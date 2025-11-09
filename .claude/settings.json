@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "UserPromptSubmit": ".claude/hooks/skill-activation-prompt.sh",
+    "PostToolUse": ".claude/hooks/post-tool-use-tracker.sh",
+    "Stop": ".claude/hooks/tsc-check.sh"
+  }
+}

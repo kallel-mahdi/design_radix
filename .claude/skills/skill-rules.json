@@ -1,0 +1,80 @@
+{
+  "version": "1.0.0",
+  "skills": {
+    "skill-developer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Guides creation and management of Claude Code skills. Triggers: skill system, create skill, add skill, skill triggers, skill-rules.json, hooks, UserPromptSubmit, PostToolUse",
+      "promptTriggers": {
+        "keywords": ["skill system", "create skill", "add skill", "skill triggers", "skill-rules.json", "hooks"],
+        "intentPatterns": ["(create|add|modify|build).*?skill"]
+      },
+      "skipConditions": {
+        "sessionSkillUsed": true
+      }
+    },
+    "bibliography-backend-guidelines": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Express + Mongoose backend patterns for bibliography service. Covers layered architecture, controllers, services, repositories, Joi validation, Winston logging, middleware, testing. Triggers: backend, controller, service, route, API, mongoose, validation, repository, middleware, bibliography-service",
+      "promptTriggers": {
+        "keywords": ["backend", "controller", "service", "route", "API", "mongoose", "validation", "repository", "middleware"],
+        "intentPatterns": ["(create|add|implement).*?(route|endpoint|API|controller|service)"]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "bibliography_backend/**/*.ts",
+          "editor_backend/services/bibliography-service/**/*.ts"
+        ],
+        "contentPatterns": ["router\\.", "export.*Controller", "mongoose\\."]
+      },
+      "skipConditions": {
+        "sessionSkillUsed": true
+      }
+    },
+    "bibliography-frontend-guidelines": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "React 19 + Tailwind/CVA frontend patterns for bibliography manager. Covers component structure, Suspense data fetching, TanStack Router, Zustand stores, CVA styling, performance optimization, TypeScript patterns. Triggers: component, react, tailwind, CVA, frontend, library, reference, collection, duplicate",
+      "promptTriggers": {
+        "keywords": ["component", "react component", "tailwind", "CVA", "styling", "frontend", "zustand", "tanstack", "suspense", "library", "reference"],
+        "intentPatterns": ["(create|add|make|build).*?(component|UI|page|modal|feature)"]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "bibliography_frontend/**/*.tsx",
+          "bibliography_frontend/**/*.ts",
+          "editor_frontend/src/**/*.tsx"
+        ],
+        "contentPatterns": ["from 'zustand'", "cva\\(", "tw-merge", "useSuspenseQuery", "className="]
+      },
+      "skipConditions": {
+        "sessionSkillUsed": true
+      }
+    },
+    "bibliography-planning-docs": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "References planning documentation (Spec.md, ComponentsSpec.md, APIDesignSystem.md, Roadmap.md, UnifiedImplementationChecklist.md). Auto-loads when implementing features, creating components, adding endpoints. Essential reference for staying aligned with specs.",
+      "promptTriggers": {
+        "keywords": ["implement", "create component", "add endpoint", "ReferenceCard", "CollectionTree", "DuplicateDetector", "TagSelector", "library", "duplicate", "import", "collection"],
+        "intentPatterns": ["(implement|create|add|build).*?(feature|component|endpoint|route|API)"]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "bibliography_frontend/src/features/**/*",
+          "bibliography_backend/src/**/*",
+          "editor_backend/services/bibliography-service/**/*"
+        ],
+        "contentPatterns": ["ReferenceCard", "CollectionTree", "DuplicateDetector", "api/"]
+      },
+      "skipConditions": {
+        "sessionSkillUsed": true
+      }
+    }
+  }
+}
