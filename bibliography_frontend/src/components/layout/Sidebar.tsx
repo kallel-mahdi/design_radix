@@ -42,6 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
+
+    return undefined;
   }, [isResizing, onWidthChange]);
 
   return (

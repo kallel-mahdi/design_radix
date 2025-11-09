@@ -1,21 +1,30 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useUIStore } from '../store/ui.store';
 import { useEffect } from 'react';
+import { useReferencesQuery } from '../features/library/api/references.queries';
+import { useLibraryStore } from '../features/library/store/library.store';
+import { ReferenceTable } from '../features/library/components/ReferenceTable';
+import { EmptyState } from '../components/ui/EmptyState';
+import { FolderOpenIcon } from '@heroicons/react/24/outline';
 
 export const Route = createFileRoute('/library')({
   component: LibraryPage,
 });
 
 function LibraryPage() {
-  const { setActiveView, setDetailsPaneOpen } = useUIStore();
+  const { setActiveView } = useUIStore();
+  const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
+  const activeTags = useLibraryStore((state) => state.activeTags);
 
   useEffect(() => {
     setActiveView('library');
   }, [setActiveView]);
 
-  const handleToggleDetails = () => {
-    setDetailsPaneOpen(true);
-  };
+  const { data: references = [], isLoading, error } = useReferencesQuery({
+    collectionId: activeCollectionId || undefined,
+    tags: activeTags.length > 0 ? activeTags : undefined,
+    deleted: false
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -26,21 +35,29 @@ function LibraryPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="bg-bg-surface border border-border rounded-lg p-6 text-center">
-          <h2 className="text-lg font-semibold text-text-primary mb-2">
-            Reference Table Coming Soon
-          </h2>
-          <p className="text-text-secondary mb-4">
-            The reference table will be implemented in Session 3
-          </p>
-          <button
-            onClick={handleToggleDetails}
-            className="px-4 py-2 bg-accent text-black rounded hover:bg-accent-hover transition-colors"
-          >
-            Test Details Pane
-          </button>
-        </div>
+      <div className="flex-1 overflow-auto">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <span className="text-text-secondary">Loading references...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-6 text-red-500">Error loading references: {(error as Error).message}</div>
+        )}
+
+        {!isLoading && !error && references.length === 0 && (
+          <EmptyState
+            icon={FolderOpenIcon}
+            title="No references yet"
+            description="Import your first reference to get started organizing your research"
+            action={{ label: "Import References", onClick: () => console.log('Open import modal') }}
+          />
+        )}
+
+        {!isLoading && !error && references.length > 0 && (
+          <ReferenceTable references={references} />
+        )}
       </div>
     </div>
   );

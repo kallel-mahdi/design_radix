@@ -51,6 +51,8 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
+
+    return undefined;
   }, [isResizing, onWidthChange]);
 
   if (!isOpen || !referenceId) return null;
