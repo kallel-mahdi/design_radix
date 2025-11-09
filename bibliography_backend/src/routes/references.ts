@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
+import { validate } from '../middleware/validate';
+import { createReferenceSchema, updateReferenceSchema } from '../validation/reference.schemas';
 
 const router = Router();
 
 // Lazy load controller on each request
-router.post('/', (req, res) => {
+router.post('/', validate(createReferenceSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.create(req, res);
 });
@@ -21,7 +23,7 @@ router.get('/:id', (req, res) => {
   return controller.getById(req, res);
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', validate(updateReferenceSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.update(req, res);
 });

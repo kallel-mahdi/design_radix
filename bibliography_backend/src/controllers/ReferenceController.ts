@@ -42,11 +42,17 @@ export class ReferenceController {
         offset: req.query.offset ? parseInt(req.query.offset as string) : 0
       };
 
-      const references = await this.referenceService.list(userId, filters);
+      const { references, total } = await this.referenceService.list(userId, filters);
 
       res.status(200).json({
         success: true,
-        data: references
+        data: references,
+        pagination: {
+          total,
+          limit: filters.limit,
+          offset: filters.offset,
+          hasMore: filters.offset + references.length < total
+        }
       });
     } catch (error) {
       ApplicationLogger.error('Reference list failed', error as Error);
