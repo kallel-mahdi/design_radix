@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Background colors */
+  --color-bg-dark: #0F1115;
+  --color-bg-surface: #171A21;
+  --color-bg-hover: #1F2330;
+
+  /* Border colors */
+  --color-border: #1F2330;
+  --color-border-accent: #04E39E;
+
+  /* Text colors */
+  --color-text-primary: #E6E8EC;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #6B7280;
+
+  /* Accent (neon green) */
+  --color-accent: #04E39E;
+  --color-accent-hover: #2AF4B4;
+  --color-accent-dark: #03B37A;
+}
+
 /* Global styles */
 * {
   margin: 0;
