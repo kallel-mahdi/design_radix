@@ -9,7 +9,11 @@ export default {
           dark: '#0F1115',      // Primary background
           surface: '#171A21',   // Cards, sidebar
           hover: '#1F2330',     // Hover states
-          border: '#2A2F3E',    // Borders
+        },
+        // Border colors
+        border: {
+          DEFAULT: '#1F2330',   // Default borders
+          accent: '#04E39E',    // Accent borders
         },
         // Text colors
         text: {

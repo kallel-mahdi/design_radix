@@ -19,6 +19,9 @@ interface UIState {
   detailsPaneWidth: number;
   detailsPaneTab: 'info' | 'pdf' | 'notes';
 
+  // Active view (for ActivityBar)
+  activeView: 'library' | 'search' | 'projects' | 'duplicates';
+
   // View mode
   viewMode: 'table' | 'grid';
 
@@ -56,6 +59,9 @@ interface UIActions {
   setDetailsPaneWidth: (width: number) => void;
   setDetailsPaneTab: (tab: UIState['detailsPaneTab']) => void;
 
+  // Active view actions
+  setActiveView: (view: UIState['activeView']) => void;
+
   // View mode actions
   setViewMode: (mode: UIState['viewMode']) => void;
 
@@ -80,6 +86,7 @@ export const useUIStore = create<UIState & UIActions>()(
         detailsPaneOpen: false,
         detailsPaneWidth: 400,
         detailsPaneTab: 'info',
+        activeView: 'library',
         viewMode: 'table',
         globalLoading: false,
         toasts: [],
@@ -158,6 +165,10 @@ export const useUIStore = create<UIState & UIActions>()(
 
         setDetailsPaneTab: (tab) =>
           set({ detailsPaneTab: tab }, false, 'ui/setDetailsPaneTab'),
+
+        // Active view actions
+        setActiveView: (view) =>
+          set({ activeView: view }, false, 'ui/setActiveView'),
 
         // View mode actions
         setViewMode: (mode) =>

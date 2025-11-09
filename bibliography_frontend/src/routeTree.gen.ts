@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as DuplicatesRouteImport } from './routes/duplicates'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DuplicatesRoute = DuplicatesRouteImport.update({
+  id: '/duplicates',
+  path: '/duplicates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/duplicates': typeof DuplicatesRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/duplicates': typeof DuplicatesRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/duplicates': typeof DuplicatesRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/duplicates' | '/library' | '/projects' | '/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/duplicates' | '/library' | '/projects' | '/search'
+  id: '__root__' | '/' | '/duplicates' | '/library' | '/projects' | '/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DuplicatesRoute: typeof DuplicatesRoute
+  LibraryRoute: typeof LibraryRoute
+  ProjectsRoute: typeof ProjectsRoute
+  SearchRoute: typeof SearchRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/duplicates': {
+      id: '/duplicates'
+      path: '/duplicates'
+      fullPath: '/duplicates'
+      preLoaderRoute: typeof DuplicatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +121,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DuplicatesRoute: DuplicatesRoute,
+  LibraryRoute: LibraryRoute,
+  ProjectsRoute: ProjectsRoute,
+  SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
