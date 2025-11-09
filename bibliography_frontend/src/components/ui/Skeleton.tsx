@@ -19,7 +19,7 @@ export function Skeleton({
   width,
   height,
 }: SkeletonProps) {
-  const baseClasses = 'animate-pulse bg-gray-200 dark:bg-gray-700';
+  const baseClasses = 'animate-pulse bg-surface-3';
 
   const variantClasses = {
     text: 'rounded',

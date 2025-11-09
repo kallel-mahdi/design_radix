@@ -17,6 +17,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
+    "@bibliography/shared": "workspace:*",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.0.1",

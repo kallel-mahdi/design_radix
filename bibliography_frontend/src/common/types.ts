@@ -1,70 +1,38 @@
-// Core data models (from frontend Spec.md section 6)
-// NOTE: Using _id to match MongoDB convention from backend
+/**
+ * Core data models - Re-exported from @bibliography/shared
+ *
+ * Single source of truth for types across frontend and backend.
+ * All types are inferred from Zod schemas for runtime validation.
+ */
 
-export interface Reference {
-  _id: string;
-  userId: string;
-  type: 'article' | 'book' | 'chapter' | 'conference' | 'thesis' | 'other';
-  title: string;
-  authors: Author[];
-  year: number | null;
-  venue: string | null;
-  doi: string | null;
-  isbn: string | null;
-  url: string | null;
-  abstract: string | null; // Phase 2
-  citationKey: string;
-  tags: string[];
-  collectionIds: string[];
-  hasPdf: boolean;
-  pdf: {
-    storedPath: string;
-    originalName: string;
-    size: number;
-    mimeType: string;
-    uploadedAt: string;
-  } | null;
-  sourceRaw: {
-    provider: 'doi' | 'bibtex' | 'csl-json' | 'ris' | 'manual';
-    payload: any;
-  };
-  deleted: boolean;
-  deletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import type {
+  ReferenceSchemaType,
+  CollectionSchemaType,
+  TagSchemaType,
+  AuthorSchemaType,
+  CreateReferenceInput as SharedCreateReferenceInput,
+  UpdateReferenceInput as SharedUpdateReferenceInput,
+  CreateCollectionInput as SharedCreateCollectionInput,
+  UpdateCollectionInput as SharedUpdateCollectionInput,
+  CreateTagInput as SharedCreateTagInput,
+  UpdateTagInput as SharedUpdateTagInput,
+} from '@bibliography/shared';
 
-export interface Author {
-  given?: string;
-  family?: string;
-  full: string;
-}
+// Re-export types from shared package
+export type Reference = ReferenceSchemaType;
+export type Author = AuthorSchemaType;
+export type Collection = CollectionSchemaType;
+export type Tag = TagSchemaType;
 
-export interface Collection {
-  _id: string;
-  userId: string;
-  name: string;
-  parentId: string | null;
-  position: number;
-  color: string | null;
-  deleted: boolean;
-  deletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export input types
+export type CreateReferenceInput = SharedCreateReferenceInput;
+export type UpdateReferenceInput = SharedUpdateReferenceInput;
+export type CreateCollectionInput = SharedCreateCollectionInput;
+export type UpdateCollectionInput = SharedUpdateCollectionInput;
+export type CreateTagInput = SharedCreateTagInput;
+export type UpdateTagInput = SharedUpdateTagInput;
 
-export interface Tag {
-  _id: string;
-  userId: string;
-  name: string;
-  color: string | null;
-  position: number | null;
-  automatic: boolean;
-  usageCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
+// Frontend-specific types that don't have backend equivalents yet
 export interface ProjectLink {
   _id: string;
   projectId: string;
@@ -85,30 +53,4 @@ export interface DuplicateCandidate {
   resolution: 'keep-existing' | 'merge' | 'keep-both' | null;
   resolvedAt: string | null;
   createdAt: string;
-}
-
-// Input types for create/update operations
-export interface CreateReferenceInput {
-  type: Reference['type'];
-  title: string;
-  authors?: Author[];
-  year?: number;
-  venue?: string;
-  doi?: string;
-  isbn?: string;
-  url?: string;
-  tags?: string[];
-  collectionIds?: string[];
-}
-
-export interface UpdateReferenceInput {
-  title?: string;
-  authors?: Author[];
-  year?: number;
-  venue?: string;
-  doi?: string;
-  isbn?: string;
-  url?: string;
-  tags?: string[];
-  collectionIds?: string[];
 }

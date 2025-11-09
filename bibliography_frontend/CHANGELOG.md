@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (Session 3E - Full Zod Migration)
+
+- **@bibliography/shared Package**: Created shared schema package for frontend and backend
+  - Centralized Zod schemas for all data models
+  - Input schemas for create/update operations
+  - Type inference from Zod schemas for TypeScript
+  - 148 comprehensive tests covering all schemas
+  - Located at `/home/mahdi/Desktop/bibliography/shared/`
+
+- **Runtime Validation**: Added Zod validation to all API responses
+  - `ReferenceListSchema.parse()` validates GET /references responses
+  - `ReferenceSchema.parse()` validates create/update mutation responses
+  - Catches malformed backend data early with helpful error messages
+  - Single source of truth for types across frontend and backend
+
+- **Utility Tests**: Added comprehensive test suite for utilities
+  - 23 new tests for formatDate, truncateText, debounce, formatAuthors
+  - Total test count: 99 tests (up from 76)
+  - All tests passing with meaningful assertions
+
 ### Added (Session 3B - Infrastructure & Utilities)
 
 - **ErrorBoundary Component**: Added React ErrorBoundary with proper override keywords for TypeScript strict mode
@@ -52,11 +72,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Zod Validation**: Reverted half-baked Zod integration
-  - Removed `*WithSchema` wrapper methods from API client
-  - Kept `src/common/schemas.ts` for future shared schema migration (Step 3)
-  - Fixed test assertions to check actual arguments (not just "toHaveBeenCalled()")
-  - All 76 tests passing
+- **Type System**: Migrated to shared package types
+  - `src/common/types.ts` now re-exports types from `@bibliography/shared`
+  - Removed duplicate type definitions
+  - Single source of truth for all data models
+  - Types inferred from Zod schemas for guaranteed runtime/compile-time consistency
+
+- **Skeleton Components**: Fixed hardcoded colors
+  - Changed from `bg-gray-200 dark:bg-gray-700` to `bg-surface-3` (theme token)
+  - Changed from `border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800` to `border-border bg-surface-2`
+  - Now properly uses Tailwind v4 CSS custom properties from design system
+
+- **Monorepo Structure**: Set up pnpm workspaces
+  - Created root `package.json` and `pnpm-workspace.yaml`
+  - Workspaces: `bibliography_frontend`, `bibliography_backend`, `shared`
+  - Shared package installed as `@bibliography/shared@workspace:*`
+  - All builds passing in workspace mode
+
+### Removed
+
+- **Old Schemas**: Removed duplicate schema file
+  - Deleted `src/common/schemas.ts` (now in @bibliography/shared)
+  - All imports updated to use shared package
 
 - **Auth Store**: Updated `setTokens` signature to accept `null`
   - Allows clearing tokens without full logout

@@ -3,6 +3,7 @@ import { apiClient } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { QUERY_STALE_TIME_MS } from '@/common/constants';
 import type { Reference, UpdateReferenceInput, CreateReferenceInput } from '@/common/types';
+import { ReferenceListSchema, ReferenceSchema } from '@bibliography/shared';
 
 export const referenceKeys = {
   all: ['references'] as const,
@@ -29,7 +30,8 @@ export function useReferencesQuery(params?: {
       if (params?.limit) queryParams.append('limit', String(params.limit));
       if (params?.offset) queryParams.append('offset', String(params.offset));
 
-      return apiClient.get<Reference[]>(`/references?${queryParams}`);
+      const data = await apiClient.get<Reference[]>(`/references?${queryParams}`);
+      return ReferenceListSchema.parse(data);
     },
     staleTime: QUERY_STALE_TIME_MS
   });
@@ -40,7 +42,8 @@ export function useCreateReferenceMutation() {
 
   return useMutation({
     mutationFn: async (data: CreateReferenceInput): Promise<Reference> => {
-      return apiClient.post<Reference>('/references', data);
+      const response = await apiClient.post<Reference>('/references', data);
+      return ReferenceSchema.parse(response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
@@ -57,7 +60,8 @@ export function useUpdateReferenceMutation() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateReferenceInput }): Promise<Reference> => {
-      return apiClient.patch<Reference>(`/references/${id}`, data);
+      const response = await apiClient.patch<Reference>(`/references/${id}`, data);
+      return ReferenceSchema.parse(response);
     },
     onSuccess: (updatedRef) => {
       queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
