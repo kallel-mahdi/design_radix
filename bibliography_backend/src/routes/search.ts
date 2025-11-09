@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 // import { container } from '../config/container';
 // import { SearchController } from '../controllers/SearchController';
 // import { TYPES } from '../config/types';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // TODO: Session 8 - Search Implementation (SearchController not implemented yet)
 // router.get('/', (req, res) => {

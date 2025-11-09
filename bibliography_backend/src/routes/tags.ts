@@ -1,11 +1,13 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { TagController } from '../controllers/TagController';
 import { TYPES } from '../config/types';
+import { validate } from '../middleware/validate';
+import { CreateTagInputSchema, UpdateTagInputSchema } from '@bibliography/shared';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
-router.post('/', (req, res) => {
+router.post('/', validate(CreateTagInputSchema), (req, res) => {
   const controller = container.get<TagController>(TYPES.TagController);
   return controller.create(req, res);
 });
@@ -15,7 +17,7 @@ router.get('/', (req, res) => {
   return controller.list(req, res);
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', validate(UpdateTagInputSchema), (req, res) => {
   const controller = container.get<TagController>(TYPES.TagController);
   return controller.update(req, res);
 });

@@ -1,14 +1,14 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
 import { validate } from '../middleware/validate';
-import { createReferenceSchema, updateReferenceSchema } from '../validation/reference.schemas';
+import { CreateReferenceInputSchema, UpdateReferenceInputSchema } from '@bibliography/shared';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // Lazy load controller on each request
-router.post('/', validate(createReferenceSchema), (req, res) => {
+router.post('/', validate(CreateReferenceInputSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.create(req, res);
 });
@@ -23,7 +23,7 @@ router.get('/:id', (req, res) => {
   return controller.getById(req, res);
 });
 
-router.patch('/:id', validate(updateReferenceSchema), (req, res) => {
+router.patch('/:id', validate(UpdateReferenceInputSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.update(req, res);
 });

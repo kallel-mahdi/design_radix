@@ -1,31 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
+import { z, ZodError } from 'zod';
 import { ApplicationLogger } from '../utils/logger';
 
-export const validate = (schema: Joi.Schema) => {
+export const validate = <T extends z.ZodTypeAny>(schema: T) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true
-    });
+    try {
+      const validated = schema.parse(req.body);
+      req.body = validated;
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const details = error.errors.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message,
+        }));
 
-    if (error) {
-      const details = error.details.map(detail => ({
-        field: detail.path.join('.'),
-        message: detail.message
-      }));
+        ApplicationLogger.warn('Validation failed', { path: req.path, details });
 
-      ApplicationLogger.warn('Validation failed', { path: req.path, details });
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          code: 'VALIDATION_ERROR',
+          details,
+        });
+      }
 
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        code: 'VALIDATION_ERROR',
-        details
-      });
+      next(error);
     }
-
-    req.body = value;
-    next();
   };
 };

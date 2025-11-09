@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { ProjectController } from '../controllers/ProjectController';
 import { TYPES } from '../config/types';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 router.post('/link', (req, res) => {
   const controller = container.get<ProjectController>(TYPES.ProjectController);

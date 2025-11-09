@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -18,7 +18,7 @@ import { projectsRouter } from './routes/projects';
 import { duplicatesRouter } from './routes/duplicates';
 import { healthRouter } from './routes/health';
 
-const app = express();
+const app: Express = express();
 
 // Configure DI container
 configureContainer();
