@@ -1,38 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, type ApiResponse } from '@/common/api/client';
-
-export interface Reference {
-  _id: string;
-  userId: string;
-  type: 'article' | 'book' | 'chapter' | 'conference' | 'thesis' | 'other';
-  title: string;
-  authors: Array<{ given: string; family: string; full: string }>;
-  year: number | null;
-  venue: string | null;
-  doi: string | null;
-  isbn: string | null;
-  url: string | null;
-  abstract: string | null;
-  tags: string[];
-  collectionIds: string[];
-  citationKey: string;
-  hasPdf: boolean;
-  pdf?: {
-    storedPath: string;
-    originalName: string;
-    size: number;
-    mimeType: string;
-    uploadedAt: Date;
-  };
-  sourceRaw: {
-    provider: 'doi' | 'bibtex' | 'csl-json' | 'ris' | 'manual';
-    payload: any;
-  };
-  deleted: boolean;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { apiClient } from '@/common/api/client';
+import { useUIStore } from '@/store/ui.store';
+import { QUERY_STALE_TIME_MS } from '@/common/constants';
+import type { Reference, UpdateReferenceInput, CreateReferenceInput } from '@/common/types';
 
 export const referenceKeys = {
   all: ['references'] as const,
@@ -59,10 +29,9 @@ export function useReferencesQuery(params?: {
       if (params?.limit) queryParams.append('limit', String(params.limit));
       if (params?.offset) queryParams.append('offset', String(params.offset));
 
-      const response = await apiClient.get<ApiResponse<Reference[]>>(`/references?${queryParams}`);
-      return response.data;
+      return apiClient.get<Reference[]>(`/references?${queryParams}`);
     },
-    staleTime: 5 * 60 * 1000
+    staleTime: QUERY_STALE_TIME_MS
   });
 }
 
@@ -70,12 +39,67 @@ export function useCreateReferenceMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: any): Promise<Reference> => {
-      const response = await apiClient.post<ApiResponse<Reference>>('/references', data);
-      return response.data;
+    mutationFn: async (data: CreateReferenceInput): Promise<Reference> => {
+      return apiClient.post<Reference>('/references', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
-    }
+      useUIStore.getState().addToast({
+        message: 'Reference created successfully',
+        type: 'success',
+      });
+    },
+  });
+}
+
+export function useUpdateReferenceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateReferenceInput }): Promise<Reference> => {
+      return apiClient.patch<Reference>(`/references/${id}`, data);
+    },
+    onSuccess: (updatedRef) => {
+      queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: referenceKeys.detail(updatedRef._id) });
+      useUIStore.getState().addToast({
+        message: 'Reference updated successfully',
+        type: 'success',
+      });
+    },
+  });
+}
+
+export function useDeleteReferenceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await apiClient.delete(`/references/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
+      useUIStore.getState().addToast({
+        message: 'Reference moved to trash',
+        type: 'success',
+      });
+    },
+  });
+}
+
+export function useRestoreReferenceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await apiClient.patch(`/references/${id}/restore`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
+      useUIStore.getState().addToast({
+        message: 'Reference restored successfully',
+        type: 'success',
+      });
+    },
   });
 }

@@ -32,5 +32,6 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"include": ["src", "e2e"],
+	"exclude": ["src/**/__tests__", "src/**/*.test.ts", "src/**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

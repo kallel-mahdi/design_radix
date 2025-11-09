@@ -3,7 +3,7 @@ import { useUIStore } from '../store/ui.store';
 import { useEffect } from 'react';
 import { useReferencesQuery } from '../features/library/api/references.queries';
 import { useLibraryStore } from '../features/library/store/library.store';
-import { ReferenceTable } from '../features/library/components/ReferenceTable';
+import { ReferenceList } from '../features/library/components/ReferenceList';
 import { EmptyState } from '../components/ui/EmptyState';
 import { FolderOpenIcon } from '@heroicons/react/24/outline';
 
@@ -56,7 +56,9 @@ function LibraryPage() {
         )}
 
         {!isLoading && !error && references.length > 0 && (
-          <ReferenceTable references={references} />
+          <div className="p-6">
+            <ReferenceList references={references} />
+          </div>
         )}
       </div>
     </div>

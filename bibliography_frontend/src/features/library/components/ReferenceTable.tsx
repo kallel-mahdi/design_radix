@@ -1,5 +1,5 @@
 import { useLibraryStore } from '../store/library.store';
-import { Reference } from '../api/references.queries';
+import type { Reference } from '@/common/types';
 import { Tag } from '@/components/ui/Tag';
 
 interface ReferenceTableProps {

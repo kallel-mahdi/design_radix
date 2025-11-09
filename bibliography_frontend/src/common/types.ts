@@ -1,7 +1,8 @@
 // Core data models (from frontend Spec.md section 6)
+// NOTE: Using _id to match MongoDB convention from backend
 
 export interface Reference {
-  id: string;
+  _id: string;
   userId: string;
   type: 'article' | 'book' | 'chapter' | 'conference' | 'thesis' | 'other';
   title: string;
@@ -21,16 +22,16 @@ export interface Reference {
     originalName: string;
     size: number;
     mimeType: string;
-    uploadedAt: Date;
+    uploadedAt: string;
   } | null;
   sourceRaw: {
     provider: 'doi' | 'bibtex' | 'csl-json' | 'ris' | 'manual';
     payload: any;
   };
   deleted: boolean;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Author {
@@ -40,40 +41,41 @@ export interface Author {
 }
 
 export interface Collection {
-  id: string;
+  _id: string;
   userId: string;
   name: string;
   parentId: string | null;
   position: number;
   color: string | null;
   deleted: boolean;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Tag {
-  id: string;
+  _id: string;
   userId: string;
   name: string;
   color: string | null;
   position: number | null;
   automatic: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  usageCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProjectLink {
-  id: string;
+  _id: string;
   projectId: string;
   referenceId?: string;
   collectionId?: string;
   userId: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface DuplicateCandidate {
-  id: string;
+  _id: string;
   userId: string;
   existingReferenceId: string;
   duplicateReferenceId: string;
@@ -81,8 +83,8 @@ export interface DuplicateCandidate {
   confidence: number;
   resolved: boolean;
   resolution: 'keep-existing' | 'merge' | 'keep-both' | null;
-  resolvedAt: Date | null;
-  createdAt: Date;
+  resolvedAt: string | null;
+  createdAt: string;
 }
 
 // Input types for create/update operations

@@ -20,6 +20,20 @@
   --color-accent: #04E39E;
   --color-accent-hover: #2AF4B4;
   --color-accent-dark: #03B37A;
+
+  /* Animations */
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 }
 
 /* Global styles */
@@ -75,4 +89,41 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* Custom cursor styles */
+@layer base {
+  /* Hide native cursor globally */
+  * {
+    cursor: none;
+  }
+
+  /* Show native cursor only for specific interactive elements */
+  button,
+  a,
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='number'],
+  textarea,
+  select,
+  [role='button'],
+  [role='link'] {
+    cursor: text;
+  }
+
+  /* Resizable panels: show resize cursor */
+  .resizer-handle {
+    cursor: col-resize;
+  }
+
+  .resizer-handle[data-panel-group-direction='vertical'] {
+    cursor: row-resize;
+  }
+
+  /* Writing surfaces should show text cursor */
+  .writing-surface {
+    cursor: text;
+  }
 }

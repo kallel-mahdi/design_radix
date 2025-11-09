@@ -1,22 +1,13 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { createRouter } from '@tanstack/react-router';
+import { App } from './App';
 import { routeTree } from './routeTree.gen';
+import { createQueryClient } from './common/config/reactQuery';
 import './styles/tailwind.css';
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
+// Create query client with optimized defaults
+const queryClient = createQueryClient();
 
 // Create the router
 const router = createRouter({
@@ -40,10 +31,7 @@ if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <App router={router} queryClient={queryClient} />
     </StrictMode>
   );
 }
