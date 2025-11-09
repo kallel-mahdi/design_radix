@@ -60,7 +60,7 @@ const ReferenceSchema: Schema = new Schema(
     isbn: { type: String },
     url: { type: String },
     abstract: { type: String },
-    citationKey: { type: String, required: true, unique: true },
+    citationKey: { type: String, required: true },
     tags: [{ type: String }],
     collectionIds: [{ type: Schema.Types.ObjectId, ref: 'Collection' }],
     hasPdf: { type: Boolean, default: false },
@@ -92,5 +92,7 @@ ReferenceSchema.index({ userId: 1, tags: 1 });
 ReferenceSchema.index({ doi: 1 });
 ReferenceSchema.index({ isbn: 1 });
 ReferenceSchema.index({ title: 'text', abstract: 'text' });
+// Citation keys must be unique per user, not globally
+ReferenceSchema.index({ userId: 1, citationKey: 1 }, { unique: true });
 
 export const Reference = mongoose.model<IReference>('Reference', ReferenceSchema);

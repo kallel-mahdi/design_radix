@@ -64,13 +64,25 @@ const consoleFormat = winston.format.combine(
 );
 
 const createLogger = (): Logger => {
+  const isTestEnv = config.nodeEnv === 'test' || process.env.JEST_WORKER_ID !== undefined;
   const transports: winston.transport[] = [];
 
-  if (config.nodeEnv !== 'production') {
+  if (config.nodeEnv !== 'production' && !isTestEnv) {
     transports.push(
       new winston.transports.Console({
         format: consoleFormat,
         level: 'debug'
+      })
+    );
+  }
+
+  // In test environment, only log errors to console
+  if (isTestEnv) {
+    transports.push(
+      new winston.transports.Console({
+        format: consoleFormat,
+        level: 'error',
+        silent: false // Set to true to completely silence logs in tests
       })
     );
   }

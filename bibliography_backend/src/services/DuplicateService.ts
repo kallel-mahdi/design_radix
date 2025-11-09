@@ -52,6 +52,8 @@ export class DuplicateService implements IDuplicateService {
             confidence: 0.95
           });
           candidates.push(candidate);
+        } else {
+          candidates.push(existing);
         }
       }
     }
@@ -81,6 +83,8 @@ export class DuplicateService implements IDuplicateService {
             confidence: 0.9
           });
           candidates.push(candidate);
+        } else {
+          candidates.push(existing);
         }
       }
     }
@@ -118,6 +122,8 @@ export class DuplicateService implements IDuplicateService {
                 confidence: similarity
               });
               candidates.push(candidate);
+            } else {
+              candidates.push(existing);
             }
           }
         }

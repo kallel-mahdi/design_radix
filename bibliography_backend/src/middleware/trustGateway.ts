@@ -78,6 +78,12 @@ export const bypassGatewayAuth = (
     throw new Error('bypassGatewayAuth middleware cannot be used in production');
   }
 
+  // Set mock headers for controllers that read directly from headers
+  req.headers['x-user-id'] = 'dev-user-123';
+  req.headers['x-user-email'] = 'dev@example.com';
+  req.headers['x-user-username'] = 'dev-user';
+  req.headers['x-user-role'] = 'user';
+
   // Create mock user for development
   (req as GatewayAuthenticatedRequest).user = {
     id: 'dev-user-123',

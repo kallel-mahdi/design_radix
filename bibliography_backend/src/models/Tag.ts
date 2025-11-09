@@ -9,6 +9,7 @@ export interface ITag extends Document {
   color: string | null;
   position: number | null;
   automatic: boolean;
+  usageCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +20,8 @@ const TagSchema: Schema = new Schema(
     name: { type: String, required: true },
     color: { type: String, default: null },
     position: { type: Number, default: null, min: 1, max: 9 },
-    automatic: { type: Boolean, default: false }
+    automatic: { type: Boolean, default: false },
+    usageCount: { type: Number, default: 0, min: 0 }
   },
   { timestamps: true }
 );

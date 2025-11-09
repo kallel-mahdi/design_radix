@@ -44,7 +44,7 @@ export interface ReferenceFilters {
 export interface IReferenceService {
   create(userId: string, data: CreateReferenceInput): Promise<IReference>;
   getById(id: string, userId: string): Promise<IReference | null>;
-  list(userId: string, filters: ReferenceFilters): Promise<IReference[]>;
+  list(userId: string, filters: ReferenceFilters): Promise<{ references: IReference[]; total: number }>;
   update(id: string, userId: string, data: UpdateReferenceInput): Promise<IReference | null>;
   softDelete(id: string, userId: string): Promise<boolean>;
   restore(id: string, userId: string): Promise<boolean>;

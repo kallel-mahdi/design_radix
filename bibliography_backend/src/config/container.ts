@@ -25,16 +25,21 @@ import { DuplicateController } from '../controllers/DuplicateController';
 import { HealthController } from '../controllers/HealthController';
 
 const container = new Container();
+let isConfigured = false;
 
 export function configureContainer() {
-  // Bind services
-  container.bind<IReferenceService>(TYPES.IReferenceService).to(ReferenceService);
-  container.bind<ICollectionService>(TYPES.ICollectionService).to(CollectionService);
-  container.bind<ITagService>(TYPES.ITagService).to(TagService);
-  container.bind<IProjectService>(TYPES.IProjectService).to(ProjectService);
-  container.bind<IDuplicateService>(TYPES.IDuplicateService).to(DuplicateService);
+  if (isConfigured) {
+    return container;
+  }
 
-  // Bind controllers
+  // Bind services with singleton scope (shared instance across requests)
+  container.bind<IReferenceService>(TYPES.IReferenceService).to(ReferenceService).inSingletonScope();
+  container.bind<ICollectionService>(TYPES.ICollectionService).to(CollectionService).inSingletonScope();
+  container.bind<ITagService>(TYPES.ITagService).to(TagService).inSingletonScope();
+  container.bind<IProjectService>(TYPES.IProjectService).to(ProjectService).inSingletonScope();
+  container.bind<IDuplicateService>(TYPES.IDuplicateService).to(DuplicateService).inSingletonScope();
+
+  // Bind controllers (transient scope - new instance per request)
   container.bind<ReferenceController>(TYPES.ReferenceController).to(ReferenceController);
   container.bind<CollectionController>(TYPES.CollectionController).to(CollectionController);
   container.bind<TagController>(TYPES.TagController).to(TagController);
@@ -42,7 +47,13 @@ export function configureContainer() {
   container.bind<DuplicateController>(TYPES.DuplicateController).to(DuplicateController);
   container.bind<HealthController>(TYPES.HealthController).to(HealthController);
 
+  isConfigured = true;
   return container;
+}
+
+export function resetContainer() {
+  container.unbindAll();
+  isConfigured = false;
 }
 
 export { container, TYPES };

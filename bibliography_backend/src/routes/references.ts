@@ -43,36 +43,36 @@ router.delete('/:id/permanent', (req, res) => {
   return controller.permanentDelete(req, res);
 });
 
-// TODO: Session 7 - Import/Export
-router.post('/import-doi', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.importDoi(req, res);
-});
+// TODO: Session 7 - Import/Export (methods not implemented yet)
+// router.post('/import-doi', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.importDoi(req, res);
+// });
 
-router.post('/import-bibtex', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.importBibtex(req, res);
-});
+// router.post('/import-bibtex', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.importBibtex(req, res);
+// });
 
-router.post('/export', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.exportReferences(req, res);
-});
+// router.post('/export', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.exportReferences(req, res);
+// });
 
-// TODO: Session 15 - PDF Management
-router.get('/:id/pdf', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.downloadPdf(req, res);
-});
+// TODO: Session 15 - PDF Management (methods not implemented yet)
+// router.get('/:id/pdf', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.downloadPdf(req, res);
+// });
 
-router.post('/:id/pdf', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.uploadPdf(req, res);
-});
+// router.post('/:id/pdf', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.uploadPdf(req, res);
+// });
 
-router.delete('/:id/pdf', (req, res) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.deletePdf(req, res);
-});
+// router.delete('/:id/pdf', (req, res) => {
+//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+//   return controller.deletePdf(req, res);
+// });
 
 export { router as referencesRouter };

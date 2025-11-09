@@ -29,7 +29,23 @@ export class TagService implements ITagService {
   }
 
   async list(userId: string): Promise<ITag[]> {
-    return Tag.find({ userId }).sort({ position: 1, name: 1 });
+    // Sort colored tags (with position) first by position ascending,
+    // then uncolored tags (position: null) by name ascending
+    const tags = await Tag.find({ userId });
+
+    return tags.sort((a, b) => {
+      // Colored tags (have position) come before uncolored tags
+      if (a.position !== null && b.position === null) return -1;
+      if (a.position === null && b.position !== null) return 1;
+
+      // Both colored: sort by position
+      if (a.position !== null && b.position !== null) {
+        return a.position - b.position;
+      }
+
+      // Both uncolored: sort by name
+      return a.name.localeCompare(b.name);
+    });
   }
 
   async update(id: string, userId: string, data: UpdateTagInput): Promise<ITag | null> {

@@ -15,10 +15,10 @@ router.post('/:id/resolve', (req, res) => {
   return controller.resolve(req, res);
 });
 
-// TODO: Session 9 - Duplicate Management
-router.post('/refresh', (req, res) => {
-  const controller = container.get<DuplicateController>(TYPES.DuplicateController);
-  return controller.refreshAll(req, res);
-});
+// TODO: Session 9 - Duplicate Management (refreshAll method not implemented yet)
+// router.post('/refresh', (req, res) => {
+//   const controller = container.get<DuplicateController>(TYPES.DuplicateController);
+//   return controller.refreshAll(req, res);
+// });
 
 export { router as duplicatesRouter };
