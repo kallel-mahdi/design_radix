@@ -27,6 +27,11 @@ router.patch('/:name/color', validate(TagColorUpdateInputSchema), (req, res) => 
   return controller.updateColor(req, res);
 });
 
+router.patch('/:oldName/rename', (req, res) => {
+  const controller = container.get<TagController>(TYPES.TagController);
+  return controller.rename(req, res);
+});
+
 router.delete('/:id', (req, res) => {
   const controller = container.get<TagController>(TYPES.TagController);
   return controller.delete(req, res);
