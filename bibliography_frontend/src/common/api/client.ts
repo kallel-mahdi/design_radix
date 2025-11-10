@@ -100,6 +100,12 @@ class ApiClient {
 
   /**
    * Normalize errors to ApiError format
+   *
+   * Distinguishes between different error types:
+   * - AbortError: Request timeout
+   * - TypeError with connection message: Server starting (retryable)
+   * - Other TypeError: Network error
+   * - Error: Generic error
    */
   private normalizeError(error: unknown): ApiError {
     if (error instanceof TypeError) {
@@ -109,6 +115,24 @@ class ApiClient {
           code: 'TIMEOUT',
         };
       }
+
+      // Connection refused during startup (before request sent)
+      // This happens when fetch() fails immediately because server isn't listening
+      const errorMessage = error.message?.toLowerCase() || '';
+      if (
+        errorMessage.includes('failed to fetch') ||
+        errorMessage.includes('network request failed') ||
+        errorMessage.includes('request failed') ||
+        error.cause instanceof TypeError // Network error during connection
+      ) {
+        // During dev startup (2-5s), this is expected. Use retryable error code.
+        return {
+          message: 'Server starting, retrying...',
+          code: 'SERVER_STARTING',
+        };
+      }
+
+      // Other TypeError (actual network issues)
       return {
         message: 'Network error. Please check your connection.',
         code: 'NETWORK_ERROR',

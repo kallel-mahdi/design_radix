@@ -14,7 +14,8 @@ export const API_TIMEOUT_MS = 30000; // 30 seconds
  */
 export const QUERY_STALE_TIME_MS = 5 * 60 * 1000; // 5 minutes
 export const QUERY_GC_TIME_MS = 10 * 60 * 1000; // 10 minutes (garbage collection)
-export const QUERY_RETRY_COUNT = 1; // Retry once on failure
+export const QUERY_RETRY_COUNT = 3; // Retry 3 times for network errors (startup race condition tolerance)
+export const QUERY_RETRY_DELAY_MS = 500; // Initial delay in ms (exponential backoff: 500ms -> 1s -> 2s)
 
 /**
  * UI Interaction
