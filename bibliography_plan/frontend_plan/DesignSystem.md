@@ -15,49 +15,39 @@ This design system defines the visual language for the bibliography manager fron
 
 ## 1. Color Palette
 
-### 1.1 Core Colors (Dark Theme MVP)
+### 1.1 Tailwind v4 CSS Custom Properties (IMPORTANT)
 
-**From Figma Mockups**:
+**Tailwind v4 uses CSS custom properties** for dynamic theming. Colors are defined in `src/styles/tailwind.css` using the `@theme` block and referenced in `tailwind.config.js` via `var()`.
 
-```typescript
-// tailwind.config.js extension
+**src/styles/tailwind.css** (@theme block):
+```css
+@theme {
+  /* Light mode colors (edit here for all themes) */
+  --color-app-bg: #2E302F;
+  --color-app-bg-secondary: #3A3C3B;
+  --color-app-accent: #00DF82;        /* Neon green accent */
+  --color-app-text: #FFFFFF;
+  --color-app-text-muted: #CCCCCC;
+  --color-app-border: #444444;
+  --color-app-border-accent: #00DF82;
+}
+```
+
+**tailwind.config.js** (reference via var()):
+```javascript
 export default {
   theme: {
     extend: {
       colors: {
-        // Background colors
-        bg: {
-          dark: '#0F1115',      // Primary background (main canvas)
-          surface: '#171A21',   // Elevated surfaces (sidebar, cards)
-          hover: '#1F2330',     // Hover states
-        },
-
-        // Border colors
-        border: {
-          DEFAULT: '#1F2330',   // Default borders
-          accent: '#04E39E',    // Accent borders (selected items)
-        },
-
-        // Text colors
-        text: {
-          primary: '#E6E8EC',   // Primary text (high contrast)
-          secondary: '#9CA3AF', // Secondary text (medium contrast)
-          muted: '#6B7280',     // Muted text (low contrast, hints)
-        },
-
-        // Accent (neon green from Figma)
-        accent: {
-          DEFAULT: '#04E39E',   // Primary accent (buttons, highlights, borders)
-          hover: '#2AF4B4',     // Hover state (lighter)
-          active: '#00D88A',    // Active/pressed state (darker)
-        },
-
-        // Semantic colors
-        semantic: {
-          danger: '#EF4444',    // Error, destructive actions (red-500)
-          warning: '#F59E0B',   // Warnings, caution (amber-500)
-          success: '#10B981',   // Success states (green-500)
-          info: '#3B82F6',      // Informational (blue-500)
+        // ✅ App colors using CSS custom properties
+        app: {
+          bg: 'var(--color-app-bg)',
+          'bg-secondary': 'var(--color-app-bg-secondary)',
+          accent: 'var(--color-app-accent)',
+          text: 'var(--color-app-text)',
+          'text-muted': 'var(--color-app-text-muted)',
+          border: 'var(--color-app-border)',
+          'border-accent': 'var(--color-app-border-accent)',
         },
       }
     }
@@ -65,53 +55,124 @@ export default {
 }
 ```
 
-**Editor Status Colors** (reuse for badges):
+**Usage in Components**:
+```tsx
+// ✅ CORRECT - Uses CSS custom properties
+<div className="bg-app-bg text-app-text border border-app-border">
+  <button className="bg-app-accent text-black hover:opacity-80">
+    Click me
+  </button>
+</div>
+
+// ❌ WRONG - Direct hex values (use var() instead)
+<div className="bg-[#2E302F]">Don't do this</div>
+```
+
+**Why CSS Custom Properties?**
+- ✅ Dynamic theme switching (change CSS vars in JS, entire app updates)
+- ✅ Centralized color management (edit `tailwind.css`, not scattered throughout config)
+- ✅ Better maintainability (Phase 2 light theme support)
+- ✅ Performance (CSS vars computed by browser, not at build time)
+
+---
+
+### 1.2 Brand Color System (Adopted from Editor)
+
+**PRIMARY: Bangladesh Green** (bibliography primary accent):
 ```typescript
-// Keep editor's status color patterns
-status: {
-  gray: {
-    100: '#F3F4F6',
-    200: '#E5E7EB',
-    300: '#D1D5DB',
-    400: '#9CA3AF',
-    600: '#4B5563',
-    900: '#111827'
-  },
-  yellow: {
-    100: '#FEF3C7',
-    400: '#FBBF24',
-    800: '#92400E'
-  },
-  orange: {
-    100: '#FFEDD5',
-    400: '#FB923C',
-    800: '#9A3412'
-  },
-  red: {
-    50: '#FEF2F2',
-    100: '#FEE2E2',
-    300: '#FCA5A5',
-    400: '#F87171',
-    500: '#EF4444',
-    600: '#DC2626',
-    800: '#991B1B'
-  },
-  green: {
-    50: '#F0FDF4',
-    100: '#DCFCE7',
-    800: '#166534'
-  },
-  purple: {
-    50: '#FAF5FF',
-    100: '#F3E8FF',
-    800: '#6B21A8'
-  },
-  blue: {
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#BFDBFE',
-    500: '#3B82F6',
-    600: '#2563EB'
+primary: {
+  50: '#E6F5F2',
+  100: '#CCEBE5',
+  200: '#99D7CB',
+  300: '#66C3B1',
+  400: '#33AF97',
+  500: '#03624C',    // ← Main brand color (bibliog accent)
+  600: '#024E3D',
+  700: '#023B2E',
+  800: '#01271F',
+  900: '#01140F',
+}
+```
+
+**SECONDARY: Caribbean Green** (highlights, success):
+```typescript
+secondary: {
+  50: '#F0FCF0',
+  100: '#E0F9E0',
+  200: '#C2F3C2',
+  300: '#A3EDA3',
+  400: '#85E785',
+  500: '#60DF60',    // ← Bright green (success, highlights)
+  600: '#4DB24D',
+  700: '#3A863A',
+  800: '#265926',
+  900: '#132D13',
+}
+```
+
+**SUPPORTING: Rich Black + Cultured** (backgrounds):
+```typescript
+'rich-black': {
+  DEFAULT: '#030F0F',
+  // ... 50-900 scale for dark variant
+},
+cultured: {
+  DEFAULT: '#F1F9FE',
+  // ... 50-900 scale for light variant
+}
+```
+
+**SEMANTIC** (errors, warnings, info - standard Tailwind):
+```typescript
+semantic: {
+  danger: '#EF4444',    // red-500
+  warning: '#F59E0B',   // amber-500
+  success: '#10B981',   // green-500
+  info: '#3B82F6',      // blue-500
+}
+```
+
+**Complete tailwind.config.js Color Section**:
+```javascript
+export default {
+  theme: {
+    extend: {
+      colors: {
+        // CSS custom property colors (REQUIRED)
+        app: {
+          bg: 'var(--color-app-bg)',
+          'bg-secondary': 'var(--color-app-bg-secondary)',
+          accent: 'var(--color-app-accent)',
+          text: 'var(--color-app-text)',
+          'text-muted': 'var(--color-app-text-muted)',
+          border: 'var(--color-app-border)',
+          'border-accent': 'var(--color-app-border-accent)',
+        },
+
+        // Brand color scales
+        primary: {
+          50: '#E6F5F2', 100: '#CCEBE5', 200: '#99D7CB', 300: '#66C3B1',
+          400: '#33AF97', 500: '#03624C', 600: '#024E3D', 700: '#023B2E',
+          800: '#01271F', 900: '#01140F'
+        },
+        secondary: {
+          50: '#F0FCF0', 100: '#E0F9E0', 200: '#C2F3C2', 300: '#A3EDA3',
+          400: '#85E785', 500: '#60DF60', 600: '#4DB24D', 700: '#3A863A',
+          800: '#265926', 900: '#132D13'
+        },
+
+        // High contrast neutrals (for text on light/dark)
+        neutral: {
+          50: '#FAFAFA', 100: '#F5F5F5', 200: '#E5E5E5', 300: '#D4D4D4',
+          400: '#A3A3A3', 500: '#737373', 600: '#525252', 700: '#404040',
+          800: '#262626', 900: '#171717', 950: '#0A0A0A'
+        },
+
+        // Standard colors (use for utility, avoid primary/secondary)
+        white: '#FFFFFF',
+        black: '#000000'
+      }
+    }
   }
 }
 ```
@@ -194,17 +255,45 @@ document.documentElement.classList.add('dark')
 
 ## 2. Typography
 
-### 2.1 Font Family
+### 2.1 Font Family (Tailwind v4 with CSS Custom Properties)
 
-**System Font Stack** (match editor):
+**src/styles/tailwind.css** (@theme block):
 ```css
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+@theme {
+  /* Font families (edit here to change globally) */
+  --font-family-sans: 'Josefin Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
 ```
 
-**Monospace** (for DOI, code):
-```css
-font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+**tailwind.config.js**:
+```javascript
+export default {
+  theme: {
+    extend: {
+      fontFamily: {
+        'sans': ['var(--font-family-sans)'],
+        'mono': ['var(--font-family-mono)'],
+      },
+    }
+  }
+}
 ```
+
+**Usage**:
+```tsx
+// Default (uses --font-family-sans from CSS vars)
+<p className="font-sans">This is body text</p>
+
+// Monospace (for DOI, code, technical)
+<code className="font-mono">10.1234/example</code>
+```
+
+**Why CSS Custom Properties for Fonts?**
+- ✅ Easy to swap font stack globally in one place
+- ✅ Design consistency across editor and bibliography
+- ✅ Phase 2 font switching (e.g., dyslexia-friendly fonts)
+- ✅ Matches Tailwind v4 approach
 
 ### 2.2 Font Scale
 
@@ -362,33 +451,38 @@ borderRadius: {
 
 ---
 
-## 5. Shadows
+## 5. Shadows (Custom Brand Shadows)
 
+**tailwind.config.js**:
 ```typescript
 boxShadow: {
-  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',                            // Subtle lift
-  DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',  // Standard
-  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',  // Medium elevation
-  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // High elevation
-  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', // Extra high
-  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',                   // Inset (inputs)
-  none: '0 0 #0000',                                                // No shadow
+  // Tailwind defaults
+  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+
+  // Brand shadows (from editor)
+  'brand': '0 4px 6px -1px rgba(3, 98, 76, 0.1), 0 2px 4px -1px rgba(3, 98, 76, 0.06)',
+  'brand-lg': '0 10px 15px -3px rgba(3, 98, 76, 0.1), 0 4px 6px -2px rgba(3, 98, 76, 0.05)',
+  'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+  'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
 }
 ```
 
 **Usage Guidelines**:
-- **Cards**: `shadow` or `shadow-md`
-- **Modals**: `shadow-xl`
+- **Cards**: `shadow-soft` (subtle, dark theme optimized)
+- **Cards (elevated)**: `shadow-soft-lg`
+- **Brand elements**: `shadow-brand` (green tint)
+- **Modals**: `shadow-lg` (Tailwind default)
 - **Dropdowns**: `shadow-lg`
 - **Inputs**: `shadow-inner` (focus: `shadow-md`)
-- **Buttons**: No shadow (use border instead)
+- **Buttons**: No shadow (use borders/accents instead)
 
-**Dark Theme Adjustment**:
-Shadows are less visible on dark backgrounds. Use borders for definition instead:
-```tsx
-// Card with border instead of heavy shadow
-<div className="border border-border rounded-lg shadow-sm">
-```
+**Dark Theme Advantage**:
+Custom soft shadows work better on dark backgrounds than default Tailwind shadows (less contrast needed):
 
 ---
 
@@ -510,7 +604,46 @@ import {
 
 ## 8. Animations & Transitions
 
-### 8.1 Transition Durations
+### 8.1 Custom Animations (from Editor)
+
+**tailwind.config.js**:
+```typescript
+animation: {
+  'fade-in': 'fadeIn 0.3s ease-in-out',
+  'slide-up': 'slideUp 0.3s ease-out',
+  'slide-down': 'slideDown 0.3s ease-out',
+  'spin': 'spin 1s linear infinite',  // Tailwind default
+},
+
+keyframes: {
+  fadeIn: {
+    '0%': { opacity: '0' },
+    '100%': { opacity: '1' },
+  },
+  slideUp: {
+    '0%': { transform: 'translateY(10px)', opacity: '0' },
+    '100%': { transform: 'translateY(0)', opacity: '1' },
+  },
+  slideDown: {
+    '0%': { transform: 'translateY(-10px)', opacity: '0' },
+    '100%': { transform: 'translateY(0)', opacity: '1' },
+  },
+}
+```
+
+**Usage**:
+```tsx
+// Fade in on mount
+<div className="animate-fade-in">Content</div>
+
+// Slide animations
+<Modal className="animate-slide-up">Modal content</Modal>
+
+// Loading spinner
+<Icon className="animate-spin" />
+```
+
+### 8.2 Transition Durations
 
 ```typescript
 transitionDuration: {
@@ -602,7 +735,127 @@ transitionTimingFunction: {
 
 ---
 
-## 9. Component Variant Patterns (CVA)
+## 9. Global Cursor System (GlobalCursor Component)
+
+The editor uses a **custom neon green cursor** (GlobalCursor) that replaces the native cursor globally. This creates a unified, branded interaction experience.
+
+### 9.1 Base CSS (src/styles/tailwind.css)
+
+**Hide all native cursors** in `@layer base`:
+```css
+@layer base {
+  html,
+  body,
+  #root {
+    background-color: var(--color-app-bg);
+    color: var(--color-app-text);
+    cursor: none;  /* ← Hide native cursor */
+  }
+
+  /* Hide cursor on ALL interactive elements */
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+
+  /* Hide on specific interactive elements */
+  button, [type="button"], [type="submit"], a, input, textarea, select, [role="button"], [role="tab"] {
+    cursor: none !important;
+  }
+
+  /* Hide on resizable elements */
+  .resizer-handle,
+  .resizer-handle * {
+    cursor: none !important;
+  }
+
+  /* Hide during resize/drag operations */
+  html.is-resizing,
+  html.is-resizing * {
+    cursor: none !important;
+  }
+}
+```
+
+### 9.2 GlobalCursor Component
+
+**src/components/ui/GlobalCursor.tsx** (copy from editor):
+```typescript
+import React, { useEffect, useState } from 'react'
+
+export const GlobalCursor: React.FC = () => {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({ x: e.clientX, y: e.clientY })
+    }
+
+    const handleMouseEnter = () => setIsVisible(true)
+    const handleMouseLeave = () => setIsVisible(false)
+
+    window.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseenter', handleMouseEnter)
+    document.addEventListener('mouseleave', handleMouseLeave)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseenter', handleMouseEnter)
+      document.removeEventListener('mouseleave', handleMouseLeave)
+    }
+  }, [])
+
+  if (!isVisible) return null
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        pointerEvents: 'none',
+        zIndex: 9999,
+        transform: 'translate(-50%, -50%)',
+      }}
+    >
+      {/* Neon green dot cursor */}
+      <div
+        style={{
+          width: '8px',
+          height: '8px',
+          backgroundColor: 'var(--color-app-accent)',  // #00DF82
+          borderRadius: '50%',
+          boxShadow: '0 0 10px var(--color-app-accent)',
+        }}
+      />
+    </div>
+  )
+}
+```
+
+### 9.3 App Integration
+
+**src/App.tsx**:
+```typescript
+import { GlobalCursor } from '@/components/ui/GlobalCursor'
+
+export const App = () => {
+  return (
+    <div>
+      <GlobalCursor />
+      {/* Rest of app content */}
+    </div>
+  )
+}
+```
+
+**Important**: Mount GlobalCursor once at app root level, not inside modals or dynamic components.
+
+---
+
+## 10. Component Variant Patterns (CVA)
 
 ### 9.1 Button Variants
 

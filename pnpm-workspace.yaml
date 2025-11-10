@@ -1,0 +1,4 @@
+packages:
+  - 'bibliography_frontend'
+  - 'bibliography_backend'
+  - 'shared'

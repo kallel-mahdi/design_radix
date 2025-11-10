@@ -15,6 +15,15 @@ This document provides detailed specifications for all components in the bibliog
 - **Composition**: Build complex components from simpler primitives
 - **Accessibility-first**: ARIA attributes, keyboard navigation, screen reader support built-in
 
+⚠️ **IMPORTANT NOTE**: The editor_frontend has **UI primitives** (Button, Card, Input, Modal, etc.) in `src/components/ui/` that you should **COPY directly**. The editor does NOT have a task-management feature with TaskCard/TaskModal - those patterns are placeholder references in this spec. Copy actual Button, Card, Input component implementations from the editor instead.
+
+**Reference Implementations** (copy from editor):
+- Button.tsx → `editor_frontend/src/components/ui/Button.tsx`
+- Card.tsx → `editor_frontend/src/components/ui/Card.tsx`
+- Input.tsx → `editor_frontend/src/components/ui/Input.tsx`
+- Modal/Dialog → `editor_frontend/src/components/ui/Modal.tsx`
+- Resizable panels → Use `react-resizable-panels` library (already in dependencies)
+
 ---
 
 ## 1. Layout Components
@@ -1033,6 +1042,512 @@ const FieldComparison: React.FC<{ label: string; existing: string; duplicate: st
 - Warning icon: `aria-label="Warning: Potential duplicate"`
 - Action buttons: Clear labels, keyboard accessible
 - Card: `role="article"` or `<article>`
+
+---
+
+## 2.10 State Management Patterns (Zustand + devtools)
+
+**Purpose**: Global UI state management with Chrome DevTools integration for debugging
+
+### UI Store Example (`src/store/ui.store.ts`)
+
+```typescript
+import { create } from 'zustand'
+import { devtools, persist, subscribeWithSelector } from 'zustand/middleware'
+
+interface UIState {
+  // State
+  theme: 'dark' | 'light' | 'system'
+  sidebarWidth: number
+  detailsPaneWidth: number
+  detailsPaneTab: 'details' | 'notes' | 'attachments'
+  modals: {
+    createReference: boolean
+    editReference: boolean
+    tagSettings: boolean
+    importDialog: boolean
+  }
+
+  // Actions
+  setTheme: (theme: 'dark' | 'light' | 'system') => void
+  setSidebarWidth: (width: number) => void
+  setDetailsPaneWidth: (width: number) => void
+  setDetailsPaneTab: (tab: 'details' | 'notes' | 'attachments') => void
+  openModal: (modal: keyof UIState['modals']) => void
+  closeModal: (modal: keyof UIState['modals']) => void
+}
+
+export const useUIStore = create<UIState>()(
+  devtools(
+    persist(
+      subscribeWithSelector((set) => ({
+        // Initial state
+        theme: 'dark',
+        sidebarWidth: 250,
+        detailsPaneWidth: 350,
+        detailsPaneTab: 'details',
+        modals: {
+          createReference: false,
+          editReference: false,
+          tagSettings: false,
+          importDialog: false,
+        },
+
+        // Actions
+        setTheme: (theme) => set({ theme }),
+        setSidebarWidth: (width) => set({ sidebarWidth: width }),
+        setDetailsPaneWidth: (width) => set({ detailsPaneWidth: width }),
+        setDetailsPaneTab: (tab) => set({ detailsPaneTab: tab }),
+        openModal: (modal) =>
+          set((state) => ({
+            modals: { ...state.modals, [modal]: true },
+          })),
+        closeModal: (modal) =>
+          set((state) => ({
+            modals: { ...state.modals, [modal]: false },
+          })),
+      })),
+      {
+        name: 'ui-store', // localStorage key
+        partialize: (state) => ({
+          theme: state.theme,
+          sidebarWidth: state.sidebarWidth,
+          detailsPaneWidth: state.detailsPaneWidth,
+        }),
+      }
+    ),
+    { name: 'UI Store' }
+  )
+)
+
+// Selectors (recommended for performance)
+export const useTheme = () => useUIStore((state) => state.theme)
+export const useSidebarWidth = () => useUIStore((state) => state.sidebarWidth)
+export const useDetailsPaneWidth = () => useUIStore((state) => state.detailsPaneWidth)
+export const useDetailsPaneTab = () => useUIStore((state) => state.detailsPaneTab)
+export const useModals = () => useUIStore((state) => state.modals)
+export const useCreateReferenceModal = () =>
+  useUIStore((state) => state.modals.createReference)
+```
+
+### Library Store Example (`src/features/library/store/library.store.ts`)
+
+```typescript
+import { create } from 'zustand'
+import { devtools, subscribeWithSelector } from 'zustand/middleware'
+
+interface LibraryState {
+  // State
+  selectedReferenceIds: Set<string>
+  activeReferenceId: string | null
+  activeCollectionId: string | null
+  expandedCollectionIds: Set<string>
+
+  // Actions
+  selectReference: (id: string, isMultiSelect?: boolean) => void
+  deselectReference: (id: string) => void
+  clearSelection: () => void
+  setActiveReference: (id: string | null) => void
+  setActiveCollection: (id: string | null) => void
+  toggleCollectionExpanded: (id: string) => void
+}
+
+export const useLibraryStore = create<LibraryState>()(
+  devtools(
+    subscribeWithSelector((set) => ({
+      // Initial state
+      selectedReferenceIds: new Set(),
+      activeReferenceId: null,
+      activeCollectionId: null,
+      expandedCollectionIds: new Set(),
+
+      // Actions
+      selectReference: (id, isMultiSelect = false) =>
+        set((state) => {
+          const newSet = isMultiSelect
+            ? new Set(state.selectedReferenceIds)
+            : new Set([id])
+          newSet.add(id)
+          return { selectedReferenceIds: newSet, activeReferenceId: id }
+        }),
+
+      deselectReference: (id) =>
+        set((state) => {
+          const newSet = new Set(state.selectedReferenceIds)
+          newSet.delete(id)
+          return { selectedReferenceIds: newSet }
+        }),
+
+      clearSelection: () =>
+        set({
+          selectedReferenceIds: new Set(),
+          activeReferenceId: null,
+        }),
+
+      setActiveReference: (id) => set({ activeReferenceId: id }),
+      setActiveCollection: (id) => set({ activeCollectionId: id }),
+
+      toggleCollectionExpanded: (id) =>
+        set((state) => {
+          const newSet = new Set(state.expandedCollectionIds)
+          if (newSet.has(id)) {
+            newSet.delete(id)
+          } else {
+            newSet.add(id)
+          }
+          return { expandedCollectionIds: newSet }
+        }),
+    })),
+    { name: 'Library Store' }
+  )
+)
+
+// Selectors
+export const useSelectedReferences = () =>
+  useLibraryStore((state) => state.selectedReferenceIds)
+export const useActiveReference = () =>
+  useLibraryStore((state) => state.activeReferenceId)
+export const useActiveCollection = () =>
+  useLibraryStore((state) => state.activeCollectionId)
+```
+
+### Auth Store Example (`src/store/auth.store.ts`)
+
+```typescript
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
+
+interface AuthState {
+  // State
+  tokens: {
+    accessToken: string | null
+    refreshToken: string | null
+  }
+  user: {
+    id: string
+    email: string
+    name: string
+  } | null
+  isLoading: boolean
+
+  // Actions
+  setTokens: (tokens: { accessToken: string; refreshToken: string }) => void
+  setUser: (user: AuthState['user']) => void
+  logout: () => void
+}
+
+export const useAuthStore = create<AuthState>()(
+  devtools(
+    persist(
+      (set) => ({
+        // Initial state
+        tokens: { accessToken: null, refreshToken: null },
+        user: null,
+        isLoading: false,
+
+        // Actions
+        setTokens: (tokens) => set({ tokens }),
+        setUser: (user) => set({ user }),
+        logout: () =>
+          set({
+            tokens: { accessToken: null, refreshToken: null },
+            user: null,
+          }),
+      }),
+      {
+        name: 'auth-store',
+        partialize: (state) => ({
+          tokens: state.tokens,
+          user: state.user,
+        }),
+      }
+    ),
+    { name: 'Auth Store' }
+  )
+)
+
+// Selectors
+export const useAccessToken = () =>
+  useAuthStore((state) => state.tokens.accessToken)
+export const useRefreshToken = () =>
+  useAuthStore((state) => state.tokens.refreshToken)
+export const useUser = () => useAuthStore((state) => state.user)
+```
+
+### Usage in Components
+
+**With Selectors (Recommended - Better Performance)**:
+```tsx
+function ReferenceTable() {
+  // Subscribe only to selectedReferenceIds
+  const selectedReferenceIds = useSelectedReferences()
+  const selectReference = useLibraryStore((state) => state.selectReference)
+
+  return (
+    <table>
+      {references.map((ref) => (
+        <tr
+          key={ref.id}
+          onClick={() => selectReference(ref.id)}
+          className={selectedReferenceIds.has(ref.id) ? 'bg-blue-100' : ''}
+        >
+          {ref.title}
+        </tr>
+      ))}
+    </table>
+  )
+}
+```
+
+**Without Selectors (Subscribes to All)**:
+```tsx
+function ThemeSwitcher() {
+  // ❌ Not recommended - subscribes to entire store
+  const { theme, setTheme } = useUIStore()
+
+  return <button onClick={() => setTheme('light')}>Light</button>
+}
+
+// ✅ Better - use selector
+function ThemeSwitcher() {
+  const theme = useUIStore((state) => state.theme)
+  const setTheme = useUIStore((state) => state.setTheme)
+
+  return <button onClick={() => setTheme('light')}>Light</button>
+}
+```
+
+### Debugging with devtools
+
+**Chrome DevTools Integration**:
+1. Install Redux DevTools browser extension
+2. Open app, go to Redux tab in DevTools
+3. See all state changes in real-time
+4. Time-travel debug: Click any action to replay state at that point
+5. Dispatch actions manually from DevTools console
+
+**Console Access**:
+```javascript
+// In browser console
+// Get current state
+useUIStore.getState()
+
+// Subscribe to changes
+const unsubscribe = useUIStore.subscribe(
+  (state) => state.theme,
+  (theme) => console.log('Theme changed:', theme)
+)
+
+// Manually trigger action
+useUIStore.getState().setTheme('light')
+```
+
+---
+
+## 2.11 Shared Type Definitions
+
+**Purpose**: Frontend types matching backend MongoDB models. Keep synchronized with backend schema.
+
+**Location**: `src/common/types.ts`
+
+### Core Models
+
+Copy these from backend `bibliography_plan/backend_plan/ServiceLayerSpec.md` and keep in sync:
+
+```typescript
+// Core data types (from backend)
+
+export interface Author {
+  given: string
+  family: string
+  full?: string  // Computed: "family, given"
+}
+
+export interface Reference {
+  _id: string
+  userId: string
+  type: 'article' | 'book' | 'chapter' | 'conference' | 'thesis' | 'other'
+  title: string  // REQUIRED
+  authors: Author[]
+  year?: number
+  venue?: string  // Journal/conference name
+  doi?: string
+  url?: string
+  abstract?: string  // Phase 2
+  tags: string[]  // Array of tag IDs
+  collectionIds: string[]
+  hasPdf: boolean
+  pdfMetadata?: {
+    storedPath: string
+    originalName: string
+    size: number
+    mimeType: string
+    uploadedAt: Date
+  }
+  sourceRaw?: {
+    provider: 'doi' | 'bibtex' | 'csl-json' | 'ris' | 'manual'
+    payload: Record<string, any>
+  }
+  deleted: boolean
+  deletedAt?: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Collection {
+  _id: string
+  userId: string
+  name: string
+  description?: string
+  parentCollectionId?: string | null
+  position: number
+  deleted: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Tag {
+  _id: string
+  userId: string
+  name: string
+  color?: string | null  // Hex color for colored tags (9 max)
+  position?: number  // 1-9 for keyboard shortcuts
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Project {
+  _id: string
+  userId: string
+  name: string
+  description?: string
+  collectionIds: string[]  // Linked collections
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface DuplicateCandidate {
+  _id: string
+  userId: string
+  existingReferenceId: string
+  duplicateReferenceId: string
+  matchReason: 'isbn' | 'doi' | 'title-creator'
+  confidence: number  // 0-1
+  resolved: boolean
+  resolution?: 'keep-existing' | 'merge' | 'keep-both'
+  resolvedAt?: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+### Usage in Components
+
+**Type-safe API calls**:
+```tsx
+// src/features/library/api/references.queries.ts
+import { Reference, Collection, Tag } from '@/common/types'
+
+export function useReferencesQuery() {
+  return useQuery<Reference[]>({
+    queryKey: referenceKeys.lists(),
+    queryFn: async () => {
+      const response = await apiClient.get<Reference[]>('/references')
+      return response
+    }
+  })
+}
+
+export function useCreateReferenceMutation() {
+  return useMutation({
+    mutationFn: async (data: Partial<Reference>) => {
+      return apiClient.post<Reference>('/references', data)
+    }
+  })
+}
+```
+
+**Type-safe component props**:
+```tsx
+interface ReferenceCardProps {
+  reference: Reference
+  selected?: boolean
+  onSelect?: (id: string) => void
+  onEdit?: (reference: Reference) => void
+}
+
+export function ReferenceCard({
+  reference,
+  selected,
+  onSelect,
+  onEdit
+}: ReferenceCardProps) {
+  return (
+    <div>
+      <h3>{reference.title}</h3>
+      <p>{reference.authors.map(a => a.full).join('; ')}</p>
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+### Keeping Types in Sync
+
+**When backend schema changes**:
+1. Backend team updates MongoDB models
+2. Backend updates TypeScript interfaces in ServiceLayerSpec.md
+3. Frontend pulls latest types and updates `src/common/types.ts`
+4. Update any components using changed types
+5. Run TypeScript compiler (`tsc --noEmit`) to catch errors
+
+**Best Practices**:
+- ✅ Keep type definitions DRY (single source of truth in types.ts)
+- ✅ Use `Partial<Reference>` for update/create payloads
+- ✅ Create utility types for common patterns:
+  ```typescript
+  export type CreateReferenceInput = Omit<Reference, '_id' | 'userId' | 'createdAt' | 'updatedAt'>
+  export type UpdateReferenceInput = Partial<CreateReferenceInput>
+  ```
+- ❌ Don't duplicate types in multiple files
+- ❌ Don't create frontend-only types that diverge from backend models
+
+### Validation at Boundaries
+
+Use **Zod** to validate backend responses at API boundary:
+
+```typescript
+// src/common/api/validators.ts
+import { z } from 'zod'
+
+const AuthorSchema = z.object({
+  given: z.string(),
+  family: z.string(),
+  full: z.string().optional()
+})
+
+const ReferenceSchema = z.object({
+  _id: z.string(),
+  userId: z.string(),
+  type: z.enum(['article', 'book', 'chapter', 'conference', 'thesis', 'other']),
+  title: z.string(),
+  authors: z.array(AuthorSchema),
+  year: z.number().optional(),
+  // ... other fields
+})
+
+// Parse and validate response
+export function validateReference(data: unknown): Reference {
+  return ReferenceSchema.parse(data)
+}
+
+// Usage in API client
+export async function getReferences(): Promise<Reference[]> {
+  const response = await fetch('/api/bibliography/references')
+  const data = await response.json()
+  return z.array(ReferenceSchema).parse(data)
+}
+```
 
 ---
 

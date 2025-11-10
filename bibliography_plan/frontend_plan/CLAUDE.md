@@ -67,96 +67,91 @@ This file provides **frontend-specific patterns** not covered in the root docume
 
 ```
 /home/mahdi/Desktop/bibliography/editor_frontend/src/
-├── features/
-│   └── task-management/           # YOUR BLUEPRINT
-│       ├── api/
-│       │   └── taskManagement.queries.ts   # React Query patterns → COPY
-│       ├── components/
-│       │   ├── TaskCard/                   # → Adapt to ReferenceCard
-│       │   ├── TaskModal/                  # → Adapt to ReferenceModal
-│       │   └── TaskManagementPage/         # → Adapt to LibraryPage
-│       ├── hooks/                          # Custom hooks pattern
-│       ├── store/
-│       │   └── taskManagement.store.ts     # Zustand pattern → COPY
-│       └── types/                          # TypeScript types
 ├── components/
-│   ├── charts/                   # Placeholder (ignore)
-│   ├── forms/                    # Placeholder (ignore)
-│   ├── layout/                   # Empty (you'll build)
-│   └── ui/                       # Placeholder README only (you'll build primitives)
+│   ├── ui/                       # UI PRIMITIVES - Copy these patterns
+│   │   ├── Button.tsx            # CVA button with variants
+│   │   ├── Card.tsx              # Card container with CVA
+│   │   ├── Input.tsx             # Form input with CVA
+│   │   ├── Modal.tsx             # Headless UI Dialog wrapper
+│   │   └── GlobalCursor.tsx      # Custom cursor component
+│   └── layout/                   # Layout components (reference)
 ├── store/
-│   └── ui.store.ts               # COPY THIS - global UI state pattern
-├── routes/                       # TanStack Router - COPY pattern
+│   ├── ui.store.ts               # COPY THIS - global UI state (Zustand + devtools)
+│   ├── auth.store.ts             # COPY THIS - auth state pattern
+│   └── (feature stores)          # Feature-specific stores
 ├── common/
 │   ├── api/
-│   │   └── client.ts             # COPY THIS - axios wrapper with auth
-│   ├── events.ts                 # COPY THIS - event bus
-│   ├── types.ts
-│   └── utils.ts
+│   │   └── client.ts             # COPY THIS - fetch-based ApiClient with token management
+│   ├── events.ts                 # COPY THIS - event bus pattern
+│   ├── types.ts                  # Type definitions
+│   └── utils.ts                  # Utility functions
+├── routes/                       # TanStack Router - COPY file-based routing pattern
+├── features/                     # Feature folders (reference for organization pattern)
 └── styles/
-    └── tailwind.css
+    └── tailwind.css              # COPY THIS - Tailwind v4 with @theme block
 ```
 
 ### What to Copy Directly
 
-**1. TaskCard → ReferenceCard**
-- **File**: `editor_frontend/src/features/task-management/components/TaskCard/TaskCard.tsx`
+**1. UI Primitives**
+- **File**: `editor_frontend/src/components/ui/` (Button.tsx, Card.tsx, Input.tsx, Modal.tsx)
 - **Copy**:
-  - CVA variant structure (variant, priority, status, size)
+  - CVA variant structure (multiple variants per component)
   - Props interface pattern
-  - Hover states (edit/delete buttons appear on hover)
-  - Badge styling
-  - Checkbox selection
+  - Styling approach with Tailwind v4
+  - Accessibility attributes (role, aria-*, etc.)
+  - Focus management for modals
 - **Adapt**:
-  - Replace task fields with reference fields (title, authors, year, venue, tags, DOI)
-  - Change variants: selected, hasPdf (instead of task statuses)
-  - Update colors to bibliography design system (accent green #04E39E)
+  - Update colors to bibliography brand colors (Bangladesh Green #03624C, Caribbean Green #60DF60)
+  - Adjust spacing if needed
+  - Add bibliography-specific props
 
-**2. TaskModal → ReferenceModal**
-- **File**: `editor_frontend/src/features/task-management/components/TaskModal/TaskModal.tsx`
-- **Copy**:
-  - Modal structure (Headless UI Dialog)
-  - Form setup (react-hook-form + Zod)
-  - Create vs Edit mode logic
-  - Mutation integration (useCreateTaskMutation → useCreateReferenceMutation)
-- **Adapt**:
-  - Reference form fields (see Spec.md section 2.7)
-  - Zod schema for references (title required, DOI validation, URL validation)
-  - Dynamic author array (add/remove authors)
-
-**3. Zustand Stores**
-- **File**: `editor_frontend/src/store/ui.store.ts`
+**2. Zustand Stores**
+- **File**: `editor_frontend/src/store/ui.store.ts` and `auth.store.ts`
 - **Copy**:
   - Store structure (state + actions)
   - LocalStorage persistence pattern
+  - **devtools middleware** (critical for debugging)
   - Theme management (dark/light/system)
   - Modal management (modals object with IDs)
-  - Toast notifications
 - **Adapt**:
   - Add bibliography-specific state (activeView, sidebarWidth, detailsPaneWidth, detailsPaneTab)
+  - Add library-specific selections (selectedReferenceIds, activeCollectionId)
+  - Implement token structure: `tokens: { accessToken, refreshToken }` (not flat `token`)
 
-**4. API Client**
+**3. API Client (Fetch-Based)**
 - **File**: `editor_frontend/src/common/api/client.ts`
 - **Copy**:
-  - Axios instance setup
-  - Request interceptor (inject auth token)
-  - Response interceptor (handle errors, show toasts)
-  - AuthManager class (token storage)
+  - Fetch-based ApiClient class structure
+  - Token management (get, set, refresh logic)
+  - Request/response interceptor pattern
+  - Error handling and logging
+  - Promise deduplication pattern
+- **DO NOT use axios** - editor uses fetch-based client
 - **Adapt**:
   - Update baseURL to `VITE_API_BASE_URL` (bibliography endpoint)
+  - Add bibliography-specific endpoints
 
-**5. React Query Patterns**
-- **File**: `editor_frontend/src/features/task-management/api/taskManagement.queries.ts`
+**4. Styling with Tailwind v4**
+- **File**: `editor_frontend/src/styles/tailwind.css`
 - **Copy**:
-  - Query key factory pattern
-  - useQuery hook structure
-  - useMutation with optimistic updates
-  - Query invalidation on success
-  - Toast notifications
+  - `@theme` block structure for CSS custom properties
+  - Color system using CSS variables
+  - Font family declarations
+  - Animation definitions
+  - @layer base for global styles
+- **Important**: Brand colors from editor use CSS variables (var(--color-...))
 - **Adapt**:
-  - Reference queries (useReferencesQuery, useCreateReferenceMutation, etc.)
-  - Collection queries
-  - Tag queries
+  - Customize colors to match bibliography design system
+  - Add any additional animations/shadows needed
+
+**5. GlobalCursor Component**
+- **File**: `editor_frontend/src/components/ui/GlobalCursor.tsx`
+- **Copy**:
+  - Custom cursor component implementation
+  - Mouse tracking logic
+  - CSS-in-JS or Tailwind approach
+- **Reference**: See DesignSystem.md for neon green cursor specifications
 
 ---
 
@@ -224,11 +219,11 @@ This file provides **frontend-specific patterns** not covered in the root docume
 
 **3. Check Editor Pattern** (10 minutes)
 ```bash
-cd /home/mahdi/Desktop/bibliography/editor_frontend/src/features/task-management/components
-# Read TaskList.tsx (minimal) - not a full table
-# Read TaskCard.tsx for row styling patterns
-# Note: They don't have a full table implementation
-# Conclusion: Build from TanStack Table directly using ComponentsSpec.md example
+cd /home/mahdi/Desktop/bibliography/editor_frontend/src/components/ui
+# Read Button.tsx, Card.tsx for styling and CVA patterns
+# Check TanStack Table examples in features/ for table component patterns
+# Note: Copy UI primitive patterns, not full feature implementations
+# Conclusion: Build from TanStack Table + UI primitives using ComponentsSpec.md example
 ```
 
 **4. Check Zotero** (5 minutes)
@@ -270,11 +265,12 @@ cd /home/mahdi/Desktop/bibliography/zotero/chrome/content/zotero
 /**
  * ReferenceTable - Main library table component
  *
- * Adapted from editor TaskCard selection patterns.
+ * Uses TanStack React Table for sorting, filtering, and column management.
  * Multi-select follows Zotero patterns (Cmd/Ctrl+Click, Shift+range).
- * Uses TanStack React Table for sorting and column management.
+ * Selection state stored in Zustand (library.store.ts).
  *
  * @see ComponentsSpec.md section 2.1 for full specification
+ * @see editor_frontend/src/components/ui/ for UI primitive patterns
  */
 ```
 

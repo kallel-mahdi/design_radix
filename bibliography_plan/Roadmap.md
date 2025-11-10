@@ -463,13 +463,12 @@ This roadmap outlines the phased development timeline for the complete bibliogra
   - Notes search (full-text)
 
 **Advanced PDF Viewer**:
-- [ ] Replace iframe with react-pdf
-  - Zoom controls
-  - Page navigation (prev/next, jump to page)
+- [ ] Enhance react-pdf viewer (MVP has basic version, Phase 2 adds advanced features)
   - Search within PDF (highlight matches)
   - Page thumbnails sidebar
   - Full-screen mode
   - Persistent scroll position
+  - Annotations and highlighting (TODO in Phase 2.5)
 - [ ] Auto-fetch PDFs from open access
   - Unpaywall API integration (check for OA versions)
   - arXiv API (auto-fetch preprints)

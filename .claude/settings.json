@@ -1,7 +1,37 @@
 {
   "hooks": {
-    "UserPromptSubmit": ".claude/hooks/skill-activation-prompt.sh",
-    "PostToolUse": ".claude/hooks/post-tool-use-tracker.sh",
-    "Stop": ".claude/hooks/tsc-check.sh"
+    "UserPromptSubmit": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/skill-activation-prompt.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-tool-use-tracker.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/tsc-check.sh"
+          }
+        ]
+      }
+    ]
   }
 }

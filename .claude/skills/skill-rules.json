@@ -9,9 +9,6 @@
       "promptTriggers": {
         "keywords": ["skill system", "create skill", "add skill", "skill triggers", "skill-rules.json", "hooks"],
         "intentPatterns": ["(create|add|modify|build).*?skill"]
-      },
-      "skipConditions": {
-        "sessionSkillUsed": true
       }
     },
     "bibliography-backend-guidelines": {
@@ -29,9 +26,6 @@
           "editor_backend/services/bibliography-service/**/*.ts"
         ],
         "contentPatterns": ["router\\.", "export.*Controller", "mongoose\\."]
-      },
-      "skipConditions": {
-        "sessionSkillUsed": true
       }
     },
     "bibliography-frontend-guidelines": {
@@ -50,9 +44,6 @@
           "editor_frontend/src/**/*.tsx"
         ],
         "contentPatterns": ["from 'zustand'", "cva\\(", "tw-merge", "useSuspenseQuery", "className="]
-      },
-      "skipConditions": {
-        "sessionSkillUsed": true
       }
     },
     "bibliography-planning-docs": {
@@ -71,9 +62,6 @@
           "editor_backend/services/bibliography-service/**/*"
         ],
         "contentPatterns": ["ReferenceCard", "CollectionTree", "DuplicateDetector", "api/"]
-      },
-      "skipConditions": {
-        "sessionSkillUsed": true
       }
     }
   }

@@ -1,0 +1,23 @@
+{
+  "name": "bibliography-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bibliography Manager - Monorepo with frontend, backend, and shared packages",
+  "workspaces": [
+    "bibliography_frontend",
+    "bibliography_backend",
+    "shared"
+  ],
+  "scripts": {
+    "test": "pnpm -r test",
+    "test:unit": "pnpm -r test:unit",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "dev:frontend": "pnpm --filter bibliography-frontend dev",
+    "dev:backend": "pnpm --filter bibliography-backend dev"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

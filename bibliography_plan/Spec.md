@@ -32,6 +32,28 @@ Build a modern, elegant bibliography management system that combines the collabo
 
 **Think**: Overleaf + Zotero combined, but more elegant and tightly integrated.
 
+---
+
+**⚠️ ARCHITECTURE CLARIFICATION**:
+
+The term "standalone bibliography manager" refers to the **product strategy** (MVP is separate from editor UI), **NOT** the deployment architecture.
+
+**Backend Architecture**: Microservices pattern
+- `bibliography-service` is one of 5+ services (auth-service, document-service, latex-service, bibliography-service, api-gateway)
+- Runs on port 8005 with separate Docker container and MongoDB database
+- API Gateway routes `/api/bibliography/*` requests to bibliography-service
+- Services trust gateway auth headers (`x-user-id`), do not validate JWT directly
+- Each service is independently deployable and scalable
+
+**Frontend Architecture**: Standalone React application
+- Separate from editor UI in MVP (Session 1-20)
+- Shares UI patterns, tech stack (React 19, Tailwind v4, Zustand), and deployment patterns with editor
+- Phase 2+ will integrate with editor for collaborative citations and reference picking
+
+**Key Point**: This is a **product organization** decision (UI separation for MVP), not a monolithic backend architecture.
+
+---
+
 ### 1.2 Target Users
 
 **Primary**: Individual researchers (PhD students, academics) who need to:
@@ -54,10 +76,12 @@ Build a modern, elegant bibliography management system that combines the collabo
 **Critical**: Tech stack MUST match the editor's existing architecture for future integration.
 
 **Frontend**:
-- React 19, TypeScript 5.8, Vite 6
-- TanStack Router (routing), Zustand (UI state), TanStack React Query (server state)
-- Tailwind CSS 4 + CVA (styling), react-hook-form + Zod (forms)
-- TanStack React Table, Headless UI, Heroicons
+- React 19, TypeScript 5.8, Vite 6 (with SWC transpiler)
+- TanStack Router 1.x (routing), Zustand 5 (UI state), TanStack React Query 5 (server state)
+- Tailwind CSS 4 + CSS custom properties, CVA (styling), react-hook-form + Zod (forms)
+- TanStack React Table 8, Headless UI 2, Heroicons 2
+- framer-motion (animations), react-resizable-panels (layout), react-pdf (PDF viewing)
+- Storybook 9 (component development)
 
 **Backend**:
 - Node.js 22+, Express 4, TypeScript 5.8
@@ -76,7 +100,7 @@ Build a modern, elegant bibliography management system that combines the collabo
 - [ ] Automatic duplicate detection on import (3-stage Zotero algorithm)
 - [ ] Search and filter references in real-time
 - [ ] Export to BibTeX format
-- [ ] Upload and view PDFs (simple iframe viewer)
+- [ ] Upload and view PDFs (react-pdf viewer with zoom/navigation)
 - [ ] Link collections to projects (editor integration prep)
 - [ ] Soft delete (trash/restore)
 - [ ] Responsive, accessible, tested (unit + integration + E2E)
@@ -213,7 +237,7 @@ Build a modern, elegant bibliography management system that combines the collabo
 
 **Info Tab**: Editable metadata (title, authors, year, venue, DOI, URL), tags section, collections section, metadata footer (dates, source)
 
-**PDF Tab (MVP)**: iframe viewer or empty state ("No PDF attached", upload button)
+**PDF Tab (MVP)**: react-pdf viewer with zoom/navigation controls, or empty state ("No PDF attached", upload button)
 
 **Notes Tab**: Placeholder ("Coming in Phase 2")
 
@@ -267,18 +291,18 @@ Build a modern, elegant bibliography management system that combines the collabo
 **Deferred to Phase 2**:
 - Collaboration/sharing UI
 - Notes CRUD with rich text editor
-- Advanced PDF viewer (react-pdf with search, zoom, annotations)
+- Advanced PDF features (annotations, highlighting, search within PDF)
 - Copy citation in formatted styles (APA, MLA, Chicago)
 - Auto-fetch PDFs from open access (Unpaywall, arXiv, PMC)
 - Offline support with sync
-- Multiple PDF attachments
+- Multiple PDF attachments per reference
 - Manual reference ordering in collections
 - Saved searches
-- Full-text PDF search
+- Full-text PDF search across library
 - Bulk duplicate resolution
 - Undo/redo
 - Advanced import (PubMed, arXiv, browser extension)
-- More export formats
+- More export formats (RIS, CSL-JSON, Zotero RDF)
 
 **Deferred to Phase 3**:
 - Settings screens
@@ -775,7 +799,14 @@ const resolveDuplicateSchema = Joi.object({
 1. User logs in via auth service (or dedicated bibliography login)
 2. Frontend receives JWT token
 3. Store token in localStorage + auth.store
-4. Inject token in all requests via axios interceptor (`Authorization: Bearer <token>`)
+4. **API Client**: Fetch-based `apiClient` class automatically injects token in all requests:
+   ```typescript
+   // src/common/api/client.ts
+   class ApiClient {
+     async get<T>(url: string) { /* auto-injects Authorization header */ }
+     async post<T>(url: string, data: any) { /* auto-injects Authorization header */ }
+   }
+   ```
 5. API Gateway validates JWT, forwards `x-user-id` header to bibliography service
 6. Bibliography service trusts `x-user-id` (no JWT validation)
 

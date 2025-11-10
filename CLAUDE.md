@@ -31,10 +31,10 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 /home/mahdi/Desktop/bibliography/
 ├── editor_frontend/              # REFERENCE - Editor's React frontend
 │   ├── src/
-│   │   ├── features/task-management/  # COPY PATTERNS from here
-│   │   ├── components/
-│   │   ├── store/
-│   │   └── routes/
+│   │   ├── components/ui/        # UI Primitives to copy (Button, Card, Input, Modal)
+│   │   ├── store/                # Zustand stores (with devtools)
+│   │   ├── common/api/           # API client patterns
+│   │   └── routes/               # Router patterns
 │   └── package.json              # See what libraries they use
 │
 ├── editor_backend/               # REFERENCE - Editor's microservices backend
@@ -134,6 +134,26 @@ The editor uses microservices architecture:
 
 ---
 
+## CRITICAL UPDATE: Editor Frontend Patterns
+
+⚠️ **IMPORTANT**: The editor_frontend does NOT have a "task-management" feature with TaskCard/TaskModal components. References to copying task-management patterns in this document (and ComponentsSpec.md) are outdated.
+
+**ACTUAL PATTERNS TO COPY FROM EDITOR**:
+- ✅ **UI Primitives**: Button, Card, Input, Modal in `src/components/ui/`
+- ✅ **Zustand Stores**: `src/store/ui.store.ts` (with devtools middleware)
+- ✅ **API Client**: `src/common/api/client.ts` (fetch-based, NOT axios)
+- ✅ **React Query Setup**: `src/features/*/api/` folder structure
+- ✅ **Router Setup**: TanStack Router with file-based routes
+- ✅ **Styling**: Tailwind v4 with CSS custom properties in `src/styles/tailwind.css`
+- ✅ **GlobalCursor**: Custom cursor component in `src/components/ui/GlobalCursor.tsx`
+
+**DO NOT copy**:
+- ❌ TaskCard, TaskModal (these don't exist - they're placeholders in old plans)
+- ❌ LaTeX editor patterns (editor-specific, not relevant to bibliography)
+- ❌ Collaboration features (Phase 2+, not MVP)
+
+---
+
 ## Code Reuse Strategy
 
 ### Priority Order for Implementation
@@ -142,11 +162,11 @@ When implementing ANY feature:
 
 **1. CHECK EDITOR FIRST** (highest priority)
 - Look in `editor_frontend/src/` for similar patterns
-- Copy component structure (e.g., TaskCard → ReferenceCard)
-- Copy Zustand store patterns
-- Copy API client setup
-- Copy form validation patterns
-- **Document in code**: `// Adapted from editor TaskCard pattern`
+- Copy UI primitives from `src/components/ui/` (Button, Card, Input, Modal)
+- Copy Zustand store patterns from `src/store/` (see devtools middleware)
+- Copy API client from `src/common/api/client.ts` (fetch-based, not axios)
+- Copy form validation patterns from existing forms
+- **Document in code**: `// Adapted from editor_frontend pattern`
 
 **2. CHECK ZOTERO SECOND** (reference implementation)
 - Look in `zotero/chrome/content/zotero/` for UI/UX patterns
@@ -164,14 +184,14 @@ When implementing ANY feature:
 ### What to Copy Directly from Editor
 
 **Frontend**:
-- ✅ TaskCard structure → ReferenceCard
-- ✅ TaskModal form → ReferenceModal
-- ✅ Zustand store patterns (ui.store, feature stores)
-- ✅ API client (axios wrapper with auth injection)
-- ✅ React Query setup (query key factories, mutations)
-- ✅ Form validation (react-hook-form + Zod)
-- ✅ CVA variant patterns
-- ✅ Layout patterns (if they have sidebar/panel components)
+- ✅ UI Primitives: Button, Card, Input, Modal from `src/components/ui/`
+- ✅ Zustand store patterns: `src/store/ui.store.ts` (with devtools middleware!)
+- ✅ API client: Fetch-based class from `src/common/api/client.ts` (NOT axios)
+- ✅ React Query setup: `src/features/*/api/` folder structure
+- ✅ Form validation: react-hook-form + Zod patterns
+- ✅ CVA variant patterns: See Button.tsx and other primitives
+- ✅ Layout patterns: `src/components/layout/` (Sidebar, etc.)
+- ✅ GlobalCursor: Custom cursor component (copy to bibliography)
 
 **Backend**:
 - ✅ Winston logger setup
@@ -213,10 +233,10 @@ When implementing ANY feature:
 
 **Step 2: Check Editor Codebase**
 ```bash
-# Frontend example: Implementing ReferenceCard
-cd /home/mahdi/Desktop/bibliography/editor_frontend/src/features/task-management/components
-# Read TaskCard.tsx - this is your template
-# Copy patterns: CVA variants, props interface, hover states
+# Frontend example: Implementing a UI component
+cd /home/mahdi/Desktop/bibliography/editor_frontend/src/components/ui
+# Read Button.tsx, Card.tsx, Input.tsx - these are your templates
+# Copy patterns: CVA variants, props interface, styling with Tailwind v4
 ```
 
 ```bash
@@ -258,12 +278,13 @@ If you do something different from Zotero, add a code comment:
 
 ## Skills Usage (CRITICAL)
 
-**ALWAYS invoke skills at session start**:
-- `bibliography-planning-docs` - specs, requirements, design system (ALWAYS)
-- `bibliography-frontend-guidelines` - React patterns, CVA, Zustand (if frontend work)
-- `bibliography-backend-guidelines` - Express, Mongoose, Joi (if backend work)
+**Skills auto-suggest based on context**:
+- `bibliography-planning-docs` - Activates when implementing features, components, or endpoints
+- `bibliography-frontend-guidelines` - Activates when working on frontend code (components, pages, styling)
+- `bibliography-backend-guidelines` - Activates when working on backend code (routes, controllers, services)
+- `skill-developer` - Activates when discussing skill system or hooks
 
-Skills auto-load once per session. Mention when using them for transparency.
+The skill activation system analyzes your prompts and project files to suggest relevant skills automatically. You don't need to manually invoke them—they'll appear when contextually appropriate based on keywords and file patterns.
 
 ---
 
@@ -286,9 +307,9 @@ Our implementation differs from Zotero in these ways (ALWAYS DOCUMENT IN CODE):
 ### "Implement a new component"
 1. Read `bibliography_plan/Spec.md` (section 2: Frontend Requirements)
 2. Read `bibliography_plan/frontend_plan/ComponentsSpec.md` (find component spec)
-3. Check `editor_frontend/src/features/task-management/components/` for similar component
-4. Copy structure, adapt for bibliography domain
-5. Check `bibliography_plan/frontend_plan/DesignSystem.md` for colors, spacing, variants
+3. Check `editor_frontend/src/components/ui/` for UI primitives (Button, Card, Input, Modal)
+4. Copy structure and CVA patterns, adapt for bibliography domain
+5. Check `bibliography_plan/frontend_plan/DesignSystem.md` for colors, spacing, variants (Tailwind v4 CSS vars)
 6. Write tests (see UnifiedImplementationChecklist.md Session 19)
 
 ### "Add a new API endpoint"
@@ -444,8 +465,10 @@ NODE_ENV=development
 - Backend logic → `zotero/chrome/content/zotero/xpcom/`
 
 **Editor Patterns**:
-- Frontend patterns → `editor_frontend/src/features/task-management/`
-- Backend patterns → `editor_backend/services/`
+- UI components → `editor_frontend/src/components/ui/` (Button, Card, Input, Modal with CVA)
+- Zustand stores → `editor_frontend/src/store/` (with devtools middleware)
+- API client → `editor_frontend/src/common/api/client.ts` (fetch-based)
+- Backend patterns → `editor_backend/services/` (logger, error handling, validation)
 
 ---
 

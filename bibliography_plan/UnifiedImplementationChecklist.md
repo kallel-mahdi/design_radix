@@ -1,8 +1,75 @@
 # Bibliography Manager — Unified Implementation Checklist
 
-**Last Updated**: 2025-01-08
-**Version**: 2.0 (Unified Frontend + Backend)
-**Total Sessions**: 20 (4 weeks, ~10-15 hours/week)
+**Last Updated**: 2025-11-09
+**Version**: 2.1 (Unified Frontend + Backend + Infrastructure)
+**Total Sessions**: 20+ (includes Sessions 3A-3E for infrastructure)
+**Completed Sessions**: 3A, 3B, 3C, 3D, 3E (Zod Migration)
+
+---
+
+## ✅ Completed Sessions (Infrastructure & Bug Fixes)
+
+### Session 3A: P0 Blockers (COMPLETE)
+- Fixed auth store tests (token structure)
+- Removed duplicate Reference type
+- Fixed Date field types (JSON serialization)
+- Created Toast components and mounted
+- Verified builds passing
+
+### Session 3B: Infrastructure & Utilities (COMPLETE)
+- ErrorBoundary component with TypeScript override keywords
+- React Query configuration optimization
+- Panel width persistence hook
+- Essential utility functions (formatDate, truncateText, debounce, formatAuthors)
+- Application constants extraction
+
+### Session 3C: Loading States (COMPLETE)
+- Skeleton loading components (generic + domain-specific)
+- Fixed hardcoded colors to use theme tokens
+- All components now use design system properly
+
+### Session 3D: Documentation (COMPLETE)
+- CHANGELOG.md created and maintained
+- STATUS.md simplified
+- All magic numbers eliminated
+
+### Session 3E: Full Zod Migration (COMPLETE) - 10 hours
+**Motivation**: Single source of truth for types across frontend and backend
+
+**Accomplished**:
+1. **@bibliography/shared Package** Created monorepo shared package with:
+   - All Zod schemas (Reference, Collection, Tag, etc.)
+   - Input schemas (Create/Update for all entities)
+   - 148 comprehensive tests covering all schemas
+   - Type inference from Zod for TypeScript
+
+2. **Workspace Setup**: pnpm workspaces configured
+   - Root package.json and pnpm-workspace.yaml
+   - Fixed TypeScript type annotations for Express routes
+   - All 3 packages (frontend, backend, shared) in workspace
+
+3. **Backend Migration**: Joi → Zod complete
+   - New Zod validation middleware
+   - All 7 route files migrated to Zod schemas
+   - Removed Joi dependency completely
+   - Backend builds successfully
+
+4. **Frontend Integration**: Runtime validation added
+   - React Query hooks validate all API responses with `.parse()`
+   - Types re-exported from @bibliography/shared
+   - Removed duplicate schemas.ts file
+   - Frontend builds successfully
+
+5. **Testing**: 247 total tests passing
+   - Shared: 148/148 tests
+   - Frontend: 99/99 tests (includes 23 new utility tests)
+   - All builds passing
+
+**Benefits Delivered**:
+- Runtime validation catches backend bugs early
+- Single source of truth for all data models
+- Type safety guaranteed at both compile-time and runtime
+- Shared schemas reduce duplication and sync issues
 
 ---
 
@@ -43,45 +110,105 @@ This checklist provides a **unified session-by-session breakdown** combining fro
 - [ ] Install dependencies:
   ```bash
   npm install react@19 react-dom@19
-  npm install @tanstack/react-router @tanstack/react-router-vite-plugin @tanstack/router-devtools
+  npm install @tanstack/react-router @tanstack/router-plugin @tanstack/router-devtools
   npm install @tanstack/react-query @tanstack/react-query-devtools
   npm install zustand
   npm install clsx tailwind-merge class-variance-authority
   npm install react-hook-form @hookform/resolvers zod
   npm install @tanstack/react-table @tanstack/react-virtual
   npm install @headlessui/react @heroicons/react
-  npm install axios dayjs
+  npm install framer-motion react-resizable-panels react-pdf pdfjs-dist dayjs
   npm install i18next react-i18next i18next-browser-languagedetector i18next-http-backend
   ```
 
 - [ ] Install dev dependencies:
   ```bash
-  npm install -D @types/node typescript
-  npm install -D tailwindcss@next postcss autoprefixer
+  npm install -D @types/node @types/react @types/react-dom typescript
+  npm install -D @tailwindcss/vite postcss autoprefixer
   npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+  npm install -D eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import eslint-plugin-jsx-a11y
   npm install -D prettier eslint-config-prettier eslint-plugin-prettier
-  npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
+  npm install -D vitest @vitest/ui @vitest/coverage-v8 @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
   npm install -D @playwright/test
+  npm install -D storybook @storybook/react @storybook/addon-essentials @storybook/addon-interactions
+  npm install -D @vitejs/plugin-react-swc
+  npm install -D @total-typescript/ts-reset
   ```
 
-- [ ] Initialize Tailwind:
+- [ ] Initialize Tailwind v4 with CSS custom properties:
   ```bash
-  npx tailwindcss init -p
+  npx tailwindcss init
   ```
 
-- [ ] Configure `tailwind.config.js` (copy colors from DesignSystem.md):
+- [ ] Configure `tailwind.config.js` (Tailwind v4 with CSS vars from editor):
   ```javascript
   export default {
     content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
     darkMode: 'class',
     theme: {
       extend: {
+        fontFamily: {
+          'sans': ['var(--font-family-sans)', 'system-ui', 'sans-serif'],
+          'mono': ['var(--font-family-mono)', 'monospace'],
+        },
         colors: {
-          accent: { DEFAULT: '#04E39E', hover: '#2AF4B4' },
-          bg: { dark: '#0F1115', surface: '#171A21', hover: '#1F2330' },
-          text: { primary: '#E6E8EC', secondary: '#9CA3AF', muted: '#6B7280' }
+          app: {
+            bg: 'var(--color-app-bg)',
+            'bg-secondary': 'var(--color-app-bg-secondary)',
+            accent: 'var(--color-app-accent)',
+            text: 'var(--color-app-text)',
+            'text-muted': 'var(--color-app-text-muted)',
+            border: 'var(--color-app-border)',
+            'border-accent': 'var(--color-app-border-accent)',
+          },
+          primary: { 50: '#E6F5F2', 100: '#CCEBE5', 200: '#99D7CB', 300: '#66C3B1', 400: '#33AF97', 500: '#03624C', 600: '#024E3D', 700: '#023B2E', 800: '#01271F', 900: '#01140F' },
+          secondary: { 50: '#F0FCF0', 100: '#E0F9E0', 200: '#C2F3C2', 300: '#A3EDA3', 400: '#85E785', 500: '#60DF60', 600: '#4DB24D', 700: '#3A863A', 800: '#265926', 900: '#132D13' },
+        },
+        boxShadow: {
+          'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+          'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+        },
+        animation: {
+          'fade-in': 'fadeIn 0.3s ease-in-out',
+          'slide-up': 'slideUp 0.3s ease-out',
+        },
+        keyframes: {
+          fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+          slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
         }
       }
+    }
+  }
+  ```
+
+- [ ] Create `src/styles/tailwind.css` with Tailwind v4 @theme block:
+  ```css
+  @import "tailwindcss";
+
+  @theme {
+    --font-family-sans: 'Josefin Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+
+    --color-app-bg: #2E302F;
+    --color-app-bg-secondary: #3A3C3B;
+    --color-app-accent: #00DF82;
+    --color-app-text: #FFFFFF;
+    --color-app-text-muted: #CCCCCC;
+    --color-app-border: #444444;
+    --color-app-border-accent: #00DF82;
+  }
+
+  @layer base {
+    html, body, #root {
+      background-color: var(--color-app-bg);
+      color: var(--color-app-text);
+      min-height: 100vh;
+      font-family: var(--font-family-sans);
+      cursor: none;
+    }
+
+    *, *::before, *::after {
+      cursor: none !important;
     }
   }
   ```
@@ -98,8 +225,33 @@ This checklist provides a **unified session-by-session breakdown** combining fro
   VITE_API_BASE_URL=http://localhost:8005/api/bibliography
   ```
 
-- [ ] Update `vite.config.ts` with TanStack Router plugin
-- [ ] First commit: `git init && git add . && git commit -m "Initial frontend setup"`
+- [ ] Update `vite.config.ts` with all required plugins:
+  ```typescript
+  import { defineConfig } from 'vite'
+  import react from '@vitejs/plugin-react-swc'
+  import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
+  import tailwindcss from '@tailwindcss/vite'
+  import path from 'path'
+
+  export default defineConfig({
+    plugins: [
+      tailwindcss(),
+      react(),
+      TanStackRouterVite(),
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    server: {
+      host: true,
+      strictPort: true,
+    },
+  })
+  ```
+
+- [ ] First commit: `git init && git add . && git commit -m "Initial frontend setup with Tailwind v4"`
 
 #### Backend Tasks (1-1.5 hours)
 
@@ -849,27 +1001,84 @@ This checklist provides a **unified session-by-session breakdown** combining fro
 
 - [ ] `src/common/api/client.ts`:
   ```typescript
-  import axios from 'axios';
+  import { useAuthStore } from '@/store/auth.store';
 
-  export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005/api/bibliography',
-    timeout: 30000
-  });
+  // Fetch-based API client (NOT axios) - matches editor pattern
+  export class ApiClient {
+    private baseURL: string;
+    private timeout: number = 30000;
 
-  // Request interceptor (add auth token when implemented)
-  apiClient.interceptors.request.use((config) => {
-    // TODO: Add auth token
-    return config;
-  });
-
-  // Response interceptor
-  apiClient.interceptors.response.use(
-    (response) => response.data,
-    (error) => {
-      console.error('API Error:', error);
-      return Promise.reject(error);
+    constructor() {
+      this.baseURL =
+        import.meta.env.VITE_API_BASE_URL ||
+        'http://localhost:8005/api/bibliography';
     }
-  );
+
+    private async request<T>(
+      url: string,
+      options: RequestInit = {}
+    ): Promise<T> {
+      const authStore = useAuthStore.getState();
+      const accessToken = authStore.tokens.accessToken;
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        ...options.headers,
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      try {
+        const response = await fetch(`${this.baseURL}${url}`, {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Handle token refresh if needed
+            authStore.logout();
+          }
+          throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        return response.json() as Promise<T>;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.error('API Error:', error);
+        throw error;
+      }
+    }
+
+    async get<T>(url: string): Promise<T> {
+      return this.request<T>(url, { method: 'GET' });
+    }
+
+    async post<T>(url: string, data?: unknown): Promise<T> {
+      return this.request<T>(url, {
+        method: 'POST',
+        body: data ? JSON.stringify(data) : undefined,
+      });
+    }
+
+    async put<T>(url: string, data?: unknown): Promise<T> {
+      return this.request<T>(url, {
+        method: 'PUT',
+        body: data ? JSON.stringify(data) : undefined,
+      });
+    }
+
+    async delete<T>(url: string): Promise<T> {
+      return this.request<T>(url, { method: 'DELETE' });
+    }
+  }
+
+  export const apiClient = new ApiClient();
   ```
 
 **Create React Query Hooks**:
@@ -1377,7 +1586,7 @@ done
 
 ### Session 11: PDF Upload & Viewer (3-4 hours)
 
-**Goal**: Single PDF upload per reference with iframe viewer
+**Goal**: Single PDF upload per reference with react-pdf viewer (MVP feature)
 
 #### Backend Tasks (1.5-2 hours)
 
@@ -1410,10 +1619,40 @@ done
 
 **Create PdfTab**:
 
-- [ ] If PDF attached: iframe with `src={pdfUrl}`
-- [ ] Download button
-- [ ] "Open in new tab" button
+- [ ] If PDF attached: Use react-pdf Document component with Page display
+- [ ] Implement zoom controls (zoom in/out, fit to page)
+- [ ] Implement navigation (previous/next page, current page display)
+- [ ] Download button to save PDF locally
+- [ ] "Open in new tab" button to view in browser
 - [ ] If no PDF: EmptyState with "Upload PDF" button
+- **Note**: react-pdf is already in MVP dependencies (see Spec.md)
+
+**Implementation Reference** (`src/features/library/components/PdfTab.tsx`):
+```tsx
+import { Document, Page, pdfjs } from 'react-pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+export function PdfTab({ pdfUrl }: { pdfUrl: string }) {
+  const [numPages, setNumPages] = useState<number>();
+  const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(1);
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setScale(s => s - 0.1)}>Zoom Out</button>
+        <span>{(scale * 100).toFixed(0)}%</span>
+        <button onClick={() => setScale(s => s + 0.1)}>Zoom In</button>
+        <input type="number" value={pageNumber} onChange={(e) => setPageNumber(Number(e.target.value))} />
+        <span>of {numPages}</span>
+      </div>
+      <Document file={pdfUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
+        <Page pageNumber={pageNumber} scale={scale} />
+      </Document>
+    </div>
+  )
+}
+```
 
 **Create PDF Upload Mutation**
 
@@ -1421,7 +1660,9 @@ done
 
 - [ ] Upload PDF via ReferenceModal
 - [ ] `hasPdf: true` in reference
-- [ ] PdfTab shows PDF in iframe
+- [ ] PdfTab displays PDF with react-pdf viewer
+- [ ] Zoom controls work
+- [ ] Navigation between pages works
 - [ ] Download button works
 - [ ] Can remove PDF
 
@@ -1627,7 +1868,7 @@ done
 
 - [ ] Click reference → DetailsPane opens
 - [ ] Info tab shows all metadata
-- [ ] PDF tab shows iframe
+- [ ] PDF tab displays PDF with react-pdf viewer (zoom and navigation work)
 - [ ] Tabs switch correctly
 - [ ] Can resize width (persists)
 - [ ] ESC closes pane
@@ -1994,7 +2235,7 @@ npx playwright test --ui  # With UI
 - [ ] Automatic duplicate detection on import
 - [ ] Can search and filter references
 - [ ] Can export to BibTeX
-- [ ] Can upload and view PDFs (iframe)
+- [ ] Can upload and view PDFs (react-pdf viewer with zoom/navigation)
 - [ ] Can link collections to projects
 - [ ] Soft delete (trash/restore)
 - [ ] Responsive UI
