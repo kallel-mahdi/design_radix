@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@/test/utils/testUtils';
 import { ReferenceList } from '../ReferenceList';
 import type { Reference } from '@/common/types';
 import { useLibraryStore } from '../../store/library.store';
