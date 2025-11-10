@@ -1,129 +1,108 @@
 @import "tailwindcss";
 
-/* Tailwind v4 Theme Configuration */
 @theme {
-  /* Background colors */
-  --color-bg-dark: #0F1115;
-  --color-bg-surface: #171A21;
-  --color-bg-hover: #1F2330;
+  /* Font families */
+  --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
 
-  /* Border colors */
-  --color-border: #1F2330;
-  --color-border-accent: #04E39E;
+  /* App theme colors (bibliography dark theme with neon green accent) */
+  --color-app-bg: #0F1115;                    /* Charcoal background (from mockup) */
+  --color-app-bg-secondary: #14161A;          /* Slightly lighter background */
+  --color-app-bg-hover: #1A1D22;              /* Hover state background */
+  --color-app-surface: #171A21;               /* Card/panel surface */
+  --color-app-surface-hover: #1F2330;         /* Surface hover state */
 
-  /* Text colors */
-  --color-text-primary: #E6E8EC;
-  --color-text-secondary: #9CA3AF;
-  --color-text-muted: #6B7280;
+  --color-app-accent: #04E39E;                /* Neon green (from mockup) */
+  --color-app-accent-hover: #2AF4B4;          /* Lighter green on hover */
+  --color-app-accent-dark: #03B37A;           /* Darker green for pressed */
 
-  /* Accent (neon green) */
-  --color-accent: #04E39E;
-  --color-accent-hover: #2AF4B4;
-  --color-accent-dark: #03B37A;
+  --color-app-text: #FFFFFF;                  /* High contrast text */
+  --color-app-text-primary: #E6E8EC;          /* Primary text (slightly dimmed white) */
+  --color-app-text-secondary: #9CA3AF;        /* Secondary text (gray) */
+  --color-app-text-muted: #6B7280;            /* Muted text (darker gray) */
 
-  /* Animations */
-  --animate-slide-in-right: slide-in-right 0.3s ease-out;
-
-  @keyframes slide-in-right {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
+  --color-app-border: #1F2330;                /* Default border */
+  --color-app-border-hover: #2A2F3D;          /* Border on hover */
+  --color-app-border-accent: #04E39E;         /* Accent border (neon green) */
 }
 
-/* Global styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-#root {
-  height: 100%;
-}
-
-/* Custom scrollbar styles */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #171A21;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #1F2330;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6B7280;
-}
-
-/* Focus styles for accessibility */
-:focus-visible {
-  outline: 2px solid #04E39E;
-  outline-offset: 2px;
-}
-
-/* Screen reader only class */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Custom cursor styles */
 @layer base {
-  /* Hide native cursor globally */
+  html,
+  body,
+  #root {
+    background-color: var(--color-app-bg);
+    color: var(--color-app-text-primary);
+    min-height: 100vh;
+    font-family: var(--font-family-sans);
+  }
+
+  /* Smooth transitions */
   * {
-    cursor: none;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
 
-  /* Show native cursor only for specific interactive elements */
-  button,
-  a,
-  input[type='text'],
-  input[type='email'],
-  input[type='password'],
-  input[type='search'],
-  input[type='number'],
-  textarea,
-  select,
-  [role='button'],
-  [role='link'] {
-    cursor: text;
+  /* Monospace fonts for code */
+  code,
+  pre,
+  .font-mono {
+    font-family: var(--font-family-mono);
   }
 
-  /* Resizable panels: show resize cursor */
-  .resizer-handle {
-    cursor: col-resize;
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-app-accent);
+    outline-offset: 2px;
   }
 
-  .resizer-handle[data-panel-group-direction='vertical'] {
-    cursor: row-resize;
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  /* Writing surfaces should show text cursor */
-  .writing-surface {
-    cursor: text;
+  ::-webkit-scrollbar-track {
+    background: var(--color-app-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-app-surface-hover);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-app-text-muted);
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: var(--color-app-accent);
+    color: #000000;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Screen reader only class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Accent glow effect */
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(4, 227, 158, 0.2);
+  }
+
+  .hover-glow-accent:hover {
+    box-shadow: 0 0 20px rgba(4, 227, 158, 0.3);
   }
 }

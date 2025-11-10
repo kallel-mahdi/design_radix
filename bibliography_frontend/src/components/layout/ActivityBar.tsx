@@ -13,8 +13,8 @@ const activityBarItemVariants = cva(
   {
     variants: {
       active: {
-        true: 'bg-accent/10 border-l-2 border-accent text-accent',
-        false: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800',
+        true: 'bg-app-accent/10 border-l-2 border-app-accent text-app-accent',
+        false: 'text-app-text-muted hover:text-app-text-secondary hover:bg-app-surface-hover',
       },
     },
   }
@@ -49,7 +49,7 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
 
   return (
     <nav
-      className={cn('w-16 bg-bg-dark border-r border-border flex flex-col', className)}
+      className={cn('w-16 bg-app-bg border-r border-app-border flex flex-col', className)}
       aria-label="Main Navigation"
     >
       {items.map((item) => (

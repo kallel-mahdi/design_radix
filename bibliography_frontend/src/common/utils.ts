@@ -30,10 +30,13 @@ export function formatDate(
  *
  * @example
  * truncateText('Long title here', 10) // "Long ti..."
+ * truncateText('ab', 2) // "ab"
+ * truncateText('abc', 2) // "ab..." (respects maxLength)
  */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
+  if (maxLength < 3) return text.slice(0, maxLength) + '...';
+  return text.slice(0, maxLength - 3) + '...';
 }
 
 /**
@@ -75,4 +78,28 @@ export function formatAuthors(authors: Author[]): string {
   if (authors.length === 1) return authors[0]!.full;
   if (authors.length === 2) return `${authors[0]!.full}, ${authors[1]!.full}`;
   return `${authors[0]!.full} et al.`;
+}
+
+/**
+ * Format file size in bytes to human-readable string
+ *
+ * @param bytes - File size in bytes
+ * @param decimals - Number of decimal places (default: 2)
+ * @returns Formatted file size string
+ *
+ * @example
+ * formatFileSize(1024) // "1.00 KB"
+ * formatFileSize(1536000) // "1.46 MB"
+ * formatFileSize(1536000000) // "1.43 GB"
+ */
+export function formatFileSize(bytes: number, decimals: number = 2): string {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }

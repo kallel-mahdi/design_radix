@@ -38,15 +38,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <form
       className={cn(
-        'relative flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-bg-dark transition-all duration-200 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent/50',
+        'relative flex items-center gap-2 px-4 py-2 rounded-lg border border-app-border bg-app-bg transition-all duration-200 focus-within:border-app-accent focus-within:ring-1 focus-within:ring-app-accent/50',
         className,
       )}
       onSubmit={handleSubmit}
     >
-      <MagnifyingGlassIcon className="h-5 w-5 text-text-secondary flex-shrink-0" />
+      <MagnifyingGlassIcon className="h-5 w-5 text-app-text-secondary flex-shrink-0" />
       <input
         autoFocus={autoFocus}
-        className="flex-1 bg-transparent text-text-primary placeholder:text-text-secondary focus:outline-none"
+        className="flex-1 bg-transparent text-app-text-primary placeholder:text-app-text-secondary focus:outline-none"
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
@@ -55,7 +55,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       />
       {query && (
         <button
-          className="p-1 text-text-secondary hover:text-text-primary hover:bg-bg-hover rounded transition-colors"
+          className="p-1 text-app-text-secondary hover:text-app-text-primary hover:bg-app-bg-hover rounded transition-colors"
           onClick={handleClear}
           type="button"
           aria-label="Clear search"

@@ -19,7 +19,7 @@ export function Skeleton({
   width,
   height,
 }: SkeletonProps) {
-  const baseClasses = 'animate-pulse bg-surface-3';
+  const baseClasses = 'animate-pulse bg-app-surface-hover';
 
   const variantClasses = {
     text: 'rounded',

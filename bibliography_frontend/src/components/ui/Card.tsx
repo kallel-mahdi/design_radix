@@ -5,9 +5,9 @@ import { cn } from '@/common/utils';
 const cardVariants = cva('rounded-lg border transition-all duration-200', {
   variants: {
     variant: {
-      default: 'bg-bg-surface border-border text-text-primary',
-      primary: 'bg-bg-surface border-border-accent text-text-primary',
-      subtle: 'bg-bg-dark border-border text-text-primary',
+      default: 'bg-app-surface border-app-border text-app-text-primary',
+      primary: 'bg-app-surface border-app-border-accent text-app-text-primary',
+      subtle: 'bg-app-bg border-app-border text-app-text-primary',
     },
     padding: {
       none: 'p-0',
@@ -52,7 +52,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-lg font-semibold leading-none tracking-tight text-text-primary',
+      'text-lg font-semibold leading-none tracking-tight text-app-text-primary',
       className,
     )}
     {...props}
@@ -66,7 +66,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-text-secondary', className)}
+    className={cn('text-sm text-app-text-secondary', className)}
     {...props}
   />
 ));

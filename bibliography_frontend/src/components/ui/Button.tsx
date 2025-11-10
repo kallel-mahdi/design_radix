@@ -3,19 +3,19 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/common/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-app-accent disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         primary:
-          'bg-accent text-black hover:bg-accent-hover shadow-md hover:shadow-lg focus-visible:ring-offset-bg-dark',
+          'bg-app-accent text-black hover:bg-app-accent-hover shadow-md hover:shadow-lg focus-visible:ring-offset-app-bg',
         secondary:
-          'bg-bg-surface text-text-primary hover:bg-bg-hover border border-border shadow-md hover:shadow-lg focus-visible:ring-offset-bg-dark',
+          'bg-app-surface text-app-text-primary hover:bg-app-surface-hover border border-app-border shadow-md hover:shadow-lg focus-visible:ring-offset-app-bg',
         outline:
-          'border-2 border-accent text-accent hover:bg-accent/10 focus-visible:ring-offset-bg-dark',
-        ghost: 'text-text-secondary hover:bg-bg-hover focus-visible:ring-offset-bg-dark',
+          'border-2 border-app-accent text-app-accent hover:bg-app-accent/10 focus-visible:ring-offset-app-bg',
+        ghost: 'text-app-text-secondary hover:bg-app-surface-hover focus-visible:ring-offset-app-bg',
         destructive:
-          'bg-red-500 text-white hover:bg-red-600 shadow-md hover:shadow-lg focus-visible:ring-red-500 focus-visible:ring-offset-bg-dark',
+          'bg-red-500 text-white hover:bg-red-600 shadow-md hover:shadow-lg focus-visible:ring-red-500 focus-visible:ring-offset-app-bg',
       },
       size: {
         sm: 'h-9 px-3 py-1.5 text-sm',

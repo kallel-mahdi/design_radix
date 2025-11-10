@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 
 export function ReferenceCardSkeleton() {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-4">
+    <div className="flex flex-col gap-2 rounded-lg border border-app-border bg-app-surface p-4">
       {/* Title skeleton */}
       <Skeleton className="h-5 w-3/4" />
 

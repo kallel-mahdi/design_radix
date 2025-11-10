@@ -8,14 +8,16 @@ import {
 	PencilIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
+import { useDeleteReferenceMutation } from "@/features/library/api/references.queries";
+import { useUIStore } from "@/store/ui.store";
 
 const referenceCardVariants = cva(
 	"group relative rounded-lg border p-4 transition-all cursor-pointer",
 	{
 		variants: {
 			selected: {
-				true: "bg-accent/5 border-l-4 border-l-accent shadow-sm",
-				false: "border-border hover:bg-bg-hover hover:shadow-md",
+				true: "bg-app-accent/5 border-l-4 border-l-app-accent shadow-sm",
+				false: "border-app-border hover:bg-app-bg-hover hover:shadow-md",
 			},
 		},
 		defaultVariants: {
@@ -35,6 +37,9 @@ export const ReferenceCard = React.forwardRef<
 	HTMLDivElement,
 	ReferenceCardProps
 >(({ reference, isSelected, onSelect, onClick, ...props }, ref) => {
+	const deleteMutation = useDeleteReferenceMutation();
+	const addToast = useUIStore((state) => state.addToast);
+
 	const formatAuthors = (authors: Reference["authors"]): string => {
 		if (!authors || authors.length === 0) return "Unknown";
 		const first = authors[0];
@@ -64,6 +69,20 @@ export const ReferenceCard = React.forwardRef<
 		onSelect(reference._id);
 	};
 
+	const handleEdit = (e: React.MouseEvent): void => {
+		e.stopPropagation();
+		// TODO: Implement edit modal in Session 8 (Forms & Modals)
+		addToast({
+			message: 'Edit feature coming in Session 8',
+			type: 'info',
+		});
+	};
+
+	const handleDelete = (e: React.MouseEvent): void => {
+		e.stopPropagation();
+		deleteMutation.mutate(reference._id);
+	};
+
 	return (
 		<div
 			ref={ref}
@@ -75,7 +94,7 @@ export const ReferenceCard = React.forwardRef<
 			<div className="absolute left-2 top-2">
 				<input
 					checked={isSelected}
-					className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+					className="h-4 w-4 rounded border-app-border text-app-accent focus:ring-app-accent"
 					type="checkbox"
 					onChange={handleSelectChange}
 				/>
@@ -84,24 +103,18 @@ export const ReferenceCard = React.forwardRef<
 			{/* Hover actions (top-right) */}
 			<div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 				<button
-					className="rounded p-1 text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+					className="rounded p-1 text-app-text-secondary hover:bg-app-surface hover:text-app-text-primary"
 					title="Edit reference"
 					type="button"
-					onClick={(e) => {
-						e.stopPropagation();
-						// TODO: Open edit modal
-					}}
+					onClick={handleEdit}
 				>
 					<PencilIcon className="h-4 w-4" />
 				</button>
 				<button
-					className="rounded p-1 text-text-secondary hover:bg-bg-surface hover:text-danger"
+					className="rounded p-1 text-app-text-secondary hover:bg-app-surface hover:text-danger"
 					title="Delete reference"
 					type="button"
-					onClick={(e) => {
-						e.stopPropagation();
-						// TODO: Delete reference
-					}}
+					onClick={handleDelete}
 				>
 					<TrashIcon className="h-4 w-4" />
 				</button>
@@ -110,12 +123,12 @@ export const ReferenceCard = React.forwardRef<
 			{/* Main content */}
 			<div className="mt-2 space-y-2">
 				{/* Title */}
-				<h3 className="pr-16 text-base font-medium text-text-primary">
+				<h3 className="pr-16 text-base font-medium text-app-text-primary">
 					{reference.title}
 				</h3>
 
 				{/* Authors */}
-				<p className="text-sm text-text-secondary">
+				<p className="text-sm text-app-text-secondary">
 					{formatAuthors(reference.authors)}
 				</p>
 
@@ -123,20 +136,20 @@ export const ReferenceCard = React.forwardRef<
 				<div className="flex flex-wrap items-center gap-2">
 					{/* Year */}
 					{reference.year && (
-						<span className="rounded bg-bg-surface px-2 py-0.5 text-xs text-text-secondary">
+						<span className="rounded bg-app-surface px-2 py-0.5 text-xs text-app-text-secondary">
 							{reference.year}
 						</span>
 					)}
 
 					{/* Type */}
-					<span className="rounded bg-bg-surface px-2 py-0.5 text-xs capitalize text-text-secondary">
+					<span className="rounded bg-app-surface px-2 py-0.5 text-xs capitalize text-app-text-secondary">
 						{reference.type}
 					</span>
 
 					{/* PDF indicator */}
 					{reference.hasPdf && (
 						<span
-							className="flex items-center gap-1 rounded bg-accent/10 px-2 py-0.5 text-xs text-accent"
+							className="flex items-center gap-1 rounded bg-app-accent/10 px-2 py-0.5 text-xs text-app-accent"
 							title="PDF attached"
 						>
 							<DocumentTextIcon className="h-3 w-3" />
@@ -146,7 +159,7 @@ export const ReferenceCard = React.forwardRef<
 
 					{/* DOI badge */}
 					{reference.doi && (
-						<span className="rounded bg-bg-surface px-2 py-0.5 text-xs text-text-muted">
+						<span className="rounded bg-app-surface px-2 py-0.5 text-xs text-app-text-muted">
 							DOI
 						</span>
 					)}
@@ -159,7 +172,7 @@ export const ReferenceCard = React.forwardRef<
 							<Tag key={tag} label={tag} size="sm" />
 						))}
 						{reference.tags.length > 3 && (
-							<span className="text-xs text-text-muted">
+							<span className="text-xs text-app-text-muted">
 								+{reference.tags.length - 3} more
 							</span>
 						)}
@@ -167,7 +180,7 @@ export const ReferenceCard = React.forwardRef<
 				)}
 
 				{/* Citation key (small, muted) */}
-				<p className="text-xs text-text-muted">{reference.citationKey}</p>
+				<p className="text-xs text-app-text-muted">{reference.citationKey}</p>
 			</div>
 		</div>
 	);

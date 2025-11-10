@@ -30,12 +30,12 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
     <div className="overflow-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-border bg-bg-surface">
-            <th className="px-3 py-3 text-left text-sm font-medium text-text-primary">Title</th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-text-primary">Authors</th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-text-primary">Year</th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-text-primary">Type</th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-text-primary">Tags</th>
+          <tr className="border-b border-app-border bg-app-surface">
+            <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Title</th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Authors</th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Year</th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Type</th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Tags</th>
           </tr>
         </thead>
         <tbody>
@@ -44,24 +44,24 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
             return (
               <tr
                 key={ref._id}
-                className={`border-b border-border cursor-pointer transition-colors ${
-                  isSelected ? 'bg-accent/5 border-l-2 border-l-accent' : 'hover:bg-bg-hover'
+                className={`border-b border-app-border cursor-pointer transition-colors ${
+                  isSelected ? 'bg-app-accent/5 border-l-2 border-l-app-accent' : 'hover:bg-app-bg-hover'
                 }`}
                 onClick={() => {
                   toggleSelection(ref._id);
                   setActiveReference(ref._id);
                 }}
               >
-                <td className="px-3 py-3 text-sm text-text-primary font-medium">
+                <td className="px-3 py-3 text-sm text-app-text-primary font-medium">
                   {ref.title}
                 </td>
-                <td className="px-3 py-3 text-sm text-text-secondary">
+                <td className="px-3 py-3 text-sm text-app-text-secondary">
                   {formatAuthors(ref.authors)}
                 </td>
-                <td className="px-3 py-3 text-sm text-text-secondary">
+                <td className="px-3 py-3 text-sm text-app-text-secondary">
                   {ref.year || 'N/A'}
                 </td>
-                <td className="px-3 py-3 text-sm text-text-secondary">
+                <td className="px-3 py-3 text-sm text-app-text-secondary">
                   <span className="capitalize">{ref.type}</span>
                 </td>
                 <td className="px-3 py-3">
@@ -71,7 +71,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
                         <Tag key={tag} label={tag} size="sm" />
                       ))
                     ) : (
-                      <span className="text-xs text-text-muted">No tags</span>
+                      <span className="text-xs text-app-text-muted">No tags</span>
                     )}
                   </div>
                 </td>

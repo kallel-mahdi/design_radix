@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       ref={sidebarRef}
-      className={cn('bg-bg-surface border-r border-border relative flex flex-col', className)}
+      className={cn('bg-app-surface border-r border-app-border relative flex flex-col', className)}
       style={{ width: `${width}px` }}
       aria-label="Sidebar"
     >
@@ -57,8 +57,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Resize handle */}
       <div
         className={cn(
-          'absolute right-0 top-0 bottom-0 w-1 hover:w-2 hover:bg-accent cursor-col-resize transition-all',
-          isResizing && 'w-2 bg-accent'
+          'absolute right-0 top-0 bottom-0 w-1 hover:w-2 hover:bg-app-accent cursor-col-resize transition-all',
+          isResizing && 'w-2 bg-app-accent'
         )}
         onMouseDown={handleMouseDown}
         aria-label="Resize sidebar"

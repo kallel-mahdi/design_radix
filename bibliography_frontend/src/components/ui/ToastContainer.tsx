@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useUIStore } from '@/store/ui.store';
 import { Toast } from './Toast';
-
-const TOAST_DURATION = 5000; // 5 seconds
+import { TOAST_DURATION_MS } from '@/common/constants';
 
 export function ToastContainer() {
 	const toasts = useUIStore((state) => state.toasts);
@@ -11,11 +10,11 @@ export function ToastContainer() {
 	useEffect(() => {
 		if (toasts.length === 0) return;
 
-		// Auto-dismiss toasts after TOAST_DURATION
+		// Auto-dismiss toasts after TOAST_DURATION_MS
 		const timers = toasts.map((toast) => {
 			return setTimeout(() => {
 				removeToast(toast.id);
-			}, TOAST_DURATION);
+			}, TOAST_DURATION_MS);
 		});
 
 		return () => {

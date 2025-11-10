@@ -3,9 +3,10 @@ import { useUIStore } from '../store/ui.store';
 import { useEffect } from 'react';
 import { useReferencesQuery } from '../features/library/api/references.queries';
 import { useLibraryStore } from '../features/library/store/library.store';
-import { ReferenceList } from '../features/library/components/ReferenceList';
+import { ReferenceTable } from '../features/library/components/ReferenceTable';
 import { EmptyState } from '../components/ui/EmptyState';
-import { FolderOpenIcon } from '@heroicons/react/24/outline';
+import { Button } from '../components/ui/Button';
+import { FolderOpenIcon, PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
 export const Route = createFileRoute('/library')({
   component: LibraryPage,
@@ -29,16 +30,45 @@ function LibraryPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-6 border-b border-border">
-        <h1 className="text-2xl font-bold text-text-primary">Library</h1>
-        <p className="text-text-secondary mt-1">Organize your references and collections</p>
+      <div className="p-6 border-b border-app-border">
+        <h1 className="text-2xl font-bold text-app-text-primary">Library</h1>
+        <p className="text-app-text-secondary mt-1">Organize your references and collections</p>
+      </div>
+
+      {/* Toolbar - Always visible */}
+      <div className="px-6 py-4 border-b border-app-border flex items-center gap-3">
+        <Button
+          variant="primary"
+          size="default"
+          onClick={() => console.log('Add reference')}
+        >
+          <PlusIcon className="w-5 h-5 mr-2" />
+          Add Reference
+        </Button>
+        <Button
+          variant="secondary"
+          size="default"
+          onClick={() => console.log('Import references')}
+        >
+          <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+          Import
+        </Button>
+        <Button
+          variant="secondary"
+          size="default"
+          onClick={() => console.log('Export references')}
+          disabled={references.length === 0}
+        >
+          <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
+          Export
+        </Button>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <span className="text-text-secondary">Loading references...</span>
+            <span className="text-app-text-secondary">Loading references...</span>
           </div>
         )}
 
@@ -56,8 +86,8 @@ function LibraryPage() {
         )}
 
         {!isLoading && !error && references.length > 0 && (
-          <div className="p-6">
-            <ReferenceList references={references} />
+          <div className="flex-1 overflow-auto">
+            <ReferenceTable references={references} />
           </div>
         )}
       </div>

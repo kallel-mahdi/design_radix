@@ -52,7 +52,7 @@ export const Modal: React.FC<ModalProps> = ({
             >
               <Dialog.Panel
                 className={cn(
-                  'w-full max-w-md rounded-lg border border-border bg-bg-surface p-6 shadow-xl transition-all',
+                  'w-full max-w-md rounded-lg border border-app-border bg-app-surface p-6 shadow-xl transition-all',
                   className,
                 )}
               >
@@ -61,12 +61,12 @@ export const Modal: React.FC<ModalProps> = ({
                   <div className="mb-4 flex items-start justify-between">
                     <div>
                       {title && (
-                        <Dialog.Title className="text-lg font-semibold text-text-primary">
+                        <Dialog.Title className="text-lg font-semibold text-app-text-primary">
                           {title}
                         </Dialog.Title>
                       )}
                       {description && (
-                        <Dialog.Description className="mt-1 text-sm text-text-secondary">
+                        <Dialog.Description className="mt-1 text-sm text-app-text-secondary">
                           {description}
                         </Dialog.Description>
                       )}
@@ -74,7 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
                     {closeButton && (
                       <button
                         onClick={onClose}
-                        className="ml-2 inline-flex items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+                        className="ml-2 inline-flex items-center justify-center rounded-lg text-app-text-secondary transition-colors hover:bg-app-bg-hover hover:text-app-text-primary"
                         aria-label="Close modal"
                       >
                         <XMarkIcon className="h-5 w-5" />

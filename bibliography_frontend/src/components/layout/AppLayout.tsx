@@ -5,6 +5,8 @@ import { SearchBar } from './SearchBar';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '@/features/library/store/library.store';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/Resizable';
+import { usePanelPersistence } from '@/common/hooks/usePanelPersistence';
+import { useReferencesQuery } from '@/features/library/api/references.queries';
 
 export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -22,9 +24,13 @@ export const AppLayout: React.FC = () => {
     navigate({ to: `/${view}` });
   };
 
-  // Mock data - will be replaced with real data in later sessions
+  // Activity Bar data sources
+  // TODO: Add duplicates detection query when duplicates feature is implemented (Session 12+)
   const duplicatesCount = 0;
-  const trashNotEmpty = false;
+
+  // Check if trash has any items
+  const { data: deletedRefs = [] } = useReferencesQuery({ deleted: true, limit: 1 });
+  const trashNotEmpty = deletedRefs.length > 0;
 
   // Get active reference from library store
   const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
@@ -38,8 +44,14 @@ export const AppLayout: React.FC = () => {
     setSearchQuery('');
   };
 
+  // Panel persistence: Sidebar | Main | Details (when open)
+  const { defaultLayout, onLayout } = usePanelPersistence(
+    'app-layout-panels',
+    detailsPaneOpen && activeReferenceId ? [25, 50, 25] : [25, 75]
+  );
+
   return (
-    <div className="h-screen flex bg-bg-dark text-text-primary overflow-hidden">
+    <div className="h-screen flex bg-app-bg text-app-text-primary overflow-hidden">
       {/* Activity Bar - Fixed */}
       <ActivityBar
         activeView={activeView}
@@ -49,12 +61,12 @@ export const AppLayout: React.FC = () => {
       />
 
       {/* Resizable Panel Group */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
+      <ResizablePanelGroup direction="horizontal" className="flex-1" onLayout={onLayout}>
         {/* Sidebar Panel */}
-        <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
-          <aside className="h-full bg-bg-surface border-r border-border flex flex-col overflow-hidden">
+        <ResizablePanel defaultSize={defaultLayout[0]} minSize={15} maxSize={40}>
+          <aside className="h-full bg-app-surface border-r border-app-border flex flex-col overflow-hidden">
             {/* Search Bar */}
-            <div className="p-4 border-b border-border">
+            <div className="p-4 border-b border-app-border">
               <SearchBar
                 onSearch={handleSearch}
                 onClear={handleClearSearch}
@@ -63,17 +75,17 @@ export const AppLayout: React.FC = () => {
             </div>
 
             {/* Collections */}
-            <div className="p-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-text-primary">Collections</h2>
+            <div className="p-4 border-b border-app-border">
+              <h2 className="text-sm font-semibold text-app-text-primary">Collections</h2>
             </div>
-            <div className="flex-1 overflow-auto p-4 text-text-secondary text-sm">
+            <div className="flex-1 overflow-auto p-4 text-app-text-secondary text-sm">
               <p>Collection tree will go here (Session 4)</p>
             </div>
 
             {/* Tags */}
-            <div className="p-4 border-t border-border">
-              <h2 className="text-sm font-semibold text-text-primary">Tags</h2>
-              <div className="mt-2 text-text-secondary text-sm">
+            <div className="p-4 border-t border-app-border">
+              <h2 className="text-sm font-semibold text-app-text-primary">Tags</h2>
+              <div className="mt-2 text-app-text-secondary text-sm">
                 <p>Tag selector will go here (Session 5)</p>
               </div>
             </div>
@@ -84,7 +96,7 @@ export const AppLayout: React.FC = () => {
         <ResizableHandle withHandle />
 
         {/* Main Content Panel */}
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           <main className="h-full flex flex-col overflow-hidden">
             <Outlet />
           </main>
@@ -94,7 +106,7 @@ export const AppLayout: React.FC = () => {
         {detailsPaneOpen && activeReferenceId && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25} minSize={20} maxSize={50}>
+            <ResizablePanel defaultSize={defaultLayout[2] || 25} minSize={20} maxSize={50}>
               <DetailsPane
                 isOpen={true}
                 onClose={() => setDetailsPaneOpen(false)}

@@ -9,6 +9,7 @@ interface LibraryState {
   activeTags: string[];
   sortBy: 'title' | 'year' | 'dateAdded' | 'authors';
   sortOrder: 'asc' | 'desc';
+  searchQuery: string;
 }
 
 interface LibraryActions {
@@ -22,6 +23,7 @@ interface LibraryActions {
   toggleTag: (tag: string) => void;
   clearTags: () => void;
   setSorting: (sortBy: LibraryState['sortBy'], sortOrder?: LibraryState['sortOrder']) => void;
+  setSearchQuery: (query: string) => void;
 }
 
 export const useLibraryStore = create<LibraryState & LibraryActions>()(
@@ -35,6 +37,7 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         activeTags: [],
         sortBy: 'dateAdded',
         sortOrder: 'desc',
+        searchQuery: '',
 
         selectReference: (id) =>
           set(
@@ -94,7 +97,10 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
           set({ activeTags: [] }, false, 'library/clearTags'),
 
         setSorting: (sortBy, sortOrder = 'asc') =>
-          set({ sortBy, sortOrder }, false, 'library/setSorting')
+          set({ sortBy, sortOrder }, false, 'library/setSorting'),
+
+        setSearchQuery: (query) =>
+          set({ searchQuery: query }, false, 'library/setSearchQuery')
       }),
       {
         name: 'library-storage',
