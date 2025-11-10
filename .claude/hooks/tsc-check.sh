@@ -1,16 +1,22 @@
 #!/bin/bash
-set -e
 
 # TSC Hook with Visible Output
 # Uses stderr for visibility in Claude Code main interface
 
+# Use Claude Code's CLAUDE_PROJECT_DIR if set, otherwise detect from script location
+if [ -z "$CLAUDE_PROJECT_DIR" ]; then
+    # Get the directory of this script
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # Project root is 2 levels up from .claude/hooks
+    CLAUDE_PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+
 HOOK_INPUT=$(cat)
 
-# Extract session_id from JSON input (like post-tool-use-tracker.sh does)
+# Extract session_id from JSON input
 SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // "default"')
 
-# CLAUDE_PROJECT_DIR should come from environment
-# (set by Claude Code when running hooks)
+# Use project-specific cache directory (not $HOME)
 CACHE_DIR="$CLAUDE_PROJECT_DIR/.claude/tsc-cache/$SESSION_ID"
 
 # Create cache directory
@@ -24,16 +30,19 @@ TOOL_INPUT=$(echo "$HOOK_INPUT" | jq -r '.tool_input // {}')
 get_repo_for_file() {
     local file_path="$1"
     local relative_path="${file_path#$CLAUDE_PROJECT_DIR/}"
-    
+
+    # Extract first directory component (repo name)
     if [[ "$relative_path" =~ ^([^/]+)/ ]]; then
         local repo="${BASH_REMATCH[1]}"
-        case "$repo" in
-            bibliography_frontend|bibliography_backend|editor_frontend|editor_backend)
-                echo "$repo"
-                return 0
-                ;;
-        esac
+        local repo_path="$CLAUDE_PROJECT_DIR/$repo"
+
+        # Check if this directory has TypeScript configuration
+        if [ -f "$repo_path/tsconfig.json" ] || [ -f "$repo_path/tsconfig.app.json" ]; then
+            echo "$repo"
+            return 0
+        fi
     fi
+
     echo ""
     return 1
 }
@@ -173,6 +182,6 @@ $CHECK_OUTPUT"
 esac
 
 # Cleanup old cache directories (older than 7 days)
-find "$HOME/.claude/tsc-cache" -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
+find "$CLAUDE_PROJECT_DIR/.claude/tsc-cache" -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
 
 exit 0

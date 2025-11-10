@@ -41,7 +41,9 @@ async function main() {
         const prompt = data.prompt.toLowerCase();
 
         // Load skill rules
-        const projectDir = process.env.CLAUDE_PROJECT_DIR || '$HOME/project';
+        // Use CLAUDE_PROJECT_DIR from environment (set by parent shell script or Claude Code)
+        // Fallback: detect from script location (__dirname is .claude/hooks)
+        const projectDir = process.env.CLAUDE_PROJECT_DIR || join(__dirname, '..', '..');
         const rulesPath = join(projectDir, '.claude', 'skills', 'skill-rules.json');
         const rules: SkillRules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
 
