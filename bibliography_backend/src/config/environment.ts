@@ -9,5 +9,5 @@ export const config = {
   uploadPath: process.env.UPLOAD_PATH || './data/uploads',
   crossrefApiUrl: process.env.CROSSREF_API_URL || 'https://api.crossref.org',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
-  trustGatewayAuth: process.env.TRUST_GATEWAY_AUTH === 'true',
+  trustGatewayAuth: process.env.TRUST_GATEWAY_AUTH !== 'false',
 };
