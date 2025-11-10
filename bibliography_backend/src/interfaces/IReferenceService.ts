@@ -4,7 +4,13 @@ import mongoose from 'mongoose';
 export interface CreateReferenceInput {
   type: IReference['type'];
   title: string;
-  authors?: IReference['authors'];
+  // Authors: 'full' is optional in input and will be auto-generated from given/family if not provided
+  // Stored references always have 'full' populated
+  authors?: Array<{
+    given?: string;
+    family?: string;
+    full?: string; // Optional - will be auto-generated if not provided
+  }>;
   year?: number;
   venue?: string;
   doi?: string;
@@ -22,7 +28,12 @@ export interface CreateReferenceInput {
 export interface UpdateReferenceInput {
   type?: IReference['type'];
   title?: string;
-  authors?: IReference['authors'];
+  // Authors: 'full' is optional in input and will be auto-generated from given/family if not provided
+  authors?: Array<{
+    given?: string;
+    family?: string;
+    full?: string; // Optional - will be auto-generated if not provided
+  }>;
   year?: number;
   venue?: string;
   doi?: string;

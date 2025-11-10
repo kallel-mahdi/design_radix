@@ -15,12 +15,30 @@ export class ReferenceService implements IReferenceService {
   async create(userId: string, data: CreateReferenceInput): Promise<IReference> {
     ApplicationLogger.info('Creating reference', { userId, title: data.title });
 
-    // Build full names for authors
-    const authors = data.authors?.map(a => ({
-      given: a.given || '',
-      family: a.family || '',
-      full: `${a.family || ''}, ${a.given || ''}`.trim().replace(/^,\s*/, '')
-    })) || [];
+    // Normalize authors: auto-generate 'full' if not provided
+    const authors = data.authors?.map(a => {
+      // If full name is explicitly provided, use it as-is
+      if (a.full) {
+        return {
+          given: a.given || '',
+          family: a.family || '',
+          full: a.full
+        };
+      }
+
+      // Otherwise auto-generate from given/family
+      // Pattern: "Family, Given" or just "Family" or just "Given"
+      const fullName = [a.family || '', a.given || '']
+        .filter(Boolean)
+        .join(', ')
+        .trim();
+
+      return {
+        given: a.given || '',
+        family: a.family || '',
+        full: fullName || 'Unknown Author' // Fallback if both are empty
+      };
+    }) || [];
 
     // Generate unique citation key
     const citationKey = await this.generateCitationKey(userId, data);
@@ -88,13 +106,31 @@ export class ReferenceService implements IReferenceService {
   async update(id: string, userId: string, data: UpdateReferenceInput): Promise<IReference | null> {
     const updateData: any = { ...data };
 
-    // If authors updated, rebuild full names
+    // If authors updated, normalize full names (auto-generate if not provided)
     if (data.authors) {
-      updateData.authors = data.authors.map(a => ({
-        given: a.given || '',
-        family: a.family || '',
-        full: `${a.family || ''}, ${a.given || ''}`.trim().replace(/^,\s*/, '')
-      }));
+      updateData.authors = data.authors.map(a => {
+        // If full name is explicitly provided, use it as-is
+        if (a.full) {
+          return {
+            given: a.given || '',
+            family: a.family || '',
+            full: a.full
+          };
+        }
+
+        // Otherwise auto-generate from given/family
+        // Pattern: "Family, Given" or just "Family" or just "Given"
+        const fullName = [a.family || '', a.given || '']
+          .filter(Boolean)
+          .join(', ')
+          .trim();
+
+        return {
+          given: a.given || '',
+          family: a.family || '',
+          full: fullName || 'Unknown Author'
+        };
+      });
     }
 
     if (data.collectionIds) {
@@ -125,7 +161,7 @@ export class ReferenceService implements IReferenceService {
   async restore(id: string, userId: string): Promise<boolean> {
     const result = await Reference.updateOne(
       { _id: id, userId, deleted: true },
-      { $set: { deleted: false }, $unset: { deletedAt: 1 } }
+      { $set: { deleted: false, deletedAt: null } }
     );
     return result.modifiedCount > 0;
   }

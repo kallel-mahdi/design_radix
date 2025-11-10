@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import { ITagService, CreateTagInput, UpdateTagInput } from '../interfaces/ITagService';
 import { Tag, ITag } from '../models/Tag';
+import { Reference } from '../models/Reference';
 import { ApplicationLogger } from '../utils/logger';
 
 @injectable()
@@ -28,24 +29,28 @@ export class TagService implements ITagService {
     return Tag.findOne({ userId, name });
   }
 
-  async list(userId: string): Promise<ITag[]> {
-    // Sort colored tags (with position) first by position ascending,
-    // then uncolored tags (position: null) by name ascending
+  async list(userId: string): Promise<Array<any>> {
+    // Get all tags
     const tags = await Tag.find({ userId });
 
-    return tags.sort((a, b) => {
-      // Colored tags (have position) come before uncolored tags
-      if (a.position !== null && b.position === null) return -1;
-      if (a.position === null && b.position !== null) return 1;
+    // Calculate usage count for each tag using aggregation
+    const tagsWithCounts = await Promise.all(
+      tags.map(async (tag) => {
+        const count = await Reference.countDocuments({
+          userId,
+          tags: tag.name,
+          deleted: false
+        });
 
-      // Both colored: sort by position
-      if (a.position !== null && b.position !== null) {
-        return a.position - b.position;
-      }
+        return {
+          ...tag.toObject(),
+          usageCount: count
+        };
+      })
+    );
 
-      // Both uncolored: sort by name
-      return a.name.localeCompare(b.name);
-    });
+    // Sort by usage count descending (most used tags first)
+    return tagsWithCounts.sort((a, b) => b.usageCount - a.usageCount);
   }
 
   async update(id: string, userId: string, data: UpdateTagInput): Promise<ITag | null> {
@@ -89,8 +94,73 @@ export class TagService implements ITagService {
     return tag;
   }
 
+  async rename(oldName: string, newName: string, userId: string): Promise<ITag | null> {
+    ApplicationLogger.info('Renaming tag', { userId, oldName, newName });
+
+    // Check if new name already exists
+    const existing = await Tag.findOne({ userId, name: newName });
+    if (existing) {
+      throw new Error('DUPLICATE_TAG_NAME: Tag with this name already exists');
+    }
+
+    // Update tag document
+    const tag = await Tag.findOneAndUpdate(
+      { userId, name: oldName },
+      { $set: { name: newName } },
+      { new: true }
+    );
+
+    if (!tag) {
+      ApplicationLogger.warn('Tag not found for rename', { userId, oldName });
+      return null;
+    }
+
+    // Update all references with this tag (cascade)
+    const updateResult = await Reference.updateMany(
+      { userId, tags: oldName },
+      { $set: { 'tags.$': newName } }  // Replace oldName with newName in array
+    );
+
+    ApplicationLogger.info('Tag renamed', {
+      userId,
+      oldName,
+      newName,
+      tagId: tag._id.toString(),
+      referencesUpdated: updateResult.modifiedCount
+    });
+
+    return tag;
+  }
+
   async delete(id: string, userId: string): Promise<boolean> {
+    // First find the tag to get its name
+    const tag = await Tag.findOne({ _id: id, userId });
+    if (!tag) {
+      ApplicationLogger.warn('Tag not found for delete', { userId, tagId: id });
+      return false;
+    }
+
+    ApplicationLogger.info('Deleting tag with cascade', { userId, tagId: id, tagName: tag.name });
+
+    // Remove tag from all references
+    const removeResult = await Reference.updateMany(
+      { userId, tags: tag.name },
+      { $pull: { tags: tag.name } }  // Remove tag from array
+    );
+
+    // Delete tag document
     const result = await Tag.deleteOne({ _id: id, userId });
-    return result.deletedCount > 0;
+
+    if (result.deletedCount > 0) {
+      ApplicationLogger.info('Tag deleted', {
+        userId,
+        tagId: id,
+        tagName: tag.name,
+        referencesUpdated: removeResult.modifiedCount
+      });
+      return true;
+    }
+
+    return false;
   }
 }

@@ -8,17 +8,47 @@ import mongoose from 'mongoose';
 
 @injectable()
 export class ProjectService implements IProjectService {
-  async linkReference(userId: string, projectId: string, referenceId: string): Promise<IProjectLink> {
+  async linkReference(userId: string, projectId: string, referenceId: string): Promise<any> {
     ApplicationLogger.info('Linking reference to project', { userId, projectId, referenceId });
 
+    const refId = new mongoose.Types.ObjectId(referenceId);
+
+    // Check if link already exists
+    const existing = await ProjectLink.findOne({
+      userId,
+      projectId,
+      referenceId: refId
+    });
+
+    // If exists, return with isNew flag
+    if (existing) {
+      ApplicationLogger.info('Reference already linked to project', { userId, projectId, referenceId });
+      return {
+        _id: existing._id,
+        userId: existing.userId,
+        projectId: existing.projectId,
+        referenceId: existing.referenceId,
+        createdAt: existing.createdAt,
+        isNew: false
+      };
+    }
+
+    // Create new link (idempotent approach: create new if not exists)
     const link = await ProjectLink.create({
       userId,
       projectId,
-      referenceId: new mongoose.Types.ObjectId(referenceId)
+      referenceId: refId
     });
 
     ApplicationLogger.info('Reference linked to project', { userId, projectId, referenceId });
-    return link;
+    return {
+      _id: link._id,
+      userId: link.userId,
+      projectId: link.projectId,
+      referenceId: link.referenceId,
+      createdAt: link.createdAt,
+      isNew: true
+    };
   }
 
   async unlinkReference(userId: string, projectId: string, referenceId: string): Promise<boolean> {
@@ -30,17 +60,47 @@ export class ProjectService implements IProjectService {
     return result.deletedCount > 0;
   }
 
-  async linkCollection(userId: string, projectId: string, collectionId: string): Promise<IProjectLink> {
+  async linkCollection(userId: string, projectId: string, collectionId: string): Promise<any> {
     ApplicationLogger.info('Linking collection to project', { userId, projectId, collectionId });
 
+    const colId = new mongoose.Types.ObjectId(collectionId);
+
+    // Check if link already exists
+    const existing = await ProjectLink.findOne({
+      userId,
+      projectId,
+      collectionId: colId
+    });
+
+    // If exists, return with isNew flag
+    if (existing) {
+      ApplicationLogger.info('Collection already linked to project', { userId, projectId, collectionId });
+      return {
+        _id: existing._id,
+        userId: existing.userId,
+        projectId: existing.projectId,
+        collectionId: existing.collectionId,
+        createdAt: existing.createdAt,
+        isNew: false
+      };
+    }
+
+    // Create new link (idempotent approach: create new if not exists)
     const link = await ProjectLink.create({
       userId,
       projectId,
-      collectionId: new mongoose.Types.ObjectId(collectionId)
+      collectionId: colId
     });
 
     ApplicationLogger.info('Collection linked to project', { userId, projectId, collectionId });
-    return link;
+    return {
+      _id: link._id,
+      userId: link.userId,
+      projectId: link.projectId,
+      collectionId: link.collectionId,
+      createdAt: link.createdAt,
+      isNew: true
+    };
   }
 
   async unlinkCollection(userId: string, projectId: string, collectionId: string): Promise<boolean> {
