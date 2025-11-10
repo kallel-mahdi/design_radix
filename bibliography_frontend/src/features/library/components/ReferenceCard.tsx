@@ -59,7 +59,7 @@ export const ReferenceCard = React.forwardRef<
 		onClick(reference._id);
 	};
 
-	const handleSelectClick = (e: React.MouseEvent): void => {
+	const handleSelectChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
 		e.stopPropagation();
 		onSelect(reference._id);
 	};
@@ -77,8 +77,7 @@ export const ReferenceCard = React.forwardRef<
 					checked={isSelected}
 					className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
 					type="checkbox"
-					onClick={handleSelectClick}
-					onChange={() => {}}
+					onChange={handleSelectChange}
 				/>
 			</div>
 
