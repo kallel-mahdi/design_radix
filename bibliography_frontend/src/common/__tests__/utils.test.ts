@@ -50,15 +50,15 @@ describe('truncateText', () => {
   it('should truncate text longer than maxLength', () => {
     const text = 'This is a very long title that needs truncation';
     const result = truncateText(text, 10);
-    expect(result).toBe('This is a ...');
-    expect(result.length).toBe(13); // 10 chars + '...'
+    expect(result).toBe('This is...'); // 7 chars + 3 ellipsis = 10 total
+    expect(result.length).toBe(10); // respects maxLength budget
   });
 
   it('should truncate to maxLength and add ellipsis', () => {
     const text = 'Long text';
     const result = truncateText(text, 3);
-    expect(result).toBe('Lon...');
-    expect(result.length).toBe(6); // 3 chars + '...'
+    expect(result).toBe('...'); // 0 chars + 3 ellipsis = 3 total
+    expect(result.length).toBe(3); // respects maxLength budget
   });
 
   it('should handle empty string', () => {
