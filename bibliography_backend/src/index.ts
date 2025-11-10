@@ -3,6 +3,8 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
+import mongoSanitize from 'express-mongo-sanitize';
+import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import { config } from './config/environment';
 import { configureContainer } from './config/container';
@@ -30,6 +32,17 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
+
+// Security middleware
+app.use(mongoSanitize());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later'
+});
+app.use('/api/bibliography', limiter);
 
 // Auth middleware (trust gateway or dev bypass)
 if (config.trustGatewayAuth) {
