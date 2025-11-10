@@ -57,7 +57,7 @@ describe('Tags API Integration Tests', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBeDefined();
     });
   });
 
@@ -184,7 +184,7 @@ describe('Tags API Integration Tests', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('MAX_COLORED_TAGS');
+      expect(response.body.message).toContain('MAX_COLORED_TAGS');
     });
 
     it('should enforce position between 1 and 9', async () => {
@@ -198,7 +198,7 @@ describe('Tags API Integration Tests', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('INVALID_POSITION');
+      expect(response.body.message).toContain('INVALID_POSITION');
     });
 
     it('should allow removing color', async () => {
@@ -231,11 +231,9 @@ describe('Tags API Integration Tests', () => {
 
       const tagId = createResponse.body.data._id;
 
-      const response = await request(app)
+      await request(app)
         .delete(`/api/bibliography/tags/${tagId}`)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
+        .expect(204);
 
       // Verify tag is deleted
       const listResponse = await request(app).get('/api/bibliography/tags');

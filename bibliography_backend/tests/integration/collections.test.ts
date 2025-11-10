@@ -63,7 +63,7 @@ describe('Collections API Integration Tests', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBeDefined();
     });
   });
 
@@ -173,11 +173,9 @@ describe('Collections API Integration Tests', () => {
 
       const collectionId = createResponse.body.data._id;
 
-      const response = await request(app)
+      await request(app)
         .delete(`/api/bibliography/collections/${collectionId}`)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
+        .expect(204);
 
       // Verify deletion
       await request(app)

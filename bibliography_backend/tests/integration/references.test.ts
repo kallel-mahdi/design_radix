@@ -76,7 +76,7 @@ describe('References API Integration Tests', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBeDefined();
     });
 
     it('should return 400 for invalid type', async () => {
@@ -117,8 +117,8 @@ describe('References API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.references).toHaveLength(2);
-      expect(response.body.data.total).toBe(2);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.pagination.total).toBe(2);
     });
 
     it('should filter references by collectionId', async () => {
@@ -152,8 +152,8 @@ describe('References API Integration Tests', () => {
         .get(`/api/bibliography/references?collectionId=${collectionId}`)
         .expect(200);
 
-      expect(response.body.data.references).toHaveLength(1);
-      expect(response.body.data.references[0].title).toBe('In Collection');
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].title).toBe('In Collection');
     });
 
     it('should filter references by tags', async () => {
@@ -179,8 +179,8 @@ describe('References API Integration Tests', () => {
         .get('/api/bibliography/references?tags=machine-learning')
         .expect(200);
 
-      expect(response.body.data.references).toHaveLength(1);
-      expect(response.body.data.references[0].title).toBe('ML Paper');
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].title).toBe('ML Paper');
     });
 
     it('should exclude deleted references by default', async () => {
@@ -201,7 +201,7 @@ describe('References API Integration Tests', () => {
         .get('/api/bibliography/references')
         .expect(200);
 
-      expect(response.body.data.references).toHaveLength(0);
+      expect(response.body.data).toHaveLength(0);
     });
 
     it('should include deleted references when deleted=true', async () => {
@@ -219,8 +219,8 @@ describe('References API Integration Tests', () => {
         .get('/api/bibliography/references?deleted=true')
         .expect(200);
 
-      expect(response.body.data.references).toHaveLength(1);
-      expect(response.body.data.references[0].deleted).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].deleted).toBe(true);
     });
 
     it('should paginate results', async () => {
@@ -239,8 +239,8 @@ describe('References API Integration Tests', () => {
         .get('/api/bibliography/references?limit=2&offset=0')
         .expect(200);
 
-      expect(response.body.data.references).toHaveLength(2);
-      expect(response.body.data.total).toBe(5);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.pagination.total).toBe(5);
     });
   });
 
@@ -315,7 +315,7 @@ describe('References API Integration Tests', () => {
         .get(`/api/bibliography/references?deleted=true`)
         .expect(200);
 
-      const deletedRef = getResponse.body.data.references.find((r: any) => r._id === refId);
+      const deletedRef = getResponse.body.data.find((r: any) => r._id === refId);
       expect(deletedRef.deleted).toBe(true);
       expect(deletedRef.deletedAt).toBeDefined();
     });
@@ -354,7 +354,7 @@ describe('References API Integration Tests', () => {
         .get('/api/bibliography/references')
         .expect(200);
 
-      const restoredRef = getResponse.body.data.references.find((r: any) => r._id === refId);
+      const restoredRef = getResponse.body.data.find((r: any) => r._id === refId);
       expect(restoredRef.deleted).toBe(false);
       expect(restoredRef.deletedAt).toBe(null);
     });
