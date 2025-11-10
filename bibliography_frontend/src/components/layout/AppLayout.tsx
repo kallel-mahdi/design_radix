@@ -7,6 +7,11 @@ import { useLibraryStore } from '@/features/library/store/library.store';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/Resizable';
 import { usePanelPersistence } from '@/common/hooks/usePanelPersistence';
 import { useReferencesQuery } from '@/features/library/api/references.queries';
+import { useCollectionsQuery } from '@/features/library/api/collections.queries';
+import { useTagsQuery } from '@/features/library/api/tags.queries';
+import { TreeView } from '@/features/library/components/TreeView';
+import { TagSelector } from '@/features/library/components/TagSelector';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -44,6 +49,14 @@ export const AppLayout: React.FC = () => {
     setSearchQuery('');
   };
 
+  // Fetch collections for sidebar
+  const { data: collections = [], isLoading: collectionsLoading } = useCollectionsQuery();
+  const { setActiveCollection } = useLibraryStore();
+  const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
+
+  // Fetch tags for sidebar
+  const { data: tags = [], isLoading: tagsLoading } = useTagsQuery();
+
   // Panel persistence: Sidebar | Main | Details (when open)
   const { defaultLayout, onLayout } = usePanelPersistence(
     'app-layout-panels',
@@ -78,17 +91,30 @@ export const AppLayout: React.FC = () => {
             <div className="p-4 border-b border-app-border">
               <h2 className="text-sm font-semibold text-app-text-primary">Collections</h2>
             </div>
-            <div className="flex-1 overflow-auto p-4 text-app-text-secondary text-sm">
-              <p>Collection tree will go here (Session 4)</p>
+            <div className="flex-1 overflow-auto">
+              {collectionsLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <div className="p-2">
+                  <TreeView
+                    collections={collections}
+                    onSelectCollection={setActiveCollection}
+                    activeCollectionId={activeCollectionId}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Tags */}
-            <div className="p-4 border-t border-app-border">
-              <h2 className="text-sm font-semibold text-app-text-primary">Tags</h2>
-              <div className="mt-2 text-app-text-secondary text-sm">
-                <p>Tag selector will go here (Session 5)</p>
+            {tagsLoading ? (
+              <div className="p-4 border-t border-app-border flex items-center justify-center">
+                <LoadingSpinner />
               </div>
-            </div>
+            ) : (
+              <TagSelector tags={tags} isLoading={false} />
+            )}
           </aside>
         </ResizablePanel>
 
