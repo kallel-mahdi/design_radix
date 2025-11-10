@@ -9,14 +9,29 @@
 import { z } from 'zod';
 
 /**
- * Author Schema
- * Validates author objects with optional given/family names and required full name
+ * Author Schema (for stored references)
+ * Validates complete author objects with full name
  */
 export const AuthorSchema = z.object({
   given: z.string().optional(),
   family: z.string().optional(),
   full: z.string(),
 });
+
+/**
+ * Author Input Schema (for API requests)
+ * Validates author input where 'full' is optional and auto-generated from given/family
+ * If full is provided, it will be used as-is
+ */
+export const AuthorInputSchema = z.object({
+  given: z.string().optional(),
+  family: z.string().optional(),
+  full: z.string().optional(),
+  // Either full OR family must be provided
+}).refine(
+  (data) => data.full || data.family,
+  { message: 'Author must have either full name or family name' }
+);
 
 /**
  * Reference Type Enum
@@ -161,6 +176,7 @@ export type ReferenceSchemaType = z.infer<typeof ReferenceSchema>;
 export type CollectionSchemaType = z.infer<typeof CollectionSchema>;
 export type TagSchemaType = z.infer<typeof TagSchema>;
 export type AuthorSchemaType = z.infer<typeof AuthorSchema>;
+export type AuthorInputType = z.infer<typeof AuthorInputSchema>;
 
 /**
  * Array schemas for list responses
@@ -178,7 +194,7 @@ export const DuplicateCandidateListSchema = z.array(DuplicateCandidateSchema);
 export const CreateReferenceInputSchema = z.object({
   type: ReferenceTypeSchema,
   title: z.string().min(1),
-  authors: z.array(AuthorSchema).optional(),
+  authors: z.array(AuthorInputSchema).optional(),
   year: z.number().optional(),
   venue: z.string().optional(),
   doi: z.string().optional(),
@@ -201,7 +217,9 @@ export const CreateCollectionInputSchema = z.object({
 });
 
 // Update Collection Input
-export const UpdateCollectionInputSchema = CreateCollectionInputSchema.partial();
+export const UpdateCollectionInputSchema = CreateCollectionInputSchema.partial().extend({
+  position: z.number().optional(),
+});
 
 // Create Tag Input
 export const CreateTagInputSchema = z.object({
