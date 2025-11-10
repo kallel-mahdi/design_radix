@@ -6,6 +6,7 @@ interface LibraryState {
   activeReferenceId: string | null;
   lastSelectedId: string | null;
   activeCollectionId: string | null;
+  expandedCollectionIds: Set<string>;
   activeTags: string[];
   sortBy: 'title' | 'year' | 'dateAdded' | 'authors';
   sortOrder: 'asc' | 'desc';
@@ -20,6 +21,7 @@ interface LibraryActions {
   clearSelection: () => void;
   setActiveReference: (id: string | null) => void;
   setActiveCollection: (id: string | null) => void;
+  toggleCollectionExpanded: (id: string) => void;
   toggleTag: (tag: string) => void;
   clearTags: () => void;
   setSorting: (sortBy: LibraryState['sortBy'], sortOrder?: LibraryState['sortOrder']) => void;
@@ -34,6 +36,7 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         activeReferenceId: null,
         lastSelectedId: null,
         activeCollectionId: null,
+        expandedCollectionIds: new Set(),
         activeTags: [],
         sortBy: 'dateAdded',
         sortOrder: 'desc',
@@ -81,6 +84,21 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         setActiveCollection: (id) =>
           set({ activeCollectionId: id }, false, 'library/setActiveCollection'),
 
+        toggleCollectionExpanded: (id) =>
+          set(
+            (state) => {
+              const expanded = new Set(state.expandedCollectionIds);
+              if (expanded.has(id)) {
+                expanded.delete(id);
+              } else {
+                expanded.add(id);
+              }
+              return { expandedCollectionIds: expanded };
+            },
+            false,
+            'library/toggleCollectionExpanded'
+          ),
+
         toggleTag: (tag) =>
           set(
             (state) => {
@@ -107,7 +125,13 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         partialize: (state) => ({
           sortBy: state.sortBy,
           sortOrder: state.sortOrder,
-          activeCollectionId: state.activeCollectionId
+          activeCollectionId: state.activeCollectionId,
+          expandedCollectionIds: Array.from(state.expandedCollectionIds)
+        }),
+        merge: (persistedState: any, currentState) => ({
+          ...currentState,
+          ...persistedState,
+          expandedCollectionIds: new Set(persistedState?.expandedCollectionIds || [])
         })
       }
     ),
@@ -127,8 +151,30 @@ export const useActiveReferenceId = () =>
 export const useActiveTags = () =>
   useLibraryStore((state) => state.activeTags);
 
+// Shallow equality comparator for object selectors
+const shallowEqual = (a: any, b: any): boolean => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (const key of keysA) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+};
+
 export const useSorting = () =>
-  useLibraryStore((state) => ({ 
-    sortBy: state.sortBy, 
-    sortOrder: state.sortOrder 
-  }));
+  useLibraryStore(
+    (state) => ({
+      sortBy: state.sortBy,
+      sortOrder: state.sortOrder
+    }),
+    shallowEqual
+  );
+
+export const useExpandedCollectionIds = () =>
+  useLibraryStore((state) => Array.from(state.expandedCollectionIds));
+
+export const useIsCollectionExpanded = (id: string) =>
+  useLibraryStore((state) => state.expandedCollectionIds.has(id));
