@@ -89,8 +89,8 @@ describe('Tags API Integration Tests', () => {
       expect(response.body.data).toEqual([]);
     });
 
-    it('should sort tags by position and name', async () => {
-      // Create tags with different positions
+    it('should sort tags by usageCount descending', async () => {
+      // Create tags
       await request(app)
         .post('/api/bibliography/tags')
         .send({ name: 'zebra' });
@@ -99,13 +99,38 @@ describe('Tags API Integration Tests', () => {
         .post('/api/bibliography/tags')
         .send({ name: 'alpha', color: '#FF0000', position: 1 });
 
+      // Create references to use the tags
+      // 'alpha' tag used in 3 references
+      for (let i = 0; i < 3; i++) {
+        await request(app)
+          .post('/api/bibliography/references')
+          .send({
+            type: 'article',
+            title: `Paper ${i}`,
+            tags: ['alpha'],
+            sourceRaw: { provider: 'manual', payload: {} },
+          });
+      }
+
+      // 'zebra' tag used in 1 reference
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'Paper 4',
+          tags: ['zebra'],
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
       const response = await request(app)
         .get('/api/bibliography/tags')
         .expect(200);
 
-      // Positioned tags should come first
+      // Tags should be sorted by usageCount descending (alpha: 3, zebra: 1)
       expect(response.body.data[0].name).toBe('alpha');
+      expect(response.body.data[0].usageCount).toBe(3);
       expect(response.body.data[1].name).toBe('zebra');
+      expect(response.body.data[1].usageCount).toBe(1);
     });
   });
 

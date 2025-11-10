@@ -304,11 +304,9 @@ describe('References API Integration Tests', () => {
 
       const refId = createResponse.body.data._id;
 
-      const response = await request(app)
+      await request(app)
         .delete(`/api/bibliography/references/${refId}`)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
+        .expect(204);
 
       // Verify soft delete
       const getResponse = await request(app)

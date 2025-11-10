@@ -151,10 +151,10 @@ describe('Collections API Integration Tests', () => {
 
       const response = await request(app)
         .patch(`/api/bibliography/collections/${collectionId}`)
-        .send({ position: 5 })
+        .send({ position: 3 })
         .expect(200);
 
-      expect(response.body.data.position).toBe(5);
+      expect(response.body.data.position).toBe(3);
     });
 
     it('should return 404 for non-existent collection', async () => {

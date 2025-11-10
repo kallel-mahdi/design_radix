@@ -1,5 +1,6 @@
 import { CollectionService } from '../../../src/services/CollectionService';
 import { Collection } from '../../../src/models/Collection';
+import { Reference } from '../../../src/models/Reference';
 import { connectInMemoryMongo, clearDatabase, disconnectInMemoryMongo } from '../../utils/mongoMemoryServer';
 
 describe('CollectionService Unit Tests', () => {
@@ -55,6 +56,101 @@ describe('CollectionService Unit Tests', () => {
 
       expect(child1.position).toBe(0);
       expect(child2.position).toBe(1);
+    });
+  });
+
+  describe('depth validation', () => {
+    it('should allow creating collection at depth 1 (root)', async () => {
+      const collection = await service.create('user-123', { name: 'Root Collection' });
+
+      expect(collection.name).toBe('Root Collection');
+      expect(collection.parentId).toBe(null);
+    });
+
+    it('should allow creating collection at depth 5 (maximum)', async () => {
+      // Create nested structure: Level 1 -> 2 -> 3 -> 4
+      const level1 = await service.create('user-123', { name: 'Level 1' });
+      const level2 = await service.create('user-123', {
+        name: 'Level 2',
+        parentId: level1._id.toString()
+      });
+      const level3 = await service.create('user-123', {
+        name: 'Level 3',
+        parentId: level2._id.toString()
+      });
+      const level4 = await service.create('user-123', {
+        name: 'Level 4',
+        parentId: level3._id.toString()
+      });
+
+      // This should succeed (depth 5)
+      const level5 = await service.create('user-123', {
+        name: 'Level 5',
+        parentId: level4._id.toString()
+      });
+
+      expect(level5.name).toBe('Level 5');
+      expect(level5.parentId?.toString()).toBe(level4._id.toString());
+    });
+
+    it('should reject creating collection at depth 6', async () => {
+      // Create nested structure: Level 1 -> 2 -> 3 -> 4 -> 5
+      const level1 = await service.create('user-123', { name: 'Level 1' });
+      const level2 = await service.create('user-123', {
+        name: 'Level 2',
+        parentId: level1._id.toString()
+      });
+      const level3 = await service.create('user-123', {
+        name: 'Level 3',
+        parentId: level2._id.toString()
+      });
+      const level4 = await service.create('user-123', {
+        name: 'Level 4',
+        parentId: level3._id.toString()
+      });
+      const level5 = await service.create('user-123', {
+        name: 'Level 5',
+        parentId: level4._id.toString()
+      });
+
+      // This should fail (would be depth 6)
+      await expect(
+        service.create('user-123', {
+          name: 'Level 6',
+          parentId: level5._id.toString()
+        })
+      ).rejects.toThrow('MAX_DEPTH_EXCEEDED');
+    });
+
+    it('should reject moving collection if it would exceed max depth', async () => {
+      // Create structure: Parent at depth 4, Child with 2-level subtree
+      const level1 = await service.create('user-123', { name: 'Level 1' });
+      const level2 = await service.create('user-123', {
+        name: 'Level 2',
+        parentId: level1._id.toString()
+      });
+      const level3 = await service.create('user-123', {
+        name: 'Level 3',
+        parentId: level2._id.toString()
+      });
+      const level4 = await service.create('user-123', {
+        name: 'Level 4',
+        parentId: level3._id.toString()
+      });
+
+      // Create separate branch with children
+      const branchRoot = await service.create('user-123', { name: 'Branch Root' });
+      const branchChild = await service.create('user-123', {
+        name: 'Branch Child',
+        parentId: branchRoot._id.toString()
+      });
+
+      // Try to move branchRoot under level4 (would make branchChild depth 6)
+      await expect(
+        service.update(branchRoot._id.toString(), 'user-123', {
+          parentId: level4._id.toString()
+        })
+      ).rejects.toThrow('MAX_DEPTH_EXCEEDED');
     });
   });
 
@@ -161,6 +257,37 @@ describe('CollectionService Unit Tests', () => {
 
       expect(updated).toBe(null);
     });
+
+    it('should prevent collection from being its own parent', async () => {
+      const collection = await service.create('user-123', { name: 'Self Reference Test' });
+
+      await expect(
+        service.update(collection._id.toString(), 'user-123', {
+          parentId: collection._id.toString()
+        })
+      ).rejects.toThrow('CIRCULAR_REFERENCE');
+    });
+
+    it('should prevent circular reference through descendants', async () => {
+      // Create chain: A -> B -> C
+      const collectionA = await service.create('user-123', { name: 'Collection A' });
+      const collectionB = await service.create('user-123', {
+        name: 'Collection B',
+        parentId: collectionA._id.toString()
+      });
+      const collectionC = await service.create('user-123', {
+        name: 'Collection C',
+        parentId: collectionB._id.toString()
+      });
+
+      // Try to make A a child of C (would create A -> B -> C -> A)
+      // This test documents expected behavior - implementation may need enhancement
+      await expect(
+        service.update(collectionA._id.toString(), 'user-123', {
+          parentId: collectionC._id.toString()
+        })
+      ).rejects.toThrow();
+    });
   });
 
   describe('delete', () => {
@@ -185,6 +312,99 @@ describe('CollectionService Unit Tests', () => {
       const deleted = await service.delete(created._id.toString(), 'user-456');
 
       expect(deleted).toBe(false);
+    });
+  });
+
+  describe('cascade delete', () => {
+    it('should soft delete parent and all descendants', async () => {
+      // Create tree: Parent -> Child1, Child2 -> Grandchild
+      const parent = await service.create('user-123', { name: 'Parent' });
+      const child1 = await service.create('user-123', {
+        name: 'Child 1',
+        parentId: parent._id.toString()
+      });
+      const child2 = await service.create('user-123', {
+        name: 'Child 2',
+        parentId: parent._id.toString()
+      });
+      const grandchild = await service.create('user-123', {
+        name: 'Grandchild',
+        parentId: child2._id.toString()
+      });
+
+      // Delete parent
+      const deleted = await service.delete(parent._id.toString(), 'user-123');
+      expect(deleted).toBe(true);
+
+      // Verify all are soft deleted (not in regular list)
+      const collections = await service.list('user-123');
+      expect(collections).toHaveLength(0);
+
+      // Verify all exist with deleted flag
+      const allCollections = await service.list('user-123', true);
+      expect(allCollections).toHaveLength(4);
+      expect(allCollections.every(c => c.deleted)).toBe(true);
+    });
+
+    it('should delete only specified subtree', async () => {
+      // Create two separate trees
+      const parent1 = await service.create('user-123', { name: 'Parent 1' });
+      const child1 = await service.create('user-123', {
+        name: 'Child 1',
+        parentId: parent1._id.toString()
+      });
+
+      const parent2 = await service.create('user-123', { name: 'Parent 2' });
+      const child2 = await service.create('user-123', {
+        name: 'Child 2',
+        parentId: parent2._id.toString()
+      });
+
+      // Delete first tree
+      await service.delete(parent1._id.toString(), 'user-123');
+
+      // Verify second tree still exists
+      const remaining = await service.list('user-123');
+      expect(remaining).toHaveLength(2);
+      expect(remaining.map(c => c.name)).toContain('Parent 2');
+      expect(remaining.map(c => c.name)).toContain('Child 2');
+    });
+  });
+
+  describe('cascade restore', () => {
+    it('should restore parent and all descendants', async () => {
+      // Create tree: Parent -> Child -> Grandchild
+      const parent = await service.create('user-123', { name: 'Parent' });
+      const child = await service.create('user-123', {
+        name: 'Child',
+        parentId: parent._id.toString()
+      });
+      const grandchild = await service.create('user-123', {
+        name: 'Grandchild',
+        parentId: child._id.toString()
+      });
+
+      // Delete parent (cascade deletes all)
+      await service.delete(parent._id.toString(), 'user-123');
+
+      // Verify all deleted
+      expect(await service.list('user-123')).toHaveLength(0);
+
+      // Restore parent
+      const restored = await service.restore(parent._id.toString(), 'user-123');
+      expect(restored).not.toBe(null);
+
+      // Verify all restored
+      const collections = await service.list('user-123');
+      expect(collections).toHaveLength(3);
+      expect(collections.map(c => c.name)).toContain('Parent');
+      expect(collections.map(c => c.name)).toContain('Child');
+      expect(collections.map(c => c.name)).toContain('Grandchild');
+    });
+
+    it('should return null when restoring non-existent collection', async () => {
+      const restored = await service.restore('507f1f77bcf86cd799439011', 'user-123');
+      expect(restored).toBe(null);
     });
   });
 });

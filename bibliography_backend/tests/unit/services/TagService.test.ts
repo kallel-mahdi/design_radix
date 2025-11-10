@@ -1,5 +1,6 @@
 import { TagService } from '../../../src/services/TagService';
 import { Tag } from '../../../src/models/Tag';
+import { Reference } from '../../../src/models/Reference';
 import { connectInMemoryMongo, clearDatabase, disconnectInMemoryMongo } from '../../utils/mongoMemoryServer';
 
 describe('TagService Unit Tests', () => {
@@ -100,16 +101,142 @@ describe('TagService Unit Tests', () => {
       expect(tags.map(t => t.name)).toContain('tag2');
     });
 
-    it('should sort by position first, then by name', async () => {
+    it('should return all tags with usageCount field', async () => {
       await service.create('user-123', { name: 'zebra' });
       await service.create('user-123', { name: 'alpha', color: '#FF0000', position: 1 });
       await service.create('user-123', { name: 'beta', color: '#00FF00', position: 2 });
 
       const tags = await service.list('user-123');
 
-      expect(tags[0].name).toBe('alpha');
-      expect(tags[1].name).toBe('beta');
-      expect(tags[2].name).toBe('zebra');
+      expect(tags).toHaveLength(3);
+      // All tags should have usageCount field (all 0 since no references)
+      tags.forEach(tag => {
+        expect(tag.usageCount).toBeDefined();
+        expect(tag.usageCount).toBe(0);
+      });
+    });
+
+    it('should return correct usage count for tags with references', async () => {
+      // Create tags
+      await service.create('user-123', { name: 'machine-learning' });
+      await service.create('user-123', { name: 'deep-learning' });
+      await service.create('user-123', { name: 'unused-tag' });
+
+      // Create references with tags
+      await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 1',
+        authors: [{ full: 'John Doe' }],
+        citationKey: 'doe2023a',
+        tags: ['machine-learning', 'deep-learning'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 2',
+        authors: [{ full: 'Jane Smith' }],
+        citationKey: 'smith2023a',
+        tags: ['machine-learning'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      // Create deleted reference (should not count)
+      await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 3 Deleted',
+        authors: [{ full: 'Bob Jones' }],
+        citationKey: 'jones2023a',
+        tags: ['machine-learning'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: true,
+        deletedAt: new Date()
+      });
+
+      // Get tags
+      const tags = await service.list('user-123');
+
+      // Verify usage counts
+      const mlTag = tags.find(t => t.name === 'machine-learning');
+      const dlTag = tags.find(t => t.name === 'deep-learning');
+      const unusedTag = tags.find(t => t.name === 'unused-tag');
+
+      expect(mlTag?.usageCount).toBe(2); // Used in 2 non-deleted references
+      expect(dlTag?.usageCount).toBe(1); // Used in 1 reference
+      expect(unusedTag?.usageCount).toBe(0); // Not used
+    });
+
+    it('should sort tags by usage count descending', async () => {
+      // Create tags
+      await service.create('user-123', { name: 'popular-tag' });
+      await service.create('user-123', { name: 'medium-tag' });
+      await service.create('user-123', { name: 'rare-tag' });
+
+      // Create references with different tag usage
+      for (let i = 0; i < 5; i++) {
+        await Reference.create({
+          userId: 'user-123',
+          type: 'article',
+          title: `Paper ${i}`,
+          authors: [{ full: 'Author' }],
+          citationKey: `key${i}`,
+          tags: ['popular-tag'],
+          collectionIds: [],
+          hasPdf: false,
+          sourceRaw: { provider: 'manual', payload: {} },
+          deleted: false
+        });
+      }
+
+      for (let i = 0; i < 2; i++) {
+        await Reference.create({
+          userId: 'user-123',
+          type: 'article',
+          title: `Paper Medium ${i}`,
+          authors: [{ full: 'Author' }],
+          citationKey: `keymedium${i}`,
+          tags: ['medium-tag'],
+          collectionIds: [],
+          hasPdf: false,
+          sourceRaw: { provider: 'manual', payload: {} },
+          deleted: false
+        });
+      }
+
+      await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper Rare',
+        authors: [{ full: 'Author' }],
+        citationKey: 'keyrare',
+        tags: ['rare-tag'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      // Get tags
+      const tags = await service.list('user-123');
+
+      // Verify sort order (most used first)
+      expect(tags[0].name).toBe('popular-tag');
+      expect(tags[0].usageCount).toBe(5);
+      expect(tags[1].name).toBe('medium-tag');
+      expect(tags[1].usageCount).toBe(2);
+      expect(tags[2].name).toBe('rare-tag');
+      expect(tags[2].usageCount).toBe(1);
     });
 
     it('should return empty array when no tags', async () => {
@@ -214,6 +341,71 @@ describe('TagService Unit Tests', () => {
     });
   });
 
+  describe('rename', () => {
+    it('should rename tag and update all references', async () => {
+      // Create tag
+      await service.create('user-123', { name: 'old-name' });
+
+      // Create references with this tag
+      const ref1 = await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 1',
+        authors: [{ full: 'John Doe' }],
+        citationKey: 'doe2023b',
+        tags: ['old-name', 'other-tag'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      const ref2 = await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 2',
+        authors: [{ full: 'Jane Smith' }],
+        citationKey: 'smith2023b',
+        tags: ['old-name'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      // Rename tag
+      const renamed = await service.rename('old-name', 'new-name', 'user-123');
+
+      expect(renamed).not.toBe(null);
+      expect(renamed?.name).toBe('new-name');
+
+      // Verify references updated
+      const updatedRef1 = await Reference.findById(ref1._id);
+      const updatedRef2 = await Reference.findById(ref2._id);
+
+      expect(updatedRef1?.tags).toContain('new-name');
+      expect(updatedRef1?.tags).not.toContain('old-name');
+      expect(updatedRef1?.tags).toContain('other-tag'); // Other tags preserved
+
+      expect(updatedRef2?.tags).toContain('new-name');
+      expect(updatedRef2?.tags).not.toContain('old-name');
+    });
+
+    it('should reject rename if new name already exists', async () => {
+      await service.create('user-123', { name: 'existing-tag' });
+      await service.create('user-123', { name: 'other-tag' });
+
+      await expect(
+        service.rename('other-tag', 'existing-tag', 'user-123')
+      ).rejects.toThrow('DUPLICATE_TAG_NAME');
+    });
+
+    it('should return null when renaming non-existent tag', async () => {
+      const renamed = await service.rename('non-existent', 'new-name', 'user-123');
+      expect(renamed).toBe(null);
+    });
+  });
+
   describe('delete', () => {
     it('should delete a tag', async () => {
       const created = await service.create('user-123', { name: 'to-delete' });
@@ -236,6 +428,64 @@ describe('TagService Unit Tests', () => {
       const deleted = await service.delete(created._id.toString(), 'user-456');
 
       expect(deleted).toBe(false);
+    });
+
+    it('should remove tag from all references when deleted', async () => {
+      // Create tag
+      const tag = await service.create('user-123', { name: 'to-remove' });
+
+      // Create references with this tag
+      const ref1 = await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 1',
+        authors: [{ full: 'John Doe' }],
+        citationKey: 'doe2023c',
+        tags: ['to-remove', 'keep-tag'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      const ref2 = await Reference.create({
+        userId: 'user-123',
+        type: 'article',
+        title: 'Paper 2',
+        authors: [{ full: 'Jane Smith' }],
+        citationKey: 'smith2023c',
+        tags: ['to-remove'],
+        collectionIds: [],
+        hasPdf: false,
+        sourceRaw: { provider: 'manual', payload: {} },
+        deleted: false
+      });
+
+      // Delete tag
+      const deleted = await service.delete(tag._id.toString(), 'user-123');
+      expect(deleted).toBe(true);
+
+      // Verify tag removed from all references
+      const updatedRef1 = await Reference.findById(ref1._id);
+      const updatedRef2 = await Reference.findById(ref2._id);
+
+      expect(updatedRef1?.tags).not.toContain('to-remove');
+      expect(updatedRef1?.tags).toContain('keep-tag'); // Other tags preserved
+      expect(updatedRef1?.tags).toHaveLength(1);
+
+      expect(updatedRef2?.tags).not.toContain('to-remove');
+      expect(updatedRef2?.tags).toHaveLength(0); // Empty array after removal
+    });
+
+    it('should handle deleting tag not used in any references', async () => {
+      const tag = await service.create('user-123', { name: 'unused-tag' });
+
+      const deleted = await service.delete(tag._id.toString(), 'user-123');
+      expect(deleted).toBe(true);
+
+      // Verify tag is deleted
+      const found = await service.getById(tag._id.toString(), 'user-123');
+      expect(found).toBe(null);
     });
   });
 });

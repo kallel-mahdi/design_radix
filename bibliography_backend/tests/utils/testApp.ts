@@ -9,6 +9,7 @@ import { referencesRouter } from '../../src/routes/references';
 import { collectionsRouter } from '../../src/routes/collections';
 import { tagsRouter } from '../../src/routes/tags';
 import { duplicatesRouter } from '../../src/routes/duplicates';
+import { projectsRouter } from '../../src/routes/projects';
 import { healthRouter } from '../../src/routes/health';
 
 export function createTestApp() {
@@ -30,6 +31,7 @@ export function createTestApp() {
   app.use('/api/bibliography/collections', collectionsRouter);
   app.use('/api/bibliography/tags', tagsRouter);
   app.use('/api/bibliography/duplicates', duplicatesRouter);
+  app.use('/api/bibliography/projects', projectsRouter);
   app.use('/health', healthRouter);
 
   // Error handler
