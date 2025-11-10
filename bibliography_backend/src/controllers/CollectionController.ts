@@ -38,6 +38,7 @@ export class CollectionController {
 
       res.status(200).json({
         success: true,
+        message: 'Collections retrieved successfully',
         data: collections
       });
     } catch (error) {
@@ -66,6 +67,7 @@ export class CollectionController {
 
       res.status(200).json({
         success: true,
+        message: 'Collection retrieved successfully',
         data: collection
       });
     } catch (error) {
@@ -107,6 +109,35 @@ export class CollectionController {
     }
   }
 
+  async restore(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.headers['x-user-id'] as string;
+      const { id } = req.params;
+
+      const collection = await this.collectionService.restore(id, userId);
+
+      if (!collection) {
+        res.status(404).json({
+          success: false,
+          message: 'Collection not found or not deleted'
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Collection restored successfully',
+        data: collection
+      });
+    } catch (error) {
+      ApplicationLogger.error('Collection restore failed', error as Error);
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to restore collection'
+      });
+    }
+  }
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
@@ -122,10 +153,7 @@ export class CollectionController {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Collection deleted successfully'
-      });
+      res.status(204).send();
     } catch (error) {
       ApplicationLogger.error('Collection deletion failed', error as Error);
       res.status(400).json({

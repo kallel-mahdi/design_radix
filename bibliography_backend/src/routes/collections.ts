@@ -30,6 +30,11 @@ router.patch('/:id', validate(UpdateCollectionInputSchema), (req, res) => {
   return controller.update(req, res);
 });
 
+router.patch('/:id/restore', (req, res) => {
+  const controller = container.get<CollectionController>(TYPES.CollectionController);
+  return controller.restore(req, res);
+});
+
 router.delete('/:id', (req, res) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
   return controller.delete(req, res);
