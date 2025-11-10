@@ -3,6 +3,8 @@ import { injectable, inject } from 'inversify';
 import { IProjectService } from '../interfaces/IProjectService';
 import { TYPES } from '../config/types';
 import { ApplicationLogger } from '../utils/logger';
+import { Reference } from '../models/Reference';
+import { Collection } from '../models/Collection';
 
 @injectable()
 export class ProjectController {
@@ -15,11 +17,28 @@ export class ProjectController {
       const userId = req.headers['x-user-id'] as string;
       const { projectId, referenceId } = req.body;
 
-      const link = await this.projectService.linkReference(userId, projectId, referenceId);
+      // Validate that reference exists before linking
+      const reference = await Reference.findOne({
+        _id: referenceId,
+        userId,
+        deleted: false
+      });
 
-      res.status(201).json({
+      if (!reference) {
+        res.status(404).json({
+          success: false,
+          message: 'Reference not found',
+          code: 'REFERENCE_NOT_FOUND'
+        });
+        return;
+      }
+
+      const result = await this.projectService.linkReference(userId, projectId, referenceId);
+      const { isNew, ...link } = result as any;
+
+      res.status(isNew ? 201 : 200).json({
         success: true,
-        message: 'Reference linked to project',
+        message: isNew ? 'Reference linked to project' : 'Reference already linked to project',
         data: link
       });
     } catch (error) {
@@ -104,11 +123,28 @@ export class ProjectController {
       const userId = req.headers['x-user-id'] as string;
       const { projectId, collectionId } = req.body;
 
-      const link = await this.projectService.linkCollection(userId, projectId, collectionId);
+      // Validate that collection exists before linking
+      const collection = await Collection.findOne({
+        _id: collectionId,
+        userId,
+        deleted: false
+      });
 
-      res.status(201).json({
+      if (!collection) {
+        res.status(404).json({
+          success: false,
+          message: 'Collection not found',
+          code: 'COLLECTION_NOT_FOUND'
+        });
+        return;
+      }
+
+      const result = await this.projectService.linkCollection(userId, projectId, collectionId);
+      const { isNew, ...link } = result as any;
+
+      res.status(isNew ? 201 : 200).json({
         success: true,
-        message: 'Collection linked to project',
+        message: isNew ? 'Collection linked to project' : 'Collection already linked to project',
         data: link
       });
     } catch (error) {
@@ -172,6 +208,22 @@ export class ProjectController {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { collectionId } = req.params;
+
+      // Validate that collection exists
+      const collection = await Collection.findOne({
+        _id: collectionId,
+        userId,
+        deleted: false
+      });
+
+      if (!collection) {
+        res.status(404).json({
+          success: false,
+          message: 'Collection not found',
+          code: 'COLLECTION_NOT_FOUND'
+        });
+        return;
+      }
 
       const projects = await this.projectService.getCollectionProjects(userId, collectionId);
 

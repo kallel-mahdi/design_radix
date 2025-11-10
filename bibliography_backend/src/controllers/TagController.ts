@@ -79,6 +79,40 @@ export class TagController {
     }
   }
 
+  async rename(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.headers['x-user-id'] as string;
+      const { oldName } = req.params;
+      const { newName } = req.body;
+
+      const tag = await this.tagService.rename(oldName, newName, userId);
+
+      if (!tag) {
+        res.status(404).json({
+          success: false,
+          message: 'Tag not found'
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Tag renamed successfully',
+        data: tag
+      });
+    } catch (error) {
+      ApplicationLogger.error('Tag rename failed', error as Error);
+
+      const message = error instanceof Error ? error.message : 'Failed to rename tag';
+      const statusCode = message.startsWith('DUPLICATE_TAG_NAME') ? 409 : 400;
+
+      res.status(statusCode).json({
+        success: false,
+        message
+      });
+    }
+  }
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
