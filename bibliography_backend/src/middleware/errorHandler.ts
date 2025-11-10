@@ -23,42 +23,52 @@ export const errorHandler = (
 
   let statusCode = error.statusCode || 500;
   let message = error.message || 'Internal Server Error';
+  let code = error.code || error.name || 'INTERNAL_ERROR';
   let details = error.details || null;
 
   // Handle MongoDB validation errors
   if (error.name === 'ValidationError') {
     statusCode = 400;
     message = 'Validation Error';
+    code = 'VALIDATION_ERROR';
     details = error.details || error.message;
   } else if (error.name === 'CastError') {
     statusCode = 400;
     message = 'Invalid ID format';
+    code = 'INVALID_ID';
   } else if (error.name === 'DocumentNotFoundError') {
     statusCode = 404;
     message = 'Document not found';
+    code = 'NOT_FOUND';
   } else if (error.name === 'UnauthorizedError') {
     statusCode = 401;
     message = 'Unauthorized';
+    code = 'UNAUTHORIZED';
   } else if (error.name === 'ForbiddenError') {
     statusCode = 403;
     message = 'Forbidden';
+    code = 'FORBIDDEN';
   } else if (error.name === 'ConflictError') {
     statusCode = 409;
     message = 'Conflict';
+    code = 'CONFLICT';
   } else if (error.code === '11000' || (error as any).code === 11000) {
     statusCode = 409;
     message = 'Duplicate key error';
+    code = 'DUPLICATE_KEY';
   }
 
   // Don't expose internal errors in production
   if (process.env.NODE_ENV === 'production' && statusCode === 500) {
     message = 'Internal Server Error';
+    code = 'INTERNAL_ERROR';
     details = null;
   }
 
   const errorResponse = {
     success: false,
     message,
+    code,
     ...(details && { details }),
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   };

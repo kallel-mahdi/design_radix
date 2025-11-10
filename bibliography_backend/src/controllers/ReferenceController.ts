@@ -46,6 +46,7 @@ export class ReferenceController {
 
       res.status(200).json({
         success: true,
+        message: 'References retrieved successfully',
         data: references,
         pagination: {
           total,
@@ -80,6 +81,7 @@ export class ReferenceController {
 
       res.status(200).json({
         success: true,
+        message: 'Reference retrieved successfully',
         data: reference
       });
     } catch (error) {
@@ -136,10 +138,7 @@ export class ReferenceController {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Reference moved to trash'
-      });
+      res.status(204).send();
     } catch (error) {
       ApplicationLogger.error('Reference deletion failed', error as Error);
       res.status(400).json({

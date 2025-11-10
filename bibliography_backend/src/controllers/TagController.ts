@@ -94,10 +94,7 @@ export class TagController {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Tag deleted successfully'
-      });
+      res.status(204).send();
     } catch (error) {
       ApplicationLogger.error('Tag deletion failed', error as Error);
       res.status(400).json({
