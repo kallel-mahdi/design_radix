@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@/test/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { ReferenceCard } from '../ReferenceCard';
 import type { Reference } from '@/common/types';
@@ -312,7 +312,7 @@ describe('ReferenceCard', () => {
     await user.click(checkbox);
 
     expect(onSelect).toHaveBeenCalledWith('ref-123');
-    expect(onClick).not.toHaveBeenCalled(); // Should not trigger card click
+    expect(onClick).not.toHaveBeenCalled(); // Checkbox click is stopped from propagating
   });
 
   it('should call onClick when card is clicked', async () => {
@@ -369,6 +369,6 @@ describe('ReferenceCard', () => {
     );
 
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain('border-l-accent');
+    expect(card.className).toContain('border-l-app-accent');
   });
 });

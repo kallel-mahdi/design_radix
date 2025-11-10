@@ -97,6 +97,7 @@ export const ReferenceCard = React.forwardRef<
 					className="h-4 w-4 rounded border-app-border text-app-accent focus:ring-app-accent"
 					type="checkbox"
 					onChange={handleSelectChange}
+					onClick={(e) => e.stopPropagation()}
 				/>
 			</div>
 
