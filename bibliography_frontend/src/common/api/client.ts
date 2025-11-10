@@ -130,6 +130,7 @@ class ApiClient {
 
   /**
    * Refresh access token using refresh token
+   * Points to editor's auth service (not bibliography backend)
    */
   private async refreshAccessToken(): Promise<void> {
     const authStore = useAuthStore.getState();
@@ -139,8 +140,10 @@ class ApiClient {
       throw new Error('No refresh token available');
     }
 
+    const AUTH_SERVICE_URL = import.meta.env['VITE_AUTH_SERVICE_URL'] || 'http://localhost:8001/api/auth';
+
     try {
-      const response = await fetch(`${this.baseURL}/auth/refresh`, {
+      const response = await fetch(`${AUTH_SERVICE_URL}/refresh-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken }),
