@@ -68,6 +68,9 @@ export const trustGatewayAuth = (
 /**
  * Middleware for development/testing - allows bypassing gateway auth
  * DO NOT USE IN PRODUCTION
+ *
+ * Sets default dev user ONLY if x-user-id header is not already present
+ * This allows tests to override with specific user IDs
  */
 export const bypassGatewayAuth = (
   req: Request,
@@ -78,18 +81,24 @@ export const bypassGatewayAuth = (
     throw new Error('bypassGatewayAuth middleware cannot be used in production');
   }
 
-  // Set mock headers for controllers that read directly from headers
-  req.headers['x-user-id'] = 'dev-user-123';
-  req.headers['x-user-email'] = 'dev@example.com';
-  req.headers['x-user-username'] = 'dev-user';
-  req.headers['x-user-role'] = 'user';
+  // Only set defaults if headers are not already present (allows test overrides)
+  const userId = (req.headers['x-user-id'] as string) || 'dev-user-123';
+  const userEmail = (req.headers['x-user-email'] as string) || 'dev@example.com';
+  const username = (req.headers['x-user-username'] as string) || 'dev-user';
+  const userRole = (req.headers['x-user-role'] as string) || 'user';
+
+  // Set headers for controllers that read directly from headers
+  req.headers['x-user-id'] = userId;
+  req.headers['x-user-email'] = userEmail;
+  req.headers['x-user-username'] = username;
+  req.headers['x-user-role'] = userRole;
 
   // Create mock user for development
   (req as GatewayAuthenticatedRequest).user = {
-    id: 'dev-user-123',
-    email: 'dev@example.com',
-    username: 'dev-user',
-    role: 'user'
+    id: userId,
+    email: userEmail,
+    username: username,
+    role: userRole
   };
 
   (req as GatewayAuthenticatedRequest).gatewayAuth = {
@@ -97,7 +106,7 @@ export const bypassGatewayAuth = (
     authenticatedBy: 'development-bypass'
   };
 
-  ApplicationLogger.info('Development: Bypassing gateway auth', { url: req.url });
+  ApplicationLogger.info('Development: Bypassing gateway auth', { userId: userId.substring(0, 8) + '...', url: req.url });
   next();
 };
 

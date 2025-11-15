@@ -44,7 +44,13 @@ export class ReferenceService implements IReferenceService {
     const citationKey = await this.generateCitationKey(userId, data);
 
     const collectionIds = data.collectionIds
-      ? data.collectionIds.map(id => new mongoose.Types.ObjectId(id))
+      ? data.collectionIds.map(id => {
+          try {
+            return new mongoose.Types.ObjectId(id);
+          } catch (error) {
+            throw new Error(`Invalid collectionId format: ${id}`);
+          }
+        })
       : [];
 
     const reference = await Reference.create({
@@ -81,11 +87,19 @@ export class ReferenceService implements IReferenceService {
     }
 
     if (filters.collectionId) {
-      query.collectionIds = new mongoose.Types.ObjectId(filters.collectionId);
+      try {
+        query.collectionIds = new mongoose.Types.ObjectId(filters.collectionId);
+      } catch (error) {
+        throw new Error(`Invalid collectionId format: ${filters.collectionId}`);
+      }
     }
 
     if (filters.tags && filters.tags.length > 0) {
       query.tags = { $all: filters.tags };
+    }
+
+    if (filters.search) {
+      query.$text = { $search: filters.search };
     }
 
     const limit = filters.limit || 100;
@@ -213,8 +227,8 @@ export class ReferenceService implements IReferenceService {
     const suffix = Math.random().toString(36).substring(2, 5);
     const key = `${lastName}${year}${firstWord}${suffix}`.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    // Check uniqueness
-    const existing = await Reference.findOne({ citationKey: key });
+    // Check uniqueness (scoped by userId)
+    const existing = await Reference.findOne({ userId, citationKey: key });
     if (existing) {
       return this.generateCitationKey(userId, data);
     }

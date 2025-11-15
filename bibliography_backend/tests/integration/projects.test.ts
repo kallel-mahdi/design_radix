@@ -37,7 +37,7 @@ describe('Projects API Integration Tests', () => {
           projectId,
           referenceId,
         })
-        .expect(200);
+        .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toMatchObject({
@@ -87,7 +87,7 @@ describe('Projects API Integration Tests', () => {
       await request(app)
         .post('/api/bibliography/projects/link')
         .send({ projectId, referenceId })
-        .expect(200);
+        .expect(201);
 
       // Link second time - should be idempotent
       const response = await request(app)
@@ -287,7 +287,7 @@ describe('Projects API Integration Tests', () => {
           projectId,
           collectionId,
         })
-        .expect(200);
+        .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toMatchObject({

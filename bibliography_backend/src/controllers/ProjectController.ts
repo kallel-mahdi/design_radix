@@ -103,6 +103,22 @@ export class ProjectController {
       const userId = req.headers['x-user-id'] as string;
       const { referenceId } = req.params;
 
+      // Validate reference exists
+      const reference = await Reference.findOne({
+        _id: referenceId,
+        userId,
+        deleted: false
+      });
+
+      if (!reference) {
+        res.status(404).json({
+          success: false,
+          message: 'Reference not found',
+          code: 'REFERENCE_NOT_FOUND'
+        });
+        return;
+      }
+
       const projects = await this.projectService.getReferenceProjects(userId, referenceId);
 
       res.status(200).json({

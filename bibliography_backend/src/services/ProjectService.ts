@@ -133,21 +133,21 @@ export class ProjectService implements IProjectService {
     });
   }
 
-  async getReferenceProjects(userId: string, referenceId: string): Promise<string[]> {
+  async getReferenceProjects(userId: string, referenceId: string): Promise<IProjectLink[]> {
     const links = await ProjectLink.find({
       userId,
       referenceId: new mongoose.Types.ObjectId(referenceId)
     });
 
-    return links.map(link => link.projectId);
+    return links;
   }
 
-  async getCollectionProjects(userId: string, collectionId: string): Promise<string[]> {
+  async getCollectionProjects(userId: string, collectionId: string): Promise<IProjectLink[]> {
     const links = await ProjectLink.find({
       userId,
       collectionId: new mongoose.Types.ObjectId(collectionId)
     });
 
-    return links.map(link => link.projectId);
+    return links;
   }
 }

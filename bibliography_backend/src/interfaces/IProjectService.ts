@@ -9,6 +9,6 @@ export interface IProjectService {
   unlinkCollection(userId: string, projectId: string, collectionId: string): Promise<boolean>;
   getProjectReferences(userId: string, projectId: string): Promise<IReference[]>;
   getProjectCollections(userId: string, projectId: string): Promise<ICollection[]>;
-  getReferenceProjects(userId: string, referenceId: string): Promise<string[]>;
-  getCollectionProjects(userId: string, collectionId: string): Promise<string[]>;
+  getReferenceProjects(userId: string, referenceId: string): Promise<IProjectLink[]>;
+  getCollectionProjects(userId: string, collectionId: string): Promise<IProjectLink[]>;
 }

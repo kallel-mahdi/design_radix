@@ -35,7 +35,22 @@ ProjectLinkSchema.pre('save', function(next) {
 ProjectLinkSchema.index({ userId: 1, projectId: 1 });
 ProjectLinkSchema.index({ referenceId: 1 });
 ProjectLinkSchema.index({ collectionId: 1 });
-ProjectLinkSchema.index({ userId: 1, projectId: 1, referenceId: 1 }, { unique: true, sparse: true });
-ProjectLinkSchema.index({ userId: 1, projectId: 1, collectionId: 1 }, { unique: true, sparse: true });
+
+// Partial indexes to prevent duplicate reference/collection links
+// Only enforce uniqueness when the field exists (not when it's null/undefined)
+ProjectLinkSchema.index(
+  { userId: 1, projectId: 1, referenceId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { referenceId: { $exists: true, $ne: null } }
+  }
+);
+ProjectLinkSchema.index(
+  { userId: 1, projectId: 1, collectionId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { collectionId: { $exists: true, $ne: null } }
+  }
+);
 
 export const ProjectLink = mongoose.model<IProjectLink>('ProjectLink', ProjectLinkSchema);

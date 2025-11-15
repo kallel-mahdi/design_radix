@@ -196,10 +196,12 @@ describe('ReferenceService Unit Tests', () => {
     });
 
     it('should filter by collectionId', async () => {
+      const validCollectionId = '507f1f77bcf86cd799439011';
+
       const ref1 = await service.create('user-123', {
         type: 'article',
         title: 'In Collection',
-        collectionIds: ['col-1'],
+        collectionIds: [validCollectionId],
         sourceRaw: { provider: 'manual', payload: {} },
       });
 
@@ -209,7 +211,7 @@ describe('ReferenceService Unit Tests', () => {
         sourceRaw: { provider: 'manual', payload: {} },
       });
 
-      const result = await service.list('user-123', { collectionId: 'col-1' });
+      const result = await service.list('user-123', { collectionId: validCollectionId });
 
       expect(result.references).toHaveLength(1);
       expect(result.references[0].title).toBe('In Collection');
@@ -251,6 +253,41 @@ describe('ReferenceService Unit Tests', () => {
       expect(page1.references).toHaveLength(2);
       expect(page1.total).toBe(5);
       expect(page2.references).toHaveLength(2);
+    });
+
+    it('should filter by search query in title', async () => {
+      await service.create('user-123', {
+        type: 'article',
+        title: 'A Study of Plasticity in Deep RL',
+        abstract: 'Neural networks and learning',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      await service.create('user-123', {
+        type: 'article',
+        title: 'Introduction to NLP',
+        abstract: 'Natural language processing',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const result = await service.list('user-123', { search: 'plasticity' });
+
+      expect(result.references).toHaveLength(1);
+      expect(result.references[0].title).toContain('Plasticity');
+    });
+
+    it('should return empty array when search has no matches', async () => {
+      await service.create('user-123', {
+        type: 'article',
+        title: 'Machine Learning Paper',
+        abstract: 'Deep learning fundamentals',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const result = await service.list('user-123', { search: 'nonexistentterm123' });
+
+      expect(result.references).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
   });
 
@@ -475,7 +512,8 @@ describe('ReferenceService Unit Tests', () => {
       const detached = await service.detachPdf(created._id.toString(), 'user-123');
 
       expect(detached?.hasPdf).toBe(false);
-      expect(detached?.pdf).toBeUndefined();
+      // Mongoose $unset returns empty object {}, not undefined
+      expect(detached?.pdf).toEqual({});
     });
 
     it('should return null when detaching from non-existent reference', async () => {

@@ -204,10 +204,10 @@ describe('ProjectService Unit Tests', () => {
         sourceRaw: { provider: 'manual', payload: {} },
       });
 
-      await service.linkReference('user-123', 'proj-1', ref1._id.toString());
-      await service.linkReference('user-123', 'proj-1', ref2._id.toString());
+      await service.linkReference('user-123', 'proj-get-refs-1', ref1._id.toString());
+      await service.linkReference('user-123', 'proj-get-refs-1', ref2._id.toString());
 
-      const references = await service.getProjectReferences('user-123', 'proj-1');
+      const references = await service.getProjectReferences('user-123', 'proj-get-refs-1');
 
       expect(references).toHaveLength(2);
       expect(references.map(r => r.title)).toContain('Paper 1');
@@ -233,12 +233,12 @@ describe('ProjectService Unit Tests', () => {
         sourceRaw: { provider: 'manual', payload: {} },
       });
 
-      await service.linkReference('user-123', 'proj-1', ref1._id.toString());
-      await service.linkReference('user-123', 'proj-1', ref2._id.toString());
+      await service.linkReference('user-123', 'proj-exclude-deleted', ref1._id.toString());
+      await service.linkReference('user-123', 'proj-exclude-deleted', ref2._id.toString());
 
       await refService.softDelete(ref2._id.toString(), 'user-123');
 
-      const references = await service.getProjectReferences('user-123', 'proj-1');
+      const references = await service.getProjectReferences('user-123', 'proj-exclude-deleted');
 
       expect(references).toHaveLength(1);
       expect(references[0].title).toBe('Paper 1');
@@ -264,10 +264,10 @@ describe('ProjectService Unit Tests', () => {
       const col1 = await colService.create('user-123', { name: 'Collection 1' });
       const col2 = await colService.create('user-123', { name: 'Collection 2' });
 
-      await service.linkCollection('user-123', 'proj-1', col1._id.toString());
-      await service.linkCollection('user-123', 'proj-1', col2._id.toString());
+      await service.linkCollection('user-123', 'proj-get-colls-1', col1._id.toString());
+      await service.linkCollection('user-123', 'proj-get-colls-1', col2._id.toString());
 
-      const collections = await service.getProjectCollections('user-123', 'proj-1');
+      const collections = await service.getProjectCollections('user-123', 'proj-get-colls-1');
 
       expect(collections).toHaveLength(2);
       expect(collections.map(c => c.name)).toContain('Collection 1');
@@ -303,12 +303,12 @@ describe('ProjectService Unit Tests', () => {
       await service.linkReference('user-123', 'proj-2', reference._id.toString());
       await service.linkReference('user-123', 'proj-3', reference._id.toString());
 
-      const projectIds = await service.getReferenceProjects('user-123', reference._id.toString());
+      const projectLinks = await service.getReferenceProjects('user-123', reference._id.toString());
 
-      expect(projectIds).toHaveLength(3);
-      expect(projectIds).toContain('proj-1');
-      expect(projectIds).toContain('proj-2');
-      expect(projectIds).toContain('proj-3');
+      expect(projectLinks).toHaveLength(3);
+      expect(projectLinks.map(l => l.projectId)).toContain('proj-1');
+      expect(projectLinks.map(l => l.projectId)).toContain('proj-2');
+      expect(projectLinks.map(l => l.projectId)).toContain('proj-3');
     });
 
     it('should return empty array when reference is not in any project', async () => {
@@ -318,9 +318,9 @@ describe('ProjectService Unit Tests', () => {
         sourceRaw: { provider: 'manual', payload: {} },
       });
 
-      const projectIds = await service.getReferenceProjects('user-123', reference._id.toString());
+      const projectLinks = await service.getReferenceProjects('user-123', reference._id.toString());
 
-      expect(projectIds).toEqual([]);
+      expect(projectLinks).toEqual([]);
     });
 
     it('should only return projects for that user', async () => {
@@ -332,9 +332,9 @@ describe('ProjectService Unit Tests', () => {
 
       await service.linkReference('user-123', 'proj-1', reference._id.toString());
 
-      const projectIds = await service.getReferenceProjects('user-456', reference._id.toString());
+      const projectLinks = await service.getReferenceProjects('user-456', reference._id.toString());
 
-      expect(projectIds).toEqual([]);
+      expect(projectLinks).toEqual([]);
     });
   });
 
@@ -345,19 +345,19 @@ describe('ProjectService Unit Tests', () => {
       await service.linkCollection('user-123', 'proj-1', collection._id.toString());
       await service.linkCollection('user-123', 'proj-2', collection._id.toString());
 
-      const projectIds = await service.getCollectionProjects('user-123', collection._id.toString());
+      const projectLinks = await service.getCollectionProjects('user-123', collection._id.toString());
 
-      expect(projectIds).toHaveLength(2);
-      expect(projectIds).toContain('proj-1');
-      expect(projectIds).toContain('proj-2');
+      expect(projectLinks).toHaveLength(2);
+      expect(projectLinks.map(l => l.projectId)).toContain('proj-1');
+      expect(projectLinks.map(l => l.projectId)).toContain('proj-2');
     });
 
     it('should return empty array when collection is not in any project', async () => {
       const collection = await colService.create('user-123', { name: 'Unlinked Collection' });
 
-      const projectIds = await service.getCollectionProjects('user-123', collection._id.toString());
+      const projectLinks = await service.getCollectionProjects('user-123', collection._id.toString());
 
-      expect(projectIds).toEqual([]);
+      expect(projectLinks).toEqual([]);
     });
 
     it('should only return projects for that user', async () => {
@@ -365,9 +365,9 @@ describe('ProjectService Unit Tests', () => {
 
       await service.linkCollection('user-123', 'proj-1', collection._id.toString());
 
-      const projectIds = await service.getCollectionProjects('user-456', collection._id.toString());
+      const projectLinks = await service.getCollectionProjects('user-456', collection._id.toString());
 
-      expect(projectIds).toEqual([]);
+      expect(projectLinks).toEqual([]);
     });
   });
 });

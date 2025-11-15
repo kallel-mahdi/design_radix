@@ -242,6 +242,78 @@ describe('References API Integration Tests', () => {
       expect(response.body.data).toHaveLength(2);
       expect(response.body.pagination.total).toBe(5);
     });
+
+    it('should filter references by search query (title match)', async () => {
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'A Study of Plasticity in Deep Reinforcement Learning',
+          abstract: 'This paper studies neural plasticity',
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'Introduction to Natural Language Processing',
+          abstract: 'NLP fundamentals',
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
+      const response = await request(app)
+        .get('/api/bibliography/references?search=plasticity')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].title).toContain('Plasticity');
+    });
+
+    it('should filter references by search query (abstract match)', async () => {
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'Deep RL Paper',
+          abstract: 'This research explores neural plasticity mechanisms in reinforcement learning',
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'NLP Paper',
+          abstract: 'Language models and transformers',
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
+      const response = await request(app)
+        .get('/api/bibliography/references?search=plasticity')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].abstract).toContain('plasticity');
+    });
+
+    it('should return empty results when search query has no matches', async () => {
+      await request(app)
+        .post('/api/bibliography/references')
+        .send({
+          type: 'article',
+          title: 'Deep Learning Fundamentals',
+          abstract: 'Introduction to neural networks',
+          sourceRaw: { provider: 'manual', payload: {} },
+        });
+
+      const response = await request(app)
+        .get('/api/bibliography/references?search=nonexistentterm123')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(0);
+      expect(response.body.pagination.total).toBe(0);
+    });
   });
 
   describe('PATCH /api/bibliography/references/:id', () => {

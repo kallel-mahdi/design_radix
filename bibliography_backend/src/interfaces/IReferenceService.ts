@@ -48,6 +48,7 @@ export interface ReferenceFilters {
   collectionId?: string;
   tags?: string[];
   deleted?: boolean;
+  search?: string;
   limit?: number;
   offset?: number;
 }

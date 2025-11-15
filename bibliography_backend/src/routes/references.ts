@@ -3,7 +3,7 @@ import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
 import { validate } from '../middleware/validate';
-import { CreateReferenceInputSchema, UpdateReferenceInputSchema } from '@bibliography/shared';
+import { CreateReferenceInputSchema, UpdateReferenceInputSchema, ImportDoiInputSchema } from '@bibliography/shared';
 
 const router: ExpressRouter = Router();
 
@@ -22,6 +22,22 @@ router.get('/:id', (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.getById(req, res);
 });
+
+// Session 6 - DOI Import
+router.post('/import-doi', validate(ImportDoiInputSchema), (req, res) => {
+  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  return controller.importFromDoi(req, res);
+});
+
+// Test Cleanup Endpoint - FOR TESTING ONLY
+// Deletes all references for a user (used by E2E tests)
+// Only available in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  router.delete('/test-cleanup', (req, res) => {
+    const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+    return controller.testCleanup(req, res);
+  });
+}
 
 router.patch('/:id', validate(UpdateReferenceInputSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
@@ -43,12 +59,7 @@ router.delete('/:id/permanent', (req, res) => {
   return controller.permanentDelete(req, res);
 });
 
-// TODO: Session 7 - Import/Export (methods not implemented yet)
-// router.post('/import-doi', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.importDoi(req, res);
-// });
-
+// TODO: Session 7 - File Import/Export (methods not implemented yet)
 // router.post('/import-bibtex', (req, res) => {
 //   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
 //   return controller.importBibtex(req, res);
