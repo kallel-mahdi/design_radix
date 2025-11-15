@@ -121,6 +121,37 @@ async function main() {
             console.log(output);
         }
 
+        // Special handling for session-plan workflow
+        // Detect if this is a session-plan command
+        const isSessionPlan = prompt.includes('session plan:') ||
+                             prompt.includes('phase 1: exploration') ||
+                             prompt.includes('phase 2: verification') ||
+                             prompt.includes('phase 3: planning') ||
+                             (prompt.includes('session') && prompt.includes('all phases must be executed'));
+
+        if (isSessionPlan) {
+            // Output as a simulated user message/requirement
+            const planReminder = '\n' +
+                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+                '⚠️  SESSION PLAN WORKFLOW REQUIREMENTS\n' +
+                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+                'IMPORTANT: You MUST execute ALL phases in order:\n\n' +
+                '1. Phase 1: Launch Explore agent for research\n' +
+                '2. Phase 2: Use WebSearch if uncertainties found\n' +
+                '3. Phase 3: Launch Plan agent for architecture decisions\n' +
+                '4. Phase 4: Use AskUserQuestion for ALL ambiguities\n' +
+                '5. Phase 5: Get user approval for plan structure\n' +
+                '6. Phase 6: Write plan file to docs/sessions/XX-plan.md\n\n' +
+                '❌ Do NOT skip the Plan agent (Phase 3)\n' +
+                '❌ Do NOT write plan file until user approves\n' +
+                '❌ Do NOT start coding during planning\n' +
+                '✅ DO use Task tool with appropriate agents\n' +
+                '✅ DO ask clarifying questions for uncertainties\n\n' +
+                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+
+            console.log(planReminder);
+        }
+
         process.exit(0);
     } catch (err) {
         console.error('Error in skill-activation-prompt hook:', err);
