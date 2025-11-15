@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrashRouteImport } from './routes/trash'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as DuplicatesRouteImport } from './routes/duplicates'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TrashRoute = TrashRouteImport.update({
+  id: '/trash',
+  path: '/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/trash': typeof TrashRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/trash': typeof TrashRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,27 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/trash': typeof TrashRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/duplicates' | '/library' | '/projects' | '/search'
+  fullPaths:
+    | '/'
+    | '/duplicates'
+    | '/library'
+    | '/projects'
+    | '/search'
+    | '/trash'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/duplicates' | '/library' | '/projects' | '/search'
-  id: '__root__' | '/' | '/duplicates' | '/library' | '/projects' | '/search'
+  to: '/' | '/duplicates' | '/library' | '/projects' | '/search' | '/trash'
+  id:
+    | '__root__'
+    | '/'
+    | '/duplicates'
+    | '/library'
+    | '/projects'
+    | '/search'
+    | '/trash'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +99,18 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   ProjectsRoute: typeof ProjectsRoute
   SearchRoute: typeof SearchRoute
+  TrashRoute: typeof TrashRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trash': {
+      id: '/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof TrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
@@ -125,6 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   ProjectsRoute: ProjectsRoute,
   SearchRoute: SearchRoute,
+  TrashRoute: TrashRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

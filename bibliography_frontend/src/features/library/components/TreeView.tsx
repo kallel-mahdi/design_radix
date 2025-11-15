@@ -18,17 +18,20 @@ interface TreeItemWithChildren extends Collection {
  * Sorted by parentId and position within each level
  */
 function buildCollectionTree(collections: Collection[]): TreeItemWithChildren[] {
+  // Defensive: filter out deleted collections (should already be filtered at query level)
+  const activeCollections = collections.filter(c => !c.deleted);
+
   const collectionMap = new Map<string | null, TreeItemWithChildren[]>();
 
   // Initialize map for all parent IDs (including null for roots)
-  for (const collection of collections) {
+  for (const collection of activeCollections) {
     if (!collectionMap.has(collection.parentId)) {
       collectionMap.set(collection.parentId, []);
     }
   }
 
   // Add collections to their parent's children, sorted by position
-  for (const collection of collections) {
+  for (const collection of activeCollections) {
     const treeItem: TreeItemWithChildren = { ...collection, children: [] };
     const children = collectionMap.get(collection.parentId) || [];
     children.push(treeItem);

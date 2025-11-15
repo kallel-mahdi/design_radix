@@ -6,7 +6,8 @@ import { mockReferences, mockCollections, mockTags } from '../fixtures/mockData'
  * Used with setupServer() to mock all network requests
  */
 
-const API_BASE_URL = 'http://localhost:5173/api/bibliography';
+// In tests, API client calls backend directly (no Vite proxy)
+const API_BASE_URL = 'http://localhost:8005/api/bibliography';
 
 export const handlers = [
   // References Endpoints

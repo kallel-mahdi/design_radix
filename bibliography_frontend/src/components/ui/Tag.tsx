@@ -8,7 +8,7 @@ const tagVariants = cva(
     variants: {
       hasColor: {
         true: "text-white",
-        false: "bg-gray-700 text-text-secondary"
+        false: "bg-gray-700 text-app-text-secondary"
       },
       size: {
         sm: "px-1.5 py-0.5 text-xs",

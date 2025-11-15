@@ -95,8 +95,8 @@ export function useRenameTagMutation() {
 
   return useMutation({
     mutationFn: async ({ oldName, newName }: { oldName: string; newName: string }): Promise<Tag> => {
-      const response = await apiClient.patch<Tag>(`/tags/${oldName}`, {
-        name: newName,
+      const response = await apiClient.patch<Tag>(`/tags/${oldName}/rename`, {
+        newName,
       });
       return TagSchema.parse(response);
     },

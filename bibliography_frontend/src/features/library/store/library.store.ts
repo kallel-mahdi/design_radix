@@ -130,7 +130,10 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         }),
         merge: (persistedState: any, currentState) => ({
           ...currentState,
-          ...persistedState,
+          // Explicitly restore persisted fields
+          sortBy: persistedState?.sortBy ?? currentState.sortBy,
+          sortOrder: persistedState?.sortOrder ?? currentState.sortOrder,
+          activeCollectionId: persistedState?.activeCollectionId ?? currentState.activeCollectionId,
           expandedCollectionIds: new Set(persistedState?.expandedCollectionIds || [])
         })
       }

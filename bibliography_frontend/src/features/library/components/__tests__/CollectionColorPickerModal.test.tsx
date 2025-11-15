@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, userEvent } from '@/test/utils/testUtils';
+import { render, screen, userEvent, waitFor } from '@/test/utils/testUtils';
 import { CollectionColorPickerModal } from '../CollectionColorPickerModal';
 import type { Collection } from '@/common/types';
 
@@ -54,41 +54,33 @@ describe('CollectionColorPickerModal Component', () => {
   describe('Color Selection', () => {
     it('should select a color when clicked', async () => {
       const user = userEvent.setup();
-      render(<CollectionColorPickerModal {...defaultProps} />);
+      // Start with no color selected
+      render(<CollectionColorPickerModal {...defaultProps} collection={{ ...mockCollection, color: null }} />);
 
-      // Find color buttons by aria-label (more reliable than className)
-      const firstColorButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
-
-      // Click first color
-      await user.click(firstColorButton);
-
-      // Re-query buttons after click (React re-renders)
-      const selectedButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
-
-      // Check that button has selected styling (border-app-accent)
-      expect(selectedButton).toHaveClass('border-app-accent');
-    });
-
-    it('should deselect a color when clicked again', async () => {
-      const user = userEvent.setup();
-      render(<CollectionColorPickerModal {...defaultProps} />);
-
-      // Find color button by aria-label
-      const colorButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
+      // Find second color button (first color will be used in deselect test)
+      const colorButton = screen.getByRole('button', { name: /Select color #4ECDC4/i });
 
       // Click to select
       await user.click(colorButton);
 
-      // Re-query after first click
-      let selectedButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
-      expect(selectedButton).toHaveClass('border-app-accent');
+      // Button should now have selected border
+      expect(colorButton).toHaveClass('border-app-accent');
+    });
 
-      // Click again to deselect
-      await user.click(selectedButton);
+    it('should deselect a color when clicked again', async () => {
+      const user = userEvent.setup();
+      // Start with first color selected
+      render(<CollectionColorPickerModal {...defaultProps} collection={{ ...mockCollection, color: '#FF6B6B' }} />);
 
-      // Re-query after second click
-      selectedButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
-      expect(selectedButton).not.toHaveClass('border-app-accent');
+      // Find color button - should be selected initially
+      const colorButton = screen.getByRole('button', { name: /Select color #FF6B6B/i });
+      expect(colorButton).toHaveClass('border-app-accent');
+
+      // Click to deselect
+      await user.click(colorButton);
+
+      // Button should no longer have selected border
+      expect(colorButton).not.toHaveClass('border-app-accent');
     });
 
     it('should initialize with collection color selected', () => {

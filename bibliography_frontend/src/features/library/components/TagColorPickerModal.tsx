@@ -87,7 +87,7 @@ export const TagColorPickerModal: React.FC<TagColorPickerModalProps> = ({
           <div className="grid grid-cols-3 gap-3">
             {TAG_COLORS.map((color, index) => {
               const position = index + 1;
-              const isOccupied = occupiedPositions.has(position) && !selectedColor;
+              const isOccupied = occupiedPositions.has(position);
               const isSelected = selectedColor === color;
 
               return (
@@ -115,6 +115,15 @@ export const TagColorPickerModal: React.FC<TagColorPickerModalProps> = ({
             })}
           </div>
         </div>
+
+        {/* Warning when all positions occupied */}
+        {availablePositions.length === 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-sm text-yellow-800">
+              All positions are occupied. Remove color from another tag first.
+            </p>
+          </div>
+        )}
 
         {/* Position Selector */}
         {selectedColor && (

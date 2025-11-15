@@ -49,7 +49,7 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
           fill="currentColor"
         />
       </svg>
-      {text && <span className="text-sm text-text-secondary">{text}</span>}
+      {text && <span className="text-sm text-app-text-secondary">{text}</span>}
     </div>
   ),
 );

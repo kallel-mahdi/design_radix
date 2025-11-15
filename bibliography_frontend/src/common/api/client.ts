@@ -71,7 +71,7 @@ class ApiClient {
     // For development: use x-user-id header to bypass JWT
     // In production, this would come from JWT token on backend
     if (!authStore.tokens?.accessToken && import.meta.env.DEV) {
-      baseHeaders['x-user-id'] = 'test-user';
+      baseHeaders['x-user-id'] = 'test-user-id';
     }
 
     return baseHeaders;

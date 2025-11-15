@@ -67,21 +67,21 @@ export class ErrorBoundary extends Component<
                   strokeWidth={2}
                 />
               </svg>
-              <h1 className="text-lg font-semibold text-text-primary">
+              <h1 className="text-lg font-semibold text-app-text-primary">
                 Something went wrong
               </h1>
             </div>
 
-            <p className="mb-4 text-sm text-text-secondary">
+            <p className="mb-4 text-sm text-app-text-secondary">
               An unexpected error occurred. You can try reloading the app or
               contact support if the problem persists.
             </p>
 
-            <details className="mb-4 rounded border border-border bg-surface-1 p-3">
-              <summary className="cursor-pointer text-sm font-medium text-text-primary">
+            <details className="mb-4 rounded border border-app-border bg-surface-1 p-3">
+              <summary className="cursor-pointer text-sm font-medium text-app-text-primary">
                 Error details
               </summary>
-              <pre className="mt-2 overflow-x-auto text-xs text-text-secondary">
+              <pre className="mt-2 overflow-x-auto text-xs text-app-text-secondary">
                 {this.state.error.message}
                 {'\n\n'}
                 {this.state.error.stack}
@@ -97,7 +97,7 @@ export class ErrorBoundary extends Component<
                 Reload App
               </button>
               <button
-                className="rounded border border-border bg-surface-1 px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-3 transition-colors"
+                className="rounded border border-app-border bg-surface-1 px-4 py-2 text-sm font-medium text-app-text-primary hover:bg-surface-3 transition-colors"
                 onClick={this.resetError}
                 type="button"
               >

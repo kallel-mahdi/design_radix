@@ -29,7 +29,7 @@ export function ReferenceList({ references }: ReferenceListProps): React.ReactEl
 
 	if (references.length === 0) {
 		return (
-			<div className="flex h-64 items-center justify-center text-text-muted">
+			<div className="flex h-64 items-center justify-center text-app-text-muted">
 				<p>No references found. Create your first reference to get started.</p>
 			</div>
 		);

@@ -253,9 +253,10 @@ describe('TagColorPickerModal Component', () => {
     });
 
     it('should show warning when all positions are occupied', () => {
-      const allPositionsOccupied: Tag[] = [
-        { ...mockTag, position: 1 },
-        { ...mockTags[1], position: 2 },
+      // Create 9 tags at positions 1-9 (current tag has NO position/color)
+      const otherColoredTags: Tag[] = [
+        { _id: 'tag-1', userId: 'user-1', name: 'tag1', color: '#FF6B6B', position: 1, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+        { _id: 'tag-2', userId: 'user-1', name: 'tag2', color: '#4ECDC4', position: 2, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
         { _id: 'tag-3', userId: 'user-1', name: 'nlp', color: '#45B7D1', position: 3, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
         { _id: 'tag-4', userId: 'user-1', name: 'vision', color: '#FFA07A', position: 4, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
         { _id: 'tag-5', userId: 'user-1', name: 'nlp2', color: '#98D8C8', position: 5, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
@@ -268,12 +269,12 @@ describe('TagColorPickerModal Component', () => {
       render(
         <TagColorPickerModal
           {...defaultProps}
-          allTags={allPositionsOccupied}
-          tag={{ ...mockTag, color: null, position: null }}
+          allTags={[{ ...mockTag, color: null, position: null }, ...otherColoredTags]} // Current tag has NO position/color
+          tag={{ ...mockTag, color: null, position: null }} // Current tag has NO position/color
         />
       );
 
-      // Should show all positions as occupied
+      // Should show warning since all 9 positions are occupied by other tags
       expect(screen.getByText(/All positions are occupied/i)).toBeInTheDocument();
     });
   });
@@ -305,7 +306,7 @@ describe('TagColorPickerModal Component', () => {
       expect(applyButton).not.toBeDisabled();
     });
 
-    it('should disable Apply button when color is selected but position is not', async () => {
+    it('should auto-select first available position when color is selected', async () => {
       const user = userEvent.setup();
       render(
         <TagColorPickerModal
@@ -318,11 +319,12 @@ describe('TagColorPickerModal Component', () => {
         (btn) => btn.className.includes('aspect-square')
       );
 
-      // Select color but don't select position
+      // Select color - should auto-select first available position
       await user.click(colorButtons[3]);
 
-      const applyButton = screen.getByRole('button', { name: /Cancel/i });
-      expect(applyButton).toBeDisabled();
+      // Button text should change to "Apply Color & Position" and be enabled
+      const applyButton = screen.getByRole('button', { name: /Apply Color & Position/i });
+      expect(applyButton).not.toBeDisabled();
     });
 
     it('should call onColorAndPositionSelect when Apply button clicked', async () => {

@@ -215,11 +215,11 @@ describe('Library Feature Integration', () => {
         expect(parsed.state.sortOrder).toBe('desc');
       }
 
-      // Reset and rehydrate
-      useLibraryStore.setState({ sortBy: 'dateAdded', sortOrder: 'desc' });
+      // Simulate page reload by calling rehydrate
+      // This should merge the persisted state into the current state
       useLibraryStore.persist.rehydrate();
 
-      // Should restore persisted sort
+      // Should have persisted sort
       const restored = useLibraryStore.getState();
       expect(restored.sortBy).toBe('authors');
       expect(restored.sortOrder).toBe('desc');

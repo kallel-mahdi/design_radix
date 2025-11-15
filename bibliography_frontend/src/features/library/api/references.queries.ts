@@ -5,27 +5,31 @@ import { QUERY_STALE_TIME_MS } from '@/common/constants';
 import type { Reference, UpdateReferenceInput, CreateReferenceInput } from '@/common/types';
 import { ReferenceListSchema, ReferenceSchema } from '@bibliography/shared';
 
+export interface ReferencesQueryParams {
+  collectionId?: string;
+  tags?: string[];
+  search?: string;
+  deleted?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
 export const referenceKeys = {
   all: ['references'] as const,
   lists: () => [...referenceKeys.all, 'list'] as const,
-  list: (filters: any) => [...referenceKeys.lists(), filters] as const,
+  list: (filters: ReferencesQueryParams = {}) => [...referenceKeys.lists(), filters] as const,
   details: () => [...referenceKeys.all, 'detail'] as const,
   detail: (id: string) => [...referenceKeys.details(), id] as const
 };
 
-export function useReferencesQuery(params?: {
-  collectionId?: string;
-  tags?: string[];
-  deleted?: boolean;
-  limit?: number;
-  offset?: number;
-}) {
+export function useReferencesQuery(params?: ReferencesQueryParams) {
   return useQuery({
     queryKey: referenceKeys.list(params || {}),
     queryFn: async (): Promise<Reference[]> => {
       const queryParams = new URLSearchParams();
       if (params?.collectionId) queryParams.append('collectionId', params.collectionId);
       if (params?.tags) queryParams.append('tags', params.tags.join(','));
+      if (params?.search) queryParams.append('search', params.search);
       if (params?.deleted !== undefined) queryParams.append('deleted', String(params.deleted));
       if (params?.limit) queryParams.append('limit', String(params.limit));
       if (params?.offset) queryParams.append('offset', String(params.offset));

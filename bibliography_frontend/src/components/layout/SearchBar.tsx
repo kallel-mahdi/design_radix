@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/common/utils';
 
@@ -18,6 +18,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   autoFocus = false,
 }) => {
   const [query, setQuery] = useState('');
+
+  // Debounced search - trigger onSearch after 300ms of no typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearch?.(query);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query, onSearch]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

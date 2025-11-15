@@ -20,7 +20,7 @@ interface UIState {
   detailsPaneTab: 'info' | 'pdf' | 'notes';
 
   // Active view (for ActivityBar)
-  activeView: 'library' | 'search' | 'projects' | 'duplicates';
+  activeView: 'library' | 'search' | 'projects' | 'duplicates' | 'trash';
 
   // View mode
   viewMode: 'table' | 'grid';

@@ -21,7 +21,7 @@ const activityBarItemVariants = cva(
 );
 
 interface ActivityBarProps {
-  activeView: 'library' | 'search' | 'projects' | 'duplicates';
+  activeView: 'library' | 'search' | 'projects' | 'duplicates' | 'trash';
   onViewChange: (view: ActivityBarProps['activeView']) => void;
   duplicatesCount?: number;
   trashNotEmpty?: boolean;
@@ -70,8 +70,10 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
       ))}
       <div className="flex-1" /> {/* Spacer */}
       <button
-        className={activityBarItemVariants({ active: false })}
+        onClick={() => onViewChange('trash')}
+        className={activityBarItemVariants({ active: activeView === 'trash' })}
         aria-label="View Trash"
+        aria-current={activeView === 'trash' ? 'page' : undefined}
       >
         <TrashIcon className={cn('w-6 h-6', trashNotEmpty && 'text-red-400')} />
       </button>

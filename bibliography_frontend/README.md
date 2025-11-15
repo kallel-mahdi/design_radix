@@ -87,7 +87,7 @@ See `.env.example` for configuration. Key variables:
 
 ## Implementation Plan
 
-Follow the **20-session implementation checklist** in `bibliography_plan/frontend_plan/ImplementationChecklist.md`
+Follow the **20-session implementation checklist** in `docs/02-delivery/checklist/`
 
 ## Code Patterns
 
@@ -134,9 +134,9 @@ const { register, handleSubmit } = useForm({
 ## Related Documentation
 
 - **Backend**: `../bibliography_backend/README.md`
-- **Planning Docs**: `../bibliography_plan/`
+- **Planning Docs**: `docs/INDEX.md`
 - **Editor Reference**: `../editor_frontend/` (copy patterns from here)
 
 ## Contributing
 
-This is part of the bibliography manager MVP. See `../bibliography_plan/frontend_plan/Spec.md` for full specifications.
+This is part of the bibliography manager MVP. See `docs/01-specification/Spec.md` for full specifications.

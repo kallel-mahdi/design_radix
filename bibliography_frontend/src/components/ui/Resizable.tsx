@@ -45,7 +45,7 @@ const ResizableHandle = ({
     {...props}
   >
     {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border border-border bg-accent/10 transition-colors hover:bg-accent/20">
+      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border border-app-border bg-accent/10 transition-colors hover:bg-accent/20">
         <svg
           className="h-2.5 w-2.5 text-accent"
           fill="none"
