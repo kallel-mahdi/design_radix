@@ -52,174 +52,45 @@ Repository executes: "Here's the data you requested"
 - Flexible configuration
 - Promotes loose coupling
 
-### Excellent Example: NotificationService
-
-**File:** `/blog-api/src/services/NotificationService.ts`
+### Example: ReferenceService Dependency Injection
 
 ```typescript
-// Define dependencies interface for clarity
-import { UserPreference } from '../models/UserPreference';
-import type { INotification } from '../models/Notification';
+import type { ReferenceRepository } from '../repositories/ReferenceRepository';
+import type { DuplicateDetector } from '../services/duplicateDetector';
 
-export interface NotificationServiceDependencies {
-    batchingService: BatchingService;
-    emailComposer: EmailComposer;
+export interface ReferenceServiceDeps {
+    repository: ReferenceRepository;
+    duplicateDetector: DuplicateDetector;
 }
 
-// Service with dependency injection
-export class NotificationService {
-    private batchingService: BatchingService;
-    private emailComposer: EmailComposer;
-    private preferencesCache: Map<string, { preferences: any; timestamp: number }> = new Map();
-    private CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+export class ReferenceService {
+    constructor(private readonly deps: ReferenceServiceDeps) {}
 
-    // Dependencies injected via constructor
-    constructor(dependencies: NotificationServiceDependencies) {
-        this.batchingService = dependencies.batchingService;
-        this.emailComposer = dependencies.emailComposer;
+    async createReference(dto: CreateReferenceDTO) {
+        await this.deps.duplicateDetector.ensureNotDuplicate(dto);
+        return this.deps.repository.create(dto);
     }
 
-    /**
-     * Create a notification and route it appropriately
-     */
-    async createNotification(params: CreateNotificationParams) {
-        const { recipientID, type, title, message, link, context = {}, channel = 'both', priority = NotificationPriority.NORMAL } = params;
-
-        try {
-            // Get template and render content
-            const template = getNotificationTemplate(type);
-            const rendered = renderNotificationContent(template, context);
-
-            // Create in-app notification record
-            const notificationId = await createNotificationRecord({
-                instanceId: parseInt(context.instanceId || '0', 10),
-                template: type,
-                recipientUserId: recipientID,
-                channel: channel === 'email' ? 'email' : 'inApp',
-                contextData: context,
-                title: finalTitle,
-                message: finalMessage,
-                link: finalLink,
-            });
-
-            // Route notification based on channel
-            if (channel === 'email' || channel === 'both') {
-                await this.routeNotification({
-                    notificationId,
-                    userId: recipientID,
-                    type,
-                    priority,
-                    title: finalTitle,
-                    message: finalMessage,
-                    link: finalLink,
-                    context,
-                });
-            }
-
-            return notification;
-        } catch (error) {
-            ErrorLogger.log(error, {
-                context: {
-                    '[NotificationService] createNotification': {
-                        type: params.type,
-                        recipientID: params.recipientID,
-                    },
-                },
-            });
-            throw error;
+    async updateReference(id: string, dto: UpdateReferenceDTO) {
+        const existing = await this.deps.repository.findById(id);
+        if (!existing) {
+            throw new NotFoundError(`Reference ${id} not found`);
         }
-    }
-
-    /**
-     * Route notification based on user preferences
-     */
-    private async routeNotification(params: { notificationId: number; userId: string; type: string; priority: NotificationPriority; title: string; message: string; link?: string; context?: Record<string, any> }) {
-        // Get user preferences with caching
-        const preferences = await this.getUserPreferences(params.userId);
-
-        // Check if we should batch or send immediately
-        if (this.shouldBatchEmail(preferences, params.type, params.priority)) {
-            await this.batchingService.queueNotificationForBatch({
-                notificationId: params.notificationId,
-                userId: params.userId,
-                userPreference: preferences,
-                priority: params.priority,
-            });
-        } else {
-            // Send immediately via EmailComposer
-            await this.sendImmediateEmail({
-                userId: params.userId,
-                title: params.title,
-                message: params.message,
-                link: params.link,
-                context: params.context,
-                type: params.type,
-            });
-        }
-    }
-
-    /**
-     * Determine if email should be batched
-     */
-    shouldBatchEmail(preferences: UserPreference, notificationType: string, priority: NotificationPriority): boolean {
-        // HIGH priority always immediate
-        if (priority === NotificationPriority.HIGH) {
-            return false;
-        }
-
-        // Check batch mode
-        const batchMode = preferences.emailBatchMode || BatchMode.IMMEDIATE;
-        return batchMode !== BatchMode.IMMEDIATE;
-    }
-
-    /**
-     * Get user preferences with caching
-     */
-    async getUserPreferences(userId: string): Promise<any> {
-        // Check cache first
-        const cached = this.preferencesCache.get(userId);
-        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-            return cached.preferences;
-        }
-
-        const preference = await UserPreference.findOne({ userId }).lean();
-
-        const finalPreferences = preference || DEFAULT_PREFERENCES;
-
-        // Update cache
-        this.preferencesCache.set(userId, {
-            preferences: finalPreferences,
-            timestamp: Date.now(),
-        });
-
-        return finalPreferences;
+        return this.deps.repository.update(id, dto);
     }
 }
-```
 
-**Usage in Controller:**
-
-```typescript
-// Instantiate with dependencies
-const notificationService = new NotificationService({
-    batchingService: new BatchingService(),
-    emailComposer: new EmailComposer(),
-});
-
-// Use in controller
-const notification = await notificationService.createNotification({
-    recipientID: 'user-123',
-    type: 'AFRLWorkflowNotification',
-    context: { workflowName: 'AFRL Monthly Report' },
+// Composition root
+const referenceService = new ReferenceService({
+    repository: new ReferenceRepository(),
+    duplicateDetector: new DuplicateDetector(),
 });
 ```
 
 **Key Takeaways:**
-- Dependencies passed via constructor
-- Clear interface defines required dependencies
-- Easy to test (inject mocks)
-- Encapsulated caching logic
-- Business rules isolated from HTTP
+- Constructor injection keeps dependencies explicit and testable
+- Services orchestrate business rules (duplicate detection) before delegating to repositories
+- Controllers receive a pre-wired `referenceService` instance and stay thin
 
 ---
 
@@ -234,94 +105,49 @@ const notification = await notificationService.createNotification({
 - Permission services
 - Configuration services
 
-### Example: PermissionService (Singleton)
-
-**File:** `/blog-api/src/services/permissionService.ts`
+### Example: CollectionPermissionService (Singleton)
 
 ```typescript
-import { Post } from '../models/Post';
+import { Collection } from '../models/Collection';
 
-class PermissionService {
-    private static instance: PermissionService;
-    private permissionCache: Map<string, { canAccess: boolean; timestamp: number }> = new Map();
-    private CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+class CollectionPermissionService {
+    private static instance: CollectionPermissionService;
+    private readonly cache = new Map<string, { canEdit: boolean; timestamp: number }>();
+    private constructor(private readonly ttlMs = 5 * 60 * 1000) {}
 
-    // Private constructor prevents direct instantiation
-    private constructor() {
-        // Mongoose models are accessed directly, no initialization needed
+    static getInstance(): CollectionPermissionService {
+        if (!CollectionPermissionService.instance) {
+            CollectionPermissionService.instance = new CollectionPermissionService();
+        }
+        return CollectionPermissionService.instance;
     }
 
-    // Get singleton instance
-    public static getInstance(): PermissionService {
-        if (!PermissionService.instance) {
-            PermissionService.instance = new PermissionService();
+    async canEdit(userId: string, collectionId: string): Promise<boolean> {
+        const cacheKey = `${userId}:${collectionId}`;
+        const cached = this.cache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < this.ttlMs) {
+            return cached.canEdit;
         }
-        return PermissionService.instance;
+
+        const collection = await Collection.findById(collectionId)
+            .select('ownerId editors')
+            .lean();
+        const canEdit = Boolean(collection && (collection.ownerId === userId || collection.editors?.includes(userId)));
+
+        this.cache.set(cacheKey, { canEdit, timestamp: Date.now() });
+        return canEdit;
     }
 
-    /**
-     * Check if user can complete a workflow step
-     */
-    async canCompleteStep(userId: string, stepInstanceId: number): Promise<boolean> {
-        const cacheKey = `${userId}:${stepInstanceId}`;
-
-        // Check cache
-        const cached = this.permissionCache.get(cacheKey);
-        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-            return cached.canAccess;
-        }
-
-        try {
-            const post = await Post.findById(stepInstanceId)
-                .populate('author')
-                .populate({
-                    path: 'comments',
-                    populate: { path: 'user' }
-                })
-                .lean();
-
-            if (!post) {
-                return false;
-            }
-
-            // Check if user has permission
-            const canEdit = (post as any).authorId === userId ||
-                await this.isUserAdmin(userId);
-
-            // Cache result
-            this.permissionCache.set(cacheKey, {
-                canAccess: canEdit,
-                timestamp: Date.now(),
-            });
-
-            return canEdit;
-        } catch (error) {
-            console.error('[PermissionService] Error checking step permission:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Clear cache for user
-     */
-    clearUserCache(userId: string): void {
-        for (const [key] of this.permissionCache) {
-            if (key.startsWith(`${userId}:`)) {
-                this.permissionCache.delete(key);
+    invalidateCollection(collectionId: string) {
+        for (const key of this.cache.keys()) {
+            if (key.endsWith(`:${collectionId}`)) {
+                this.cache.delete(key);
             }
         }
-    }
-
-    /**
-     * Clear all cache
-     */
-    clearCache(): void {
-        this.permissionCache.clear();
     }
 }
 
-// Export singleton instance
-export const permissionService = PermissionService.getInstance();
+export const collectionPermissionService = CollectionPermissionService.getInstance();
 ```
 
 **Usage:**

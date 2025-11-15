@@ -200,7 +200,7 @@ Bibliography Frontend Guidelines
 Bibliography Planning Docs
   [!] resources/ directory NOT PRESENT
       - Note: This is a reference skill that loads planning files
-      - Planning docs located in: /home/mahdi/Desktop/bibliography/bibliography_plan/
+      - Planning docs located in: /home/mahdi/Desktop/bibliography/docs/
       - Expected to load Spec.md, ComponentsSpec.md, etc. dynamically
 
 Skill Developer

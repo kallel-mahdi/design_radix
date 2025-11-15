@@ -1,9 +1,19 @@
 ---
 name: skill-developer
-description: Create and manage Claude Code skills following Anthropic best practices. Use when creating new skills, modifying skill-rules.json, understanding trigger patterns, working with hooks, debugging skill activation, or implementing progressive disclosure. Covers skill structure, YAML frontmatter, trigger types (keywords, intent patterns, file paths, content patterns), enforcement levels (block, suggest, warn), hook mechanisms (UserPromptSubmit, PreToolUse), session tracking, and the 500-line rule.
+description: Create and manage Claude Code skills following Anthropic best practices. Use when creating new skills, modifying skill-rules.json, understanding trigger patterns, working with hooks, debugging skill activation, or implementing progressive disclosure. Covers skill structure, YAML frontmatter, trigger types (keywords, intent patterns, file paths, content patterns), enforcement levels (block, suggest, warn), hook mechanisms (UserPromptSubmit, PostToolUse, Stop), session tracking, and the 500-line rule.
 ---
 
 # Skill Developer Guide
+
+## Quick Reference
+
+| Use this skill when… | Bring this input | You will deliver |
+| --- | --- | --- |
+| Creating or editing a skill | Relevant SKILL.md draft, trigger ideas, affected repo paths | Updated SKILL.md + skill-rules entry that meets 500-line rule |
+| Debugging skill activation | Recent hook stderr/stdout, prompt/file examples | Diagnosis + trigger adjustments/test steps |
+| Updating hooks/settings | Current `.claude/settings.json`, hook script path | Documented hook change + validation notes |
+
+Keep SKILL.md files under **500 lines**, push detailed examples into `resources/`, and document any deviations from Anthropic’s progressive-disclosure pattern in code comments.
 
 ## Purpose
 
@@ -27,23 +37,25 @@ Automatically activates when you mention:
 
 ## System Overview
 
-### Two-Hook Architecture
+### Active Hook Architecture
 
-**1. UserPromptSubmit Hook** (Proactive Suggestions)
-- **File**: `.claude/hooks/skill-activation-prompt.ts`
-- **Trigger**: BEFORE Claude sees user's prompt
-- **Purpose**: Suggest relevant skills based on keywords + intent patterns
-- **Method**: Injects formatted reminder as context (stdout → Claude's input)
-- **Use Cases**: Topic-based skills, implicit work detection
+The current `.claude/settings.json` registers three hooks:
 
-**2. Stop Hook - Error Handling Reminder** (Gentle Reminders)
-- **File**: `.claude/hooks/error-handling-reminder.ts`
-- **Trigger**: AFTER Claude finishes responding
-- **Purpose**: Gentle reminder to self-assess error handling in code written
-- **Method**: Analyzes edited files for risky patterns, displays reminder if needed
-- **Use Cases**: Error handling awareness without blocking friction
+1. **UserPromptSubmit → `skill-activation-prompt.ts`**
+   - Runs *before* Claude sees the user prompt.
+   - Loads `skill-rules.json`, matches keywords/intent, and injects a formatted suggestion card (stdout → Claude context).
+   - Use this hook to keep skills advisory and fast (<100 ms target).
 
-**Philosophy Change (2025-10-27):** We moved away from blocking PreToolUse for Sentry/error handling. Instead, use gentle post-response reminders that don't block workflow but maintain code quality awareness.
+2. **PostToolUse → `post-tool-use-tracker.sh`**
+   - Runs after Edit/MultiEdit/Write succeed.
+   - Logs edited files + repos, deduplicates build/TSC commands per session, and skips Markdown files to avoid noise.
+   - Use it to capture evidence for TSC/build guards or analytics without blocking the workflow.
+
+3. **Stop → `tsc-check.sh`**
+   - Runs when a tool invocation ends, replaying cached TypeScript commands for any repo touched this session.
+   - Emits results on **stderr** so Claude notices failures, stores diagnostics under `.claude/tsc-cache/{session_id}` for the auto-error-resolver agent.
+
+> **Note:** The earlier `error-handling-reminder.ts` hook has been retired. If you add new guardrails (e.g., PreToolUse blockers), document and register them here so the guide always mirrors reality.
 
 ### Configuration File
 
@@ -158,6 +170,8 @@ See [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) for complete schema.
 ```
 
 ### Step 3: Test Triggers
+
+> **Guardrail reminder:** This repo currently ships *suggestion-only* hooks. If you add a PreToolUse guardrail, drop the hook script into `.claude/hooks/` and register it in `.claude/settings.json` before running the commands below.
 
 **Test UserPromptSubmit:**
 ```bash

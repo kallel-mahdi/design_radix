@@ -1,18 +1,48 @@
 ---
 name: bibliography-planning-docs
-description: References comprehensive planning documentation (Spec.md, ComponentsSpec.md, APIDesignSystem.md, Roadmap.md, UnifiedImplementationChecklist.md) for bibliography manager implementation. Auto-loads when working on features, components, API endpoints, or discussing implementation. Triggers on component names (ReferenceCard, CollectionTree), features (library, search, duplicates), or planning discussions.
+description: References comprehensive planning documentation (Spec.md, ComponentsSpec.md, APIDesignSystem.md, session checklists, roadmaps) for bibliography manager implementation. Auto-loads when working on features, components, API endpoints, or discussing implementation. Triggers on component names (ReferenceCard, CollectionTree), features (library, search, duplicates), or planning discussions.
 ---
 
 # Bibliography Planning Documentation Reference
 
-When implementing features for the bibliography manager, ALWAYS reference the comprehensive planning documentation. This skill ensures you stay aligned with the unified spec and don't duplicate work.
+When implementing features for the bibliography manager, ALWAYS reference the comprehensive planning documentation in `docs/` (start with `docs/INDEX.md`). This skill ensures you stay aligned with the unified spec and session-based workflow.
+
+---
+
+## Documentation Structure
+
+```
+docs/
+├── INDEX.md                          # Navigation hub
+├── 01-specification/                 # Complete specifications
+│   ├── Spec.md                       # Unified frontend + backend spec
+│   ├── INTEGRATION.md                # Architecture & integration
+│   ├── backend/                      # Backend specs
+│   └── frontend/                     # Frontend specs
+├── 02-delivery/                      # Implementation roadmap
+│   ├── checklist/                    # Session tasks (detailed)
+│   │   ├── sessions-01-05.md
+│   │   ├── sessions-06-10.md
+│   │   ├── sessions-11-15.md
+│   │   ├── sessions-16-20.md
+│   │   └── future.md
+│   └── roadmap/                      # Session goals (high-level)
+│       ├── sessions-01-05.md
+│       ├── sessions-06-10.md
+│       ├── sessions-11-15.md
+│       ├── sessions-16-20.md
+│       └── future-phases.md
+└── sessions/                         # Active session plans
+    ├── XX-plan.md                    # Created by /session-plan
+    └── completed/                    # Archived by /session-finish
+```
 
 ---
 
 ## Primary Documentation
 
 ### 1. Unified Specification
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/Spec.md`
+**Location:** `docs/01-specification/Spec.md`
 
 **Read this FIRST for any feature:**
 - Frontend Requirements (Components, State Management, Routing)
@@ -31,7 +61,7 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 ---
 
 ### 2. Frontend Component Specifications
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/frontend_plan/ComponentsSpec.md`
+**Location:** `docs/01-specification/frontend/ComponentsSpec.md`
 
 **Use when creating/modifying React components:**
 - **ReferenceCard** - Displays individual reference in list
@@ -49,7 +79,7 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 ---
 
 ### 3. Design System
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/frontend_plan/DesignSystem.md`
+**Location:** `docs/01-specification/frontend/DesignSystem.md`
 
 **Use for styling decisions:**
 - Color palette (primary, secondary, danger, etc.)
@@ -65,7 +95,7 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 ---
 
 ### 4. API Design & Endpoints
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/backend_plan/APIDesignSystem.md`
+**Location:** `docs/01-specification/backend/APIDesignSystem.md`
 
 **Use when creating/modifying backend routes:**
 - Complete endpoint specifications (method, path, auth)
@@ -80,48 +110,90 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 
 ---
 
-### 5. Implementation Checklist
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/UnifiedImplementationChecklist.md`
+### 5. Session Checklists (Detailed Tasks)
+**Location:** `docs/02-delivery/checklist/`
 
-**Use for session planning:**
-- 20 sessions with specific tasks
+**Use for detailed session planning:**
+- [sessions-01-05.md](../../../docs/02-delivery/checklist/sessions-01-05.md) - Foundation & core CRUD
+- [sessions-06-10.md](../../../docs/02-delivery/checklist/sessions-06-10.md) - Library view & collections
+- [sessions-11-15.md](../../../docs/02-delivery/checklist/sessions-11-15.md) - Search & import/export
+- [sessions-16-20.md](../../../docs/02-delivery/checklist/sessions-16-20.md) - Polish & testing
+- [future.md](../../../docs/02-delivery/checklist/future.md) - Post-MVP features
+
+Each session has:
 - Frontend + Backend tasks integrated
 - Dependencies between tasks
-- Acceptance criteria for each task
-- Estimated time per task
+- Acceptance criteria
+- Estimated time
 
-**Example:** "What should I work on in Session 3?"
-→ Go to UnifiedImplementationChecklist.md → Session 3 → See all frontend + backend tasks with dependencies
+**Example:** "What should I work on in Session 7?"
+→ Go to docs/02-delivery/checklist/sessions-06-10.md → Session 7 → See all tasks
 
 ---
 
-### 6. Development Roadmap
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/Roadmap.md`
+### 6. Session Roadmaps (High-Level Goals)
+**Location:** `docs/02-delivery/roadmap/`
 
-**For understanding phasing:**
-- MVP features (Sessions 1-10)
-- Phase 2 features (Sessions 11-15)
-- Phase 3 features (Sessions 16-20)
-- Dependencies between phases
-- Timeline and priorities
+**For understanding session goals and phasing:**
+- [sessions-01-05.md](../../../docs/02-delivery/roadmap/sessions-01-05.md) - Foundation goals
+- [sessions-06-10.md](../../../docs/02-delivery/roadmap/sessions-06-10.md) - Library goals
+- [sessions-11-15.md](../../../docs/02-delivery/roadmap/sessions-11-15.md) - Search goals
+- [sessions-16-20.md](../../../docs/02-delivery/roadmap/sessions-16-20.md) - Polish goals
+- [future-phases.md](../../../docs/02-delivery/roadmap/future-phases.md) - Post-MVP phases
+
+---
+
+### 7. Active Session Plans
+**Location:** `docs/sessions/`
+
+**Created by:** `/session-plan X` command
+**Archived by:** `/session-finish X` command
+
+**Structure:**
+- `XX-plan.md` (e.g., `06-plan.md`) - Comprehensive plan for Session X
+- Contains: Research findings, architecture decisions, implementation checklist, deviations, DoD
+- Moved to `sessions/completed/` after session finishes
+
+**Example:** "Read plan for current session"
+→ Check docs/sessions/ for latest XX-plan.md
 
 ---
 
 ## Reference Documentation
 
 ### Backend Specifics
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/backend_plan/`
+**Location:** `docs/01-specification/backend/`
 
 - **ServiceLayerSpec.md** - Service layer architecture, business logic patterns
+- **DatabaseDesign.md** - MongoDB schemas, indexes, performance
+- **RecommendedLibraries.md** - Approved libraries for all phases
 - **zotero.md** - Zotero implementation notes, duplicate detection algorithm
-- **CLAUDE.md** - Backend-specific context and patterns
 
 ---
 
-### Frontend Specifics
-**Location:** `/home/mahdi/Desktop/bibliography/bibliography_plan/frontend_plan/`
+## Session-Based Workflow
 
-- **CLAUDE.md** - Frontend-specific context and patterns
+**CRITICAL**: All development follows this workflow:
+
+### 1. `/session-plan X`
+- Reads `docs/02-delivery/checklist/sessions-XX-XX.md`
+- Uses Explore/Plan agents to research Zotero + editor patterns
+- Asks clarifying questions
+- Creates `docs/sessions/XX-plan.md` after approval
+
+### 2. `/session-execute X`
+- Reads `docs/sessions/XX-plan.md`
+- Implements backend → checkpoint → frontend
+- References `docs/01-specification/` for specs
+
+### 3. `/session-test X`
+- Writes comprehensive tests (60/30/10 pyramid)
+- References testing strategy
+
+### 4. `/session-finish X`
+- Updates CHANGELOG
+- Commits with references
+- Archives plan to `docs/sessions/completed/`
 
 ---
 
@@ -130,52 +202,27 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 ```
 I'm implementing a feature...
 
+├─ Which session am I on?
+│  └─ → docs/02-delivery/checklist/sessions-XX-XX.md
+│
+├─ What's the session plan?
+│  └─ → docs/sessions/XX-plan.md
+│
 ├─ Is it a React component?
-│  └─ → ComponentsSpec.md (what props/behavior?)
-│     → DesignSystem.md (how to style?)
+│  └─ → docs/01-specification/frontend/ComponentsSpec.md (what props/behavior?)
+│     → docs/01-specification/frontend/DesignSystem.md (how to style?)
 │
 ├─ Is it a backend API endpoint?
-│  └─ → APIDesignSystem.md (what's the spec?)
-│     → ServiceLayerSpec.md (how to organize logic?)
+│  └─ → docs/01-specification/backend/APIDesignSystem.md (what's the spec?)
+│     → docs/01-specification/backend/ServiceLayerSpec.md (how to organize logic?)
 │
 ├─ Do I need to understand duplicates?
-│  └─ → backend_plan/zotero.md (how does it work?)
-│
-├─ What should I work on next?
-│  └─ → UnifiedImplementationChecklist.md (Session #?)
+│  └─ → docs/01-specification/backend/zotero.md (how does it work?)
 │
 └─ What's the big picture?
-   └─ → Roadmap.md (Phase timeline?)
-      → Spec.md (MVP vs Phase 2/3?)
+   └─ → docs/02-delivery/roadmap/sessions-XX-XX.md (Session goals?)
+      → docs/01-specification/Spec.md (MVP vs Phase 2/3?)
 ```
-
----
-
-## Examples by Feature
-
-### Implementing Library Feature (ReferenceCard, CollectionTree)
-1. **Planning:** Spec.md → "Library" section
-2. **Components:** ComponentsSpec.md → ReferenceCard, CollectionTree
-3. **Styling:** DesignSystem.md → Colors, spacing, card variants
-4. **API:** APIDesignSystem.md → GET /references, POST /collections
-5. **Business Logic:** backend_plan/ServiceLayerSpec.md
-6. **Session Tasks:** UnifiedImplementationChecklist.md → Find which sessions cover library
-
-### Implementing Duplicate Detection
-1. **Overall Requirements:** Spec.md → "Duplicate Detection" section
-2. **Frontend UI:** ComponentsSpec.md → DuplicateDetector component
-3. **Algorithm:** backend_plan/zotero.md → How Zotero detects duplicates
-4. **API Endpoints:** APIDesignSystem.md → Duplicate endpoints
-5. **Services:** backend_plan/ServiceLayerSpec.md → Duplicate detection service
-6. **Sessions:** UnifiedImplementationChecklist.md → Sessions 5-6 (duplicate detection)
-
-### Implementing Import Feature
-1. **Requirements:** Spec.md → "Import/Export" section
-2. **Frontend UI:** ComponentsSpec.md → ImportDialog component
-3. **Form Validation:** APIDesignSystem.md → Import endpoint validation
-4. **Backend Processing:** backend_plan/ServiceLayerSpec.md → Import service
-5. **Error Handling:** APIDesignSystem.md → Import error codes
-6. **Sessions:** UnifiedImplementationChecklist.md → Session 7 (import)
 
 ---
 
@@ -183,66 +230,77 @@ I'm implementing a feature...
 
 **ALWAYS follow this sequence:**
 
-1. **Read Spec.md** (feature requirements section)
-   - Understand MVP vs future phases
-   - Check dependencies on other features
+1. **Run `/session-plan X`**
+   - Let workflow guide research and planning
+   - Creates comprehensive plan in docs/sessions/
 
-2. **Read component/endpoint-specific doc**
+2. **Read docs/sessions/XX-plan.md**
+   - Understand research findings
+   - Review architecture decisions
+   - Follow implementation checklist
+
+3. **Reference docs/01-specification/**
+   - Spec.md for feature requirements
    - ComponentsSpec.md for frontend
    - APIDesignSystem.md for backend
-   - Both for integrated features
 
-3. **Check editor_frontend/backend for patterns**
+4. **Check editor_frontend/backend for patterns**
    - Copy component structure from editor_frontend
    - Copy service patterns from editor_backend
 
-4. **Check Zotero (if reference app feature)**
+5. **Check Zotero (if reference app feature)**
    - Look in zotero/chrome/content/zotero/
    - See how they solved the problem
+   - Reference docs/01-specification/backend/zotero.md
 
-5. **Code & Test**
+6. **Code & Test**
    - Follow patterns from guidelines skills
    - Use examples from planning docs
    - Write comprehensive tests
 
-6. **Update relevant session in UnifiedImplementationChecklist.md**
-   - Mark task as complete
-   - Document decisions made
-   - Note blockers if any
+7. **Run `/session-finish X`**
+   - Updates CHANGELOG
+   - Commits with references
+   - Archives plan
 
 ---
 
 ## When You're Stuck
 
 **I don't know what to implement next**
-→ UnifiedImplementationChecklist.md → Find current session → Follow tasks in order
+→ docs/02-delivery/checklist/sessions-XX-XX.md → Find current session → Follow tasks in order
 
 **I don't know how to implement X component**
-→ ComponentsSpec.md → Find component → Read spec → Check editor_frontend for pattern
+→ docs/01-specification/frontend/ComponentsSpec.md → Find component → Read spec → Check editor_frontend for pattern
 
 **I don't know the API contract**
-→ APIDesignSystem.md → Find endpoint → See schema, validation, error codes
+→ docs/01-specification/backend/APIDesignSystem.md → Find endpoint → See schema, validation, error codes
 
 **I don't understand how duplicate detection should work**
-→ backend_plan/zotero.md → Read algorithm section
+→ docs/01-specification/backend/zotero.md → Read algorithm section
 
 **I need to understand the big picture**
-→ Spec.md → MVP section → See all core features and how they interact
+→ docs/01-specification/Spec.md → MVP section → See all core features and how they interact
 
 **I need styling guidance**
-→ DesignSystem.md → Find relevant section (colors, spacing, components)
+→ docs/01-specification/frontend/DesignSystem.md → Find relevant section (colors, spacing, components)
+
+**Where is the current session plan?**
+→ docs/sessions/ → Look for latest XX-plan.md
 
 ---
 
 ## Key Principles
 
-- ✅ Spec.md is the source of truth
+- ✅ docs/01-specification/Spec.md is the source of truth
+- ✅ Follow session workflow: /session-plan → /session-execute → /session-test → /session-finish
+- ✅ Session plans in docs/sessions/ guide implementation
+- ✅ docs/02-delivery/checklist/ has detailed tasks per session
+- ✅ docs/02-delivery/roadmap/ has high-level goals per session range
 - ✅ ComponentsSpec.md and APIDesignSystem.md are binding contracts
 - ✅ Always check dependencies before starting a feature
 - ✅ Reference editor_frontend/backend for implementation patterns
 - ✅ Reference Zotero for UX/algorithm inspiration
-- ✅ Follow UnifiedImplementationChecklist.md sessions strictly
-- ✅ If doc is unclear, note it as "Open Item" in Roadmap.md
 - ✅ Keep all docs updated as decisions evolve
 
 ---
@@ -251,10 +309,11 @@ I'm implementing a feature...
 
 - **bibliography-backend-guidelines** - Implementation patterns for backend
 - **bibliography-frontend-guidelines** - Implementation patterns for frontend
+- **bibliography-testing-skill** - Testing conventions and structure
 - **skill-developer** - How to create and manage skills
 
 ---
 
-**Last Updated**: 2025-01-09
-**Status**: Reference documentation complete
-**Next**: Start Session 1 per UnifiedImplementationChecklist.md
+**Last Updated**: 2025-11-11
+**Status**: Unified documentation structure complete
+**Next**: Run `/session-plan X` to start next session

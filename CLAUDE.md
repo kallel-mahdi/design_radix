@@ -8,6 +8,8 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 
 **Current Status**: MVP development - standalone bibliography manager that will later integrate with the collaborative editor.
 
+> **Reuse hierarchy**: (1) copy patterns from `editor_frontend` / `editor_backend`, (2) mirror Zotero’s proven UX/algorithms, (3) write net-new code only when neither exists. Document deviations inline when you diverge.
+
 ---
 
 ## Team Structure & Your Role
@@ -46,31 +48,24 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 │   │   └── api-gateway/          # REFERENCE - Routing & auth headers
 │   └── docker-compose.yml
 │
-├── zotero/                       # REFERENCE - Zotero source code
-│   ├── chrome/content/zotero/    # UI components, workflows
-│   │   ├── xpcom/                # Backend logic (duplicate detection, search, etc.)
-│   │   └── components/           # React components (newer UI)
-│   └── resource/schema/          # Database schema (SQLite)
+├── docs/                        # YOUR PLANNING DOCS (see docs/INDEX.md for nav)
+│   ├── 01-specification/        # Specs (frontend + backend)
+│   │   ├── Spec.md              # Unified requirements
+│   │   ├── frontend/DesignSystem.md
+│   │   └── backend/APIDesignSystem.md
+│   ├── 02-delivery/             # Session roadmap + checklist
+│   └── sessions/                # Plans created via /session-plan
 │
-├── bibliography_plan/            # YOUR PLANNING DOCS
-│   ├── Spec.md                  # UNIFIED - Complete frontend + backend specification
-│   ├── Roadmap.md               # UNIFIED - Phased development timeline (MVP → Phase 3)
-│   ├── UnifiedImplementationChecklist.md  # UNIFIED - 20 sessions combining F+B tasks
-│   ├── RecommendedLibraries.md  # Library guide (MVP + Phase 1-3)
-│   ├── CLAUDE.md                # This file (project overview)
-│   ├── frontend_plan/           # Frontend-specific docs
-│   │   ├── ComponentsSpec.md    # Detailed component specifications
-│   │   ├── DesignSystem.md      # Colors, typography, CVA patterns
-│   │   └── CLAUDE.md            # Frontend-specific context
-│   └── backend_plan/            # Backend-specific docs
-│       ├── APIDesignSystem.md   # API endpoint details, validation schemas
-│       ├── ServiceLayerSpec.md  # Service layer architecture
-│       ├── Agents.md            # Instructions for AI assistants
-│       ├── zotero.md            # Zotero implementation notes
-│       └── CLAUDE.md            # Backend-specific context
+├── zotero/                      # REFERENCE - Zotero source code checkout
+│   ├── chrome/content/zotero/   # UI components, workflows
+│   │   ├── xpcom/               # Backend logic (duplicate detection, search, etc.)
+│   │   └── components/          # React components (newer UI)
+│   └── resource/schema/         # Database schema (SQLite)
 │
 └── (future: bibliography_frontend/, bibliography_backend/)
 ```
+
+**Zotero checkout:** The `zotero/` directory above is part of this repo’s working tree. All references like `zotero/chrome/content/zotero/...` point there.
 
 ---
 
@@ -220,59 +215,18 @@ When implementing ANY feature:
 
 ---
 
-## Research Process (ALWAYS FOLLOW THIS)
+## Development Workflow
 
-### Before Implementing ANY Feature:
+Use the **session-based workflow** for all feature development:
 
-**Step 1: Read Planning Docs**
-- **Primary**: `bibliography_plan/Spec.md` - Unified specification (frontend + backend)
-- **Roadmap**: `bibliography_plan/Roadmap.md` - Phased development timeline
-- **Implementation**: `bibliography_plan/UnifiedImplementationChecklist.md` - Session-by-session tasks
-- **Frontend Details**: `bibliography_plan/frontend_plan/ComponentsSpec.md`, `DesignSystem.md`
-- **Backend Details**: `bibliography_plan/backend_plan/APIDesignSystem.md`, `ServiceLayerSpec.md`
+1. **Plan**: `/session-plan X` - Research (Zotero + editor + WebSearch), clarify ambiguities, create plan document
+2. **Execute**: `/session-execute X` - Implement backend + frontend with checkpoint between phases
+3. **Test**: `/session-test X` - Write comprehensive tests (optional timing: before or after implementation)
+4. **Finish**: `/session-finish X` - Update documentation, commit with references, archive plan
 
-**Step 2: Check Editor Codebase**
-```bash
-# Frontend example: Implementing a UI component
-cd /home/mahdi/Desktop/bibliography/editor_frontend/src/components/ui
-# Read Button.tsx, Card.tsx, Input.tsx - these are your templates
-# Copy patterns: CVA variants, props interface, styling with Tailwind v4
-```
+Each session follows: Research → Clarify → Plan → Implement → Test → Document → Commit
 
-```bash
-# Backend example: Implementing file upload
-cd /home/mahdi/Desktop/bibliography/editor_backend/services/document-service
-# Find multer configuration
-# Copy to bibliography-service
-```
-
-**Step 3: Check Zotero (if relevant)**
-```bash
-# Frontend example: Understanding tag selector UI
-cd /home/mahdi/Desktop/bibliography/zotero/chrome/content/zotero/components
-# Read tagSelector.jsx
-# Note: Max 9 colored tags, settings menu, drag-drop for assignment
-
-# Backend example: Duplicate detection
-cd /home/mahdi/Desktop/bibliography/zotero/chrome/content/zotero/xpcom
-# Read duplicates.js
-# Understand 3-stage matching: ISBN → DOI → Title+Creator
-```
-
-**Step 4: Implement**
-- Follow patterns from editor
-- Match Zotero UX where specified
-- Write tests (comprehensive: unit + integration + E2E)
-
-**Step 5: Document Deviations**
-If you do something different from Zotero, add a code comment:
-```typescript
-/**
- * NOTE: Automatic duplicate detection on import (differs from Zotero)
- * Zotero requires manual trigger, but we detect automatically for immediate feedback.
- * This increases import time slightly but provides better UX.
- */
-```
+See `.claude/commands/session-*.md` for detailed workflow steps.
 
 ---
 
@@ -305,25 +259,25 @@ Our implementation differs from Zotero in these ways (ALWAYS DOCUMENT IN CODE):
 ## Common Tasks & Where to Look
 
 ### "Implement a new component"
-1. Read `bibliography_plan/Spec.md` (section 2: Frontend Requirements)
-2. Read `bibliography_plan/frontend_plan/ComponentsSpec.md` (find component spec)
+1. Read `docs/01-specification/Spec.md` (section 2: Frontend Requirements)
+2. Read `docs/01-specification/frontend/ComponentsSpec.md` (find component spec)
 3. Check `editor_frontend/src/components/ui/` for UI primitives (Button, Card, Input, Modal)
 4. Copy structure and CVA patterns, adapt for bibliography domain
-5. Check `bibliography_plan/frontend_plan/DesignSystem.md` for colors, spacing, variants (Tailwind v4 CSS vars)
-6. Write tests (see UnifiedImplementationChecklist.md Session 19)
+5. Check `docs/01-specification/frontend/DesignSystem.md` for colors, spacing, variants (Tailwind v4 CSS vars)
+6. Write tests (see `docs/02-delivery/checklist/` Session 19 tasks)
 
 ### "Add a new API endpoint"
-1. Read `bibliography_plan/Spec.md` (section 3: Backend Requirements + section 6: Integration Points)
-2. Read `bibliography_plan/backend_plan/APIDesignSystem.md` (endpoint details)
+1. Read `docs/01-specification/Spec.md` (section 3: Backend Requirements + section 6: Integration Points)
+2. Read `docs/01-specification/backend/APIDesignSystem.md` (endpoint details)
 3. Check `editor_backend/services/document-service/src/routes/` for route patterns
 4. Check `editor_backend/services/auth-service/src/controllers/` for controller patterns
 5. Implement in `bibliography-service/src/`
 6. Write tests (unit + integration)
 
 ### "Implement Zotero feature X"
-1. Check if it's in MVP scope (`bibliography_plan/Spec.md` sections 2 & 3)
+1. Check if it's in MVP scope (`docs/01-specification/Spec.md` sections 2 & 3)
 2. If in scope, check Zotero implementation: `zotero/chrome/content/zotero/` or `zotero/chrome/content/zotero/xpcom/`
-3. Read `bibliography_plan/backend_plan/zotero.md` for algorithm details
+3. Read `docs/01-specification/backend/zotero.md` for algorithm details
 4. Adapt to our tech stack (React not XUL, MongoDB not SQLite)
 5. Document any deviations
 
@@ -439,21 +393,21 @@ NODE_ENV=development
 ## Key Contacts / Documentation
 
 **Primary Documentation** (Unified):
-- **Spec.md** (`bibliography_plan/Spec.md`) - Complete frontend + backend specification
-- **Roadmap.md** (`bibliography_plan/Roadmap.md`) - Phased development timeline (MVP → Phase 3)
-- **UnifiedImplementationChecklist.md** (`bibliography_plan/UnifiedImplementationChecklist.md`) - 20 sessions with detailed tasks
-- **RecommendedLibraries.md** (`bibliography_plan/RecommendedLibraries.md`) - Library guide for all phases
+- **Spec.md** (`docs/01-specification/Spec.md`) - Complete frontend + backend specification
+- **Roadmap folder** (`docs/02-delivery/roadmap/`) - Phased development timeline (MVP → Phase 3)
+- **Session checklists** (`docs/02-delivery/checklist/`) - 20 sessions with detailed tasks
+- **RecommendedLibraries.md** (`docs/01-specification/backend/RecommendedLibraries.md`) - Library guide for all phases
 
 **Frontend-Specific Documentation**:
-- Component specs → `bibliography_plan/frontend_plan/ComponentsSpec.md`
-- Design tokens → `bibliography_plan/frontend_plan/DesignSystem.md`
-- Frontend context → `bibliography_plan/frontend_plan/CLAUDE.md`
+- Component specs → `docs/01-specification/frontend/ComponentsSpec.md`
+- Design tokens → `docs/01-specification/frontend/DesignSystem.md`
+- Frontend context → `docs/01-specification/frontend/CLAUDE.md`
 
 **Backend-Specific Documentation**:
-- API details → `bibliography_plan/backend_plan/APIDesignSystem.md`
-- Service layer → `bibliography_plan/backend_plan/ServiceLayerSpec.md`
-- Zotero reference → `bibliography_plan/backend_plan/zotero.md`
-- Backend context → `bibliography_plan/backend_plan/CLAUDE.md`
+- API details → `docs/01-specification/backend/APIDesignSystem.md`
+- Service layer → `docs/01-specification/backend/ServiceLayerSpec.md`
+- Zotero reference → `docs/01-specification/backend/zotero.md`
+- Backend context → `docs/01-specification/backend/CLAUDE.md`
 
 **For Clarification**:
 - Open questions → See Spec.md section 6 (Open Items)
@@ -491,12 +445,12 @@ From user's global `.claude/CLAUDE.md`:
 
 When starting a new task:
 - [ ] **INVOKE SKILLS** (planning-docs always, + frontend/backend guidelines)
-- [ ] Read `bibliography_plan/Spec.md` (relevant section)
-- [ ] Read `bibliography_plan/UnifiedImplementationChecklist.md` (find your session)
+- [ ] Read `docs/01-specification/Spec.md` (relevant section)
+- [ ] Read the current session checklist in `docs/02-delivery/checklist/`
 - [ ] Search editor codebase for similar pattern
-- [ ] Check Zotero if UI/UX question (see `backend_plan/zotero.md`)
+- [ ] Check Zotero if UI/UX question (see `docs/01-specification/backend/zotero.md`)
 - [ ] Copy pattern, adapt to bibliography domain
-- [ ] Write tests (see Session 19 of UnifiedImplementationChecklist.md)
+- [ ] Write tests (follow `docs/02-delivery/checklist/` Session 19 tasks)
 - [ ] Document any deviations from Zotero
 
 ---

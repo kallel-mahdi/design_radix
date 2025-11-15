@@ -25,6 +25,10 @@
           "bibliography_backend/**/*.ts",
           "editor_backend/services/bibliography-service/**/*.ts"
         ],
+        "pathExclusions": [
+          "**/*.generated.ts",
+          "**/*.d.ts"
+        ],
         "contentPatterns": ["router\\.", "export.*Controller", "mongoose\\."]
       }
     },
@@ -42,6 +46,11 @@
           "bibliography_frontend/**/*.tsx",
           "bibliography_frontend/**/*.ts",
           "editor_frontend/src/**/*.tsx"
+        ],
+        "pathExclusions": [
+          "**/*.generated.ts",
+          "**/*.generated.tsx",
+          "**/*.d.ts"
         ],
         "contentPatterns": ["from 'zustand'", "cva\\(", "tw-merge", "useSuspenseQuery", "className="]
       }
@@ -62,6 +71,25 @@
           "editor_backend/services/bibliography-service/**/*"
         ],
         "contentPatterns": ["ReferenceCard", "CollectionTree", "DuplicateDetector", "api/"]
+      }
+    },
+    "bibliography-testing-skill": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Testing conventions for bibliography manager. Covers test pyramid ratios (60/30/10), project test structure, and monorepo test commands. Triggers: test, testing, unit test, integration test, E2E, vitest, playwright",
+      "promptTriggers": {
+        "keywords": ["test", "testing", "unit test", "integration test", "E2E", "vitest", "playwright", "coverage"],
+        "intentPatterns": ["(write|add|create).*?(test|spec)", "test.*?(component|endpoint|feature)"]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "**/__tests__/**/*.test.ts",
+          "**/__tests__/**/*.test.tsx",
+          "tests/**/*.test.ts",
+          "tests/e2e/**/*.spec.ts"
+        ],
+        "contentPatterns": ["describe\\(", "it\\(", "test\\(", "expect\\("]
       }
     }
   }

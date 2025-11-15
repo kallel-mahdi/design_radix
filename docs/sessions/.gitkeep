@@ -1,0 +1,3 @@
+# Session plans are created here during /session-plan
+# Format: XX-plan.md (e.g., 06-plan.md)
+# After /session-finish, plans move to completed/

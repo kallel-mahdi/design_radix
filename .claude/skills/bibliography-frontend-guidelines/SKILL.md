@@ -5,6 +5,14 @@ description: React 19/TypeScript frontend patterns for bibliography manager usin
 
 # Bibliography Frontend Development Guidelines
 
+## Quick Reference
+
+| Use this skill when… | Bring this input | You will deliver |
+| --- | --- | --- |
+| Building or refactoring React UI | Feature spec + affected files | Components that follow Suspense, Tailwind/CVA, TanStack Router patterns |
+| Adding data fetching/state | API contract + store/query draft | Hooks/stores using TanStack Query + Zustand with project aliases |
+| Styling or accessibility review | Design tokens from `docs/01-specification/frontend/DesignSystem.md` | Tailwind/CVA variants + Headless UI composition notes |
+
 ## Purpose
 
 Comprehensive guide for modern React development emphasizing Suspense-based data fetching, Tailwind/CVA styling, lazy loading, proper file organization, and performance optimization.

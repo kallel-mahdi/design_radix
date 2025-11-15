@@ -5,6 +5,14 @@ description: Express/TypeScript backend patterns for bibliography service using 
 
 # Bibliography Backend Development Guidelines
 
+## Quick Reference
+
+| Use this skill when… | Bring this input | You will deliver |
+| --- | --- | --- |
+| Creating/updating routes, controllers, services | API spec + affected files | Layered Express code (route → controller → service → repository) with Joi + logging |
+| Touching Mongoose schemas or repositories | Current schema + data requirements | Models/repositories that follow DI + repository patterns |
+| Reviewing middleware/logging/error handling | Gateway contract + failure cases | Middleware stack using Winston, config module, consistent error responses |
+
 ## Purpose
 
 Establish consistency and best practices for bibliography microservice using Express/TypeScript/Mongoose patterns.
