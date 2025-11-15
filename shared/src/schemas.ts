@@ -45,6 +45,8 @@ export const ReferenceTypeSchema = z.enum([
   'other',
 ]);
 
+export type ReferenceType = z.infer<typeof ReferenceTypeSchema>;
+
 /**
  * PDF Metadata Schema
  */
@@ -263,6 +265,15 @@ export const DuplicateResolutionInputSchema = z.object({
   resolution: z.enum(['keep-existing', 'merge', 'keep-both']),
 });
 
+// DOI Import Input (Session 6)
+// Uses Crossref-recommended regex (matches 99.3% of Crossref DOIs)
+// See: docs/sessions/06-plan.md for validation rationale
+export const ImportDoiInputSchema = z.object({
+  doi: z.string()
+    .min(1, 'DOI is required')
+    .regex(/^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i, 'Invalid DOI format'),
+});
+
 /**
  * Type exports for input schemas
  */
@@ -278,3 +289,4 @@ export type ProjectUnlinkInput = z.infer<typeof ProjectUnlinkInputSchema>;
 export type ProjectLinkCollectionInput = z.infer<typeof ProjectLinkCollectionInputSchema>;
 export type ProjectUnlinkCollectionInput = z.infer<typeof ProjectUnlinkCollectionInputSchema>;
 export type DuplicateResolutionInput = z.infer<typeof DuplicateResolutionInputSchema>;
+export type ImportDoiInput = z.infer<typeof ImportDoiInputSchema>;
