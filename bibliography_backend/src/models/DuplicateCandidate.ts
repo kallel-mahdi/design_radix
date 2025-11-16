@@ -9,8 +9,8 @@ export interface IDuplicateCandidate extends Document {
   duplicateReferenceId: mongoose.Types.ObjectId;
   matchReason: 'isbn' | 'doi' | 'title-creator';
   confidence: number;
-  resolved: boolean;
-  resolution: 'keep-existing' | 'merge' | 'keep-both' | null;
+  status: 'pending' | 'keep-existing' | 'keep-new' | 'merged';
+  actionTakenBy?: string;
   resolvedAt?: Date;
   createdAt: Date;
 }
@@ -26,20 +26,32 @@ const DuplicateCandidateSchema: Schema = new Schema(
       required: true
     },
     confidence: { type: Number, min: 0, max: 1, required: true },
-    resolved: { type: Boolean, default: false },
-    resolution: {
+    status: {
       type: String,
-      enum: ['keep-existing', 'merge', 'keep-both'],
-      default: null
+      enum: ['pending', 'keep-existing', 'keep-new', 'merged'],
+      default: 'pending',
+      required: true
     },
+    actionTakenBy: { type: String },
     resolvedAt: { type: Date }
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 // CRITICAL INDEXES
-DuplicateCandidateSchema.index({ userId: 1, resolved: 1 });
+DuplicateCandidateSchema.index({ userId: 1, status: 1 });
 DuplicateCandidateSchema.index({ existingReferenceId: 1 });
 DuplicateCandidateSchema.index({ duplicateReferenceId: 1 });
+
+// Prevent duplicate pairs - compound unique index
+// Ensures we don't create multiple duplicate candidates for the same reference pair
+DuplicateCandidateSchema.index(
+  {
+    userId: 1,
+    existingReferenceId: 1,
+    duplicateReferenceId: 1
+  },
+  { unique: true }
+);
 
 export const DuplicateCandidate = mongoose.model<IDuplicateCandidate>('DuplicateCandidate', DuplicateCandidateSchema);

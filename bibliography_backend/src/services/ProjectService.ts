@@ -4,6 +4,7 @@ import { ProjectLink, IProjectLink } from '../models/ProjectLink';
 import { Reference, IReference } from '../models/Reference';
 import { Collection, ICollection } from '../models/Collection';
 import { ApplicationLogger } from '../utils/logger';
+import { DocumentNotFoundError } from '../middleware/errorHandler';
 import mongoose from 'mongoose';
 
 @injectable()
@@ -12,6 +13,17 @@ export class ProjectService implements IProjectService {
     ApplicationLogger.info('Linking reference to project', { userId, projectId, referenceId });
 
     const refId = new mongoose.Types.ObjectId(referenceId);
+
+    // Validate that reference exists before linking
+    const reference = await Reference.findOne({
+      _id: refId,
+      userId,
+      deleted: false
+    });
+
+    if (!reference) {
+      throw new DocumentNotFoundError('Reference not found');
+    }
 
     // Check if link already exists
     const existing = await ProjectLink.findOne({
@@ -64,6 +76,17 @@ export class ProjectService implements IProjectService {
     ApplicationLogger.info('Linking collection to project', { userId, projectId, collectionId });
 
     const colId = new mongoose.Types.ObjectId(collectionId);
+
+    // Validate that collection exists before linking
+    const collection = await Collection.findOne({
+      _id: colId,
+      userId,
+      deleted: false
+    });
+
+    if (!collection) {
+      throw new DocumentNotFoundError('Collection not found');
+    }
 
     // Check if link already exists
     const existing = await ProjectLink.findOne({
@@ -134,6 +157,17 @@ export class ProjectService implements IProjectService {
   }
 
   async getReferenceProjects(userId: string, referenceId: string): Promise<IProjectLink[]> {
+    // Validate reference exists
+    const reference = await Reference.findOne({
+      _id: referenceId,
+      userId,
+      deleted: false
+    });
+
+    if (!reference) {
+      throw new DocumentNotFoundError('Reference not found');
+    }
+
     const links = await ProjectLink.find({
       userId,
       referenceId: new mongoose.Types.ObjectId(referenceId)
@@ -143,6 +177,17 @@ export class ProjectService implements IProjectService {
   }
 
   async getCollectionProjects(userId: string, collectionId: string): Promise<IProjectLink[]> {
+    // Validate collection exists
+    const collection = await Collection.findOne({
+      _id: collectionId,
+      userId,
+      deleted: false
+    });
+
+    if (!collection) {
+      throw new DocumentNotFoundError('Collection not found');
+    }
+
     const links = await ProjectLink.find({
       userId,
       collectionId: new mongoose.Types.ObjectId(collectionId)

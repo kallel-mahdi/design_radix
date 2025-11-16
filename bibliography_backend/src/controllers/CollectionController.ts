@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { ICollectionService } from '../interfaces/ICollectionService';
 import { TYPES } from '../config/types';
-import { ApplicationLogger } from '../utils/logger';
+import { DocumentNotFoundError } from '../middleware/errorHandler';
 
 @injectable()
 export class CollectionController {
@@ -10,7 +10,7 @@ export class CollectionController {
     @inject(TYPES.ICollectionService) private collectionService: ICollectionService
   ) {}
 
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const data = req.body;
@@ -23,15 +23,11 @@ export class CollectionController {
         data: collection
       });
     } catch (error) {
-      ApplicationLogger.error('Collection creation failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Collection creation failed'
-      });
+      next(error);
     }
   }
 
-  async list(req: Request, res: Response): Promise<void> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const collections = await this.collectionService.list(userId);
@@ -42,15 +38,11 @@ export class CollectionController {
         data: collections
       });
     } catch (error) {
-      ApplicationLogger.error('Collection list failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to list collections'
-      });
+      next(error);
     }
   }
 
-  async getById(req: Request, res: Response): Promise<void> {
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -58,11 +50,7 @@ export class CollectionController {
       const collection = await this.collectionService.getById(id, userId);
 
       if (!collection) {
-        res.status(404).json({
-          success: false,
-          message: 'Collection not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Collection not found');
       }
 
       res.status(200).json({
@@ -71,15 +59,11 @@ export class CollectionController {
         data: collection
       });
     } catch (error) {
-      ApplicationLogger.error('Collection retrieval failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to retrieve collection'
-      });
+      next(error);
     }
   }
 
-  async update(req: Request, res: Response): Promise<void> {
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -88,11 +72,7 @@ export class CollectionController {
       const collection = await this.collectionService.update(id, userId, data);
 
       if (!collection) {
-        res.status(404).json({
-          success: false,
-          message: 'Collection not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Collection not found');
       }
 
       res.status(200).json({
@@ -101,15 +81,11 @@ export class CollectionController {
         data: collection
       });
     } catch (error) {
-      ApplicationLogger.error('Collection update failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to update collection'
-      });
+      next(error);
     }
   }
 
-  async restore(req: Request, res: Response): Promise<void> {
+  async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -117,11 +93,7 @@ export class CollectionController {
       const collection = await this.collectionService.restore(id, userId);
 
       if (!collection) {
-        res.status(404).json({
-          success: false,
-          message: 'Collection not found or not deleted'
-        });
-        return;
+        throw new DocumentNotFoundError('Collection not found or not deleted');
       }
 
       res.status(200).json({
@@ -130,15 +102,11 @@ export class CollectionController {
         data: collection
       });
     } catch (error) {
-      ApplicationLogger.error('Collection restore failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to restore collection'
-      });
+      next(error);
     }
   }
 
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -146,20 +114,12 @@ export class CollectionController {
       const success = await this.collectionService.delete(id, userId);
 
       if (!success) {
-        res.status(404).json({
-          success: false,
-          message: 'Collection not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Collection not found');
       }
 
       res.status(204).send();
     } catch (error) {
-      ApplicationLogger.error('Collection deletion failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete collection'
-      });
+      next(error);
     }
   }
 }

@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import { ApplicationLogger } from '../utils/logger';
 import { ReferenceType } from '@bibliography/shared';
 import { CreateReferenceInput } from '../interfaces/IReferenceService';
+import { config } from '../config/environment';
 
 /**
  * Crossref API Response Interfaces
@@ -70,7 +71,7 @@ const TYPE_MAP: Record<string, ReferenceType> = {
  */
 @injectable()
 export class CrossrefService {
-  private readonly CROSSREF_API = 'https://api.crossref.org/works';
+  private readonly CROSSREF_API = `${config.crossrefApiUrl}/works`;
   private readonly USER_AGENT = 'BibliographyManager/1.0 (mailto:support@bibliography.app)';
   private readonly TIMEOUT_MS = 10000;
 

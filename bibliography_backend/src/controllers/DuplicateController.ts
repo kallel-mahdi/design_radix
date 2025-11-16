@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { IDuplicateService } from '../interfaces/IDuplicateService';
 import { TYPES } from '../config/types';
-import { ApplicationLogger } from '../utils/logger';
+import { DocumentNotFoundError } from '../middleware/errorHandler';
 
 @injectable()
 export class DuplicateController {
@@ -10,7 +10,7 @@ export class DuplicateController {
     @inject(TYPES.IDuplicateService) private duplicateService: IDuplicateService
   ) {}
 
-  async listUnresolved(req: Request, res: Response): Promise<void> {
+  async listUnresolved(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const duplicates = await this.duplicateService.listUnresolved(userId);
@@ -20,28 +20,20 @@ export class DuplicateController {
         data: duplicates
       });
     } catch (error) {
-      ApplicationLogger.error('Duplicate list failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to list duplicates'
-      });
+      next(error);
     }
   }
 
-  async resolve(req: Request, res: Response): Promise<void> {
+  async resolve(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
-      const { resolution } = req.body;
+      const { action } = req.body;
 
-      const duplicate = await this.duplicateService.resolve(userId, id, resolution);
+      const duplicate = await this.duplicateService.resolve(userId, id, action);
 
       if (!duplicate) {
-        res.status(404).json({
-          success: false,
-          message: 'Duplicate not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Duplicate not found');
       }
 
       res.status(200).json({
@@ -50,11 +42,7 @@ export class DuplicateController {
         data: duplicate
       });
     } catch (error) {
-      ApplicationLogger.error('Duplicate resolution failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to resolve duplicate'
-      });
+      next(error);
     }
   }
 }

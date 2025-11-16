@@ -46,10 +46,15 @@ describe('Duplicates API Integration Tests', () => {
 
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
-      // May or may not have duplicates depending on detection implementation
+      // Verify duplicate structure when found
       if (response.body.data.length > 0) {
         expect(response.body.data[0]).toHaveProperty('_id');
-        expect(response.body.data[0]).toHaveProperty('duplicateOf');
+        expect(response.body.data[0]).toHaveProperty('existingReferenceId');
+        expect(response.body.data[0]).toHaveProperty('duplicateReferenceId');
+        expect(response.body.data[0]).toHaveProperty('status');
+        expect(response.body.data[0].status).toBe('pending');
+        expect(response.body.data[0]).toHaveProperty('matchReason');
+        expect(response.body.data[0]).toHaveProperty('confidence');
       }
     });
 
@@ -124,7 +129,7 @@ describe('Duplicates API Integration Tests', () => {
   });
 
   describe('POST /api/bibliography/duplicates/:id/resolve', () => {
-    it('should resolve duplicate with keep-existing resolution', async () => {
+    it('should resolve duplicate with keep-existing action', async () => {
       // Create original reference
       const ref1Response = await request(app)
         .post('/api/bibliography/references')
@@ -161,19 +166,19 @@ describe('Duplicates API Integration Tests', () => {
         const response = await request(app)
           .post(`/api/bibliography/duplicates/${duplicateId}/resolve`)
           .send({
-            resolution: 'keep-existing',
-            keepId: ref1Id,
-            removeId: ref2Id,
+            action: 'keep-existing',
           })
           .expect(200);
 
         expect(response.body.success).toBe(true);
-        expect(response.body.data).toHaveProperty('resolution');
-        expect(response.body.data.resolution).toBe('resolved');
+        expect(response.body.data).toHaveProperty('status');
+        expect(response.body.data.status).toBe('keep-existing');
+        expect(response.body.data).toHaveProperty('resolvedAt');
+        expect(response.body.data).toHaveProperty('actionTakenBy');
       }
     });
 
-    it('should resolve duplicate with merge resolution', async () => {
+    it('should reject merge action (not implemented in MVP)', async () => {
       // Create original reference
       const ref1Response = await request(app)
         .post('/api/bibliography/references')
@@ -212,29 +217,20 @@ describe('Duplicates API Integration Tests', () => {
       if (duplicatesResponse.body.data.length > 0) {
         const duplicateId = duplicatesResponse.body.data[0]._id;
 
-        // Resolve with merge
+        // Attempt merge - should fail as not implemented in MVP
         const response = await request(app)
           .post(`/api/bibliography/duplicates/${duplicateId}/resolve`)
           .send({
-            resolution: 'merge',
-            keepId: ref1Id,
-            removeId: ref2Id,
-            mergedData: {
-              authors: [
-                { given: 'John', family: 'Doe', full: 'John Doe' },
-                { given: 'Jane', family: 'Smith', full: 'Jane Smith' },
-              ],
-              year: 2024,
-            },
+            action: 'merged',
           })
-          .expect(200);
+          .expect(400);
 
-        expect(response.body.success).toBe(true);
-        expect(response.body.data.resolution).toBe('resolved');
+        expect(response.body.success).toBe(false);
+        expect(response.body.message).toContain('MERGE_NOT_IMPLEMENTED');
       }
     });
 
-    it('should resolve duplicate with keep-both resolution', async () => {
+    it('should resolve duplicate with keep-new action', async () => {
       // Create original reference
       const ref1Response = await request(app)
         .post('/api/bibliography/references')
@@ -247,7 +243,7 @@ describe('Duplicates API Integration Tests', () => {
 
       const ref1Id = ref1Response.body.data._id;
 
-      // Create duplicate
+      // Create duplicate (newer reference)
       const ref2Response = await request(app)
         .post('/api/bibliography/references')
         .send({
@@ -267,16 +263,19 @@ describe('Duplicates API Integration Tests', () => {
       if (duplicatesResponse.body.data.length > 0) {
         const duplicateId = duplicatesResponse.body.data[0]._id;
 
-        // Resolve with keep-both
+        // Resolve with keep-new (keeps the newer reference, deletes existing)
         const response = await request(app)
           .post(`/api/bibliography/duplicates/${duplicateId}/resolve`)
           .send({
-            resolution: 'keep-both',
+            action: 'keep-new',
           })
           .expect(200);
 
         expect(response.body.success).toBe(true);
-        expect(response.body.data.resolution).toBe('resolved');
+        expect(response.body.data).toHaveProperty('status');
+        expect(response.body.data.status).toBe('keep-new');
+        expect(response.body.data).toHaveProperty('resolvedAt');
+        expect(response.body.data).toHaveProperty('actionTakenBy');
       }
     });
 
@@ -284,16 +283,14 @@ describe('Duplicates API Integration Tests', () => {
       const response = await request(app)
         .post('/api/bibliography/duplicates/507f1f77bcf86cd799439011/resolve')
         .send({
-          resolution: 'keep-existing',
-          keepId: '507f1f77bcf86cd799439012',
-          removeId: '507f1f77bcf86cd799439013',
+          action: 'keep-existing',
         })
         .expect(404);
 
       expect(response.body.success).toBe(false);
     });
 
-    it('should return 400 for invalid resolution type', async () => {
+    it('should return 400 for invalid action type', async () => {
       // Create duplicate first
       await request(app)
         .post('/api/bibliography/references')
@@ -323,11 +320,12 @@ describe('Duplicates API Integration Tests', () => {
         const response = await request(app)
           .post(`/api/bibliography/duplicates/${duplicateId}/resolve`)
           .send({
-            resolution: 'invalid-resolution',
+            action: 'invalid-action',
           })
           .expect(400);
 
         expect(response.body.success).toBe(false);
+        expect(response.body.code).toBe('VALIDATION_ERROR');
       }
     });
 
@@ -335,11 +333,12 @@ describe('Duplicates API Integration Tests', () => {
       const response = await request(app)
         .post('/api/bibliography/duplicates/507f1f77bcf86cd799439011/resolve')
         .send({
-          // Missing resolution field
+          // Missing action field
         })
         .expect(400);
 
       expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe('VALIDATION_ERROR');
     });
   });
 

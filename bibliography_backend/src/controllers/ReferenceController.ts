@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { IReferenceService } from '../interfaces/IReferenceService';
 import { CrossrefService } from '../services/CrossrefService';
 import { TYPES } from '../config/types';
 import { ApplicationLogger } from '../utils/logger';
 import { Reference } from '../models/Reference';
+import { DocumentNotFoundError } from '../middleware/errorHandler';
 
 @injectable()
 export class ReferenceController {
@@ -13,7 +14,7 @@ export class ReferenceController {
     @inject(TYPES.ICrossrefService) private crossrefService: CrossrefService
   ) {}
 
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const data = req.body;
@@ -26,23 +27,21 @@ export class ReferenceController {
         data: reference
       });
     } catch (error) {
-      ApplicationLogger.error('Reference creation failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Reference creation failed'
-      });
+      next(error);
     }
   }
 
-  async list(req: Request, res: Response): Promise<void> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
+      // Clamp limit to max 1000 per spec (Task 5: pagination limit clamping)
+      const limit = Math.min(Math.max(1, parseInt(req.query.limit as string) || 100), 1000);
       const filters = {
         collectionId: req.query.collectionId as string,
         tags: req.query.tags ? (req.query.tags as string).split(',') : undefined,
         deleted: req.query.deleted === 'true',
         search: req.query.search as string | undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        limit,
         offset: req.query.offset ? parseInt(req.query.offset as string) : 0
       };
 
@@ -60,15 +59,11 @@ export class ReferenceController {
         }
       });
     } catch (error) {
-      ApplicationLogger.error('Reference list failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to list references'
-      });
+      next(error);
     }
   }
 
-  async getById(req: Request, res: Response): Promise<void> {
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -76,11 +71,7 @@ export class ReferenceController {
       const reference = await this.referenceService.getById(id, userId);
 
       if (!reference) {
-        res.status(404).json({
-          success: false,
-          message: 'Reference not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Reference not found');
       }
 
       res.status(200).json({
@@ -89,15 +80,11 @@ export class ReferenceController {
         data: reference
       });
     } catch (error) {
-      ApplicationLogger.error('Reference retrieval failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to retrieve reference'
-      });
+      next(error);
     }
   }
 
-  async update(req: Request, res: Response): Promise<void> {
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -106,11 +93,7 @@ export class ReferenceController {
       const reference = await this.referenceService.update(id, userId, data);
 
       if (!reference) {
-        res.status(404).json({
-          success: false,
-          message: 'Reference not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Reference not found');
       }
 
       res.status(200).json({
@@ -119,15 +102,11 @@ export class ReferenceController {
         data: reference
       });
     } catch (error) {
-      ApplicationLogger.error('Reference update failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to update reference'
-      });
+      next(error);
     }
   }
 
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -135,24 +114,16 @@ export class ReferenceController {
       const success = await this.referenceService.softDelete(id, userId);
 
       if (!success) {
-        res.status(404).json({
-          success: false,
-          message: 'Reference not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Reference not found');
       }
 
       res.status(204).send();
     } catch (error) {
-      ApplicationLogger.error('Reference deletion failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete reference'
-      });
+      next(error);
     }
   }
 
-  async restore(req: Request, res: Response): Promise<void> {
+  async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -160,11 +131,7 @@ export class ReferenceController {
       const success = await this.referenceService.restore(id, userId);
 
       if (!success) {
-        res.status(404).json({
-          success: false,
-          message: 'Reference not found in trash'
-        });
-        return;
+        throw new DocumentNotFoundError('Reference not found in trash');
       }
 
       res.status(200).json({
@@ -172,15 +139,11 @@ export class ReferenceController {
         message: 'Reference restored successfully'
       });
     } catch (error) {
-      ApplicationLogger.error('Reference restoration failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to restore reference'
-      });
+      next(error);
     }
   }
 
-  async permanentDelete(req: Request, res: Response): Promise<void> {
+  async permanentDelete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -188,23 +151,13 @@ export class ReferenceController {
       const success = await this.referenceService.permanentDelete(id, userId);
 
       if (!success) {
-        res.status(404).json({
-          success: false,
-          message: 'Reference not found in trash'
-        });
-        return;
+        throw new DocumentNotFoundError('Reference not found in trash');
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Reference permanently deleted'
-      });
+      // Task 12: Use 204 No Content for permanent delete (no body)
+      res.status(204).send();
     } catch (error) {
-      ApplicationLogger.error('Permanent deletion failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to permanently delete reference'
-      });
+      next(error);
     }
   }
 
@@ -220,19 +173,18 @@ export class ReferenceController {
    *
    * Auto-triggers duplicate detection asynchronously (via ReferenceService.create).
    */
-  async importFromDoi(req: Request, res: Response): Promise<void> {
+  async importFromDoi(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { doi } = req.body;
 
       ApplicationLogger.info('Importing reference from DOI', { userId, doi });
 
-      // Check if DOI already exists for this user (avoids redundant Crossref API calls)
-      const normalizedDoi = doi.trim().toLowerCase();
-      const existing = await Reference.findOne({ userId, doi: normalizedDoi, deleted: false });
+      // Task 11: DOI normalization removed from controller - handled by service layer
+      const existing = await Reference.findOne({ userId, doi: doi.trim().toLowerCase(), deleted: false });
 
       if (existing) {
-        ApplicationLogger.info('DOI already exists in library', { userId, doi: normalizedDoi, referenceId: existing._id.toString() });
+        ApplicationLogger.info('DOI already exists in library', { userId, doi, referenceId: existing._id.toString() });
         res.status(200).json({
           success: true,
           message: 'Reference already exists in your library',
@@ -262,24 +214,18 @@ export class ReferenceController {
         data: reference
       });
     } catch (error) {
-      ApplicationLogger.error('DOI import failed', error as Error);
-
-      // Handle specific Crossref errors
-      const errorMessage = error instanceof Error ? error.message : 'DOI import failed';
-      let statusCode = 400;
-
-      if (errorMessage.includes('DOI not found')) {
-        statusCode = 404;
-      } else if (errorMessage.includes('Rate limit exceeded')) {
-        statusCode = 429;
-      } else if (errorMessage.includes('Network error') || errorMessage.includes('timeout')) {
-        statusCode = 503;
+      // Enhance error with specific status codes before passing to error handler
+      if (error instanceof Error) {
+        const message = error.message;
+        if (message.includes('DOI not found')) {
+          (error as any).statusCode = 404;
+        } else if (message.includes('Rate limit exceeded')) {
+          (error as any).statusCode = 429;
+        } else if (message.includes('Network error') || message.includes('timeout')) {
+          (error as any).statusCode = 503;
+        }
       }
-
-      res.status(statusCode).json({
-        success: false,
-        message: errorMessage
-      });
+      next(error);
     }
   }
 
@@ -291,7 +237,7 @@ export class ReferenceController {
    *
    * Used by E2E tests to ensure test isolation and prevent test pollution
    */
-  async testCleanup(req: Request, res: Response): Promise<void> {
+  async testCleanup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
 
@@ -311,11 +257,7 @@ export class ReferenceController {
         deletedCount: result.deletedCount
       });
     } catch (error) {
-      ApplicationLogger.error('Test cleanup failed', error as Error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Test cleanup failed'
-      });
+      next(error);
     }
   }
 }

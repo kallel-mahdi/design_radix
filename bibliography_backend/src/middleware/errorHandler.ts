@@ -26,6 +26,22 @@ export const errorHandler = (
   let code = error.code || error.name || 'INTERNAL_ERROR';
   let details = error.details || null;
 
+  // Parse error message for known error codes
+  const errorMessagePatterns = [
+    'MAX_COLORED_TAGS',
+    'POSITION_TAKEN',
+    'INVALID_POSITION',
+    'MERGE_NOT_IMPLEMENTED'
+  ];
+
+  for (const pattern of errorMessagePatterns) {
+    if (message.startsWith(pattern + ':')) {
+      statusCode = 400;
+      code = pattern;
+      break;
+    }
+  }
+
   // Handle MongoDB validation errors
   if (error.name === 'ValidationError') {
     statusCode = 400;

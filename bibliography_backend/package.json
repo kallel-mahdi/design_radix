@@ -19,7 +19,11 @@
     "test:integration": "jest --selectProjects=integration",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "jest --coverage --watchAll=false --ci"
+    "test:ci": "jest --coverage --watchAll=false --ci",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f bibliography-backend",
+    "docker:shell": "docker-compose exec bibliography-backend sh"
   },
   "dependencies": {
     "@bibliography/shared": "workspace:*",

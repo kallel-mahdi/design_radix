@@ -135,31 +135,50 @@ export class DuplicateService implements IDuplicateService {
   }
 
   async listUnresolved(userId: string): Promise<IDuplicateCandidate[]> {
-    return DuplicateCandidate.find({ userId, resolved: false })
+    return DuplicateCandidate.find({ userId, status: 'pending' })
       .populate('existingReferenceId')
       .populate('duplicateReferenceId')
       .sort({ createdAt: -1 });
   }
 
-  async resolve(userId: string, duplicateId: string, resolution: 'keep-existing' | 'merge' | 'keep-both'): Promise<IDuplicateCandidate | null> {
+  async resolve(userId: string, duplicateId: string, action: 'keep-existing' | 'keep-new' | 'merged'): Promise<IDuplicateCandidate | null> {
     const candidate = await DuplicateCandidate.findOneAndUpdate(
       { _id: duplicateId, userId },
       {
         $set: {
-          resolved: true,
-          resolution,
+          status: action,
+          actionTakenBy: userId,
           resolvedAt: new Date()
         }
       },
       { new: true }
     );
 
-    if (candidate && resolution === 'keep-existing') {
-      // Soft delete the duplicate reference
-      await Reference.updateOne(
-        { _id: candidate.duplicateReferenceId, userId },
-        { $set: { deleted: true, deletedAt: new Date() } }
-      );
+    if (!candidate) {
+      return null;
+    }
+
+    // Execute resolution action based on status
+    switch (action) {
+      case 'keep-existing':
+        // Permanently delete the duplicate reference
+        await Reference.deleteOne({
+          _id: candidate.duplicateReferenceId,
+          userId
+        });
+        break;
+
+      case 'keep-new':
+        // Permanently delete the existing reference
+        await Reference.deleteOne({
+          _id: candidate.existingReferenceId,
+          userId
+        });
+        break;
+
+      case 'merged':
+        // Merge functionality not implemented in MVP
+        throw new Error('MERGE_NOT_IMPLEMENTED: Merge functionality not available in MVP');
     }
 
     return candidate;

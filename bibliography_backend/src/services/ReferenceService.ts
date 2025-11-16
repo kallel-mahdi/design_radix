@@ -123,6 +123,12 @@ export class ReferenceService implements IReferenceService {
   }
 
   async update(id: string, userId: string, data: UpdateReferenceInput): Promise<IReference | null> {
+    // Track which fields changed that affect duplicate detection
+    const fieldsAffectingDuplicates = ['title', 'authors', 'doi', 'isbn'];
+    const changedFields = Object.keys(data).filter(key =>
+      fieldsAffectingDuplicates.includes(key)
+    );
+
     const updateData: any = { ...data };
 
     // Normalize DOI to lowercase if being updated
@@ -168,8 +174,21 @@ export class ReferenceService implements IReferenceService {
       { new: true }
     );
 
-    if (reference) {
-      ApplicationLogger.info('Reference updated', { userId, referenceId: id });
+    if (!reference) {
+      return null;
+    }
+
+    ApplicationLogger.info('Reference updated', { userId, referenceId: id });
+
+    // If duplicate-relevant fields changed, re-run detection asynchronously
+    if (changedFields.length > 0) {
+      // Trigger duplicate detection asynchronously (don't await)
+      this.duplicateService.detectForReference(userId, id).catch(err => {
+        ApplicationLogger.error('Background duplicate detection failed', err, {
+          referenceId: id,
+          userId
+        });
+      });
     }
 
     return reference;

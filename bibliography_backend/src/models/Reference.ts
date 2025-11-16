@@ -92,7 +92,9 @@ ReferenceSchema.index({ userId: 1, tags: 1 });
 ReferenceSchema.index({ doi: 1 });
 ReferenceSchema.index({ isbn: 1 });
 ReferenceSchema.index({ title: 'text', abstract: 'text' });
-// Citation keys must be unique per user, not globally
-ReferenceSchema.index({ userId: 1, citationKey: 1 }, { unique: true });
+// Citation keys must be unique per user (not globally)
+// Following Zotero's per-library uniqueness pattern (userdata.sql line 168: UNIQUE (libraryID, key))
+// This allows different users to use the same citation keys in their own libraries
+ReferenceSchema.index({ userId: 1, citationKey: 1 }, { unique: true, sparse: true });
 
 export const Reference = mongoose.model<IReference>('Reference', ReferenceSchema);

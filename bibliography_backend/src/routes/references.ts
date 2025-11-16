@@ -2,61 +2,61 @@ import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
-import { validate } from '../middleware/validate';
+import { validate, validateParams, validateQuery, ObjectIdParamSchema, ReferenceListQuerySchema } from '../middleware/validate';
 import { CreateReferenceSchema, UpdateReferenceSchema, ImportDoiSchema } from '@bibliography/shared';
 
 const router: ExpressRouter = Router();
 
 // Lazy load controller on each request
-router.post('/', validate(CreateReferenceSchema), (req, res) => {
+router.post('/', validate(CreateReferenceSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.create(req, res);
+  return controller.create(req, res, next);
 });
 
-router.get('/', (req, res) => {
+router.get('/', validateQuery(ReferenceListQuerySchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.list(req, res);
+  return controller.list(req, res, next);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.getById(req, res);
+  return controller.getById(req, res, next);
 });
 
 // Session 6 - DOI Import
-router.post('/import-doi', validate(ImportDoiSchema), (req, res) => {
+router.post('/import-doi', validate(ImportDoiSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.importFromDoi(req, res);
+  return controller.importFromDoi(req, res, next);
 });
 
 // Test Cleanup Endpoint - FOR TESTING ONLY
 // Deletes all references for a user (used by E2E tests)
-// Only available in non-production environments
+// Available in test and development environments (NOT production)
 if (process.env.NODE_ENV !== 'production') {
-  router.delete('/test-cleanup', (req, res) => {
+  router.delete('/test-cleanup', (req, res, next) => {
     const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-    return controller.testCleanup(req, res);
+    return controller.testCleanup(req, res, next);
   });
 }
 
-router.patch('/:id', validate(UpdateReferenceSchema), (req, res) => {
+router.patch('/:id', validateParams(ObjectIdParamSchema), validate(UpdateReferenceSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.update(req, res);
+  return controller.update(req, res, next);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.delete(req, res);
+  return controller.delete(req, res, next);
 });
 
-router.patch('/:id/restore', (req, res) => {
+router.patch('/:id/restore', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.restore(req, res);
+  return controller.restore(req, res, next);
 });
 
-router.delete('/:id/permanent', (req, res) => {
+router.delete('/:id/permanent', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-  return controller.permanentDelete(req, res);
+  return controller.permanentDelete(req, res, next);
 });
 
 // TODO: Session 7 - File Import/Export (methods not implemented yet)

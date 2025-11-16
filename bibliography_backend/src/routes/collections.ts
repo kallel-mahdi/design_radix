@@ -2,7 +2,7 @@ import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { CollectionController } from '../controllers/CollectionController';
 import { TYPES } from '../config/types';
-import { validate } from '../middleware/validate';
+import { validate, validateParams, ObjectIdParamSchema } from '../middleware/validate';
 import {
   CreateCollectionSchema,
   UpdateCollectionSchema,
@@ -10,34 +10,34 @@ import {
 
 const router: ExpressRouter = Router();
 
-router.post('/', validate(CreateCollectionSchema), (req, res) => {
+router.post('/', validate(CreateCollectionSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.create(req, res);
+  return controller.create(req, res, next);
 });
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.list(req, res);
+  return controller.list(req, res, next);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.getById(req, res);
+  return controller.getById(req, res, next);
 });
 
-router.patch('/:id', validate(UpdateCollectionSchema), (req, res) => {
+router.patch('/:id', validateParams(ObjectIdParamSchema), validate(UpdateCollectionSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.update(req, res);
+  return controller.update(req, res, next);
 });
 
-router.patch('/:id/restore', (req, res) => {
+router.patch('/:id/restore', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.restore(req, res);
+  return controller.restore(req, res, next);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
-  return controller.delete(req, res);
+  return controller.delete(req, res, next);
 });
 
 export { router as collectionsRouter };

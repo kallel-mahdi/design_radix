@@ -61,36 +61,81 @@ export class TagService implements ITagService {
     );
   }
 
-  async updateColor(name: string, userId: string, color: string | null, position: number | null): Promise<ITag | null> {
+  async updateColor(name: string, userId: string, color: string | null, position?: number | null): Promise<ITag | null> {
     ApplicationLogger.info('Updating tag color', { userId, name, color, position });
 
-    // Enforce max 9 colored tags
-    if (color !== null && position !== null) {
-      const coloredTagsCount = await Tag.countDocuments({
-        userId,
-        color: { $ne: null },
-        name: { $ne: name }
-      });
-
-      if (coloredTagsCount >= 9) {
-        throw new Error('MAX_COLORED_TAGS: Cannot have more than 9 colored tags');
-      }
-
-      if (position < 1 || position > 9) {
-        throw new Error('INVALID_POSITION: Position must be between 1 and 9');
-      }
+    const tag = await Tag.findOne({ userId, name });
+    if (!tag) {
+      return null;
     }
 
-    const tag = await Tag.findOneAndUpdate(
-      { userId, name },
-      { $set: { color, position } },
-      { new: true }
-    );
+    if (color !== null) {
+      // Setting a color - auto-calculate position if not provided
+      if (position === undefined || position === null) {
+        // Find first available position (1-9)
+        const coloredTags = await Tag.find({
+          userId,
+          color: { $ne: null },
+          _id: { $ne: tag._id }
+        }).select('position').sort('position');
 
-    if (tag) {
-      ApplicationLogger.info('Tag color updated', { userId, name, tagId: tag._id.toString() });
+        const usedPositions = new Set(coloredTags.map(t => t.position).filter(p => p !== null));
+
+        // Find first gap in 1-9
+        let availablePosition = null;
+        for (let i = 1; i <= 9; i++) {
+          if (!usedPositions.has(i)) {
+            availablePosition = i;
+            break;
+          }
+        }
+
+        if (availablePosition === null) {
+          throw new Error('MAX_COLORED_TAGS: Maximum 9 colored tags allowed');
+        }
+
+        position = availablePosition;
+      } else {
+        // Validate provided position
+        if (position < 1 || position > 9) {
+          throw new Error('INVALID_POSITION: Position must be between 1 and 9');
+        }
+
+        // Check if position already taken
+        const existingAtPosition = await Tag.findOne({
+          userId,
+          position,
+          _id: { $ne: tag._id }
+        });
+
+        if (existingAtPosition) {
+          throw new Error('POSITION_TAKEN: Position already occupied by another tag');
+        }
+      }
+
+      tag.color = color;
+      tag.position = position;
+    } else {
+      // Clearing color - remove position and renumber remaining
+      const oldPosition = tag.position;
+      tag.color = null;
+      tag.position = null;
+      await tag.save();
+
+      if (oldPosition !== null) {
+        // Renumber tags with position > oldPosition
+        await Tag.updateMany(
+          { userId, position: { $gt: oldPosition } },
+          { $inc: { position: -1 } }
+        );
+      }
+
+      ApplicationLogger.info('Tag color cleared', { userId, name, tagId: tag._id.toString() });
+      return tag;
     }
 
+    await tag.save();
+    ApplicationLogger.info('Tag color updated', { userId, name, tagId: tag._id.toString(), position });
     return tag;
   }
 

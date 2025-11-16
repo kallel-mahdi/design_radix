@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { ITagService } from '../interfaces/ITagService';
 import { TYPES } from '../config/types';
-import { ApplicationLogger } from '../utils/logger';
+import { DocumentNotFoundError, ConflictError } from '../middleware/errorHandler';
 
 @injectable()
 export class TagController {
@@ -10,7 +10,7 @@ export class TagController {
     @inject(TYPES.ITagService) private tagService: ITagService
   ) {}
 
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const data = req.body;
@@ -23,15 +23,11 @@ export class TagController {
         data: tag
       });
     } catch (error) {
-      ApplicationLogger.error('Tag creation failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Tag creation failed'
-      });
+      next(error);
     }
   }
 
-  async list(req: Request, res: Response): Promise<void> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const tags = await this.tagService.list(userId);
@@ -41,15 +37,11 @@ export class TagController {
         data: tags
       });
     } catch (error) {
-      ApplicationLogger.error('Tag list failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to list tags'
-      });
+      next(error);
     }
   }
 
-  async update(req: Request, res: Response): Promise<void> {
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -58,11 +50,7 @@ export class TagController {
       const tag = await this.tagService.update(id, userId, data);
 
       if (!tag) {
-        res.status(404).json({
-          success: false,
-          message: 'Tag not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Tag not found');
       }
 
       res.status(200).json({
@@ -71,15 +59,11 @@ export class TagController {
         data: tag
       });
     } catch (error) {
-      ApplicationLogger.error('Tag update failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to update tag'
-      });
+      next(error);
     }
   }
 
-  async rename(req: Request, res: Response): Promise<void> {
+  async rename(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { oldName } = req.params;
@@ -88,11 +72,7 @@ export class TagController {
       const tag = await this.tagService.rename(oldName, newName, userId);
 
       if (!tag) {
-        res.status(404).json({
-          success: false,
-          message: 'Tag not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Tag not found');
       }
 
       res.status(200).json({
@@ -101,19 +81,16 @@ export class TagController {
         data: tag
       });
     } catch (error) {
-      ApplicationLogger.error('Tag rename failed', error as Error);
-
-      const message = error instanceof Error ? error.message : 'Failed to rename tag';
-      const statusCode = message.startsWith('DUPLICATE_TAG_NAME') ? 409 : 400;
-
-      res.status(statusCode).json({
-        success: false,
-        message
-      });
+      // Convert duplicate tag error to ConflictError
+      if (error instanceof Error && error.message.startsWith('DUPLICATE_TAG_NAME')) {
+        next(new ConflictError(error.message));
+      } else {
+        next(error);
+      }
     }
   }
 
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { id } = req.params;
@@ -121,24 +98,16 @@ export class TagController {
       const success = await this.tagService.delete(id, userId);
 
       if (!success) {
-        res.status(404).json({
-          success: false,
-          message: 'Tag not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Tag not found');
       }
 
       res.status(204).send();
     } catch (error) {
-      ApplicationLogger.error('Tag deletion failed', error as Error);
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete tag'
-      });
+      next(error);
     }
   }
 
-  async updateColor(req: Request, res: Response): Promise<void> {
+  async updateColor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers['x-user-id'] as string;
       const { name } = req.params;
@@ -147,11 +116,7 @@ export class TagController {
       const tag = await this.tagService.updateColor(name, userId, color, position);
 
       if (!tag) {
-        res.status(404).json({
-          success: false,
-          message: 'Tag not found'
-        });
-        return;
+        throw new DocumentNotFoundError('Tag not found');
       }
 
       res.status(200).json({
@@ -160,15 +125,7 @@ export class TagController {
         data: tag
       });
     } catch (error) {
-      ApplicationLogger.error('Tag color update failed', error as Error);
-
-      const message = error instanceof Error ? error.message : 'Failed to update tag color';
-      const statusCode = message.startsWith('MAX_COLORED_TAGS') || message.startsWith('INVALID_POSITION') ? 400 : 500;
-
-      res.status(statusCode).json({
-        success: false,
-        message
-      });
+      next(error);
     }
   }
 }

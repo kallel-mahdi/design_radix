@@ -35,14 +35,21 @@ app.use(requestLogger);
 
 // Security middleware
 app.use(mongoSanitize());
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again later'
-});
-app.use('/api/bibliography', limiter);
+
+// Rate limiting (disabled in development/test for E2E tests)
+if (config.nodeEnv === 'production') {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests from this IP, please try again later'
+  });
+  app.use('/api/bibliography', limiter);
+  ApplicationLogger.info('Rate limiting enabled (production mode)');
+} else {
+  ApplicationLogger.warn('Rate limiting DISABLED (development/test mode)');
+}
 
 // Auth middleware (trust gateway or dev bypass)
 if (config.trustGatewayAuth) {
