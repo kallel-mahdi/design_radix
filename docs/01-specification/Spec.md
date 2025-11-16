@@ -86,7 +86,7 @@ The term "standalone bibliography manager" refers to the **product strategy** (M
 **Backend**:
 - Node.js 22+, Express 4, TypeScript 5.8
 - MongoDB (Mongoose 8), Redis 4 (Phase 2)
-- Joi (validation MVP, Zod in Phase 2), Winston (logging), Multer (file upload)
+- Zod (validation MVP, Zod in Phase 2), Winston (logging), Multer (file upload)
 - Inversify (dependency injection - advanced DI pattern)
 
 **Why these exact versions?** Code sharing, team consistency, future integration simplicity.
@@ -489,7 +489,7 @@ src/
 - **Controllers**: Handle HTTP, call services, format responses
 - **Services**: Business logic, database operations, external APIs
 - **Models**: Mongoose schemas, validation, indexes
-- **Middleware**: Trust gateway auth, error handling, validation (Joi)
+- **Middleware**: Trust gateway auth, error handling, validation (Zod)
 
 **Authentication**:
 - Trust API Gateway headers (`x-user-id`)
@@ -515,7 +515,7 @@ src/
 - Performance testing (index verification, query optimization)
 
 **Validation**:
-- Joi schemas for all request bodies (MVP)
+- Zod schemas for all request bodies (MVP)
 - Zod migration in Phase 2 (shared schemas with frontend)
 
 **Database**:
@@ -610,7 +610,7 @@ interface Reference {
 - `{ isbn: 1 }` — Duplicate detection (ISBN match)
 - `{ title: 'text', abstract: 'text' }` — Full-text search
 
-**Validation** (Joi MVP, Zod Phase 2):
+**Validation** (Zod MVP, Zod Phase 2):
 ```typescript
 const createReferenceSchema = Joi.object({
   type: Joi.string().valid('article', 'book', 'chapter', 'conference', 'thesis', 'other').required(),

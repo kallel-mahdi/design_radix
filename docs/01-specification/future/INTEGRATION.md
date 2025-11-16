@@ -157,6 +157,92 @@ Bibliography service: http://localhost:8005/api/bibliography
 Bibliography_frontend: http://localhost:5173
 ```
 
+**Configuration**:
+```typescript
+// bibliography_frontend/src/common/api/client.ts
+const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:3000/api/bibliography';
+const AUTH_SERVICE_URL = import.meta.env['VITE_AUTH_SERVICE_URL'] || 'http://localhost:3000/api/auth';
+```
+
+### API Response Format
+
+All bibliography service endpoints return a **standardized envelope structure** for consistent error handling and data access:
+
+**Success Response**:
+```typescript
+interface ApiResponse<T> {
+  success: boolean;        // Always true for successful requests
+  message: string;         // Human-readable success message
+  data: T;                 // Actual response data (typed)
+  pagination?: {           // Present for list endpoints
+    total: number;         // Total items in database
+    limit: number;         // Items per page
+    offset: number;        // Starting position
+    hasMore: boolean;      // Whether more pages exist
+  };
+}
+```
+
+**Error Response**:
+```typescript
+interface ApiError {
+  success: false;          // Always false for errors
+  message: string;         // Human-readable error message
+  code: string;            // Machine-readable error code (e.g., 'VALIDATION_ERROR')
+  details?: any;           // Optional error details (validation errors, etc.)
+}
+```
+
+**Example Success Response**:
+```json
+{
+  "success": true,
+  "message": "Reference created successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "type": "article",
+    "title": "Machine Learning Paper",
+    "citationKey": "smith2024machine",
+    ...
+  }
+}
+```
+
+**Example Error Response**:
+```json
+{
+  "success": false,
+  "message": "Invalid path parameters",
+  "code": "VALIDATION_ERROR",
+  "details": [
+    {"field": "id", "message": "Invalid ObjectId format"}
+  ]
+}
+```
+
+**Request Flow**:
+1. Frontend → API Gateway (port 3000)
+2. Gateway validates JWT, injects `x-user-id` header
+3. Gateway routes to bibliography service (port 8005)
+4. Service trusts `x-user-id` header (zero-trust within service)
+5. Service returns envelope response
+6. Frontend uses `isApiError()` type guard to handle errors
+
+**Frontend Usage**:
+```typescript
+import { ApiResponse, isApiError } from '@bibliography/shared';
+
+const response = await apiClient.get<Reference>('/references/123');
+
+if (isApiError(response)) {
+  // Handle error
+  console.error(response.code, response.message);
+} else {
+  // Access data
+  const reference = response.data;
+}
+```
+
 ### Shared Data Models
 
 Backend defines these models that frontend uses:

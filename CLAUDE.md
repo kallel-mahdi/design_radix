@@ -122,7 +122,7 @@ The editor uses microservices architecture:
 - Mongoose (MongoDB ODM)
 - Winston (logging)
 - Multer (file uploads)
-- Joi (validation)
+- Zod (validation - shared with frontend)
 - Jest or Vitest (testing)
 
 **Why**: Team consistency, code sharing, future integration, no surprises.
@@ -194,7 +194,7 @@ When implementing ANY feature:
 - ✅ Trust gateway auth middleware
 - ✅ Error handling middleware
 - ✅ Multer file upload configuration
-- ✅ Joi validation schemas
+- ✅ Zod validation schemas (in @bibliography/shared package)
 - ✅ Health check route pattern
 
 ### What to Reference from Zotero

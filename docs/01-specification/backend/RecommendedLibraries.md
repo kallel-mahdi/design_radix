@@ -238,7 +238,7 @@ app.use(compression({
 
 **Migration Strategy**:
 ```typescript
-// Before (Joi)
+// Before (Zod)
 const schema = Joi.object({
   title: Joi.string().required(),
   year: Joi.number().min(1000).max(2100)
@@ -260,10 +260,10 @@ type CreateReferenceInput = z.infer<typeof schema>;
 
 **Migration Steps**:
 1. Create `bibliography_common` package
-2. Convert schemas from Joi → Zod (mechanical process)
+2. Convert schemas from Zod → Zod (mechanical process)
 3. Add Zod middleware to Express
 4. Update imports in frontend and backend
-5. Remove Joi dependency
+5. Remove Zod dependency
 
 **Effort Breakdown**:
 - Setup shared package: 30 min
@@ -463,7 +463,7 @@ npm install express-async-errors dotenv-safe argon2 cookie-parser
 
 ## Migration Guides
 
-### Joi → Zod Migration
+### Zod → Zod Migration
 
 **Step 1**: Create shared package
 ```bash
@@ -477,7 +477,7 @@ npm install zod
 
 ```typescript
 // OLD: bibliography_backend/src/validation/schemas.ts
-import Joi from 'joi';
+import Zod from 'joi';
 
 export const createReferenceSchema = Joi.object({
   title: Joi.string().required(),
@@ -510,7 +510,7 @@ export type CreateReferenceInput = z.infer<typeof createReferenceSchema>;
 
 **Step 3**: Update middleware
 ```typescript
-// OLD: Using Joi middleware
+// OLD: Using Zod middleware
 import { validate } from './middleware/validation';
 router.post('/', validate(schema), controller.create);
 
@@ -559,7 +559,7 @@ if (!user.passwordHash.startsWith('$argon2')) {
 
 ### Validation
 
-| Feature | Joi | Zod |
+| Feature | Zod | Zod |
 |---------|-----|-----|
 | TypeScript Inference | ❌ No | ✅ Excellent |
 | Bundle Size | ~100KB | ~45KB |
@@ -672,7 +672,7 @@ app.use(helmet({
 **Fix**: Ensure build tools available in CI/CD
 
 ### 5. Zod Middleware Performance
-**Issue**: Slight overhead vs Joi (negligible for MVP)
+**Issue**: Slight overhead vs Zod (negligible for MVP)
 **Fix**: None needed (trade-off for type safety)
 
 ### 6. express-mongo-sanitize Limitations

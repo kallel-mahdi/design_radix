@@ -50,7 +50,7 @@ The service layer implements business logic, separated from HTTP concerns (contr
 1. Generate unique citation key using `generateCitationKey()`:
    - Format: `lastname + year + titleWord + random3chars`
    - Example: `smith2024machine + abc` → `smith2024machineabc`
-2. Validate required fields (title, type checked by Joi in controller)
+2. Validate required fields (title, type checked by Zod in controller)
 3. Create reference document in MongoDB with `deleted: false`
 4. **Trigger async duplicate detection** (non-blocking):
    - Calls `duplicateService.detectForReference(reference._id)`

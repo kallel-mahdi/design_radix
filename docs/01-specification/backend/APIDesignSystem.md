@@ -201,7 +201,7 @@ This document defines the standard patterns for HTTP API responses, error handli
 
 | Code | Description | HTTP Status | Example Scenario |
 |------|-------------|-------------|------------------|
-| `VALIDATION_ERROR` | Input validation failed (Joi) | 400 | Missing required field, invalid format, type mismatch |
+| `VALIDATION_ERROR` | Input validation failed (Zod) | 400 | Missing required field, invalid format, type mismatch |
 | `NOT_FOUND` | Resource not found | 404 | Reference ID doesn't exist, Collection not found |
 | `DUPLICATE_DOI` | Reference with same DOI exists | 409 | Creating reference with existing DOI |
 | `DUPLICATE_ISBN` | Reference with same ISBN exists | 409 | Creating book with existing ISBN |
@@ -218,90 +218,66 @@ This document defines the standard patterns for HTTP API responses, error handli
 
 ---
 
-## Joi Validation Schemas
+## Zod Validation Schemas
+
+**Note**: All validation schemas are defined in `shared/src/schemas.ts` and shared between frontend and backend for type safety.
 
 ### Reference Creation
 
 **Endpoint**: `POST /api/bibliography/references`
 
-**Schema**:
+**Schema** (from `@bibliography/shared`):
 ```typescript
-const createReferenceSchema = Joi.object({
-  type: Joi.string()
-    .valid('article', 'book', 'chapter', 'conference', 'thesis', 'other')
-    .required()
-    .messages({
-      'any.required': 'Reference type is required',
-      'any.only': 'Type must be one of: article, book, chapter, conference, thesis, other'
-    }),
+import { z } from 'zod';
 
-  title: Joi.string()
-    .min(1)
-    .required()
-    .messages({
-      'any.required': 'Title is required',
-      'string.empty': 'Title cannot be empty'
-    }),
+export const CreateReferenceSchema = z.object({
+  type: z.enum(['article', 'book', 'chapter', 'conference', 'thesis', 'other'], {
+    errorMap: () => ({ message: 'Type must be one of: article, book, chapter, conference, thesis, other' })
+  }),
 
-  authors: Joi.array()
-    .items(Joi.object({
-      given: Joi.string().allow('').optional(),
-      family: Joi.string().allow('').optional(),
-      full: Joi.string().required()
-    }))
+  title: z.string().min(1, 'Title is required'),
+
+  authors: z.array(z.object({
+    given: z.string().optional(),
+    family: z.string().optional(),
+    full: z.string()
+  })).optional(),
+
+  year: z.number()
+    .int()
+    .min(1000, 'Year must be at least 1000')
+    .max(2100, 'Year cannot exceed 2100')
     .optional(),
 
-  year: Joi.number()
-    .integer()
-    .min(1000)
-    .max(2100)
-    .optional()
-    .messages({
-      'number.min': 'Year must be at least 1000',
-      'number.max': 'Year cannot exceed 2100'
-    }),
+  venue: z.string().optional(),
 
-  venue: Joi.string().optional(),
-
-  doi: Joi.string()
-    .regex(/^10\.\d{4,}\/\S+$/)
-    .optional()
-    .messages({
-      'string.pattern.base': 'Invalid DOI format. Must start with "10." followed by registrant code and suffix'
-    }),
-
-  isbn: Joi.string()
-    .regex(/^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/)
-    .optional()
-    .messages({
-      'string.pattern.base': 'Invalid ISBN format. Must be valid ISBN-10 or ISBN-13'
-    }),
-
-  url: Joi.string()
-    .uri()
-    .optional()
-    .messages({
-      'string.uri': 'Invalid URL format'
-    }),
-
-  abstract: Joi.string().optional(),
-
-  tags: Joi.array()
-    .items(Joi.string())
+  doi: z.string()
+    .regex(/^10\.\d{4,}\/\S+$/, 'Invalid DOI format. Must start with "10." followed by registrant code and suffix')
     .optional(),
 
-  collectionIds: Joi.array()
-    .items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
-    .optional()
-    .messages({
-      'string.pattern.base': 'Invalid collection ID format. Must be valid MongoDB ObjectId'
-    }),
+  isbn: z.string()
+    .regex(/^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/, 'Invalid ISBN format')
+    .optional(),
 
-  sourceRaw: Joi.object({
-    provider: Joi.string().required(),
-    payload: Joi.any().required()
-  }).required()
+  url: z.string()
+    .url('Invalid URL format')
+    .optional(),
+
+  abstract: z.string().optional(),
+
+  tags: z.array(z.string()).optional(),
+
+  collectionIds: z.array(
+    z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid collection ID format. Must be valid MongoDB ObjectId')
+  ).optional(),
+
+  sourceRaw: z.object({
+    provider: z.string(),
+    payload: z.any()
+  })
 });
+
+export type CreateReference = z.infer<typeof CreateReferenceSchema>;
 ```
 
 ---
@@ -312,21 +288,21 @@ const createReferenceSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const updateReferenceSchema = Joi.object({
-  title: Joi.string().min(1).optional(),
-  authors: Joi.array().items(Joi.object({
-    given: Joi.string().allow('').optional(),
-    family: Joi.string().allow('').optional(),
-    full: Joi.string().required()
+const updateReferenceSchema = z.object({
+  title: z.string().min(1).optional(),
+  authors: z.array().items(z.object({
+    given: z.string().allow('').optional(),
+    family: z.string().allow('').optional(),
+    full: z.string().required()
   })).optional(),
-  year: Joi.number().integer().min(1000).max(2100).optional(),
-  venue: Joi.string().optional(),
-  doi: Joi.string().regex(/^10\.\d{4,}\/\S+$/).optional(),
-  isbn: Joi.string().regex(/^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/).optional(),
-  url: Joi.string().uri().optional(),
-  abstract: Joi.string().optional(),
-  tags: Joi.array().items(Joi.string()).optional(),
-  collectionIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)).optional()
+  year: z.number().integer().min(1000).max(2100).optional(),
+  venue: z.string().optional(),
+  doi: z.string().regex(/^10\.\d{4,}\/\S+$/).optional(),
+  isbn: z.string().regex(/^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/).optional(),
+  url: z.string().uri().optional(),
+  abstract: z.string().optional(),
+  tags: z.array().items(z.string()).optional(),
+  collectionIds: z.array().items(z.string().regex(/^[0-9a-fA-F]{24}$/)).optional()
 }).min(1); // At least one field required
 ```
 
@@ -338,8 +314,8 @@ const updateReferenceSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const createCollectionSchema = Joi.object({
-  name: Joi.string()
+const createCollectionSchema = z.object({
+  name: z.string()
     .min(1)
     .required()
     .messages({
@@ -347,7 +323,7 @@ const createCollectionSchema = Joi.object({
       'string.empty': 'Collection name cannot be empty'
     }),
 
-  parentId: Joi.string()
+  parentId: z.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .allow(null)
     .optional()
@@ -355,7 +331,7 @@ const createCollectionSchema = Joi.object({
       'string.pattern.base': 'Invalid parent ID format. Must be valid MongoDB ObjectId'
     }),
 
-  color: Joi.string()
+  color: z.string()
     .regex(/^#[0-9A-Fa-f]{6}$/)
     .optional()
     .messages({
@@ -372,10 +348,10 @@ const createCollectionSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const updateCollectionSchema = Joi.object({
-  name: Joi.string().min(1).optional(),
-  parentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).optional(),
-  color: Joi.string().regex(/^#[0-9A-Fa-f]{6}$/).optional()
+const updateCollectionSchema = z.object({
+  name: z.string().min(1).optional(),
+  parentId: z.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional()
 }).min(1);
 ```
 
@@ -387,8 +363,8 @@ const updateCollectionSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const createTagSchema = Joi.object({
-  name: Joi.string()
+const createTagSchema = z.object({
+  name: z.string()
     .min(1)
     .required()
     .messages({
@@ -396,7 +372,7 @@ const createTagSchema = Joi.object({
       'string.empty': 'Tag name cannot be empty'
     }),
 
-  color: Joi.string()
+  color: z.string()
     .regex(/^#[0-9A-Fa-f]{6}$/)
     .allow(null)
     .optional()
@@ -414,8 +390,8 @@ const createTagSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const setTagColorSchema = Joi.object({
-  color: Joi.string()
+const setTagColorSchema = z.object({
+  color: z.string()
     .regex(/^#[0-9A-Fa-f]{6}$/)
     .allow(null)
     .required()
@@ -434,33 +410,33 @@ const setTagColorSchema = Joi.object({
 
 **Schema**:
 ```typescript
-const searchQuerySchema = Joi.object({
-  text: Joi.string().optional(),
+const searchQuerySchema = z.object({
+  text: z.string().optional(),
 
-  collectionId: Joi.string()
+  collectionId: z.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .optional(),
 
-  tags: Joi.array()
-    .items(Joi.string())
+  tags: z.array()
+    .items(z.string())
     .optional(),
 
-  type: Joi.string()
+  type: z.string()
     .valid('article', 'book', 'chapter', 'conference', 'thesis', 'other')
     .optional(),
 
-  deleted: Joi.boolean()
+  deleted: z.boolean()
     .optional()
     .default(false),
 
-  limit: Joi.number()
+  limit: z.number()
     .integer()
     .min(1)
     .max(1000)
     .optional()
     .default(100),
 
-  offset: Joi.number()
+  offset: z.number()
     .integer()
     .min(0)
     .optional()
@@ -476,8 +452,8 @@ const searchQuerySchema = Joi.object({
 
 **Schema**:
 ```typescript
-const resolveDuplicateSchema = Joi.object({
-  candidateId: Joi.string()
+const resolveDuplicateSchema = z.object({
+  candidateId: z.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
@@ -485,7 +461,7 @@ const resolveDuplicateSchema = Joi.object({
       'string.pattern.base': 'Invalid candidate ID format'
     }),
 
-  action: Joi.string()
+  action: z.string()
     .valid('keep-existing', 'keep-both', 'merge')
     .required()
     .messages({
@@ -509,7 +485,7 @@ const resolveDuplicateSchema = Joi.object({
 - `Content-Type: application/json`
 - `x-user-id: <user-id>` (required, from API Gateway)
 
-**Request Body**: `CreateReferenceInput` (see Joi schema above)
+**Request Body**: `CreateReferenceInput` (see Zod schema above)
 
 **Success Response** (201 Created):
 ```json
