@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Session 9 - DetailsPane Enhancement (2025-11-16)
+
+**Frontend:**
+- Enhanced InfoTab in DetailsPane with comprehensive metadata display
+- Added Edit button in header (opens ReferenceModal for editing)
+- Added Tags section with colored pills and remove (X) buttons
+- Added Collections section with clickable filter links and folder icons
+- Added Metadata footer showing Created/Modified dates and source provider
+- Implemented ESC key handler to close DetailsPane and clear active reference
+- Fixed API envelope unwrapping bug (response.data instead of full response)
+
+**Backend:**
+- Added virtual `collections` field to Reference model for proper population
+- Updated ReferenceService.getById() to populate collections without overwriting collectionIds array
+- Fixed Mongoose virtual field configuration (toJSON/toObject)
+
+**Shared:**
+- Fixed CollectionSchema.deletedAt from .nullable() to .nullish() for correct validation
+
+**Tests:**
+- Backend unit: 1 test for collection population in ReferenceService.getById()
+- Frontend unit: 20 tests for DetailsPane (Edit button, Tags, Collections, Metadata footer)
+- Frontend integration: 13 tests (8 for tag removal workflow, 5 for ESC key handler)
+- E2E: 11 comprehensive tests with worker isolation pattern
+- Total: 45 tests passing ✅
+- Created TESTING.md with test pyramid analysis, best practices, running instructions
+
+**Critical Bugs Fixed During Testing:**
+1. API envelope unwrapping in DetailsPane (caught by integration tests)
+2. Collection population overwriting collectionIds (caught by E2E tests)
+3. Zod schema validation for deletedAt field (caught by E2E tests)
+
+**Deviations from Zotero:**
+- None - Session 9 follows Zotero's item pane patterns (tags, collections, metadata footer)
+
+**References:**
+- Session Plan: `docs/sessions/09-plan.md`
+- Testing Documentation: `TESTING.md`
+- Zotero UI: `zotero/chrome/content/zotero/elements/itemPane.js` (tag pills, collections links)
+- Editor Patterns: Button/Card CVA variants, Zustand store patterns
+
+### Session 8 - ReferenceTable with TanStack Table (2025-11-16)
+
+**Note:** Session 8 was planned for ReferenceTable implementation with TanStack Table, but this component was already fully implemented in Session 3. The Session 8 plan has been archived for reference, but no new implementation work was required.
+
+**Session 8 Scope (Already Complete):**
+- TanStack Table v8 integration ✅ (implemented in Session 3)
+- Virtualization with @tanstack/react-virtual ✅ (implemented in Session 3)
+- Multi-select with checkbox, Cmd/Ctrl+Click, Shift+Click ✅ (implemented in Session 3)
+- Client-side sorting with Zustand state management ✅ (implemented in Session 3)
+- Author display formatting (LastName, F.) ✅ (implemented in Session 3)
+- Tag pills with overflow handling ✅ (implemented in Session 3)
+- Keyboard navigation (Arrow keys, Enter, Space) ✅ (implemented in Session 3)
+
+**References:**
+- Session Plan: `docs/sessions/completed/08-plan.md`
+- Existing Implementation: `bibliography_frontend/src/features/library/components/ReferenceTable.tsx`
+
 ### Session 7 Code Review - Bug Fixes & Test Documentation (2025-01-16)
 
 **Code Review Fixes:**

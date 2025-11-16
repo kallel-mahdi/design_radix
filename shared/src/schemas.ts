@@ -82,8 +82,29 @@ export const SourceRawSchema = z.object({
 });
 
 /**
+ * Collection Schema
+ * Validates collection objects from API responses
+ * Defined early to allow ReferenceSchema to reference it
+ */
+export const CollectionSchema = z.object({
+  _id: z.string(),
+  userId: z.string(),
+  name: z.string(),
+  parentId: z.string().nullable(),
+  position: z.number(),
+  color: z.string().nullable(),
+  deleted: z.boolean(),
+  deletedAt: z.string().nullish(), // Session 9 fix: allow undefined when not soft-deleted
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/**
  * Reference Schema
  * Validates reference objects from API responses
+ *
+ * Note: collections field is populated when fetching reference details
+ * collectionIds is always present for backwards compatibility
  */
 export const ReferenceSchema = z.object({
   _id: z.string(),
@@ -100,6 +121,7 @@ export const ReferenceSchema = z.object({
   citationKey: z.string(),
   tags: z.array(z.string()),
   collectionIds: z.array(z.string()),
+  collections: z.array(CollectionSchema).optional(), // Populated in detail queries
   hasPdf: z.boolean(),
   pdf: PdfMetadataSchema.nullish(),
   sourceRaw: SourceRawSchema,
@@ -107,23 +129,6 @@ export const ReferenceSchema = z.object({
   deletedAt: z.string().nullish(),
   createdAt: z.string(), // ISO 8601 string
   updatedAt: z.string(), // ISO 8601 string
-});
-
-/**
- * Collection Schema
- * Validates collection objects from API responses
- */
-export const CollectionSchema = z.object({
-  _id: z.string(),
-  userId: z.string(),
-  name: z.string(),
-  parentId: z.string().nullable(),
-  position: z.number(),
-  color: z.string().nullable(),
-  deleted: z.boolean(),
-  deletedAt: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
 });
 
 /**
