@@ -264,8 +264,11 @@ export const DeleteProjectLinkCollectionSchema = z.object({
 });
 
 // Duplicate Resolution Schema
+// 'action' field changed from 'resolution' to align with status-based model
+// 'keep-new' allows keeping the newly detected reference
+// 'merged' indicates merge operation (not implemented in MVP, will throw error)
 export const DuplicateResolutionSchema = z.object({
-  resolution: z.enum(['keep-existing', 'merge', 'keep-both']),
+  action: z.enum(['keep-existing', 'keep-new', 'merged']),
 });
 
 // DOI Import Schema (Session 6)
@@ -293,3 +296,87 @@ export type CreateProjectLinkCollection = z.infer<typeof CreateProjectLinkCollec
 export type DeleteProjectLinkCollection = z.infer<typeof DeleteProjectLinkCollectionSchema>;
 export type DuplicateResolution = z.infer<typeof DuplicateResolutionSchema>;
 export type ImportDoi = z.infer<typeof ImportDoiSchema>;
+
+/**
+ * API Response Envelope Types
+ * Used by both frontend and backend for consistent API responses
+ */
+
+/**
+ * Standard API response envelope
+ * All backend endpoints return this structure
+ */
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data: T;
+  pagination?: PaginationMetadata;
+  code?: string;
+  details?: any;
+}
+
+/**
+ * Pagination metadata for list responses
+ */
+export interface PaginationMetadata {
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/**
+ * Error response structure
+ */
+export interface ApiError {
+  success: false;
+  message: string;
+  code: string;
+  details?: any;
+}
+
+/**
+ * Type guard for API errors
+ */
+export function isApiError(response: ApiResponse<any> | ApiError): response is ApiError {
+  return !response.success;
+}
+
+/**
+ * Common error codes returned by the API
+ */
+export const ErrorCodes = {
+  // Validation errors (400)
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_ID: 'INVALID_ID',
+  MAX_COLORED_TAGS: 'MAX_COLORED_TAGS',
+  POSITION_TAKEN: 'POSITION_TAKEN',
+  INVALID_POSITION: 'INVALID_POSITION',
+  CIRCULAR_REFERENCE: 'CIRCULAR_REFERENCE',
+  FILE_UPLOAD_ERROR: 'FILE_UPLOAD_ERROR',
+
+  // Authentication/Authorization errors (401, 403)
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+
+  // Not found errors (404)
+  NOT_FOUND: 'NOT_FOUND',
+
+  // Conflict errors (409)
+  DUPLICATE_DOI: 'DUPLICATE_DOI',
+  DUPLICATE_ISBN: 'DUPLICATE_ISBN',
+  DUPLICATE_KEY: 'DUPLICATE_KEY',
+  DUPLICATE_CITATION_KEY: 'DUPLICATE_CITATION_KEY',
+  DUPLICATE_TAG_NAME: 'DUPLICATE_TAG_NAME',
+  CONFLICT: 'CONFLICT',
+
+  // Server errors (500+)
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  EXTERNAL_API_ERROR: 'EXTERNAL_API_ERROR',
+
+  // Not implemented (501)
+  NOT_IMPLEMENTED: 'NOT_IMPLEMENTED',
+  MERGE_NOT_IMPLEMENTED: 'MERGE_NOT_IMPLEMENTED',
+} as const;
+
+export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
