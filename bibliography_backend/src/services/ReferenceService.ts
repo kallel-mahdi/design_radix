@@ -79,7 +79,9 @@ export class ReferenceService implements IReferenceService {
   }
 
   async getById(id: string, userId: string): Promise<IReference | null> {
-    return Reference.findOne({ _id: id, userId });
+    // Session 9: Populate virtual 'collections' field for DetailsPane enhancement
+    // This keeps collectionIds as string[] and adds collections as Collection[]
+    return Reference.findOne({ _id: id, userId }).populate('collections');
   }
 
   async list(userId: string, filters: ReferenceFilters): Promise<{ references: IReference[]; total: number }> {

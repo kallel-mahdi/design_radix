@@ -97,4 +97,16 @@ ReferenceSchema.index({ title: 'text', abstract: 'text' });
 // This allows different users to use the same citation keys in their own libraries
 ReferenceSchema.index({ userId: 1, citationKey: 1 }, { unique: true, sparse: true });
 
+// Session 9: Virtual field for populated collections
+// This allows us to populate collections without overwriting collectionIds
+ReferenceSchema.virtual('collections', {
+  ref: 'Collection',
+  localField: 'collectionIds',
+  foreignField: '_id'
+});
+
+// Ensure virtuals are included in JSON output
+ReferenceSchema.set('toJSON', { virtuals: true });
+ReferenceSchema.set('toObject', { virtuals: true });
+
 export const Reference = mongoose.model<IReference>('Reference', ReferenceSchema);
