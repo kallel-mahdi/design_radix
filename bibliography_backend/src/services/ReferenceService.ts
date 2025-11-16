@@ -15,6 +15,10 @@ export class ReferenceService implements IReferenceService {
   async create(userId: string, data: CreateReferenceInput): Promise<IReference> {
     ApplicationLogger.info('Creating reference', { userId, title: data.title });
 
+    // Normalize DOI to lowercase for consistent duplicate detection
+    // Prevents duplicate creation due to case differences (e.g., "10.1145/ABC" vs "10.1145/abc")
+    const normalizedDoi = data.doi ? data.doi.trim().toLowerCase() : undefined;
+
     // Normalize authors: auto-generate 'full' if not provided
     const authors = data.authors?.map(a => {
       // If full name is explicitly provided, use it as-is
@@ -55,6 +59,7 @@ export class ReferenceService implements IReferenceService {
 
     const reference = await Reference.create({
       ...data,
+      doi: normalizedDoi,
       userId,
       authors,
       citationKey,
@@ -119,6 +124,12 @@ export class ReferenceService implements IReferenceService {
 
   async update(id: string, userId: string, data: UpdateReferenceInput): Promise<IReference | null> {
     const updateData: any = { ...data };
+
+    // Normalize DOI to lowercase if being updated
+    // Ensures consistency with create() method and prevents case-sensitive duplicates
+    if (data.doi) {
+      updateData.doi = data.doi.trim().toLowerCase();
+    }
 
     // If authors updated, normalize full names (auto-generate if not provided)
     if (data.authors) {
