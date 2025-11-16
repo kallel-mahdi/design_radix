@@ -9,8 +9,8 @@
 import { z } from 'zod';
 
 /**
- * Author Schema (for stored references)
- * Validates complete author objects with full name
+ * Author Schema
+ * Validates complete author objects from API responses
  */
 export const AuthorSchema = z.object({
   given: z.string().optional(),
@@ -19,11 +19,11 @@ export const AuthorSchema = z.object({
 });
 
 /**
- * Author Input Schema (for API requests)
- * Validates author input where 'full' is optional and auto-generated from given/family
- * If full is provided, it will be used as-is
+ * Create Author Schema
+ * Validates author input for create/update operations
+ * The 'full' field is optional and auto-generated from given/family if not provided
  */
-export const AuthorInputSchema = z.object({
+export const CreateAuthorSchema = z.object({
   given: z.string().trim().optional(),
   family: z.string().trim().optional(),
   full: z.string().trim().optional(),
@@ -83,7 +83,7 @@ export const SourceRawSchema = z.object({
 
 /**
  * Reference Schema
- * Complete validation for reference objects from API
+ * Validates reference objects from API responses
  */
 export const ReferenceSchema = z.object({
   _id: z.string(),
@@ -111,7 +111,7 @@ export const ReferenceSchema = z.object({
 
 /**
  * Collection Schema
- * Validates collection objects from API
+ * Validates collection objects from API responses
  */
 export const CollectionSchema = z.object({
   _id: z.string(),
@@ -128,7 +128,7 @@ export const CollectionSchema = z.object({
 
 /**
  * Tag Schema
- * Validates tag objects from API
+ * Validates tag objects from API responses
  */
 export const TagSchema = z.object({
   _id: z.string(),
@@ -144,7 +144,7 @@ export const TagSchema = z.object({
 
 /**
  * Project Link Schema
- * Validates project link objects from API
+ * Validates project link objects from API responses
  */
 export const ProjectLinkSchema = z.object({
   _id: z.string(),
@@ -157,7 +157,7 @@ export const ProjectLinkSchema = z.object({
 
 /**
  * Duplicate Candidate Schema
- * Validates duplicate detection results from API
+ * Validates duplicate detection results from API responses
  */
 export const DuplicateCandidateSchema = z.object({
   _id: z.string(),
@@ -175,14 +175,13 @@ export const DuplicateCandidateSchema = z.object({
 });
 
 /**
- * Type inference helpers
- * Use these to get TypeScript types from Zod schemas
+ * Type inference for response schemas
  */
-export type ReferenceSchemaType = z.infer<typeof ReferenceSchema>;
-export type CollectionSchemaType = z.infer<typeof CollectionSchema>;
-export type TagSchemaType = z.infer<typeof TagSchema>;
-export type AuthorSchemaType = z.infer<typeof AuthorSchema>;
-export type AuthorInputType = z.infer<typeof AuthorInputSchema>;
+export type Reference = z.infer<typeof ReferenceSchema>;
+export type Collection = z.infer<typeof CollectionSchema>;
+export type Tag = z.infer<typeof TagSchema>;
+export type Author = z.infer<typeof AuthorSchema>;
+export type CreateAuthor = z.infer<typeof CreateAuthorSchema>;
 
 /**
  * Array schemas for list responses
@@ -193,14 +192,14 @@ export const TagListSchema = z.array(TagSchema);
 export const DuplicateCandidateListSchema = z.array(DuplicateCandidateSchema);
 
 /**
- * Input schemas for create/update operations
+ * Request schemas for create/update operations
  */
 
-// Create Reference Input - only required fields from ReferenceSchema
-export const CreateReferenceInputSchema = z.object({
+// Create Reference Schema - only required fields for creating a reference
+export const CreateReferenceSchema = z.object({
   type: ReferenceTypeSchema,
   title: z.string().min(1),
-  authors: z.array(AuthorInputSchema).optional(),
+  authors: z.array(CreateAuthorSchema).optional(),
   year: z.number().optional(),
   venue: z.string().optional(),
   doi: z.string().optional(),
@@ -212,85 +211,85 @@ export const CreateReferenceInputSchema = z.object({
   sourceRaw: SourceRawSchema,
 });
 
-// Update Reference Input - all fields optional
-export const UpdateReferenceInputSchema = CreateReferenceInputSchema.partial();
+// Update Reference Schema - all fields optional
+export const UpdateReferenceSchema = CreateReferenceSchema.partial();
 
-// Create Collection Input
-export const CreateCollectionInputSchema = z.object({
+// Create Collection Schema
+export const CreateCollectionSchema = z.object({
   name: z.string().min(1),
   parentId: z.string().optional(),
   color: z.string().optional(),
 });
 
-// Update Collection Input
-export const UpdateCollectionInputSchema = CreateCollectionInputSchema.partial().extend({
+// Update Collection Schema
+export const UpdateCollectionSchema = CreateCollectionSchema.partial().extend({
   position: z.number().optional(),
 });
 
-// Create Tag Input
-export const CreateTagInputSchema = z.object({
+// Create Tag Schema
+export const CreateTagSchema = z.object({
   name: z.string().min(1),
   color: z.string().optional(),
   position: z.number().optional(),
 });
 
-// Update Tag Input
-export const UpdateTagInputSchema = CreateTagInputSchema.partial();
+// Update Tag Schema
+export const UpdateTagSchema = CreateTagSchema.partial();
 
-// Tag Color Update Input (for PATCH /:name/color)
-export const TagColorUpdateInputSchema = z.object({
+// Tag Color Update Schema (for PATCH /:name/color)
+export const TagColorUpdateSchema = z.object({
   color: z.string().nullable(),
   position: z.number().nullable().optional(),
 });
 
-// Project Link/Unlink Input
-export const ProjectLinkInputSchema = z.object({
+// Project Link/Unlink Request Schemas
+export const CreateProjectLinkSchema = z.object({
   projectId: z.string(),
   referenceId: z.string(),
 });
 
-export const ProjectUnlinkInputSchema = z.object({
+export const DeleteProjectLinkSchema = z.object({
   projectId: z.string(),
   referenceId: z.string(),
 });
 
-export const ProjectLinkCollectionInputSchema = z.object({
+export const CreateProjectLinkCollectionSchema = z.object({
   projectId: z.string(),
   collectionId: z.string(),
 });
 
-export const ProjectUnlinkCollectionInputSchema = z.object({
+export const DeleteProjectLinkCollectionSchema = z.object({
   projectId: z.string(),
   collectionId: z.string(),
 });
 
-// Duplicate Resolution Input
-export const DuplicateResolutionInputSchema = z.object({
+// Duplicate Resolution Schema
+export const DuplicateResolutionSchema = z.object({
   resolution: z.enum(['keep-existing', 'merge', 'keep-both']),
 });
 
-// DOI Import Input (Session 6)
+// DOI Import Schema (Session 6)
 // Uses Crossref-recommended regex (matches 99.3% of Crossref DOIs)
 // See: docs/sessions/06-plan.md for validation rationale
-export const ImportDoiInputSchema = z.object({
+export const ImportDoiSchema = z.object({
   doi: z.string()
     .min(1, 'DOI is required')
     .regex(/^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i, 'Invalid DOI format'),
 });
 
 /**
- * Type exports for input schemas
+ * Type inference for request schemas
  */
-export type CreateReferenceInput = z.infer<typeof CreateReferenceInputSchema>;
-export type UpdateReferenceInput = z.infer<typeof UpdateReferenceInputSchema>;
-export type CreateCollectionInput = z.infer<typeof CreateCollectionInputSchema>;
-export type UpdateCollectionInput = z.infer<typeof UpdateCollectionInputSchema>;
-export type CreateTagInput = z.infer<typeof CreateTagInputSchema>;
-export type UpdateTagInput = z.infer<typeof UpdateTagInputSchema>;
-export type TagColorUpdateInput = z.infer<typeof TagColorUpdateInputSchema>;
-export type ProjectLinkInput = z.infer<typeof ProjectLinkInputSchema>;
-export type ProjectUnlinkInput = z.infer<typeof ProjectUnlinkInputSchema>;
-export type ProjectLinkCollectionInput = z.infer<typeof ProjectLinkCollectionInputSchema>;
-export type ProjectUnlinkCollectionInput = z.infer<typeof ProjectUnlinkCollectionInputSchema>;
-export type DuplicateResolutionInput = z.infer<typeof DuplicateResolutionInputSchema>;
-export type ImportDoiInput = z.infer<typeof ImportDoiInputSchema>;
+export type CreateReference = z.infer<typeof CreateReferenceSchema>;
+export type UpdateReference = z.infer<typeof UpdateReferenceSchema>;
+export type CreateCollection = z.infer<typeof CreateCollectionSchema>;
+export type UpdateCollection = z.infer<typeof UpdateCollectionSchema>;
+export type CreateTag = z.infer<typeof CreateTagSchema>;
+export type UpdateTag = z.infer<typeof UpdateTagSchema>;
+export type TagColorUpdate = z.infer<typeof TagColorUpdateSchema>;
+export type CreateProjectLink = z.infer<typeof CreateProjectLinkSchema>;
+export type DeleteProjectLink = z.infer<typeof DeleteProjectLinkSchema>;
+export type CreateProjectLinkCollection = z.infer<typeof CreateProjectLinkCollectionSchema>;
+export type DeleteProjectLinkCollection = z.infer<typeof DeleteProjectLinkCollectionSchema>;
+export type DuplicateResolution = z.infer<typeof DuplicateResolutionSchema>;
+export type ImportDoi = z.infer<typeof ImportDoiSchema>;

@@ -15,42 +15,40 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  // Reference schemas
+  // Response schemas
   ReferenceSchema,
-  CreateReferenceInputSchema,
-  UpdateReferenceInputSchema,
-  ReferenceListSchema,
-
-  // Collection schemas
   CollectionSchema,
-  CreateCollectionInputSchema,
-  UpdateCollectionInputSchema,
-  CollectionListSchema,
-
-  // Tag schemas
   TagSchema,
-  CreateTagInputSchema,
-  UpdateTagInputSchema,
-  TagListSchema,
-
-  // Nested object schemas
   AuthorSchema,
-  ReferenceTypeSchema,
+  ReferenceListSchema,
+  CollectionListSchema,
+  TagListSchema,
   DuplicateCandidateSchema,
   DuplicateCandidateListSchema,
   ProjectLinkSchema,
 
+  // Request schemas
+  CreateReferenceSchema,
+  UpdateReferenceSchema,
+  CreateCollectionSchema,
+  UpdateCollectionSchema,
+  CreateTagSchema,
+  UpdateTagSchema,
+
+  // Type enums
+  ReferenceTypeSchema,
+
   // Type exports
-  type ReferenceSchemaType,
-  type CollectionSchemaType,
-  type TagSchemaType,
-  type AuthorSchemaType,
-  type CreateReferenceInput,
-  type UpdateReferenceInput,
-  type CreateCollectionInput,
-  type UpdateCollectionInput,
-  type CreateTagInput,
-  type UpdateTagInput,
+  type Reference,
+  type Collection,
+  type Tag,
+  type Author,
+  type CreateReference,
+  type UpdateReference,
+  type CreateCollection,
+  type UpdateCollection,
+  type CreateTag,
+  type UpdateTag,
 } from '../schemas';
 
 // ============================================================================
@@ -60,7 +58,7 @@ import {
 /**
  * Creates a valid reference object for testing
  */
-function createValidReference(): ReferenceSchemaType {
+function createValidReference(): Reference {
   return {
     _id: '507f1f77bcf86cd799439011',
     userId: 'user123',
@@ -101,7 +99,7 @@ function createValidReference(): ReferenceSchemaType {
 /**
  * Creates a valid collection object for testing
  */
-function createValidCollection(): CollectionSchemaType {
+function createValidCollection(): Collection {
   return {
     _id: '507f1f77bcf86cd799439014',
     userId: 'user123',
@@ -119,7 +117,7 @@ function createValidCollection(): CollectionSchemaType {
 /**
  * Creates a valid tag object for testing
  */
-function createValidTag(): TagSchemaType {
+function createValidTag(): Tag {
   return {
     _id: '507f1f77bcf86cd799439015',
     userId: 'user123',
@@ -179,7 +177,7 @@ describe('AuthorSchema', () => {
   });
 
   it('should infer correct TypeScript type', () => {
-    const author: AuthorSchemaType = { full: 'John Doe' };
+    const author: Author = { full: 'John Doe' };
     expect(author.full).toBe('John Doe');
   });
 });
@@ -387,7 +385,7 @@ describe('ReferenceSchema', () => {
   });
 
   it('should infer correct TypeScript type', () => {
-    const ref: ReferenceSchemaType = createValidReference();
+    const ref: Reference = createValidReference();
     expect(ref._id).toBe('507f1f77bcf86cd799439011');
     expect(ref.type).toBe('article');
   });
@@ -421,13 +419,14 @@ describe('ReferenceListSchema', () => {
 // CREATE REFERENCE INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('CreateReferenceInputSchema', () => {
+describe('CreateReferenceSchema', () => {
   it('should validate minimal input with required fields only', () => {
     const input = {
       type: 'article' as const,
       title: 'Test Article',
+      sourceRaw: { provider: 'manual' as const, payload: {} },
     };
-    expect(() => CreateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with all optional fields', () => {
@@ -443,33 +442,34 @@ describe('CreateReferenceInputSchema', () => {
       abstract: 'Test abstract',
       tags: ['tag1', 'tag2'],
       collectionIds: ['507f1f77bcf86cd799439011'],
+      sourceRaw: { provider: 'manual' as const, payload: {} },
     };
-    expect(() => CreateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should reject input without type', () => {
     const input = { title: 'Test Article' };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should reject input without title', () => {
     const input = { type: 'article' };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should reject input with empty title', () => {
     const input = { type: 'article', title: '' };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should reject input with invalid type', () => {
     const input = { type: 'invalid-type', title: 'Test Article' };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should reject input with invalid year type', () => {
     const input = { type: 'article', title: 'Test Article', year: '2024' };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should reject input with invalid authors structure', () => {
@@ -478,16 +478,17 @@ describe('CreateReferenceInputSchema', () => {
       title: 'Test Article',
       authors: [{ given: 'John' }], // Missing required 'full'
     };
-    expect(() => CreateReferenceInputSchema.parse(input)).toThrow();
+    expect(() => CreateReferenceSchema.parse(input)).toThrow();
   });
 
   it('should accept input with extra fields (Zod default behavior)', () => {
     const input = {
       type: 'article',
       title: 'Test Article',
+      sourceRaw: { provider: 'manual' as const, payload: {} },
       extraField: 'should be stripped',
     };
-    const result = CreateReferenceInputSchema.parse(input);
+    const result = CreateReferenceSchema.parse(input);
     expect((result as any).extraField).toBeUndefined();
   });
 
@@ -504,15 +505,15 @@ describe('CreateReferenceInputSchema', () => {
 // UPDATE REFERENCE INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('UpdateReferenceInputSchema', () => {
+describe('UpdateReferenceSchema', () => {
   it('should validate empty update', () => {
     const input = {};
-    expect(() => UpdateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with title only', () => {
     const input = { title: 'Updated Title' };
-    expect(() => UpdateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with multiple fields', () => {
@@ -521,7 +522,7 @@ describe('UpdateReferenceInputSchema', () => {
       year: 2025,
       tags: ['new-tag'],
     };
-    expect(() => UpdateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should validate update with all fields', () => {
@@ -538,7 +539,7 @@ describe('UpdateReferenceInputSchema', () => {
       tags: ['updated-tag'],
       collectionIds: ['507f1f77bcf86cd799439099'],
     };
-    expect(() => UpdateReferenceInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateReferenceSchema.parse(input)).not.toThrow();
   });
 
   it('should reject update with empty title', () => {
@@ -617,7 +618,7 @@ describe('CollectionSchema', () => {
   });
 
   it('should infer correct TypeScript type', () => {
-    const collection: CollectionSchemaType = createValidCollection();
+    const collection: Collection = createValidCollection();
     expect(collection.name).toBe('Machine Learning Papers');
   });
 });
@@ -650,10 +651,10 @@ describe('CollectionListSchema', () => {
 // CREATE COLLECTION INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('CreateCollectionInputSchema', () => {
+describe('CreateCollectionSchema', () => {
   it('should validate minimal input with name only', () => {
     const input = { name: 'New Collection' };
-    expect(() => CreateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with parent ID', () => {
@@ -661,7 +662,7 @@ describe('CreateCollectionInputSchema', () => {
       name: 'Subcollection',
       parentId: '507f1f77bcf86cd799439099',
     };
-    expect(() => CreateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with color', () => {
@@ -669,7 +670,7 @@ describe('CreateCollectionInputSchema', () => {
       name: 'Colored Collection',
       color: '#3b82f6',
     };
-    expect(() => CreateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with all fields', () => {
@@ -678,17 +679,17 @@ describe('CreateCollectionInputSchema', () => {
       parentId: '507f1f77bcf86cd799439099',
       color: '#10b981',
     };
-    expect(() => CreateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should reject input without name', () => {
     const input = {};
-    expect(() => CreateCollectionInputSchema.parse(input)).toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).toThrow();
   });
 
   it('should reject input with empty name', () => {
     const input = { name: '' };
-    expect(() => CreateCollectionInputSchema.parse(input)).toThrow();
+    expect(() => CreateCollectionSchema.parse(input)).toThrow();
   });
 
   it('should infer correct TypeScript type', () => {
@@ -701,22 +702,22 @@ describe('CreateCollectionInputSchema', () => {
 // UPDATE COLLECTION INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('UpdateCollectionInputSchema', () => {
+describe('UpdateCollectionSchema', () => {
   it('should validate empty update', () => {
     const input = {};
-    expect(() => UpdateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with name only', () => {
     const input = { name: 'Updated Collection' };
-    expect(() => UpdateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with parentId', () => {
     const input: UpdateCollectionInput = {
       parentId: '507f1f77bcf86cd799439099',
     };
-    expect(() => UpdateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should validate update with all fields', () => {
@@ -725,12 +726,12 @@ describe('UpdateCollectionInputSchema', () => {
       parentId: '507f1f77bcf86cd799439099',
       color: '#ef4444',
     };
-    expect(() => UpdateCollectionInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateCollectionSchema.parse(input)).not.toThrow();
   });
 
   it('should reject update with empty name', () => {
     const input = { name: '' };
-    expect(() => UpdateCollectionInputSchema.parse(input)).toThrow();
+    expect(() => UpdateCollectionSchema.parse(input)).toThrow();
   });
 
   it('should infer correct TypeScript type', () => {
@@ -799,7 +800,7 @@ describe('TagSchema', () => {
   });
 
   it('should infer correct TypeScript type', () => {
-    const tag: TagSchemaType = createValidTag();
+    const tag: Tag = createValidTag();
     expect(tag.name).toBe('machine-learning');
   });
 });
@@ -832,10 +833,10 @@ describe('TagListSchema', () => {
 // CREATE TAG INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('CreateTagInputSchema', () => {
+describe('CreateTagSchema', () => {
   it('should validate minimal input with name only', () => {
     const input = { name: 'new-tag' };
-    expect(() => CreateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with color', () => {
@@ -843,7 +844,7 @@ describe('CreateTagInputSchema', () => {
       name: 'colored-tag',
       color: '#3b82f6',
     };
-    expect(() => CreateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with position', () => {
@@ -851,7 +852,7 @@ describe('CreateTagInputSchema', () => {
       name: 'positioned-tag',
       position: 5,
     };
-    expect(() => CreateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate input with all fields', () => {
@@ -860,22 +861,22 @@ describe('CreateTagInputSchema', () => {
       color: '#10b981',
       position: 3,
     };
-    expect(() => CreateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => CreateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should reject input without name', () => {
     const input = {};
-    expect(() => CreateTagInputSchema.parse(input)).toThrow();
+    expect(() => CreateTagSchema.parse(input)).toThrow();
   });
 
   it('should reject input with empty name', () => {
     const input = { name: '' };
-    expect(() => CreateTagInputSchema.parse(input)).toThrow();
+    expect(() => CreateTagSchema.parse(input)).toThrow();
   });
 
   it('should reject input with invalid position type', () => {
     const input = { name: 'test-tag', position: '5' };
-    expect(() => CreateTagInputSchema.parse(input)).toThrow();
+    expect(() => CreateTagSchema.parse(input)).toThrow();
   });
 
   it('should infer correct TypeScript type', () => {
@@ -888,20 +889,20 @@ describe('CreateTagInputSchema', () => {
 // UPDATE TAG INPUT SCHEMA TESTS
 // ============================================================================
 
-describe('UpdateTagInputSchema', () => {
+describe('UpdateTagSchema', () => {
   it('should validate empty update', () => {
     const input = {};
-    expect(() => UpdateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with name only', () => {
     const input = { name: 'updated-tag' };
-    expect(() => UpdateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate partial update with color', () => {
     const input: UpdateTagInput = { color: '#ef4444' };
-    expect(() => UpdateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should validate update with all fields', () => {
@@ -910,12 +911,12 @@ describe('UpdateTagInputSchema', () => {
       color: '#8b5cf6',
       position: 10,
     };
-    expect(() => UpdateTagInputSchema.parse(input)).not.toThrow();
+    expect(() => UpdateTagSchema.parse(input)).not.toThrow();
   });
 
   it('should reject update with empty name', () => {
     const input = { name: '' };
-    expect(() => UpdateTagInputSchema.parse(input)).toThrow();
+    expect(() => UpdateTagSchema.parse(input)).toThrow();
   });
 
   it('should infer correct TypeScript type', () => {
@@ -1178,7 +1179,7 @@ describe('ProjectLinkSchema', () => {
 
 describe('Type Inference', () => {
   it('should infer ReferenceSchemaType correctly', () => {
-    const ref: ReferenceSchemaType = createValidReference();
+    const ref: Reference = createValidReference();
     // TypeScript compilation test - if this compiles, types are correct
     expect(ref._id).toBeDefined();
     expect(ref.type).toBeDefined();
@@ -1186,19 +1187,19 @@ describe('Type Inference', () => {
   });
 
   it('should infer CollectionSchemaType correctly', () => {
-    const collection: CollectionSchemaType = createValidCollection();
+    const collection: Collection = createValidCollection();
     expect(collection._id).toBeDefined();
     expect(collection.name).toBeDefined();
   });
 
   it('should infer TagSchemaType correctly', () => {
-    const tag: TagSchemaType = createValidTag();
+    const tag: Tag = createValidTag();
     expect(tag._id).toBeDefined();
     expect(tag.name).toBeDefined();
   });
 
   it('should infer AuthorSchemaType correctly', () => {
-    const author: AuthorSchemaType = { full: 'John Doe' };
+    const author: Author = { full: 'John Doe' };
     expect(author.full).toBeDefined();
   });
 
