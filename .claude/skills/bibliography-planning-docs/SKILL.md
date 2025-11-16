@@ -9,6 +9,19 @@ When implementing features for the bibliography manager, ALWAYS reference the co
 
 ---
 
+## Pre-Implementation Confidence Workflow
+
+1. **Load context**: Use this planning skill to absorb the active session plan and the relevant docs listed below.
+2. **Run `@bibliography-confidence`** immediately afterward. The confidence skill records that you:
+   - searched for existing implementations,
+   - verified architecture alignment with `CLAUDE.md`,
+   - reviewed official docs (Spec, ComponentsSpec, APIDesignSystem, etc.),
+   - found working OSS/editor references,
+   - confirmed the root cause/problem framing.
+3. **Gate execution**: Do not begin coding until the confidence score is ≥0.90. If the score is lower, loop back to clarify specs or research editor/Zotero patterns, then rerun the confidence skill.
+
+---
+
 ## Documentation Structure
 
 ```

@@ -73,6 +73,16 @@
         "contentPatterns": ["ReferenceCard", "CollectionTree", "DuplicateDetector", "api/"]
       }
     },
+    "bibliography-confidence": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Pre-implementation confidence check for bibliography work. Ensures duplicate search, architecture compliance, official doc review, OSS references, and root-cause clarity reach ≥90% before coding.",
+      "promptTriggers": {
+        "keywords": ["confidence check", "docs/sessions", "session plan", "pre-implementation", "ready to implement"],
+        "intentPatterns": ["(before|prior).*(implement|coding)", "(plan|design).*?(backend|frontend|feature|endpoint|component)"]
+      }
+    },
     "bibliography-testing-skill": {
       "type": "domain",
       "enforcement": "suggest",

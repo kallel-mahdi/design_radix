@@ -74,3 +74,37 @@ pnpm test:e2e --ui
 ## Test Inventory
 
 See `TESTING.md` for what's been tested so far and coverage status.
+
+---
+
+## E2E Critical Patterns
+
+### Worker Isolation (REQUIRED)
+**Problem:** Shared user IDs cause race conditions in parallel tests
+**Solution:** Worker-scoped user IDs via Playwright fixtures
+
+```typescript
+// ALWAYS import from custom fixture
+import { test, expect } from './fixtures/workerFixtures';
+
+test.beforeEach(async ({ page, workerUserId }) => {
+  // Use workerUserId - each worker gets unique ID
+  await page.request.delete(
+    'http://localhost:8005/api/bibliography/references/test-cleanup',
+    { headers: { 'x-user-id': workerUserId } }
+  );
+
+  await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+    await route.continue({
+      headers: { ...route.request().headers(), 'x-user-id': workerUserId }
+    });
+  });
+});
+```
+
+**Never use:** Hardcoded `'test-user-id'` - causes race conditions
+**Always use:** `workerUserId` fixture from `./fixtures/workerFixtures`
+
+---
+
+Before creating e2e tests use the playwright MCP to explore the app yourself. Once you are sure everything works properly write the tests using playwright and make sure they run. Whenever an e2e test is not working double check with the Playwright MCP yourself!!
