@@ -2,7 +2,9 @@ import { useAuthStore, type Tokens } from '@/store/auth.store';
 import { useUIStore } from '@/store/ui.store';
 import { API_TIMEOUT_MS } from '../constants';
 
-const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:8005/api/bibliography';
+// Default to API Gateway (port 3000) for centralized auth, logging, and routing
+// Direct service access available via VITE_API_BASE_URL=http://localhost:8005/api/bibliography for testing only
+const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:3000/api/bibliography';
 
 export interface ApiResponse<T = any> {
   data: T;
@@ -164,7 +166,8 @@ class ApiClient {
       throw new Error('No refresh token available');
     }
 
-    const AUTH_SERVICE_URL = import.meta.env['VITE_AUTH_SERVICE_URL'] || 'http://localhost:8001/api/auth';
+    // Route auth refresh through API Gateway for consistent CORS, rate limiting, and observability
+    const AUTH_SERVICE_URL = import.meta.env['VITE_AUTH_SERVICE_URL'] || 'http://localhost:3000/api/auth';
 
     try {
       const response = await fetch(`${AUTH_SERVICE_URL}/refresh-token`, {
@@ -195,8 +198,9 @@ class ApiClient {
 
   /**
    * Handle response and show error toasts
+   * Returns the full ApiResponse envelope {success, message, data, pagination?}
    */
-  private async handleResponse<T>(response: Response): Promise<T> {
+  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
     let data: any;
 
     try {
@@ -233,18 +237,19 @@ class ApiClient {
       throw error;
     }
 
-    // Unwrap the ApiResponse envelope - return only the data field
-    return data?.data as T;
+    // Return the full ApiResponse envelope (success, message, data, pagination)
+    return data as ApiResponse<T>;
   }
 
   /**
    * Generic request method with token refresh support
+   * Returns the full ApiResponse envelope {success, message, data, pagination?}
    */
   private async request<T>(
     endpoint: string,
     method: string,
     options?: RequestOptions,
-  ): Promise<T> {
+  ): Promise<ApiResponse<T>> {
     const url = this.buildURL(endpoint, options?.params);
     const headers = this.buildHeaders(options?.headers as Record<string, string>);
 
@@ -310,44 +315,45 @@ class ApiClient {
     }
   }
 
-  // HTTP Methods
-  public async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+  // HTTP Methods - All return full ApiResponse envelope
+  public async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'GET', options);
   }
 
-  public async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  public async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'POST', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  public async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'PATCH', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  public async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'PUT', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+  public async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'DELETE', options);
   }
 
   /**
    * Upload file to server
+   * Returns the full ApiResponse envelope {success, message, data}
    */
   public async uploadFile<T>(
     endpoint: string,
     file: File,
     options?: RequestOptions,
-  ): Promise<T> {
+  ): Promise<ApiResponse<T>> {
     const url = this.buildURL(endpoint, options?.params);
     const headers = this.buildHeaders();
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/workerFixtures';
 
 /**
  * Critical User Flows - E2E Tests
@@ -6,15 +6,31 @@ import { test, expect } from '@playwright/test';
  * These tests validate the most critical user journeys that would be
  * time-consuming to test manually (5+ minutes each). They run against
  * the real frontend and backend.
+ *
+ * Worker Isolation:
+ * - Each Playwright worker uses a unique user ID (test-user-0, test-user-1, etc.)
+ * - This prevents race conditions when tests run in parallel
+ * - Worker A cannot delete Worker B's data
  */
 
 test.describe('Critical User Flows', () => {
-  test.beforeEach(async ({ page }) => {
-    // Intercept all API calls to inject x-user-id header for backend authentication
+  test.beforeEach(async ({ page, workerUserId }) => {
+    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
+    const cleanupResponse = await page.request.delete(
+      'http://localhost:8005/api/bibliography/references/test-cleanup',
+      {
+        headers: {
+          'x-user-id': workerUserId,
+        },
+      }
+    );
+    expect(cleanupResponse.ok()).toBeTruthy();
+
+    // Intercept all API calls to inject worker-scoped user ID
     await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
       const headers = {
         ...route.request().headers(),
-        'x-user-id': 'test-user-id',
+        'x-user-id': workerUserId,
       };
       await route.continue({ headers });
     });
@@ -26,12 +42,14 @@ test.describe('Critical User Flows', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('Create Reference → Add to Collection → Search → View Details', async ({ page }) => {
-    // PARTIAL TEST: Only Step 1 (reference creation) is implemented and tested
-    // Steps 2-4 require collection/search/details UI features (Sessions 8-10)
+  test('should create reference and verify in table', async ({ page }) => {
+    // Test reference creation workflow (Session 8 - IMPLEMENTED)
 
     // Step 1: Create a new reference
     await page.getByRole('button', { name: /New Reference/i }).click();
+
+    // Verify modal opened
+    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
 
     // Fill form using data-testid
     await page.getByTestId('reference-title-input').fill('Deep Reinforcement Learning for Robotics');
@@ -39,46 +57,20 @@ test.describe('Critical User Flows', () => {
     await page.getByTestId('reference-year-input').fill('2024');
     await page.getByTestId('author-0-family-input').fill('Doe');
 
+    // Submit form
     await page.getByTestId('reference-submit-button').click();
     await page.waitForLoadState('networkidle');
 
-    // Verify reference appears in library
-    await expect(page.getByText('Deep Reinforcement Learning for Robotics')).toBeVisible({ timeout: 5000 });
+    // Verify modal closed
+    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 3000 });
 
-    // TODO: Steps 2-4 require collection/search/details features - test when implemented
-    // // Step 2: Add to collection
-    // // Right-click on the reference card
-    // await page.getByText('Deep Reinforcement Learning for Robotics').click({ button: 'right' });
-    //
-    // // Select "Add to Collection" from context menu
-    // await page.getByRole('menuitem', { name: /Add to Collection/i }).click();
-    //
-    // // Select ML Papers collection
-    // await page.getByText('ML Papers').click();
-    //
-    // // Verify success message
-    // await expect(page.getByText(/Added to collection/i)).toBeVisible();
-    //
-    // // Step 3: Search for the reference
-    // await page.getByPlaceholder(/Search references/i).fill('reinforcement learning');
-    //
-    // // Wait for search debounce and results
-    // await page.waitForTimeout(500);
-    //
-    // // Verify filtered results
-    // await expect(page.getByText('Deep Reinforcement Learning for Robotics')).toBeVisible();
-    //
-    // // Step 4: View reference details
-    // await page.getByText('Deep Reinforcement Learning for Robotics').click();
-    //
-    // // Verify details modal opens
-    // await expect(page.getByRole('dialog')).toBeVisible();
-    // await expect(page.getByText('Jane Doe')).toBeVisible();
-    // await expect(page.getByText('2024')).toBeVisible();
-    //
-    // // Close modal
-    // await page.getByRole('button', { name: /Close/i }).click();
-    // await expect(page.getByRole('dialog')).not.toBeVisible();
+    // Verify success toast
+    await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
+
+    // Verify reference appears in library table
+    await expect(page.getByText('Deep Reinforcement Learning for Robotics')).toBeVisible();
+    await expect(page.getByText('Doe')).toBeVisible();
+    await expect(page.getByText('2024')).toBeVisible();
   });
 
   test.skip('Collection Management: Create → Rename → Organize → Delete → Restore', async ({ page }) => {

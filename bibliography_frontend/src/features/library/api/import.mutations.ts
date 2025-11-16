@@ -76,7 +76,7 @@ export function useImportFromDoiMutation() {
   return useMutation({
     mutationFn: async (input: ImportDoiInput): Promise<Reference> => {
       const response = await apiClient.post<Reference>('/references/import-doi', input);
-      return ReferenceSchema.parse(response);
+      return ReferenceSchema.parse(response.data);
     },
     onSuccess: (reference) => {
       const listQueries = queryClient.getQueryCache().findAll({ queryKey: referenceKeys.lists() });

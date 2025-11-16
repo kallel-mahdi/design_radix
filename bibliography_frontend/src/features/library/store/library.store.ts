@@ -42,7 +42,7 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         activeCollectionId: null,
         expandedCollectionIds: new Set(),
         activeTags: [],
-        sortBy: 'dateAdded',
+        sortBy: 'year',
         sortOrder: 'desc',
         searchQuery: '',
 

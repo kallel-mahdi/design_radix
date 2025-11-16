@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/workerFixtures';
 
 /**
  * Tag Management Workflows - E2E Tests
@@ -11,15 +11,20 @@ import { test, expect } from '@playwright/test';
  *
  * TODO: Implement tag management UI (Session 9) before enabling these tests
  * SKIPPED: Tag selector, color picker, and tag filtering UI not yet implemented
+ *
+ * Worker Isolation:
+ * - Each Playwright worker uses a unique user ID (test-user-0, test-user-1, etc.)
+ * - This prevents race conditions when tests run in parallel
+ * - Worker A cannot delete Worker B's data
  */
 
 test.describe.skip('Tag Workflows', () => {
-  test.beforeEach(async ({ page }) => {
-    // Intercept all API calls to inject x-user-id header for backend authentication
+  test.beforeEach(async ({ page, workerUserId }) => {
+    // Intercept all API calls to inject worker-scoped user ID
     await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
       const headers = {
         ...route.request().headers(),
-        'x-user-id': 'test-user-id',
+        'x-user-id': workerUserId,
       };
       await route.continue({ headers });
     });

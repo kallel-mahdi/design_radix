@@ -33,8 +33,8 @@ export function useReferencesQuery(params?: ReferencesQueryParams) {
       if (params?.limit) queryParams.append('limit', String(params.limit));
       if (params?.offset) queryParams.append('offset', String(params.offset));
 
-      const data = await apiClient.get<Reference[]>(`/references?${queryParams}`);
-      return ReferenceListSchema.parse(data);
+      const response = await apiClient.get<Reference[]>(`/references?${queryParams}`);
+      return ReferenceListSchema.parse(response.data);
     },
     staleTime: QUERY_STALE_TIME_MS
   });
@@ -46,8 +46,8 @@ export function useReferenceQuery(id: string | undefined, enabled = true) {
     queryKey: id ? referenceKeys.detail(id) : referenceKeys.details(),
     queryFn: async (): Promise<Reference> => {
       if (!id) throw new Error('Reference ID is required');
-      const data = await apiClient.get<Reference>(`/references/${id}`);
-      return ReferenceSchema.parse(data);
+      const response = await apiClient.get<Reference>(`/references/${id}`);
+      return ReferenceSchema.parse(response.data);
     },
     enabled: enabled && !!id,
     staleTime: QUERY_STALE_TIME_MS

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/workerFixtures';
 
 /**
  * E2E Test: DOI Import Flow (One-Step Pattern)
@@ -24,38 +24,42 @@ import { test, expect } from '@playwright/test';
  * If tests fail with rate limiting errors, wait a few minutes before retrying.
  *
  * Performance: These tests take 15-20 seconds due to real Crossref API calls.
- * Serial execution is required to prevent race conditions and rate limiting.
+ *
+ * Worker Isolation:
+ * - Each Playwright worker uses a unique user ID (test-user-0, test-user-1, etc.)
+ * - This prevents race conditions when tests run in parallel
+ * - Worker A cannot delete Worker B's data
+ * - Serial execution no longer needed - worker isolation handles it
  */
 
-test.describe.serial('DOI Import Flow', () => {
+test.describe('DOI Import Flow', () => {
   // Mark all tests in this suite as slow for CI awareness
   test.slow();
   const TEST_DOI = '10.1145/3411764.3445518';
   const EXPECTED_TITLE = '"Everyone wants to do the model work, not the data work": Data Cascades in High-Stakes AI';
   const EXPECTED_TITLE_PARTIAL = 'Data Cascades in High-Stakes AI'; // Use partial match for wrapped text
 
-  test.beforeEach(async ({ page }) => {
-    // Cleanup BEFORE test to ensure clean state
+  test.beforeEach(async ({ page, workerUserId }) => {
+    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
     const cleanupResponse = await page.request.delete('http://localhost:8005/api/bibliography/references/test-cleanup', {
       headers: {
-        'x-user-id': 'test-user-id',
+        'x-user-id': workerUserId,
       },
     });
     expect(cleanupResponse.ok()).toBeTruthy();
+
+    // Intercept API calls to inject worker-scoped user ID
+    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+      const headers = {
+        ...route.request().headers(),
+        'x-user-id': workerUserId,
+      };
+      await route.continue({ headers });
+    });
 
     // Navigate to library page
     await page.goto('http://localhost:5173/library');
     await page.waitForLoadState('networkidle');
-  });
-
-  test.afterEach(async ({ page }) => {
-    // Cleanup: Delete all test references to ensure test isolation
-    const cleanupResponse = await page.request.delete('http://localhost:8005/api/bibliography/references/test-cleanup', {
-      headers: {
-        'x-user-id': 'test-user-id',
-      },
-    });
-    expect(cleanupResponse.ok()).toBeTruthy();
   });
 
   test('should successfully import reference from DOI (one-step)', async ({ page }) => {

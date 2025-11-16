@@ -1,12 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
+import os from 'os';
 
 /**
  * Playwright Configuration for E2E Tests
+ *
+ * Worker-Scoped User ID Strategy:
+ * - Each Playwright worker gets a unique user ID (test-user-0, test-user-1, etc.)
+ * - This prevents race conditions when tests run in parallel
+ * - Worker A cannot delete Worker B's data - complete isolation
+ * - Tests must use the workerUserId fixture from e2e/fixtures/workerFixtures.ts
+ *
+ * Test Isolation Pattern:
+ * 1. Import from fixtures: import { test, expect } from './fixtures/workerFixtures'
+ * 2. Use workerUserId in beforeEach for cleanup and API routing
+ * 3. Each worker cleans up only its own data before each test
+ * 4. Global teardown cleans up all workers after tests complete
  *
  * See https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
   testDir: './e2e',
+
+  /* Global teardown - cleanup test data after all tests */
+  globalTeardown: './e2e/global-teardown.ts',
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -17,8 +33,11 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
-  /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
+  /*
+   * Worker optimization: Leave 1 CPU for OS/browser overhead (Playwright best practice)
+   * CI uses 1 worker for predictable results
+   */
+  workers: process.env.CI ? 1 : Math.max(1, os.cpus().length - 1),
 
   /* Reporter to use */
   reporter: 'html',

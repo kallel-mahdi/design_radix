@@ -11,7 +11,7 @@ export function useCreateReferenceMutation() {
   return useMutation({
     mutationFn: async (data: CreateReferenceInput): Promise<Reference> => {
       const response = await apiClient.post<Reference>('/references', data);
-      return ReferenceSchema.parse(response);
+      return ReferenceSchema.parse(response.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
@@ -38,7 +38,7 @@ export function useUpdateReferenceMutation() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateReferenceInput }): Promise<Reference> => {
       const response = await apiClient.patch<Reference>(`/references/${id}`, data);
-      return ReferenceSchema.parse(response);
+      return ReferenceSchema.parse(response.data);
     },
     onSuccess: (updatedRef) => {
       queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });

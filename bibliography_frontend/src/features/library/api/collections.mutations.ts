@@ -11,7 +11,7 @@ export function useCreateCollectionMutation() {
   return useMutation({
     mutationFn: async (data: CreateCollectionInput): Promise<Collection> => {
       const response = await apiClient.post<Collection>('/collections', data);
-      return CollectionSchema.parse(response);
+      return CollectionSchema.parse(response.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
@@ -37,7 +37,7 @@ export function useUpdateCollectionMutation() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateCollectionInput }): Promise<Collection> => {
       const response = await apiClient.patch<Collection>(`/collections/${id}`, data);
-      return CollectionSchema.parse(response);
+      return CollectionSchema.parse(response.data);
     },
     onSuccess: (updatedCollection) => {
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });

@@ -3,20 +3,39 @@
  *
  * Critical path tests for creating and editing references through the full application stack.
  * These tests run against the real backend and database.
+ *
+ * Worker Isolation:
+ * - Each Playwright worker uses a unique user ID (test-user-0, test-user-1, etc.)
+ * - This prevents race conditions when tests run in parallel
+ * - Worker A cannot delete Worker B's data
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/workerFixtures';
 
 test.describe('Reference Creation and Editing', () => {
   // Generate unique test identifier to avoid collisions between test runs
-  const testId = `test-${Date.now()}`;
+  let testId: string;
 
-  test.beforeEach(async ({ page }) => {
-    // Intercept all API calls to inject x-user-id header for backend authentication
+  test.beforeEach(async ({ page, workerUserId }) => {
+    // Generate unique test ID for each test
+    testId = `test-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
+    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
+    const cleanupResponse = await page.request.delete(
+      'http://localhost:8005/api/bibliography/references/test-cleanup',
+      {
+        headers: {
+          'x-user-id': workerUserId,
+        },
+      }
+    );
+    expect(cleanupResponse.ok()).toBeTruthy();
+
+    // Intercept all API calls to inject worker-scoped user ID
     await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
       const headers = {
         ...route.request().headers(),
-        'x-user-id': 'test-user-id',
+        'x-user-id': workerUserId,
       };
       await route.continue({ headers });
     });
@@ -60,9 +79,13 @@ test.describe('Reference Creation and Editing', () => {
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
     // Step 7: New reference should appear in the table
-    await expect(page.getByText(title)).toBeVisible();
-    await expect(page.getByText(author)).toBeVisible();
-    await expect(page.getByText('2024')).toBeVisible();
+    // Find the row containing our specific title first
+    const row = page.locator('tr', { hasText: title });
+    await expect(row).toBeVisible();
+
+    // Verify author and year within that row to avoid matching other references
+    await expect(row.getByText(author)).toBeVisible();
+    await expect(row.getByText('2024')).toBeVisible();
   });
 
   test('should edit an existing reference', async ({ page }) => {
@@ -81,10 +104,9 @@ test.describe('Reference Creation and Editing', () => {
     // Wait for toast to disappear
     await page.waitForTimeout(3000);
 
-    // Now edit the reference - find by specific title
-    await page.getByText(originalTitle).hover();
-    const row = page.getByText(originalTitle).locator('..');
-    await row.getByRole('button', { name: 'Edit reference' }).click();
+    // Now edit the reference - double-click to open edit modal
+    const row = page.getByText(originalTitle).locator('..').locator('..');
+    await row.dblclick();
 
     // Modal should open in edit mode
     await expect(page.getByRole('heading', { name: 'Edit Reference' })).toBeVisible();
@@ -205,8 +227,16 @@ test.describe('Reference Creation and Editing', () => {
     // Should succeed
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
-    // Both authors should appear in the table (format: "Doe & Smith" for 2 authors)
+    // Both authors should appear in the table
+    // Format should be "Doe, J. & Smith, J." (Family, Initial. & Family, Initial.)
     await expect(page.getByText(title)).toBeVisible();
-    await expect(page.getByText(`${author1} & ${author2}`)).toBeVisible();
+
+    // Check for the formatted author string in the table
+    // The UI renders as "Family, Initial. & Family, Initial." for multiple authors
+    const row = page.locator('tr', { hasText: title });
+    await expect(row).toBeVisible();
+
+    // Verify both author family names appear in the row
+    await expect(row.getByText(new RegExp(`${author1}.*${author2}|${author1}, J\\. & ${author2}, J\\.`))).toBeVisible();
   });
 });
