@@ -3,12 +3,12 @@ import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
 import { validate } from '../middleware/validate';
-import { CreateReferenceInputSchema, UpdateReferenceInputSchema, ImportDoiInputSchema } from '@bibliography/shared';
+import { CreateReferenceSchema, UpdateReferenceSchema, ImportDoiSchema } from '@bibliography/shared';
 
 const router: ExpressRouter = Router();
 
 // Lazy load controller on each request
-router.post('/', validate(CreateReferenceInputSchema), (req, res) => {
+router.post('/', validate(CreateReferenceSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.create(req, res);
 });
@@ -24,7 +24,7 @@ router.get('/:id', (req, res) => {
 });
 
 // Session 6 - DOI Import
-router.post('/import-doi', validate(ImportDoiInputSchema), (req, res) => {
+router.post('/import-doi', validate(ImportDoiSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.importFromDoi(req, res);
 });
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-router.patch('/:id', validate(UpdateReferenceInputSchema), (req, res) => {
+router.patch('/:id', validate(UpdateReferenceSchema), (req, res) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
   return controller.update(req, res);
 });

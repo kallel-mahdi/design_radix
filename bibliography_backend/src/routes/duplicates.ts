@@ -3,7 +3,7 @@ import { container } from '../config/container';
 import { DuplicateController } from '../controllers/DuplicateController';
 import { TYPES } from '../config/types';
 import { validate } from '../middleware/validate';
-import { DuplicateResolutionInputSchema } from '@bibliography/shared';
+import { DuplicateResolutionSchema } from '@bibliography/shared';
 
 const router: ExpressRouter = Router();
 
@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   return controller.listUnresolved(req, res);
 });
 
-router.post('/:id/resolve', validate(DuplicateResolutionInputSchema), (req, res) => {
+router.post('/:id/resolve', validate(DuplicateResolutionSchema), (req, res) => {
   const controller = container.get<DuplicateController>(TYPES.DuplicateController);
   return controller.resolve(req, res);
 });

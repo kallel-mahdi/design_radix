@@ -4,13 +4,13 @@ import { CollectionController } from '../controllers/CollectionController';
 import { TYPES } from '../config/types';
 import { validate } from '../middleware/validate';
 import {
-  CreateCollectionInputSchema,
-  UpdateCollectionInputSchema,
+  CreateCollectionSchema,
+  UpdateCollectionSchema,
 } from '@bibliography/shared';
 
 const router: ExpressRouter = Router();
 
-router.post('/', validate(CreateCollectionInputSchema), (req, res) => {
+router.post('/', validate(CreateCollectionSchema), (req, res) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
   return controller.create(req, res);
 });
@@ -25,7 +25,7 @@ router.get('/:id', (req, res) => {
   return controller.getById(req, res);
 });
 
-router.patch('/:id', validate(UpdateCollectionInputSchema), (req, res) => {
+router.patch('/:id', validate(UpdateCollectionSchema), (req, res) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
   return controller.update(req, res);
 });
