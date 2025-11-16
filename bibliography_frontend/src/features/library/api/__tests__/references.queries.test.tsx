@@ -5,12 +5,14 @@ import React from 'react';
 import { apiClient } from '@/common/api/client';
 import {
   useReferencesQuery,
+  referenceKeys,
+} from '../references.queries';
+import {
   useCreateReferenceMutation,
   useUpdateReferenceMutation,
   useDeleteReferenceMutation,
   useRestoreReferenceMutation,
-  referenceKeys,
-} from '../references.queries';
+} from '../references.mutations';
 import { useUIStore } from '@/store/ui.store';
 import type { Reference } from '@/common/types';
 

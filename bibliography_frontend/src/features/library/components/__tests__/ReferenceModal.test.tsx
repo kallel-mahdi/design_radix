@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ReferenceModal } from '../ReferenceModal';
 import * as uiStore from '@/store/ui.store';
 import * as referencesQueries from '../../api/references.queries';
+import * as referencesMutations from '../../api/references.mutations';
 
 // Mock Headless UI components to render children directly in tests
 vi.mock('@headlessui/react', () => {
@@ -41,7 +42,7 @@ vi.mock('@/store/ui.store', async () => {
   };
 });
 
-// Mock the queries and mutations
+// Mock the queries
 vi.mock('../../api/references.queries', async () => {
   const actual = await vi.importActual('../../api/references.queries');
   return {
@@ -51,6 +52,14 @@ vi.mock('../../api/references.queries', async () => {
       isLoading: false,
       error: null,
     })),
+  };
+});
+
+// Mock the mutations
+vi.mock('../../api/references.mutations', async () => {
+  const actual = await vi.importActual('../../api/references.mutations');
+  return {
+    ...actual,
     useCreateReferenceMutation: vi.fn(() => ({
       mutateAsync: vi.fn(),
       isPending: false,
@@ -375,7 +384,7 @@ describe('ReferenceModal', () => {
     });
 
     it('should show loading state when mutation is pending', () => {
-      vi.mocked(referencesQueries.useCreateReferenceMutation).mockReturnValue({
+      vi.mocked(referencesMutations.useCreateReferenceMutation).mockReturnValue({
         mutateAsync: vi.fn(),
         isPending: true,
       } as any);
@@ -432,12 +441,12 @@ describe('ReferenceModal', () => {
       } as any);
 
       // Re-setup mutations
-      vi.mocked(referencesQueries.useCreateReferenceMutation).mockReturnValue({
+      vi.mocked(referencesMutations.useCreateReferenceMutation).mockReturnValue({
         mutateAsync: vi.fn(),
         isPending: false,
       } as any);
 
-      vi.mocked(referencesQueries.useUpdateReferenceMutation).mockReturnValue({
+      vi.mocked(referencesMutations.useUpdateReferenceMutation).mockReturnValue({
         mutateAsync: vi.fn(),
         isPending: false,
       } as any);
@@ -467,10 +476,10 @@ describe('ReferenceModal', () => {
       render(<ReferenceModal referenceId="ref-edit-1" />);
 
       // Verify useUpdateReferenceMutation was called (indicating edit mode setup)
-      expect(referencesQueries.useUpdateReferenceMutation).toHaveBeenCalled();
+      expect(referencesMutations.useUpdateReferenceMutation).toHaveBeenCalled();
 
       // Verify useCreateReferenceMutation was also set up (both are always set up)
-      expect(referencesQueries.useCreateReferenceMutation).toHaveBeenCalled();
+      expect(referencesMutations.useCreateReferenceMutation).toHaveBeenCalled();
     });
 
     it('should have sourceRaw field structure in formDataToUpdateInput', () => {

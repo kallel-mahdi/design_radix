@@ -12,7 +12,7 @@
 import { z } from 'zod';
 import {
   ReferenceTypeSchema,
-  AuthorInputSchema,
+  CreateAuthorSchema,
 } from '@bibliography/shared';
 
 /**
@@ -26,7 +26,7 @@ const DOI_REGEX = /^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i;
  * Reference Form Schema
  *
  * Form-specific validation extending shared schemas.
- * Differences from CreateReferenceInputSchema:
+ * Differences from CreateReferenceSchema:
  * - Authors array can be empty (users can add incrementally)
  * - Year validation range: 1000-2100
  * - DOI/URL format validation with helpful error messages
@@ -36,7 +36,7 @@ const DOI_REGEX = /^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i;
 export const ReferenceFormSchema = z.object({
   type: ReferenceTypeSchema,
   title: z.string().min(1, 'Title is required'),
-  authors: z.array(AuthorInputSchema),
+  authors: z.array(CreateAuthorSchema),
   year: z.preprocess(
     (val) => {
       // Convert NaN from empty number inputs to undefined

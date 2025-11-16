@@ -6,31 +6,31 @@
  */
 
 import type {
-  ReferenceSchemaType,
-  CollectionSchemaType,
-  TagSchemaType,
-  AuthorSchemaType,
-  CreateReferenceInput as SharedCreateReferenceInput,
-  UpdateReferenceInput as SharedUpdateReferenceInput,
-  CreateCollectionInput as SharedCreateCollectionInput,
-  UpdateCollectionInput as SharedUpdateCollectionInput,
-  CreateTagInput as SharedCreateTagInput,
-  UpdateTagInput as SharedUpdateTagInput,
+  Reference as SharedReference,
+  Collection as SharedCollection,
+  Tag as SharedTag,
+  Author as SharedAuthor,
+  CreateReference,
+  UpdateReference,
+  CreateCollection,
+  UpdateCollection,
+  CreateTag,
+  UpdateTag,
 } from '@bibliography/shared';
 
 // Re-export types from shared package
-export type Reference = ReferenceSchemaType;
-export type Author = AuthorSchemaType;
-export type Collection = CollectionSchemaType;
-export type Tag = TagSchemaType;
+export type Reference = SharedReference;
+export type Author = SharedAuthor;
+export type Collection = SharedCollection;
+export type Tag = SharedTag;
 
-// Re-export input types
-export type CreateReferenceInput = SharedCreateReferenceInput;
-export type UpdateReferenceInput = SharedUpdateReferenceInput;
-export type CreateCollectionInput = SharedCreateCollectionInput;
-export type UpdateCollectionInput = SharedUpdateCollectionInput;
-export type CreateTagInput = SharedCreateTagInput;
-export type UpdateTagInput = SharedUpdateTagInput;
+// Re-export request types
+export type CreateReferenceInput = CreateReference;
+export type UpdateReferenceInput = UpdateReference;
+export type CreateCollectionInput = CreateCollection;
+export type UpdateCollectionInput = UpdateCollection;
+export type CreateTagInput = CreateTag;
+export type UpdateTagInput = UpdateTag;
 
 // Frontend-specific types that don't have backend equivalents yet
 export interface ProjectLink {

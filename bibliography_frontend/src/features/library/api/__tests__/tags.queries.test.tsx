@@ -5,13 +5,15 @@ import React from 'react';
 import { apiClient } from '@/common/api/client';
 import {
   useTagsQuery,
+  tagKeys,
+} from '../tags.queries';
+import {
   useCreateTagMutation,
   useUpdateTagMutation,
   useSetTagColorMutation,
   useRenameTagMutation,
   useDeleteTagMutation,
-  tagKeys,
-} from '../tags.queries';
+} from '../tags.mutations';
 import { useUIStore } from '@/store/ui.store';
 import type { Tag } from '@/common/types';
 

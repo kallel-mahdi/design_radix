@@ -3,11 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ImportModal } from '../ImportModal';
-import * as importQueries from '../../api/import.queries';
+import * as importMutations from '../../api/import.mutations';
 import { useUIStore } from '@/store/ui.store';
 
-// Mock the import queries
-vi.mock('../../api/import.queries');
+// Mock the import mutations
+vi.mock('../../api/import.mutations');
 
 // Mock the UI store
 vi.mock('@/store/ui.store', () => ({
@@ -64,7 +64,7 @@ describe('ImportModal', () => {
       addToast: mockAddToast,
     } as any);
 
-    vi.mocked(importQueries.useImportFromDoiMutation).mockReturnValue({
+    vi.mocked(importMutations.useImportFromDoiMutation).mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
     } as any);
@@ -193,7 +193,7 @@ describe('ImportModal', () => {
     it('should show loading state during import', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(importQueries.useImportFromDoiMutation).mockReturnValue({
+      vi.mocked(importMutations.useImportFromDoiMutation).mockReturnValue({
         mutateAsync: mockMutateAsync,
         isPending: true,
       } as any);

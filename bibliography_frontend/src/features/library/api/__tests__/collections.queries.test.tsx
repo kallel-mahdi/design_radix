@@ -5,12 +5,14 @@ import React from 'react';
 import { apiClient } from '@/common/api/client';
 import {
   useCollectionsQuery,
+  collectionKeys,
+} from '../collections.queries';
+import {
   useCreateCollectionMutation,
   useUpdateCollectionMutation,
   useDeleteCollectionMutation,
   useRestoreCollectionMutation,
-  collectionKeys,
-} from '../collections.queries';
+} from '../collections.mutations';
 import { useUIStore } from '@/store/ui.store';
 import type { Collection } from '@/common/types';
 

@@ -25,11 +25,11 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useModalState, useUIStore } from '@/store/ui.store';
+import { useReferenceQuery } from '../api/references.queries';
 import {
   useCreateReferenceMutation,
   useUpdateReferenceMutation,
-  useReferenceQuery,
-} from '../api/references.queries';
+} from '../api/references.mutations';
 import { ReferenceFormSchema, formDataToCreateInput, formDataToUpdateInput, type ReferenceFormData } from '../types/schemas';
 import { useLibraryStore } from '../store/library.store';
 

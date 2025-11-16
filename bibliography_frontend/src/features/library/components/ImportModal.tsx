@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useImportFromDoiMutation } from '../api/import.queries';
+import { useImportFromDoiMutation } from '../api/import.mutations';
 import { useUIStore } from '@/store/ui.store';
 import { isValidDoi, normalizeDoi } from '@/common/utils/validation';
 import type { ApiError } from '@/common/api/client';

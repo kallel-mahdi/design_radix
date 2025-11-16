@@ -8,7 +8,7 @@ import {
 	PencilIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useDeleteReferenceMutation } from "@/features/library/api/references.queries";
+import { useDeleteReferenceMutation } from "@/features/library/api/references.mutations";
 import { useUIStore } from "@/store/ui.store";
 
 const referenceCardVariants = cva(

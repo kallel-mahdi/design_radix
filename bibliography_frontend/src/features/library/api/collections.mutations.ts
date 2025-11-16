@@ -1,0 +1,105 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/common/api/client';
+import { useUIStore } from '@/store/ui.store';
+import { collectionKeys } from './collections.queries';
+import type { Collection, CreateCollectionInput, UpdateCollectionInput } from '@/common/types';
+import { CollectionSchema } from '@bibliography/shared';
+
+export function useCreateCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateCollectionInput): Promise<Collection> => {
+      const response = await apiClient.post<Collection>('/collections', data);
+      return CollectionSchema.parse(response);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      useUIStore.getState().addToast({
+        message: 'Collection created successfully',
+        type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to create collection',
+        type: 'error',
+      });
+    },
+  });
+}
+
+export function useUpdateCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCollectionInput }): Promise<Collection> => {
+      const response = await apiClient.patch<Collection>(`/collections/${id}`, data);
+      return CollectionSchema.parse(response);
+    },
+    onSuccess: (updatedCollection) => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.detail(updatedCollection._id) });
+      useUIStore.getState().addToast({
+        message: 'Collection updated successfully',
+        type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to update collection',
+        type: 'error',
+      });
+    },
+  });
+}
+
+export function useDeleteCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await apiClient.delete(`/collections/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      useUIStore.getState().addToast({
+        message: 'Collection deleted successfully',
+        type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to delete collection',
+        type: 'error',
+      });
+    },
+  });
+}
+
+export function useRestoreCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await apiClient.patch(`/collections/${id}/restore`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      useUIStore.getState().addToast({
+        message: 'Collection restored successfully',
+        type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to restore collection',
+        type: 'error',
+      });
+    },
+  });
+}
