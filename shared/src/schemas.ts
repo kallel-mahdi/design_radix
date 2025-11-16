@@ -24,12 +24,16 @@ export const AuthorSchema = z.object({
  * If full is provided, it will be used as-is
  */
 export const AuthorInputSchema = z.object({
-  given: z.string().optional(),
-  family: z.string().optional(),
-  full: z.string().optional(),
-  // Either full OR family must be provided
+  given: z.string().trim().optional(),
+  family: z.string().trim().optional(),
+  full: z.string().trim().optional(),
+  // Either full OR family must be provided (after trimming)
 }).refine(
-  (data) => data.full || data.family,
+  (data) => {
+    const hasFullName = data.full && data.full.length > 0;
+    const hasFamilyName = data.family && data.family.length > 0;
+    return hasFullName || hasFamilyName;
+  },
   { message: 'Author must have either full name or family name' }
 );
 

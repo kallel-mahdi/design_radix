@@ -46,15 +46,17 @@
 
 ---
 
-### Session 7: ReferenceModal & Manual CRUD (3-4 hours)
+### Session 7: ReferenceModal & Manual CRUD (3-4 hours) ✅ COMPLETE (with Code Review Fixes)
 
 **Goal**: Complete create/edit reference modal backed by Zod validation so manual workflows work before bulk imports.
 
-#### Frontend Tasks (3-4 hours)
+**Completion Date**: 2025-01-16 (includes post-review fixes)
+
+#### Frontend Tasks (3-4 hours) ✅
 
 **Extend ReferenceModal**:
 
-- [ ] `src/features/library/components/ReferenceModal.tsx`:
+- [x] `src/features/library/components/ReferenceModal.tsx`:
   - Full form with react-hook-form + `@bibliography/shared` Zod schema
   - Fields: type, title (required), authors (dynamic array), year, venue, DOI, URL, tags, PDF placeholder
   - Create vs Edit mode + optimistic save state
@@ -63,28 +65,37 @@
 
 **Create Schema Helpers**:
 
-- [ ] `src/features/library/types/schemas.ts` exports `ReferenceFormSchema` inferred from shared package but adapted for form defaults
+- [x] `src/features/library/types/schemas.ts` exports `ReferenceFormSchema` inferred from shared package but adapted for form defaults
 
 **Wire Mutations**:
 
-- [ ] `useCreateReferenceMutation` and `useUpdateReferenceMutation` submit parsed payloads
-- [ ] Ensure mutations invalidate `['references', activeCollectionId, filters]`
+- [x] `useCreateReferenceMutation` and `useUpdateReferenceMutation` submit parsed payloads
+- [x] Ensure mutations invalidate `['references', activeCollectionId, filters]`
 
 **UI Polish**:
 
-- [ ] Dynamic authors list (add/remove buttons, keyboard focus after add)
-- [ ] Venue autocomplete seeded from existing references (React Query select)
-- [ ] Validation errors inline + toast fallback
+- [x] Dynamic authors list (add/remove buttons, keyboard focus after add)
+- [x] Dual-mode author entry (structured firstName/lastName OR single full name)
+- [x] Validation errors inline + toast fallback
+- [ ] Venue autocomplete seeded from existing references (deferred to Session 11+)
 
-#### Verification
+#### Verification ✅
 
-- [ ] Can create reference with title only (minimal)
-- [ ] Can create reference with all fields populated
-- [ ] Validation errors show correctly (invalid DOI/URL)
-- [ ] Edit mode pre-fills data and saves updates
-- [ ] Newly created references immediately appear in ReferenceTable selection
+- [x] Can create reference with title only (minimal) - **Fixed in code review**
+- [x] Can create reference with all fields populated
+- [x] Validation errors show correctly (invalid DOI/URL)
+- [x] Edit mode pre-fills data and saves updates
+- [x] Newly created references immediately appear in ReferenceTable selection
+
+#### Code Review Fixes (2025-01-16) ✅
+
+- [x] **Fixed title-only creation** - Filter empty authors before submission
+- [x] **Fixed selection/details sync** - Clear activeReferenceId when deselecting
+- [x] **Fixed DOI normalization** - Normalize to lowercase in service layer
+- [x] **Updated E2E test documentation** - Marked 31 tests as skipped pending UI
 
 **Estimated Time**: 3-4 hours
+**Actual Time**: 4-5 hours (including code review fixes)
 
 ---
 
