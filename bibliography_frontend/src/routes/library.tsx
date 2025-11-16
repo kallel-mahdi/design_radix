@@ -19,6 +19,7 @@ export function LibraryPage() {
   const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
   const activeTags = useLibraryStore((state) => state.activeTags);
   const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
+  const setActiveReference = useLibraryStore((state) => state.setActiveReference);
   const editReferenceId = useLibraryStore((state) => state.editReferenceId);
   const searchQuery = useLibraryStore((state) => state.searchQuery);
 
@@ -36,6 +37,19 @@ export function LibraryPage() {
       setDetailsPaneOpen(false);
     }
   }, [activeReferenceId, setDetailsPaneOpen]);
+
+  // ESC key handler: Close DetailsPane and clear active reference
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && activeReferenceId) {
+        setDetailsPaneOpen(false);
+        setActiveReference(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeReferenceId, setDetailsPaneOpen, setActiveReference]);
 
   const { data: references = [], isLoading, error } = useReferencesQuery({
     collectionId: activeCollectionId || undefined,
