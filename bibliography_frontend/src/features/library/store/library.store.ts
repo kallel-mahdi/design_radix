@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 interface LibraryState {
   selectedReferenceIds: Set<string>;
   activeReferenceId: string | null;
+  editReferenceId: string | null;
   lastSelectedId: string | null;
   activeCollectionId: string | null;
   expandedCollectionIds: Set<string>;
@@ -20,6 +22,7 @@ interface LibraryActions {
   selectAll: (ids: string[]) => void;
   clearSelection: () => void;
   setActiveReference: (id: string | null) => void;
+  setEditReference: (id: string | null) => void;
   setActiveCollection: (id: string | null) => void;
   toggleCollectionExpanded: (id: string) => void;
   toggleTag: (tag: string) => void;
@@ -34,6 +37,7 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
       (set, get) => ({
         selectedReferenceIds: new Set(),
         activeReferenceId: null,
+        editReferenceId: null,
         lastSelectedId: null,
         activeCollectionId: null,
         expandedCollectionIds: new Set(),
@@ -57,7 +61,11 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
             (state) => {
               const newSet = new Set(state.selectedReferenceIds);
               newSet.delete(id);
-              return { selectedReferenceIds: newSet };
+              return {
+                selectedReferenceIds: newSet,
+                // Clear active if we're deselecting the active reference
+                activeReferenceId: state.activeReferenceId === id ? null : state.activeReferenceId
+              };
             },
             false,
             'library/deselectReference'
@@ -76,10 +84,21 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
           set({ selectedReferenceIds: new Set(ids) }, false, 'library/selectAll'),
 
         clearSelection: () =>
-          set({ selectedReferenceIds: new Set(), lastSelectedId: null }, false, 'library/clearSelection'),
+          set(
+            {
+              selectedReferenceIds: new Set(),
+              lastSelectedId: null,
+              activeReferenceId: null
+            },
+            false,
+            'library/clearSelection'
+          ),
 
         setActiveReference: (id) =>
           set({ activeReferenceId: id }, false, 'library/setActiveReference'),
+
+        setEditReference: (id) =>
+          set({ editReferenceId: id }, false, 'library/setEditReference'),
 
         setActiveCollection: (id) =>
           set({ activeCollectionId: id }, false, 'library/setActiveCollection'),
@@ -154,26 +173,13 @@ export const useActiveReferenceId = () =>
 export const useActiveTags = () =>
   useLibraryStore((state) => state.activeTags);
 
-// Shallow equality comparator for object selectors
-const shallowEqual = (a: any, b: any): boolean => {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-  if (keysA.length !== keysB.length) return false;
-  for (const key of keysA) {
-    if (a[key] !== b[key]) return false;
-  }
-  return true;
-};
-
+// Use Zustand v5 useShallow hook for object selectors to prevent unnecessary re-renders
 export const useSorting = () =>
   useLibraryStore(
-    (state) => ({
+    useShallow((state) => ({
       sortBy: state.sortBy,
       sortOrder: state.sortOrder
-    }),
-    shallowEqual
+    }))
   );
 
 export const useExpandedCollectionIds = () =>

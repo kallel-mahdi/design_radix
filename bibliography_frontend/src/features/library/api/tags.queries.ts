@@ -39,6 +39,14 @@ export function useCreateTagMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to create tag',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -56,6 +64,14 @@ export function useUpdateTagMutation() {
       useUIStore.getState().addToast({
         message: 'Tag updated successfully',
         type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to update tag',
+        type: 'error',
       });
     },
   });
@@ -87,6 +103,12 @@ export function useSetTagColorMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to update tag color',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -107,6 +129,14 @@ export function useRenameTagMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to rename tag',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -122,6 +152,12 @@ export function useDeleteTagMutation() {
       useUIStore.getState().addToast({
         message: 'Tag deleted successfully',
         type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to delete tag',
+        type: 'error',
       });
     },
   });

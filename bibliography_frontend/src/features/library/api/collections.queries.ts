@@ -41,6 +41,14 @@ export function useCreateCollectionMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to create collection',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -60,6 +68,14 @@ export function useUpdateCollectionMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to update collection',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -77,6 +93,12 @@ export function useDeleteCollectionMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to delete collection',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -92,6 +114,12 @@ export function useRestoreCollectionMutation() {
       useUIStore.getState().addToast({
         message: 'Collection restored successfully',
         type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to restore collection',
+        type: 'error',
       });
     },
   });

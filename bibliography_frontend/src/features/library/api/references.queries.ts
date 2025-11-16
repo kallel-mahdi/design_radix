@@ -41,6 +41,20 @@ export function useReferencesQuery(params?: ReferencesQueryParams) {
   });
 }
 
+export function useReferenceQuery(id: string | undefined, enabled = true) {
+  return useQuery({
+    // Use generic detail key when id is undefined to avoid creating ['references','detail',undefined] cache entries
+    queryKey: id ? referenceKeys.detail(id) : referenceKeys.details(),
+    queryFn: async (): Promise<Reference> => {
+      if (!id) throw new Error('Reference ID is required');
+      const data = await apiClient.get<Reference>(`/references/${id}`);
+      return ReferenceSchema.parse(data);
+    },
+    enabled: enabled && !!id,
+    staleTime: QUERY_STALE_TIME_MS
+  });
+}
+
 export function useCreateReferenceMutation() {
   const queryClient = useQueryClient();
 
@@ -54,6 +68,15 @@ export function useCreateReferenceMutation() {
       useUIStore.getState().addToast({
         message: 'Reference created successfully',
         type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      // Skip validation errors - already shown inline by react-hook-form
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to create reference',
+        type: 'error',
       });
     },
   });
@@ -75,6 +98,15 @@ export function useUpdateReferenceMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      // Skip validation errors - already shown inline by react-hook-form
+      if (error.code === 'VALIDATION_ERROR') return;
+
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to update reference',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -92,6 +124,12 @@ export function useDeleteReferenceMutation() {
         type: 'success',
       });
     },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to delete reference',
+        type: 'error',
+      });
+    },
   });
 }
 
@@ -107,6 +145,12 @@ export function useRestoreReferenceMutation() {
       useUIStore.getState().addToast({
         message: 'Reference restored successfully',
         type: 'success',
+      });
+    },
+    onError: (error: any) => {
+      useUIStore.getState().addToast({
+        message: error.message || 'Failed to restore reference',
+        type: 'error',
       });
     },
   });

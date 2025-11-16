@@ -1,6 +1,8 @@
 import { useLibraryStore } from '../store/library.store';
+import { useUIStore } from '@/store/ui.store';
 import type { Reference } from '@/common/types';
 import { Tag } from '@/components/ui/Tag';
+import { PencilIcon } from '@heroicons/react/24/outline';
 
 interface ReferenceTableProps {
   references: Reference[];
@@ -8,10 +10,13 @@ interface ReferenceTableProps {
 
 export function ReferenceTable({ references }: ReferenceTableProps) {
   const selectedReferenceIds = useLibraryStore((state) => state.selectedReferenceIds);
+  const selectReference = useLibraryStore((state) => state.selectReference);
   const toggleSelection = useLibraryStore((state) => state.toggleSelection);
   const selectAll = useLibraryStore((state) => state.selectAll);
   const clearSelection = useLibraryStore((state) => state.clearSelection);
   const setActiveReference = useLibraryStore((state) => state.setActiveReference);
+  const setEditReference = useLibraryStore((state) => state.setEditReference);
+  const { openModal } = useUIStore();
 
   const allSelected = references.length > 0 && references.every(ref => selectedReferenceIds.has(ref._id));
   const someSelected = references.some(ref => selectedReferenceIds.has(ref._id)) && !allSelected;
@@ -26,18 +31,35 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
 
   const handleRowClick = (refId: string, event: React.MouseEvent) => {
     if (event.metaKey || event.ctrlKey) {
-      // Cmd/Ctrl+Click: toggle selection without affecting others
+      // Cmd/Ctrl+Click: toggle multi-select without changing active reference
       toggleSelection(refId);
     } else {
-      // Regular click: select only this item and show details
-      toggleSelection(refId);
-      setActiveReference(refId);
+      // Regular click: clear all, select only this item, set as active
+      const isCurrentlySelected = selectedReferenceIds.has(refId);
+      const isOnlySelection = selectedReferenceIds.size === 1 && isCurrentlySelected;
+
+      if (isOnlySelection) {
+        // Clicking the only selected item: deselect and clear active
+        clearSelection();
+        setActiveReference(null);
+      } else {
+        // Select only this item and show details
+        clearSelection();
+        selectReference(refId);
+        setActiveReference(refId);
+      }
     }
   };
 
   const handleCheckboxClick = (refId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     toggleSelection(refId);
+  };
+
+  const handleEdit = (refId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setEditReference(refId);
+    openModal('reference-modal');
   };
 
   const formatAuthors = (authors: Reference['authors']) => {
@@ -77,6 +99,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
             <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Year</th>
             <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Type</th>
             <th className="px-3 py-3 text-left text-sm font-medium text-app-text-primary">Tags</th>
+            <th className="px-3 py-3 w-12"></th>
           </tr>
         </thead>
         <tbody>
@@ -122,6 +145,16 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
                       <span className="text-xs text-app-text-muted">No tags</span>
                     )}
                   </div>
+                </td>
+                <td className="px-3 py-3 w-12">
+                  <button
+                    onClick={(e) => handleEdit(ref._id, e)}
+                    className="p-1.5 text-app-text-secondary hover:text-app-accent hover:bg-app-surface-hover rounded transition-colors"
+                    aria-label="Edit reference"
+                    title="Edit reference"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
                 </td>
               </tr>
             );

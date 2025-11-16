@@ -123,7 +123,7 @@ class ApiClient {
         errorMessage.includes('failed to fetch') ||
         errorMessage.includes('network request failed') ||
         errorMessage.includes('request failed') ||
-        error.cause instanceof TypeError // Network error during connection
+        (error as any).cause instanceof TypeError // Network error during connection (ES2022 feature)
       ) {
         // During dev startup (2-5s), this is expected. Use retryable error code.
         return {

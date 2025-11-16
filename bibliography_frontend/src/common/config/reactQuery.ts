@@ -53,11 +53,11 @@ export const queryClientConfig = {
     queries: {
       staleTime: QUERY_STALE_TIME_MS,
       gcTime: QUERY_GC_TIME_MS,
-      retry: (failureCount, error) => {
+      retry: (failureCount: number, error: unknown) => {
         // Only retry network-related errors, up to QUERY_RETRY_COUNT times
         return failureCount < QUERY_RETRY_COUNT && isRetryableError(error);
       },
-      retryDelay: (attemptIndex) => getRetryDelay(attemptIndex),
+      retryDelay: (attemptIndex: number) => getRetryDelay(attemptIndex),
       refetchOnWindowFocus: false,
     },
     mutations: {

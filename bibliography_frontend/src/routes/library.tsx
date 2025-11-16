@@ -5,6 +5,7 @@ import { useReferencesQuery } from '../features/library/api/references.queries';
 import { useLibraryStore } from '../features/library/store/library.store';
 import { ReferenceTable } from '../features/library/components/ReferenceTable';
 import { ImportModal } from '../features/library/components/ImportModal';
+import { ReferenceModal } from '../features/library/components/ReferenceModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { FolderOpenIcon, PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
@@ -13,11 +14,12 @@ export const Route = createFileRoute('/library')({
   component: LibraryPage,
 });
 
-function LibraryPage() {
-  const { setActiveView, setDetailsPaneOpen } = useUIStore();
+export function LibraryPage() {
+  const { setActiveView, setDetailsPaneOpen, openModal } = useUIStore();
   const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
   const activeTags = useLibraryStore((state) => state.activeTags);
   const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
+  const editReferenceId = useLibraryStore((state) => state.editReferenceId);
   const searchQuery = useLibraryStore((state) => state.searchQuery);
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -55,10 +57,10 @@ function LibraryPage() {
           <Button
             variant="primary"
             size="default"
-            onClick={() => console.log('Add reference')}
+            onClick={() => openModal('reference-modal')}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
-            Add Reference
+            New Reference
           </Button>
           <Button
             variant="secondary"
@@ -112,6 +114,9 @@ function LibraryPage() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
       />
+
+      {/* Reference Modal (Create/Edit) */}
+      <ReferenceModal referenceId={editReferenceId || undefined} />
     </div>
   );
 }
