@@ -223,56 +223,96 @@ useEffect(() => {
 
 ---
 
-### Session 10: PDF Upload & Viewer (3-4 hours)
+### Session 9.5: Test Fixtures Setup (0.5 hours) ✅ COMPLETE
+
+**Goal**: PDF test fixtures for E2E tests (arXiv papers + hand-crafted minimal PDFs)
+
+**Completion Date**: 2025-01-16
+
+#### Tasks ✅
+
+- [x] Created `e2e/fixtures/pdfs/` directory structure
+- [x] Generated minimal.pdf (293B) and small-test.pdf (739B) - committed to Git
+- [x] Created `scripts/download-test-fixtures.cjs` - downloads arXiv papers (gitignored)
+- [x] Created `e2e/fixtures/paths.ts` - type-safe fixture paths
+- [x] Added NPM script `pnpm test:download-fixtures`
+- [x] Updated `.gitignore` and `.gitattributes` for binary PDFs
+- [x] Created comprehensive README.md with legal attribution
+
+**Fixtures**: minimal (293B), smallTest (739B), small (233KB), medium (2.2MB), large (224KB)
+
+---
+
+### Session 10: PDF Upload & Viewer (3-4 hours) ✅ COMPLETE
 
 **Goal**: Single PDF upload per reference with polished react-pdf viewer (MVP feature)
 
-#### Backend Tasks (1.5-2 hours)
+**Completion Date**: 2025-11-17
+
+#### Backend Tasks (1.5-2 hours) ✅
 
 **Configure Multer**:
 
-- [ ] `src/utils/fileUpload.ts`:
+- [x] `src/utils/fileUpload.ts`:
   - Single file upload
   - .pdf MIME type filter
-  - Max 10MB size limit
-  - Store at `UPLOAD_PATH/{uuid}.pdf`
+  - Max 50MB size limit (from API spec, not 10MB)
+  - Store at `data/bibliography/uploads/{uuid}.pdf`
 
 **Add PDF Routes**:
 
-- [ ] `POST /references/:id/pdf` (multipart upload)
-- [ ] `GET /references/:id/pdf` (download)
-- [ ] `DELETE /references/:id/pdf` (remove)
+- [x] `POST /references/:id/upload-pdf` (multipart upload)
+- [x] `GET /references/:id/pdf` (download)
+- [x] `DELETE /references/:id/pdf` (remove)
 
 **Update ReferenceService**:
 
-- [ ] Save PDF metadata (storedPath, originalName, size, mimeType)
-- [ ] Set `hasPdf: true`
+- [x] Save PDF metadata (storedPath, originalName, size, mimeType)
+- [x] Set `hasPdf: true`
 
-#### Frontend Tasks (1.5-2 hours)
+#### Frontend Tasks (1.5-2 hours) ✅
 
 **Extend ReferenceModal**:
 
-- [ ] File input for PDF upload wired to mutation
-- [ ] Show filename + size when selected
-- [ ] Upload on save (multipart request)
+- [x] PdfUploadZone with drag-drop + file input wired to mutation
+- [x] Show filename + size when selected
+- [x] Upload on save (multipart request)
 
 **Create PdfTab**:
 
-- [ ] Use `react-pdf` Document/Page with zoom + navigation controls
-- [ ] Download + “Open in new tab” buttons
-- [ ] Empty state when no PDF
+- [x] Use `react-pdf` Document/Page with zoom + navigation controls
+- [x] Download + "Open in new tab" buttons
+- [x] Empty state when no PDF
 
 **Create PDF Upload Mutation**
 
-- [ ] `useUploadPdfMutation` handles optimistic updates to `hasPdf`
+- [x] `useUploadPdfMutation` handles optimistic updates to `hasPdf`
+- [x] `useDeletePdfMutation` for PDF removal
 
-#### Verification
+#### Tests ✅
 
-- [ ] Upload PDF via ReferenceModal → `hasPdf: true`
-- [ ] PdfTab displays PDF with controls
-- [ ] Zoom + page navigation + download buttons work
-- [ ] Remove PDF returns to empty state
+- [x] Backend unit: 2 tests (uploadPdf, deletePdf service methods)
+- [x] Backend integration: 13 tests (upload/download/delete, MIME/size validation, ownership)
+- [x] Frontend unit: 0 tests (deferred per test pyramid - 60/30/10 ratio)
+- [x] E2E: 7 comprehensive tests with worker isolation
+- [x] Total: 22 tests passing ✅
+
+#### Verification ✅
+
+- [x] Upload PDF via ReferenceModal → `hasPdf: true`
+- [x] PdfTab displays PDF with controls
+- [x] Zoom + page navigation + download buttons work
+- [x] Remove PDF returns to empty state
+- [x] All E2E tests pass (7/7) ✅
 
 **Estimated Time**: 3-4 hours
+**Actual Time**: 4-5 hours (including bug fix)
+
+**Bug Fixed (2025-11-17):**
+- Type mismatch in pdf.mutations.ts caused E2E test failure
+- Fix: Corrected generic type from `PdfUploadResponse` to `PdfData` to match apiClient.uploadFile() contract
+- Result: E2E tests improved from 6/7 to 7/7 passing
+
+**Note**: Implementation includes drag-drop support (adapted from editor FileUpload.tsx) and comprehensive PDF management with replace functionality. 50MB limit from API spec used instead of 10MB from checklist.
 
 ---

@@ -52,6 +52,16 @@ tests/e2e/               # Critical flows only (root level)
 
 ---
 
+## Test Fixtures (Session 9.5)
+
+**Setup:** `pnpm test:download-fixtures` (downloads arXiv PDFs)
+
+**Usage:** `import { FIXTURE_PATHS } from './fixtures/paths'`
+- `minimal` (293B), `smallTest` (739B) - committed to Git
+- `small` (233KB), `medium` (2.2MB), `large` (224KB) - arXiv papers, gitignored
+
+---
+
 ## Monorepo Commands
 
 ```bash

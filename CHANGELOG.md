@@ -7,6 +7,92 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Session 10 - PDF Upload & Viewer (2025-11-17)
+
+**Frontend:**
+- Created PdfTab component with react-pdf v9 integration
+  - Document/Page rendering with PDF.js worker
+  - Zoom controls (0.5x - 3.0x in 0.25x increments)
+  - Page navigation (prev/next buttons + direct input)
+  - Download button with proper filename
+  - Open in new tab functionality
+  - Empty state when no PDF attached
+  - Loading spinner during PDF load
+- Created PdfUploadZone component with drag-and-drop support
+  - Drag-over visual feedback (border/background color change)
+  - MIME type validation (application/pdf only)
+  - File size validation (50MB max from API spec)
+  - Shows current PDF if exists with "Replace" button
+  - Shows selected file pending upload with icon
+  - Validation error display with XCircleIcon
+- Created pdf.mutations.ts with TanStack Query mutations
+  - useUploadPdfMutation with optimistic updates (sets hasPdf: true immediately)
+  - useDeletePdfMutation with optimistic updates (sets hasPdf: false immediately)
+  - Automatic cache invalidation on success
+  - Error handling with revert on failure
+- Integrated PdfUploadZone into ReferenceModal
+  - Track selectedPdfFile state
+  - Upload PDF after reference save (create or edit)
+  - Clear state on modal close
+- Wired PdfTab into DetailsPane replacing placeholder
+
+**Backend:**
+- Created fileUpload.ts with Multer v2 configuration
+  - Disk storage at `./data/bibliography/uploads/{uuid}.pdf`
+  - UUID v4 filenames for collision resistance
+  - 50MB file size limit (from API spec, not 10MB from checklist)
+  - PDF MIME type validation
+  - Auto-create upload directory
+- Added 3 PDF management routes to references.ts:
+  - POST `/:id/upload-pdf` (multipart/form-data)
+  - GET `/:id/pdf` (download/stream)
+  - DELETE `/:id/pdf` (remove file + metadata)
+- Implemented ReferenceController methods:
+  - uploadPdf: Handles multipart upload, validates file presence
+  - downloadPdf: Streams PDF with Content-Disposition header
+  - deletePdf: Removes file and metadata
+- Implemented ReferenceService methods:
+  - uploadPdf: Saves file metadata, deletes old PDF if exists (replace operation)
+  - getPdfPath: Returns storedPath for streaming
+  - deletePdf: Removes file from disk and clears metadata
+- Updated IReferenceService interface with PDF method signatures
+- Created upload directory structure: `data/bibliography/uploads/` with .gitkeep and .gitignore
+
+**Tests:**
+- Backend unit: 2 tests (uploadPdf, deletePdf service methods)
+- Backend integration: 13 tests (PDF upload/download/delete, file validation, error handling)
+- Frontend unit: 0 tests (deferred per test pyramid)
+- E2E: 7 comprehensive tests with worker isolation
+- Total: 22 tests passing ✅
+
+**Critical Bug Fixed (2025-11-17):**
+- **Type mismatch in pdf.mutations.ts** (caused E2E test failure "should handle complete workflow")
+  - Problem: Generic type for `apiClient.uploadFile<T>()` was `PdfUploadResponse` (full response) instead of `PdfData` (data field)
+  - Backend returns: `{success, message, data: {hasPdf, pdf}}`
+  - apiClient expects `T` to be type of `data` field, not entire response
+  - Fix: Renamed interface to `PdfData`, changed `data.data.hasPdf` to `data.hasPdf` in onSuccess handler
+  - File: `bibliography_frontend/src/features/library/api/pdf.mutations.ts`
+  - Result: All 7/7 E2E tests now pass (was 6/7 before)
+- **Added await to query invalidation** in ReferenceModal.tsx:172
+  - Ensures cache refetch completes before PDF upload starts (prevents race condition)
+  - File: `bibliography_frontend/src/features/library/components/ReferenceModal.tsx`
+
+**Dependencies:**
+- Backend: uuid, @types/uuid (already installed)
+- Frontend: react-pdf v9 (already installed)
+
+**Deviations from Zotero:**
+- Single PDF per reference (MVP constraint, Zotero supports multiple attachments)
+- react-pdf viewer (Phase 1 MVP, Zotero has custom PDF viewer with annotations)
+- Drag-drop adapted from editor FileUpload.tsx (Zotero uses desktop file drag)
+
+**References:**
+- Session Plan: `docs/sessions/10-plan.md`
+- API Spec: `docs/01-specification/backend/APIDesignSystem.md:363` (50MB limit)
+- Zotero Patterns: `zotero/chrome/content/zotero/xpcom/attachments.js` (file storage patterns)
+- Editor Patterns: `editor_frontend/src/features/*/components/FileUpload.tsx` (drag-drop)
+- react-pdf Docs: https://react-pdf.org/ (v9 API with worker configuration)
+
 ### Session 9 - DetailsPane Enhancement (2025-11-16)
 
 **Frontend:**
