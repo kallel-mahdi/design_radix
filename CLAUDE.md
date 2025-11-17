@@ -30,60 +30,94 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 ## Project Structure
 
 ```
-/home/mahdi/Desktop/bibliography/
-├── editor_frontend/              # REFERENCE - Editor's React frontend
-│   ├── src/
-│   │   ├── components/ui/        # UI Primitives to copy (Button, Card, Input, Modal)
-│   │   ├── store/                # Zustand stores (with devtools)
-│   │   ├── common/api/           # API client patterns
-│   │   └── routes/               # Router patterns
-│   └── package.json              # See what libraries they use
+/home/mahdi/Desktop/bibliography/                # Single monorepo (pnpm workspace)
 │
-├── editor_backend/               # REFERENCE - Editor's microservices backend
-│   ├── services/
-│   │   ├── auth-service/         # REUSE - Authentication patterns
-│   │   ├── document-service/     # REUSE - File upload (multer) patterns
-│   │   ├── bibliography-service/ # YOUR WORK - Partially scaffolded
-│   │   ├── latex-service/        # REFERENCE - PDF generation patterns
-│   │   └── api-gateway/          # REFERENCE - Routing & auth headers
+├── bibliography_backend/        # Backend service (no .git)
+│   ├── src/
+│   │   ├── controllers/         # Express request handlers
+│   │   ├── models/              # Mongoose schemas
+│   │   ├── routes/              # Express routes
+│   │   ├── services/            # Business logic
+│   │   ├── middleware/          # Auth, validation, errors
+│   │   └── utils/               # Helpers, logger
+│   ├── tests/
+│   │   ├── unit/
+│   │   └── integration/
+│   ├── package.json
 │   └── docker-compose.yml
 │
-├── docs/                        # YOUR PLANNING DOCS (see docs/INDEX.md for nav)
+├── bibliography_frontend/       # Frontend app (no .git)
+│   ├── src/
+│   │   ├── features/            # Feature modules
+│   │   │   ├── library/
+│   │   │   ├── search/
+│   │   │   ├── projects/
+│   │   │   └── duplicates/
+│   │   ├── components/          # Reusable components
+│   │   │   ├── layout/
+│   │   │   └── ui/
+│   │   ├── store/               # Zustand stores
+│   │   ├── routes/              # TanStack Router
+│   │   ├── common/              # Shared utilities
+│   │   └── styles/              # Tailwind CSS
+│   ├── e2e/                     # Playwright E2E tests
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tailwind.config.js
+│
+├── shared/                      # @bibliography/shared package
+│   ├── src/
+│   │   ├── types/               # TypeScript interfaces
+│   │   ├── schemas/             # Zod validation schemas
+│   │   └── utils/               # Shared utilities
+│   └── package.json
+│
+├── editor_frontend/             # REFERENCE - Editor's React frontend (submodule)
+├── editor_backend/              # REFERENCE - Editor's backend (submodule)
+├── zotero/                      # REFERENCE - Zotero source code (submodule)
+│
+├── docs/                        # Project documentation
 │   ├── 01-specification/        # Specs (frontend + backend)
-│   │   ├── Spec.md              # Unified requirements
-│   │   ├── frontend/DesignSystem.md
-│   │   └── backend/APIDesignSystem.md
 │   ├── 02-delivery/             # Session roadmap + checklist
-│   └── sessions/                # Plans created via /session-plan
+│   └── sessions/                # Session plans and reviews
 │
-├── zotero/                      # REFERENCE - Zotero source code checkout
-│   ├── chrome/content/zotero/   # UI components, workflows
-│   │   ├── xpcom/               # Backend logic (duplicate detection, search, etc.)
-│   │   └── components/          # React components (newer UI)
-│   └── resource/schema/         # Database schema (SQLite)
-│
-└── (future: bibliography_frontend/, bibliography_backend/)
+├── .git/                        # Single monorepo git history
+├── pnpm-workspace.yaml          # pnpm workspace configuration
+└── package.json                 # Root workspace config
 ```
 
-**Zotero checkout:** The `zotero/` directory above is part of this repo’s working tree. All references like `zotero/chrome/content/zotero/...` point there.
+**Repository**: `https://github.com/Citable-io/bibliography`
+**Type**: Single monorepo with pnpm workspaces
+**Git History**: Unified history across all packages (Sessions 6-10+)
 
 ---
 
 ## Architecture Principles
 
-### 1. **Separation of Concerns**
+### 1. **Monorepo with pnpm Workspaces**
 
-**CRITICAL**: Frontend and backend must be in SEPARATE folders (like editor).
+**STRUCTURE**: Single git repository with separate frontend/backend packages (not separate repos).
 
-When creating new code:
+```
+bibliography/                           # Single monorepo
+├── bibliography_backend/                # Backend package (@bibliography/backend)
+├── bibliography_frontend/               # Frontend package (@bibliography/frontend)
+├── shared/                              # Shared types/schemas (@bibliography/shared)
+├── pnpm-workspace.yaml                  # Defines workspace packages
+└── .git/                                # Single git history
+```
+
+**Benefits of this approach**:
+- ✅ Single git history: Atomic commits across frontend/backend/shared
+- ✅ Zero-friction type sharing: Changes to shared types immediately visible
+- ✅ Simple development: `pnpm install` at root installs all workspaces
+- ✅ Workspace protocol: `workspace:*` dependencies prevent version mismatches
+- ✅ Separate deployment: Each package can be deployed independently
+- ✅ Matches pnpm best practices: Monorepo for tight coupling during MVP
+
+**No separate folders needed**:
 - ❌ **WRONG**: `/home/mahdi/Desktop/bibliography/src/` (mixed frontend/backend)
-- ✅ **CORRECT**: `/home/mahdi/Desktop/bibliography/bibliography_frontend/` and `/home/mahdi/Desktop/bibliography/bibliography_backend/`
-
-**Why**:
-- Different deployment pipelines
-- Different dependencies
-- Frontend can be static (CDN), backend is a service
-- Easier to scale independently
+- ✅ **CORRECT**: All packages coexist in single repo with pnpm workspaces
 
 ### 2. **Microservices Pattern** (Backend)
 
@@ -356,21 +390,52 @@ bibliography_backend/
 - Or individual service: `cd services/auth-service && npm run dev`
 - Test: `npm run test`
 
-### Bibliography Setup (TODO)
+### Bibliography Monorepo Setup (Complete ✅)
 
-When you create the bibliography repos:
-- **Frontend**: Same structure as editor_frontend
-- **Backend**: Microservice in `editor_backend/services/bibliography-service/` OR separate repo `bibliography_backend/`
+**Repository**: https://github.com/Citable-io/bibliography
+
+**Structure**: Single monorepo with pnpm workspaces
+- `bibliography_backend/` - Backend Express service
+- `bibliography_frontend/` - Frontend React app
+- `shared/` - Shared types (@bibliography/shared)
+
+**Development Setup**:
+
+```bash
+# Clone
+git clone https://github.com/Citable-io/bibliography
+cd bibliography
+
+# Install all workspaces
+pnpm install
+
+# Run all services
+pnpm dev                    # Starts all dev servers in parallel
+
+# Or individual services
+pnpm --filter @bibliography/backend dev
+pnpm --filter @bibliography/frontend dev
+```
 
 **Environment Variables** (from Spec.md):
 ```env
-# Frontend
+# Frontend (bibliography_frontend/.env)
 VITE_API_BASE_URL=http://localhost:8005/api/bibliography
 
-# Backend
+# Backend (bibliography_backend/.env)
 MONGODB_URL=mongodb://localhost:27017/bibliography
 PORT=8005
 NODE_ENV=development
+```
+
+**pnpm Workspace Commands**:
+```bash
+pnpm -r list                # List all packages
+pnpm --filter @bibliography/backend build
+pnpm --filter @bibliography/frontend build
+pnpm build                  # Build all packages
+pnpm test                   # Test all packages
+pnpm lint                   # Lint all packages
 ```
 
 ---
@@ -457,7 +522,10 @@ When starting a new task:
 
 ## Important Reminders
 
-1. **ALWAYS separate frontend and backend folders** (never mix in one directory)
+1. **USE monorepo structure**: Front/backend are separate packages in single repo, not separate folders
+   - Shared types via `@bibliography/shared` workspace package
+   - Use `workspace:*` protocol for dependencies
+   - Make atomic commits across packages
 2. **ALWAYS check editor first** before implementing anything
 3. **ALWAYS document** when you deviate from Zotero's approach
 4. **NEVER skip tests** (comprehensive coverage required)
@@ -466,6 +534,10 @@ When starting a new task:
 
 ---
 
-**Last Updated**: 2025-01-08
-**Status**: Pre-implementation (planning complete, ready to code)
-**Next Step**: Create `bibliography_frontend/` and `bibliography_backend/` folders following structure above
+**Last Updated**: 2025-01-17
+**Status**: Monorepo complete, pushed to GitHub
+**Repository**: https://github.com/Citable-io/bibliography
+**Next Steps**:
+1. Clone from GitHub: `git clone https://github.com/Citable-io/bibliography`
+2. Install: `pnpm install` (installs all workspaces)
+3. Develop: `pnpm dev` (starts frontend and backend)
