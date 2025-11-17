@@ -30,65 +30,17 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 ## Project Structure
 
 ```
-/home/mahdi/Desktop/bibliography/                # Single monorepo (pnpm workspace)
-│
-├── bibliography_backend/        # Backend service (no .git)
-│   ├── src/
-│   │   ├── controllers/         # Express request handlers
-│   │   ├── models/              # Mongoose schemas
-│   │   ├── routes/              # Express routes
-│   │   ├── services/            # Business logic
-│   │   ├── middleware/          # Auth, validation, errors
-│   │   └── utils/               # Helpers, logger
-│   ├── tests/
-│   │   ├── unit/
-│   │   └── integration/
-│   ├── package.json
-│   └── docker-compose.yml
-│
-├── bibliography_frontend/       # Frontend app (no .git)
-│   ├── src/
-│   │   ├── features/            # Feature modules
-│   │   │   ├── library/
-│   │   │   ├── search/
-│   │   │   ├── projects/
-│   │   │   └── duplicates/
-│   │   ├── components/          # Reusable components
-│   │   │   ├── layout/
-│   │   │   └── ui/
-│   │   ├── store/               # Zustand stores
-│   │   ├── routes/              # TanStack Router
-│   │   ├── common/              # Shared utilities
-│   │   └── styles/              # Tailwind CSS
-│   ├── e2e/                     # Playwright E2E tests
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
-│
-├── shared/                      # @bibliography/shared package
-│   ├── src/
-│   │   ├── types/               # TypeScript interfaces
-│   │   ├── schemas/             # Zod validation schemas
-│   │   └── utils/               # Shared utilities
-│   └── package.json
-│
-├── editor_frontend/             # REFERENCE - Editor's React frontend (submodule)
-├── editor_backend/              # REFERENCE - Editor's backend (submodule)
-├── zotero/                      # REFERENCE - Zotero source code (submodule)
-│
-├── docs/                        # Project documentation
-│   ├── 01-specification/        # Specs (frontend + backend)
-│   ├── 02-delivery/             # Session roadmap + checklist
-│   └── sessions/                # Session plans and reviews
-│
-├── .git/                        # Single monorepo git history
-├── pnpm-workspace.yaml          # pnpm workspace configuration
-└── package.json                 # Root workspace config
+bibliography/                      # Single monorepo (pnpm workspace)
+├── bibliography_backend/          # Backend service
+├── bibliography_frontend/         # Frontend app
+├── shared/                        # @bibliography/shared (types, schemas)
+├── editor_frontend/               # REFERENCE (submodule)
+├── editor_backend/                # REFERENCE (submodule)
+├── zotero/                        # REFERENCE (submodule)
+└── docs/                          # Documentation
 ```
 
-**Repository**: `https://github.com/Citable-io/bibliography`
-**Type**: Single monorepo with pnpm workspaces
-**Git History**: Unified history across all packages (Sessions 6-10+)
+**Repository**: https://github.com/Citable-io/bibliography (pnpm monorepo)
 
 ---
 
@@ -96,28 +48,11 @@ You are working on a **bibliography manager** - part of a larger research ecosys
 
 ### 1. **Monorepo with pnpm Workspaces**
 
-**STRUCTURE**: Single git repository with separate frontend/backend packages (not separate repos).
-
-```
-bibliography/                           # Single monorepo
-├── bibliography_backend/                # Backend package (@bibliography/backend)
-├── bibliography_frontend/               # Frontend package (@bibliography/frontend)
-├── shared/                              # Shared types/schemas (@bibliography/shared)
-├── pnpm-workspace.yaml                  # Defines workspace packages
-└── .git/                                # Single git history
-```
-
-**Benefits of this approach**:
-- ✅ Single git history: Atomic commits across frontend/backend/shared
-- ✅ Zero-friction type sharing: Changes to shared types immediately visible
-- ✅ Simple development: `pnpm install` at root installs all workspaces
-- ✅ Workspace protocol: `workspace:*` dependencies prevent version mismatches
-- ✅ Separate deployment: Each package can be deployed independently
-- ✅ Matches pnpm best practices: Monorepo for tight coupling during MVP
-
-**No separate folders needed**:
-- ❌ **WRONG**: `/home/mahdi/Desktop/bibliography/src/` (mixed frontend/backend)
-- ✅ **CORRECT**: All packages coexist in single repo with pnpm workspaces
+Single git repo with separate frontend/backend/shared packages. Benefits:
+- Atomic commits across packages
+- Zero-friction type sharing
+- Simple `pnpm install` (installs all workspaces)
+- Separate deployment per package
 
 ### 2. **Microservices Pattern** (Backend)
 
@@ -390,52 +325,30 @@ bibliography_backend/
 - Or individual service: `cd services/auth-service && npm run dev`
 - Test: `npm run test`
 
-### Bibliography Monorepo Setup (Complete ✅)
-
-**Repository**: https://github.com/Citable-io/bibliography
-
-**Structure**: Single monorepo with pnpm workspaces
-- `bibliography_backend/` - Backend Express service
-- `bibliography_frontend/` - Frontend React app
-- `shared/` - Shared types (@bibliography/shared)
-
-**Development Setup**:
+### Bibliography Setup
 
 ```bash
-# Clone
 git clone https://github.com/Citable-io/bibliography
 cd bibliography
-
-# Install all workspaces
 pnpm install
+pnpm dev                    # Run all packages
+```
 
-# Run all services
-pnpm dev                    # Starts all dev servers in parallel
-
-# Or individual services
+**Individual packages**:
+```bash
 pnpm --filter @bibliography/backend dev
 pnpm --filter @bibliography/frontend dev
 ```
 
-**Environment Variables** (from Spec.md):
+**Environment Variables**:
 ```env
-# Frontend (bibliography_frontend/.env)
+# bibliography_frontend/.env
 VITE_API_BASE_URL=http://localhost:8005/api/bibliography
 
-# Backend (bibliography_backend/.env)
+# bibliography_backend/.env
 MONGODB_URL=mongodb://localhost:27017/bibliography
 PORT=8005
 NODE_ENV=development
-```
-
-**pnpm Workspace Commands**:
-```bash
-pnpm -r list                # List all packages
-pnpm --filter @bibliography/backend build
-pnpm --filter @bibliography/frontend build
-pnpm build                  # Build all packages
-pnpm test                   # Test all packages
-pnpm lint                   # Lint all packages
 ```
 
 ---
@@ -522,15 +435,12 @@ When starting a new task:
 
 ## Important Reminders
 
-1. **USE monorepo structure**: Front/backend are separate packages in single repo, not separate folders
-   - Shared types via `@bibliography/shared` workspace package
-   - Use `workspace:*` protocol for dependencies
-   - Make atomic commits across packages
-2. **ALWAYS check editor first** before implementing anything
-3. **ALWAYS document** when you deviate from Zotero's approach
-4. **NEVER skip tests** (comprehensive coverage required)
-5. **MATCH editor tech stack exactly** (no substitutions without approval)
-6. **KEEP code simple** (no unnecessary defensive checks, trust types)
+1. **Monorepo structure**: Atomic commits across frontend/backend/shared
+2. **Check editor first** before implementing features
+3. **Document deviations** from Zotero's approach
+4. **Comprehensive tests** required
+5. **Match editor tech stack** exactly
+6. **Keep code simple** (trust types, no defensive checks)
 
 ---
 
