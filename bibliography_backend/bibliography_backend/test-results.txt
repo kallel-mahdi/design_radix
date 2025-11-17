@@ -1,0 +1,262 @@
+
+> bibliography-backend@0.1.0 test /home/mahdi/Desktop/bibliography/bibliography_backend
+> jest
+
+PASS unit tests/unit/models/tag.model.test.ts
+PASS unit tests/unit/services/TagService.test.ts
+PASS unit tests/unit/services/CollectionService.test.ts
+PASS unit tests/unit/services/DuplicateService.test.ts
+PASS integration tests/integration/collections.test.ts
+PASS integration tests/integration/tags.test.ts
+  ● Console
+
+    console.log
+      2025-11-10 16:16:11 [[31merror[39m] bibliography-service: [31mTag color update failed[39m {"error":{"message":"MAX_COLORED_TAGS: Cannot have more than 9 colored tags","stack":"Error: MAX_COLORED_TAGS: Cannot have more than 9 colored tags\n    at TagService.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/TagService.ts:76:15)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at TagController.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/TagController.ts:147:19)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-10 16:16:11 [[31merror[39m] bibliography-service: [31mTag color update failed[39m {"error":{"message":"INVALID_POSITION: Position must be between 1 and 9","stack":"Error: INVALID_POSITION: Position must be between 1 and 9\n    at TagService.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/TagService.ts:80:15)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at TagController.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/TagController.ts:147:19)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+PASS integration tests/integration/duplicates.test.ts
+FAIL unit tests/unit/services/ReferenceService.test.ts
+  ● ReferenceService Unit Tests › list › should filter by collectionId
+
+    BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+
+      45 |
+      46 |     const collectionIds = data.collectionIds
+    > 47 |       ? data.collectionIds.map(id => new mongoose.Types.ObjectId(id))
+         |                                      ^
+      48 |       : [];
+      49 |
+      50 |     const reference = await Reference.create({
+
+      at new ObjectId (../node_modules/.pnpm/bson@6.10.4/node_modules/bson/src/objectid.ts:120:15)
+      at src/services/ReferenceService.ts:47:38
+          at Array.map (<anonymous>)
+      at ReferenceService.create (src/services/ReferenceService.ts:47:28)
+      at Object.<anonymous> (tests/unit/services/ReferenceService.test.ts:199:20)
+
+  ● ReferenceService Unit Tests › detachPdf › should detach pdf from reference
+
+    expect(received).toBeUndefined()
+
+    Received: {}
+
+      511 |
+      512 |       expect(detached?.hasPdf).toBe(false);
+    > 513 |       expect(detached?.pdf).toBeUndefined();
+          |                             ^
+      514 |     });
+      515 |
+      516 |     it('should return null when detaching from non-existent reference', async () => {
+
+      at Object.<anonymous> (tests/unit/services/ReferenceService.test.ts:513:29)
+
+FAIL integration tests/integration/projects.test.ts
+  ● Console
+
+    console.log
+      2025-11-10 16:16:11 [[31merror[39m] bibliography-service: [31mReference linking failed[39m {"error":{"message":"E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_collectionId_1 dup key: { userId: \"dev-user-123\", projectId: \"proj-123\", collectionId: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_collectionId_1 dup key: { userId: \"dev-user-123\", projectId: \"proj-123\", collectionId: null }\n    at InsertOneOperation.handleOk (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/insert.ts:79:13)\n    at tryOperation (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:290:26)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at executeOperation (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:119:12)\n    at Collection.insertOne (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/collection.ts:294:12)","name":"MongoServerError"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-10 16:16:11 [[31merror[39m] bibliography-service: [31mCollection linking failed[39m {"error":{"message":"E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_referenceId_1 dup key: { userId: \"dev-user-123\", projectId: \"proj-123\", referenceId: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_referenceId_1 dup key: { userId: \"dev-user-123\", projectId: \"proj-123\", referenceId: null }\n    at InsertOneOperation.handleOk (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/insert.ts:79:13)\n    at tryOperation (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:290:26)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at executeOperation (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:119:12)\n    at Collection.insertOne (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/collection.ts:294:12)","name":"MongoServerError"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+  ● Projects API Integration Tests › POST /api/bibliography/projects/link › should link reference to project
+
+    expected 200 "OK", got 201 "Created"
+
+      38 |           referenceId,
+      39 |         })
+    > 40 |         .expect(200);
+         |          ^
+      41 |
+      42 |       expect(response.body.success).toBe(true);
+      43 |       expect(response.body.data).toMatchObject({
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:40:10)
+      ----
+      at Test._assertStatus (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11)
+
+  ● Projects API Integration Tests › POST /api/bibliography/projects/link › should handle already linked reference
+
+    expected 200 "OK", got 201 "Created"
+
+      88 |         .post('/api/bibliography/projects/link')
+      89 |         .send({ projectId, referenceId })
+    > 90 |         .expect(200);
+         |          ^
+      91 |
+      92 |       // Link second time - should be idempotent
+      93 |       const response = await request(app)
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:90:10)
+      ----
+      at Test._assertStatus (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11)
+
+  ● Projects API Integration Tests › GET /api/bibliography/projects/:projectId/references › should get all references in a project
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 1
+    Received array:  [{"__v": 0, "_id": "691201bb1bd333274fdd73fe", "authors": [], "citationKey": "unknown2025paperq8l", "collectionIds": [], "createdAt": "2025-11-10T15:16:11.567Z", "deleted": false, "hasPdf": false, "sourceRaw": {"provider": "manual"}, "tags": [], "title": "Paper 1", "type": "article", "updatedAt": "2025-11-10T15:16:11.567Z", "userId": "dev-user-123"}]
+
+      198 |
+      199 |       expect(response.body.success).toBe(true);
+    > 200 |       expect(response.body.data).toHaveLength(2);
+          |                                  ^
+      201 |       expect(response.body.data.map((r: any) => r.title)).toContain('Paper 1');
+      202 |       expect(response.body.data.map((r: any) => r.title)).toContain('Book 1');
+      203 |     });
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:200:34)
+
+  ● Projects API Integration Tests › GET /api/bibliography/projects/references/:referenceId/projects › should get all projects containing a reference
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "proj-1"
+    Received array: [undefined, undefined]
+
+      242 |       expect(response.body.success).toBe(true);
+      243 |       expect(response.body.data).toHaveLength(2);
+    > 244 |       expect(response.body.data.map((p: any) => p.projectId)).toContain('proj-1');
+          |                                                               ^
+      245 |       expect(response.body.data.map((p: any) => p.projectId)).toContain('proj-2');
+      246 |     });
+      247 |
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:244:63)
+
+  ● Projects API Integration Tests › GET /api/bibliography/projects/references/:referenceId/projects › should return 404 for non-existent reference
+
+    expected 404 "Not Found", got 200 "OK"
+
+      266 |       const response = await request(app)
+      267 |         .get('/api/bibliography/projects/references/507f1f77bcf86cd799439011/projects')
+    > 268 |         .expect(404);
+          |          ^
+      269 |
+      270 |       expect(response.body.success).toBe(false);
+      271 |     });
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:268:10)
+      ----
+      at Test._assertStatus (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11)
+
+  ● Projects API Integration Tests › POST /api/bibliography/projects/link-collection › should link collection to project
+
+    expected 200 "OK", got 201 "Created"
+
+      288 |           collectionId,
+      289 |         })
+    > 290 |         .expect(200);
+          |          ^
+      291 |
+      292 |       expect(response.body.success).toBe(true);
+      293 |       expect(response.body.data).toMatchObject({
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:290:10)
+      ----
+      at Test._assertStatus (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11)
+
+  ● Projects API Integration Tests › GET /api/bibliography/projects/:projectId/collections › should get all collections in a project
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 1
+    Received array:  [{"__v": 0, "_id": "691201bb1bd333274fdd746d", "color": null, "createdAt": "2025-11-10T15:16:11.645Z", "deleted": false, "name": "ML Papers", "parentId": null, "position": 0, "updatedAt": "2025-11-10T15:16:11.645Z", "userId": "dev-user-123"}]
+
+      408 |
+      409 |       expect(response.body.success).toBe(true);
+    > 410 |       expect(response.body.data).toHaveLength(2);
+          |                                  ^
+      411 |       expect(response.body.data.map((c: any) => c.name)).toContain('ML Papers');
+      412 |       expect(response.body.data.map((c: any) => c.name)).toContain('Books');
+      413 |     });
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:410:34)
+
+  ● Projects API Integration Tests › GET /api/bibliography/projects/collections/:collectionId/projects › should get all projects containing a collection
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "proj-1"
+    Received array: [undefined, undefined]
+
+      448 |       expect(response.body.success).toBe(true);
+      449 |       expect(response.body.data).toHaveLength(2);
+    > 450 |       expect(response.body.data.map((p: any) => p.projectId)).toContain('proj-1');
+          |                                                               ^
+      451 |       expect(response.body.data.map((p: any) => p.projectId)).toContain('proj-2');
+      452 |     });
+      453 |
+
+      at Object.<anonymous> (tests/integration/projects.test.ts:450:63)
+
+PASS integration tests/integration/references.test.ts
+FAIL unit tests/unit/services/ProjectService.test.ts
+  ● ProjectService Unit Tests › getProjectReferences › should get all references in a project
+
+    MongoServerError: E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_collectionId_1 dup key: { userId: "user-123", projectId: "proj-1", collectionId: null }
+
+      at InsertOneOperation.handleOk (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/insert.ts:79:13)
+      at tryOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+      at executeOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+      at Collection.insertOne (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/collection.ts:294:12)
+
+  ● ProjectService Unit Tests › getProjectReferences › should exclude deleted references
+
+    MongoServerError: E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_collectionId_1 dup key: { userId: "user-123", projectId: "proj-1", collectionId: null }
+
+      at InsertOneOperation.handleOk (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/insert.ts:79:13)
+      at tryOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+      at executeOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+      at Collection.insertOne (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/collection.ts:294:12)
+
+  ● ProjectService Unit Tests › getProjectCollections › should get all collections in a project
+
+    MongoServerError: E11000 duplicate key error collection: test.projectlinks index: userId_1_projectId_1_referenceId_1 dup key: { userId: "user-123", projectId: "proj-1", referenceId: null }
+
+      at InsertOneOperation.handleOk (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/insert.ts:79:13)
+      at tryOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:290:26)
+      at executeOperation (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/operations/execute_operation.ts:119:12)
+      at Collection.insertOne (../node_modules/.pnpm/mongodb@6.20.0_socks@2.8.7/node_modules/mongodb/src/collection.ts:294:12)
+
+PASS integration tests/integration/reference.service.test.ts
+
+Test Suites: 3 failed, 9 passed, 12 total
+Tests:       13 failed, 205 passed, 218 total
+Snapshots:   0 total
+Time:        2.539 s, estimated 3 s
+Ran all test suites in 2 projects.
+ ELIFECYCLE  Test failed. See above for more details.

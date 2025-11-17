@@ -1,0 +1,58 @@
+
+> bibliography-backend@0.1.0 test /home/mahdi/Desktop/bibliography/bibliography_backend
+> jest
+
+PASS unit tests/unit/models/tag.model.test.ts
+PASS integration tests/integration/reference.service.test.ts
+PASS unit tests/unit/services/ProjectService.test.ts
+PASS unit tests/unit/services/ReferenceService.test.ts
+PASS unit tests/unit/services/DuplicateService.test.ts
+PASS unit tests/unit/services/TagService.test.ts
+PASS unit tests/unit/services/CollectionService.test.ts
+PASS integration tests/integration/collections.test.ts
+PASS integration tests/integration/duplicates.test.ts
+PASS integration tests/integration/tags.test.ts
+  ● Console
+
+    console.log
+      2025-11-15 13:38:45 [[31merror[39m] bibliography-service: [31mTag color update failed[39m {"error":{"message":"MAX_COLORED_TAGS: Cannot have more than 9 colored tags","stack":"Error: MAX_COLORED_TAGS: Cannot have more than 9 colored tags\n    at TagService.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/TagService.ts:76:15)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at TagController.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/TagController.ts:147:19)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-15 13:38:45 [[31merror[39m] bibliography-service: [31mTag color update failed[39m {"error":{"message":"INVALID_POSITION: Position must be between 1 and 9","stack":"Error: INVALID_POSITION: Position must be between 1 and 9\n    at TagService.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/TagService.ts:80:15)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at TagController.updateColor (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/TagController.ts:147:19)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+PASS integration tests/integration/references.test.ts
+PASS integration tests/integration/projects.test.ts
+PASS unit tests/unit/services/CrossrefService.test.ts (14.625 s)
+PASS integration tests/integration/doi-import.test.ts (18.725 s)
+  ● Console
+
+    console.log
+      2025-11-15 13:38:45 [[31merror[39m] bibliography-service: [31mDOI import failed[39m {"error":{"message":"DOI not found","stack":"Error: DOI not found\n    at CrossrefService.fetchMetadata (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/CrossrefService.ts:121:17)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at ReferenceController.importFromDoi (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/ReferenceController.ts:245:28)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-15 13:39:01 [[31merror[39m] bibliography-service: [31mDOI import failed[39m {"error":{"message":"Rate limit exceeded, please try again later","stack":"Error: Rate limit exceeded, please try again later\n    at CrossrefService.fetchMetadata (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/CrossrefService.ts:128:19)\n    at ReferenceController.importFromDoi (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/ReferenceController.ts:245:28)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-15 13:39:01 [[31merror[39m] bibliography-service: [31mCrossref request timeout[39m {"error":{"message":"The operation was aborted","stack":"AbortError: The operation was aborted\n    at Object.<anonymous> (/home/mahdi/Desktop/bibliography/bibliography_backend/tests/integration/doi-import.test.ts:201:28)\n    at Promise.then.completed (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at _runTest (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:121:9)\n    at _runTestsForDescribeBlock (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:121:9)\n    at run (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)\n    at Object.worker (/home/mahdi/Desktop/bibliography/node_modules/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/testWorker.js:106:12)","name":"AbortError"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2025-11-15 13:39:01 [[31merror[39m] bibliography-service: [31mDOI import failed[39m {"error":{"message":"Request timeout - Crossref API did not respond in time","stack":"Error: Request timeout - Crossref API did not respond in time\n    at CrossrefService.fetchMetadata (/home/mahdi/Desktop/bibliography/bibliography_backend/src/services/CrossrefService.ts:164:19)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at ReferenceController.importFromDoi (/home/mahdi/Desktop/bibliography/bibliography_backend/src/controllers/ReferenceController.ts:245:28)","name":"Error"},"category":"APPLICATION"}
+
+      at Console.log (../node_modules/.pnpm/winston@3.18.3/node_modules/winston/lib/winston/transports/console.js:87:23)
+
+
+Test Suites: 14 passed, 14 total
+Tests:       259 passed, 259 total
+Snapshots:   0 total
+Time:        19.247 s
+Ran all test suites in 2 projects.
