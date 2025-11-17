@@ -34,13 +34,15 @@ bibliography/                      # Single monorepo (pnpm workspace)
 ├── bibliography_backend/          # Backend service
 ├── bibliography_frontend/         # Frontend app
 ├── shared/                        # @bibliography/shared (types, schemas)
-├── editor_frontend/               # REFERENCE (submodule)
-├── editor_backend/                # REFERENCE (submodule)
-├── zotero/                        # REFERENCE (submodule)
 └── docs/                          # Documentation
 ```
 
 **Repository**: https://github.com/Citable-io/bibliography (pnpm monorepo)
+
+**Local Reference Repos** (in your local folder, not in GitHub):
+- `editor_frontend/` - Reference for UI patterns
+- `editor_backend/` - Reference for backend patterns
+- `zotero/` - Reference for UX/duplicate detection algorithms
 
 ---
 
