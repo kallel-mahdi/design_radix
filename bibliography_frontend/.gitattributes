@@ -1,0 +1,16 @@
+# Git attributes for bibliography frontend
+
+# Mark PDF files as binary (no text diffs)
+*.pdf binary
+
+# Mark common binary formats as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
