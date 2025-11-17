@@ -572,4 +572,257 @@ describe('ReferenceService Unit Tests', () => {
       expect(detached).toBeNull();
     });
   });
+
+  // Session 10: PDF Upload/Delete Methods (filesystem operations mocked)
+  describe('uploadPdf', () => {
+    it('should upload PDF and save metadata', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'research-paper.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 2048000,
+        destination: './data/bibliography/uploads/',
+        filename: 'abc123.pdf',
+        path: './data/bibliography/uploads/abc123.pdf',
+        buffer: Buffer.from(''),
+        stream: {} as any,
+      };
+
+      const updated = await service.uploadPdf(created._id.toString(), 'user-123', mockFile);
+
+      expect(updated).not.toBeNull();
+      expect(updated?.hasPdf).toBe(true);
+      expect(updated?.pdf?.originalName).toBe('research-paper.pdf');
+      expect(updated?.pdf?.storedPath).toBe('./data/bibliography/uploads/abc123.pdf');
+      expect(updated?.pdf?.size).toBe(2048000);
+      expect(updated?.pdf?.mimeType).toBe('application/pdf');
+      expect(updated?.pdf?.uploadedAt).toBeDefined();
+    });
+
+    it('should replace existing PDF when uploading new one', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      // First upload
+      const mockFile1: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'old.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 1000000,
+        destination: './data/bibliography/uploads/',
+        filename: 'old123.pdf',
+        path: './data/bibliography/uploads/old123.pdf',
+        buffer: Buffer.from(''),
+        stream: {} as any,
+      };
+
+      await service.uploadPdf(created._id.toString(), 'user-123', mockFile1);
+
+      // Second upload (replacement)
+      const mockFile2: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'new.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 2000000,
+        destination: './data/bibliography/uploads/',
+        filename: 'new456.pdf',
+        path: './data/bibliography/uploads/new456.pdf',
+        buffer: Buffer.from(''),
+        stream: {} as any,
+      };
+
+      const updated = await service.uploadPdf(created._id.toString(), 'user-123', mockFile2);
+
+      expect(updated?.pdf?.originalName).toBe('new.pdf');
+      expect(updated?.pdf?.storedPath).toBe('./data/bibliography/uploads/new456.pdf');
+      expect(updated?.pdf?.size).toBe(2000000);
+    });
+
+    it('should return null for non-existent reference', async () => {
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'test.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 1000000,
+        destination: './data/bibliography/uploads/',
+        filename: 'test123.pdf',
+        path: './data/bibliography/uploads/test123.pdf',
+        buffer: Buffer.from(''),
+        stream: {} as any,
+      };
+
+      const result = await service.uploadPdf('507f1f77bcf86cd799439011', 'user-123', mockFile);
+
+      expect(result).toBeNull();
+    });
+
+    it('should enforce user isolation', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'test.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 1000000,
+        destination: './data/bibliography/uploads/',
+        filename: 'test123.pdf',
+        path: './data/bibliography/uploads/test123.pdf',
+        buffer: Buffer.from(''),
+        stream: {} as any,
+      };
+
+      // Different user tries to upload to reference
+      const result = await service.uploadPdf(created._id.toString(), 'user-456', mockFile);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getPdfPath', () => {
+    it('should return PDF path for reference with PDF', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      await service.attachPdf(created._id.toString(), 'user-123', {
+        storedPath: '/data/uploads/test.pdf',
+        originalName: 'research.pdf',
+        size: 2000000,
+        mimeType: 'application/pdf',
+      });
+
+      const pdfPath = await service.getPdfPath(created._id.toString(), 'user-123');
+
+      expect(pdfPath).not.toBeNull();
+      expect(pdfPath?.storedPath).toBe('/data/uploads/test.pdf');
+      expect(pdfPath?.originalName).toBe('research.pdf');
+    });
+
+    it('should return null for reference without PDF', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const pdfPath = await service.getPdfPath(created._id.toString(), 'user-123');
+
+      // Service returns null when no PDF exists (checked via !reference.pdf || !reference.pdf.storedPath)
+      // MongoDB may create empty pdf object, so service checks for storedPath existence
+      expect(pdfPath).toBeNull();
+    });
+
+    it('should return null for non-existent reference', async () => {
+      const pdfPath = await service.getPdfPath('507f1f77bcf86cd799439011', 'user-123');
+
+      expect(pdfPath).toBeNull();
+    });
+
+    it('should enforce user isolation', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      await service.attachPdf(created._id.toString(), 'user-123', {
+        storedPath: '/data/uploads/test.pdf',
+        originalName: 'research.pdf',
+        size: 2000000,
+        mimeType: 'application/pdf',
+      });
+
+      // Different user tries to access PDF
+      const pdfPath = await service.getPdfPath(created._id.toString(), 'user-456');
+
+      expect(pdfPath).toBeNull();
+    });
+  });
+
+  describe('deletePdf', () => {
+    it('should delete PDF and clear metadata', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      await service.attachPdf(created._id.toString(), 'user-123', {
+        storedPath: '/data/uploads/test.pdf',
+        originalName: 'research.pdf',
+        size: 2000000,
+        mimeType: 'application/pdf',
+      });
+
+      const deleted = await service.deletePdf(created._id.toString(), 'user-123');
+
+      expect(deleted).toBe(true);
+
+      // Verify metadata cleared
+      const updated = await service.getById(created._id.toString(), 'user-123');
+      expect(updated?.hasPdf).toBe(false);
+    });
+
+    it('should return false for non-existent reference', async () => {
+      const deleted = await service.deletePdf('507f1f77bcf86cd799439011', 'user-123');
+
+      expect(deleted).toBe(false);
+    });
+
+    it('should return true even if reference has no PDF (idempotent)', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      const deleted = await service.deletePdf(created._id.toString(), 'user-123');
+
+      expect(deleted).toBe(true);
+    });
+
+    it('should enforce user isolation', async () => {
+      const created = await service.create('user-123', {
+        type: 'article',
+        title: 'Test Paper',
+        sourceRaw: { provider: 'manual', payload: {} },
+      });
+
+      await service.attachPdf(created._id.toString(), 'user-123', {
+        storedPath: '/data/uploads/test.pdf',
+        originalName: 'research.pdf',
+        size: 2000000,
+        mimeType: 'application/pdf',
+      });
+
+      // Different user tries to delete PDF
+      const deleted = await service.deletePdf(created._id.toString(), 'user-456');
+
+      expect(deleted).toBe(false);
+
+      // Verify PDF still exists for original user
+      const pdfPath = await service.getPdfPath(created._id.toString(), 'user-123');
+      expect(pdfPath).not.toBeNull();
+    });
+  });
 });

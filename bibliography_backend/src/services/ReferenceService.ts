@@ -249,6 +249,118 @@ export class ReferenceService implements IReferenceService {
     );
   }
 
+  /**
+   * Upload PDF for a reference (Session 10)
+   *
+   * Handles single PDF upload per reference (MVP constraint from Spec.md).
+   * If old PDF exists, deletes it before saving new one.
+   * Stores metadata in reference document (Zotero pattern from userdata.sql itemAttachments table).
+   */
+  async uploadPdf(id: string, userId: string, file: Express.Multer.File): Promise<IReference | null> {
+    const fs = await import('fs');
+
+    // Find reference and ensure ownership
+    const reference = await Reference.findOne({ _id: id, userId, deleted: false });
+
+    if (!reference) {
+      ApplicationLogger.warn('Reference not found for PDF upload', { id, userId });
+      return null;
+    }
+
+    // Delete old PDF file if exists (replace operation)
+    if (reference.pdf?.storedPath) {
+      try {
+        fs.unlinkSync(reference.pdf.storedPath);
+        ApplicationLogger.info('Old PDF file deleted', { storedPath: reference.pdf.storedPath });
+      } catch (error) {
+        ApplicationLogger.warn('Failed to delete old PDF file', {
+          storedPath: reference.pdf.storedPath,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    // Update reference with new PDF metadata
+    reference.hasPdf = true;
+    reference.pdf = {
+      originalName: file.originalname,
+      storedPath: file.path,
+      size: file.size,
+      mimeType: file.mimetype,
+      uploadedAt: new Date()
+    };
+
+    await reference.save();
+
+    ApplicationLogger.info('PDF uploaded successfully', {
+      referenceId: id,
+      userId,
+      filename: file.originalname,
+      size: file.size
+    });
+
+    return reference;
+  }
+
+  /**
+   * Get PDF file path for download (Session 10)
+   *
+   * Returns absolute path and original filename for streaming.
+   * Returns null if reference not found or no PDF attached.
+   */
+  async getPdfPath(id: string, userId: string): Promise<{ storedPath: string; originalName: string } | null> {
+    const reference = await Reference.findOne({ _id: id, userId, deleted: false });
+
+    if (!reference || !reference.pdf || !reference.pdf.storedPath) {
+      ApplicationLogger.warn('PDF not found', { id, userId, hasPdf: reference?.hasPdf });
+      return null;
+    }
+
+    return {
+      storedPath: reference.pdf.storedPath,
+      originalName: reference.pdf.originalName
+    };
+  }
+
+  /**
+   * Delete PDF from reference (Session 10)
+   *
+   * Removes PDF file from disk and clears metadata from document.
+   * Idempotent operation (deleting twice doesn't error).
+   */
+  async deletePdf(id: string, userId: string): Promise<boolean> {
+    const fs = await import('fs');
+
+    const reference = await Reference.findOne({ _id: id, userId, deleted: false });
+
+    if (!reference) {
+      ApplicationLogger.warn('Reference not found for PDF deletion', { id, userId });
+      return false;
+    }
+
+    // Delete file from disk if exists
+    if (reference.pdf?.storedPath) {
+      try {
+        fs.unlinkSync(reference.pdf.storedPath);
+        ApplicationLogger.info('PDF file deleted from disk', { storedPath: reference.pdf.storedPath });
+      } catch (error) {
+        ApplicationLogger.warn('Failed to delete PDF file from disk', {
+          storedPath: reference.pdf.storedPath,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+
+    // Clear PDF metadata from document
+    reference.hasPdf = false;
+    reference.pdf = undefined;
+    await reference.save();
+
+    ApplicationLogger.info('PDF metadata cleared from reference', { referenceId: id, userId });
+
+    return true;
+  }
+
   private async generateCitationKey(userId: string, data: CreateReferenceInput): Promise<string> {
     const lastName = data.authors?.[0]?.family || 'unknown';
     const year = data.year || new Date().getFullYear();

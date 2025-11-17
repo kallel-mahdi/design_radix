@@ -68,4 +68,8 @@ export interface IReferenceService {
     mimeType: string;
   }): Promise<IReference | null>;
   detachPdf(id: string, userId: string): Promise<IReference | null>;
+  // Session 10: PDF upload/download/delete
+  uploadPdf(id: string, userId: string, file: Express.Multer.File): Promise<IReference | null>;
+  getPdfPath(id: string, userId: string): Promise<{ storedPath: string; originalName: string } | null>;
+  deletePdf(id: string, userId: string): Promise<boolean>;
 }

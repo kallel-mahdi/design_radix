@@ -70,20 +70,22 @@ router.delete('/:id/permanent', validateParams(ObjectIdParamSchema), (req, res, 
 //   return controller.exportReferences(req, res);
 // });
 
-// TODO: Session 15 - PDF Management (methods not implemented yet)
-// router.get('/:id/pdf', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.downloadPdf(req, res);
-// });
+// Session 10 - PDF Management
+import { uploadPdf } from '../utils/fileUpload';
 
-// router.post('/:id/pdf', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.uploadPdf(req, res);
-// });
+router.post('/:id/upload-pdf', validateParams(ObjectIdParamSchema), uploadPdf, (req: any, res: any, next: any) => {
+  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  return controller.uploadPdf(req, res, next);
+});
 
-// router.delete('/:id/pdf', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.deletePdf(req, res);
-// });
+router.get('/:id/pdf', validateParams(ObjectIdParamSchema), (req, res, next) => {
+  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  return controller.downloadPdf(req, res, next);
+});
+
+router.delete('/:id/pdf', validateParams(ObjectIdParamSchema), (req, res, next) => {
+  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  return controller.deletePdf(req, res, next);
+});
 
 export { router as referencesRouter };
