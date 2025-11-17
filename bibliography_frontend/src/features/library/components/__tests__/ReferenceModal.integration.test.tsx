@@ -61,15 +61,29 @@ vi.mock('@headlessui/react', () => {
 });
 
 // Mock UI store
+const mockAddToast = vi.fn();
+const mockCloseModal = vi.fn();
+const mockOpenModal = vi.fn();
+
 vi.mock('@/store/ui.store', async () => {
   const actual = await vi.importActual('@/store/ui.store');
   return {
     ...actual,
     useModalState: vi.fn(() => true),
-    useUIStore: vi.fn(() => ({
-      closeModal: vi.fn(),
-      openModal: vi.fn(),
-    })),
+    useUIStore: Object.assign(
+      vi.fn(() => ({
+        closeModal: mockCloseModal,
+        openModal: mockOpenModal,
+        addToast: mockAddToast,
+      })),
+      {
+        getState: vi.fn(() => ({
+          closeModal: mockCloseModal,
+          openModal: mockOpenModal,
+          addToast: mockAddToast,
+        })),
+      }
+    ),
   };
 });
 
@@ -110,7 +124,6 @@ const mockExistingReference = {
 
 describe('ReferenceModal Integration Tests', () => {
   let queryClient: QueryClient;
-  const mockCloseModal = vi.fn();
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -122,10 +135,6 @@ describe('ReferenceModal Integration Tests', () => {
 
     vi.clearAllMocks();
     vi.mocked(uiStore.useModalState).mockReturnValue(true);
-    vi.mocked(uiStore.useUIStore).mockReturnValue({
-      closeModal: mockCloseModal,
-      openModal: vi.fn(),
-    } as any);
 
     // Default MSW handler for create
     server.use(
@@ -313,11 +322,7 @@ describe('ReferenceModal Integration Tests', () => {
   });
 
   describe('Form Submission Workflows (Real Integration)', () => {
-    // TODO: Success path tests timeout waiting for mockCloseModal to be called
-    // Error tests (409, 500) pass, which proves MSW handler works
-    // Need to investigate why closeModal isn't being called in success path
-    // Possibly related to mock setup or async timing
-    it.skip('should create reference and close modal on success', async () => {
+    it('should create reference and close modal on success', async () => {
       const user = userEvent.setup();
 
       render(
@@ -374,7 +379,7 @@ describe('ReferenceModal Integration Tests', () => {
       );
     });
 
-    it.skip('should invalidate queries cache after creating reference', async () => {
+    it('should invalidate queries cache after creating reference', async () => {
       const user = userEvent.setup();
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
@@ -398,7 +403,7 @@ describe('ReferenceModal Integration Tests', () => {
       );
     });
 
-    it.skip('should update existing reference and close modal', async () => {
+    it('should update existing reference and close modal', async () => {
       const user = userEvent.setup();
 
       // Mock GET request for existing reference
@@ -446,7 +451,7 @@ describe('ReferenceModal Integration Tests', () => {
       );
     });
 
-    it.skip('should disable submit button during form submission', async () => {
+    it('should disable submit button during form submission', async () => {
       const user = userEvent.setup();
 
       // Add delay to simulate slow API

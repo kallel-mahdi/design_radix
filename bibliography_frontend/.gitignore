@@ -35,3 +35,10 @@ test-results
 
 # Build
 .tsbuildinfo
+
+# Test Fixtures
+# Exclude downloaded arXiv papers (re-download via script)
+e2e/fixtures/pdfs/*.pdf
+# Include hand-crafted minimal test PDFs
+!e2e/fixtures/pdfs/minimal.pdf
+!e2e/fixtures/pdfs/small-test.pdf

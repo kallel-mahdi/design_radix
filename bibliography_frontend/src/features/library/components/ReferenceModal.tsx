@@ -17,9 +17,10 @@
  * - No collection/tag assignment in modal (deferred to post-creation workflows)
  */
 
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useForm, useFieldArray, Controller, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -30,8 +31,10 @@ import {
   useCreateReferenceMutation,
   useUpdateReferenceMutation,
 } from '../api/references.mutations';
+import { useUploadPdfMutation } from '../api/pdf.mutations';
 import { ReferenceFormSchema, formDataToCreateInput, formDataToUpdateInput, type ReferenceFormData } from '../types/schemas';
 import { useLibraryStore } from '../store/library.store';
+import { PdfUploadZone } from './PdfUploadZone';
 
 interface ReferenceModalProps {
   referenceId?: string; // If provided, edit mode
@@ -41,8 +44,10 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
   const isOpen = useModalState('reference-modal');
   const { closeModal } = useUIStore();
   const setEditReference = useLibraryStore((state) => state.setEditReference);
+  const queryClient = useQueryClient();
   const createMutation = useCreateReferenceMutation();
   const updateMutation = useUpdateReferenceMutation();
+  const uploadPdfMutation = useUploadPdfMutation();
 
   const isEditMode = !!referenceId;
 
@@ -53,6 +58,12 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
   // Matches Zotero's fieldMode: 0 = structured, 1 = single
   // Uses field.id as key to survive author removal/reordering
   const [authorModes, setAuthorModes] = useState<Record<string, 'structured' | 'single'>>({});
+
+  // Session 10: Track selected PDF file for upload
+  const [selectedPdfFile, setSelectedPdfFile] = useState<File | null>(null);
+
+  // Track submission state to prevent double submission
+  const isSubmitting = useRef(false);
 
   // Form setup with Zod validation
   const form = useForm<ReferenceFormData>({
@@ -140,24 +151,60 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
 
   // Handle form submission
   const onSubmit: SubmitHandler<ReferenceFormData> = useCallback(async (data) => {
+    // Prevent double submission (race condition guard)
+    if (isSubmitting.current) {
+      return;
+    }
+
+    isSubmitting.current = true;
+
     try {
+      let savedReferenceId = referenceId;
+
       if (isEditMode && referenceId) {
         await updateMutation.mutateAsync({
           id: referenceId,
           data: formDataToUpdateInput(data),
         });
+
+        // CRITICAL: Await query invalidation to ensure cache is updated
+        // before PDF upload mutation tries to access reference data
+        await queryClient.invalidateQueries({
+          queryKey: ['references', 'detail', referenceId]
+        });
       } else {
-        await createMutation.mutateAsync(formDataToCreateInput(data));
+        const newReference = await createMutation.mutateAsync(formDataToCreateInput(data));
+        savedReferenceId = newReference._id;
       }
+
+      // Session 10: Upload PDF if file selected
+      if (selectedPdfFile && savedReferenceId) {
+        try {
+          await uploadPdfMutation.mutateAsync({
+            referenceId: savedReferenceId,
+            file: selectedPdfFile,
+          });
+        } catch (error) {
+          // PDF upload error - log but don't block modal close
+          // User can retry PDF upload later if needed
+          console.error('[PDF Upload] Error:', error);
+          // Toast already shown by mutation error handler
+        }
+      }
+
       closeModal('reference-modal');
       setEditReference(null);
       form.reset();
       setAuthorModes({});
+      setSelectedPdfFile(null);
+      isSubmitting.current = false; // Reset flag on success to allow future submissions
     } catch (error) {
-      // Error toast handled by mutation
+      // Reference create/update error - prevent modal close
       console.error('Form submission error:', error);
+      // Reset submission flag on error so user can retry
+      isSubmitting.current = false;
     }
-  }, [isEditMode, referenceId, updateMutation, createMutation, closeModal, setEditReference, form]);
+  }, [isEditMode, referenceId, updateMutation, createMutation, uploadPdfMutation, selectedPdfFile, closeModal, setEditReference, form]);
 
   // Handle modal close
   const handleClose = useCallback(() => {
@@ -165,6 +212,9 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
     setEditReference(null);
     form.reset();
     setAuthorModes({});
+    setSelectedPdfFile(null);
+    // Reset submission guard when modal closes
+    isSubmitting.current = false;
   }, [closeModal, setEditReference, form]);
 
   // Keyboard shortcuts: Cmd+Enter to save, Escape to cancel
@@ -223,7 +273,19 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
     });
   }, [remove]);
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createMutation.isPending || updateMutation.isPending || uploadPdfMutation.isPending;
+
+  // Wrapped form submit handler with submission guard
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault(); // Prevent native form submission
+
+    // Check submission guard at form level too
+    if (isSubmitting.current) {
+      return;
+    }
+
+    form.handleSubmit(onSubmit)(e);
+  }, [form, onSubmit]);
 
   return (
     <Modal
@@ -233,7 +295,7 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
       className="max-w-2xl"
       closeButton={!isLoading}
     >
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Reference Type */}
         <div>
           <label htmlFor="type" className="block text-sm font-medium text-app-text-primary mb-1">
@@ -440,17 +502,13 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
           )}
         </div>
 
-        {/* PDF Upload Placeholder (Phase 2) */}
-        <div>
-          <label className="block text-sm font-medium text-app-text-secondary mb-1">
-            PDF Attachment
-          </label>
-          <div className="rounded-lg border-2 border-dashed border-app-border bg-app-bg-hover p-4 text-center">
-            <p className="text-sm text-app-text-secondary">
-              Coming in Phase 2
-            </p>
-          </div>
-        </div>
+        {/* PDF Upload (Session 10) */}
+        <PdfUploadZone
+          onFileSelected={setSelectedPdfFile}
+          currentPdf={reference?.pdf || undefined}
+          selectedFile={selectedPdfFile}
+          disabled={isLoading}
+        />
 
         {/* Footer: Cancel | Save */}
         <div className="flex justify-end gap-3 pt-4 border-t border-app-border">

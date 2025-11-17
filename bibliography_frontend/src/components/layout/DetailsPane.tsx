@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { useLibraryStore } from '@/features/library/store/library.store';
 import { useUpdateReferenceMutation } from '@/features/library/api/references.mutations';
+import { PdfTab } from '@/features/library/components/PdfTab';
 import { format } from 'date-fns';
 
 interface DetailsPaneProps {
@@ -278,13 +279,9 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
             )}
           </Tab.Panel>
 
-          {/* PDF Tab - Placeholder for Session 7 */}
-          <Tab.Panel className="p-4 h-full flex items-center justify-center">
-            <div className="text-center text-app-text-secondary">
-              <DocumentTextIcon className="w-16 h-16 mx-auto mb-4 text-app-text-muted" />
-              <p className="mb-2">PDF viewer coming in Session 7</p>
-              <p className="text-sm text-app-text-muted">Will display PDF using react-pdf viewer</p>
-            </div>
+          {/* PDF Tab - Session 10 */}
+          <Tab.Panel className="h-full">
+            <PdfTab reference={reference || null} />
           </Tab.Panel>
 
           {/* Notes Tab - Placeholder for Phase 2 */}

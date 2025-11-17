@@ -42,6 +42,9 @@ export default defineConfig({
   /* Reporter to use */
   reporter: 'html',
 
+  /* Timeout for each test (60 seconds - allows for complex workflows) */
+  timeout: 60 * 1000,
+
   /* Shared settings for all the projects below */
   use: {
     /* Base URL to use in actions like `await page.goto('/')` */
@@ -49,6 +52,12 @@ export default defineConfig({
 
     /* Viewport size - Full HD */
     viewport: { width: 1920, height: 1080 },
+
+    /* Action timeout - fail fast if element not found (10 seconds instead of 30) */
+    actionTimeout: 10 * 1000,
+
+    /* Navigation timeout (10 seconds) */
+    navigationTimeout: 10 * 1000,
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',

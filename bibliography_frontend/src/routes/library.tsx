@@ -38,6 +38,13 @@ export function LibraryPage() {
     }
   }, [activeReferenceId, setDetailsPaneOpen]);
 
+  // Auto-open ReferenceModal when Edit button clicked
+  useEffect(() => {
+    if (editReferenceId) {
+      openModal('reference-modal');
+    }
+  }, [editReferenceId]); // openModal is stable from Zustand, no need in deps
+
   // ESC key handler: Close DetailsPane and clear active reference
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
