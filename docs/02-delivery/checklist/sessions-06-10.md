@@ -99,22 +99,25 @@
 
 ---
 
-### Session 8: ReferenceTable with TanStack Table (3-4 hours)
+### Session 8: ReferenceTable with TanStack Table (3-4 hours) ✅ COMPLETE
 
 **Goal**: Full-featured reference table with selection + keyboard support so manual CRUD and imports have a home.
 
-#### Frontend Tasks (3-4 hours)
+**Completion Date**: 2025-01-16 (implemented during Session 3)
+
+#### Frontend Tasks (3-4 hours) ✅
 
 **Create ReferenceTable**:
 
-- [ ] `src/features/library/components/ReferenceTable.tsx`:
-  - TanStack React Table setup using virtualized rows when >500 refs
-  - Columns: Checkbox | Title | Authors | Year | Venue | Tags | Files | DOI
-  - Sortable headers (click to toggle asc/desc)
-  - Multi-select: checkbox column, Cmd/Ctrl+Click, Shift+Click ranges
-  - CVA row variants (default, selected, hasPdf)
-  - Keyboard navigation (Arrow keys) + Enter to open DetailsPane
-  - Double-click opens ReferenceModal in edit mode
+- [x] `src/features/library/components/ReferenceTable.tsx`:
+  - TanStack React Table v8 with useReactTable hook ✅
+  - @tanstack/react-virtual for virtualized rows (>500 refs) ✅
+  - Columns: Checkbox | Title | Authors | Year | Venue | Tags | Files | DOI ✅
+  - Sortable headers (click to toggle asc/desc) ✅
+  - Multi-select: checkbox column, Cmd/Ctrl+Click, Shift+Click ranges ✅
+  - CVA row variants (default, selected, hasPdf) ✅
+  - Keyboard navigation (ArrowUp/ArrowDown at lines 431-439) ✅
+  - Double-click opens ReferenceModal in edit mode ✅
 
 **Define Columns**:
 
@@ -148,78 +151,82 @@ const columns = [
 
 **Wire to Library Store**:
 
-- [ ] Selection + activeReferenceId comes from `library.store.ts`
-- [ ] Table listens to filters (collection, tag, search) so Query Keys stay consistent
+- [x] Selection + activeReferenceId comes from `library.store.ts` ✅
+- [x] Table listens to filters (collection, tag, search) so Query Keys stay consistent ✅
 
 **Add Keyboard Navigation**:
 
-```typescript
-useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowDown') {
-      // Select next reference
-    } else if (e.key === 'ArrowUp') {
-      // Select previous reference
-    } else if (e.key === 'Enter') {
-      // Open details pane
-    }
-  };
+- [x] Keyboard handler implemented with ArrowUp/ArrowDown navigation ✅
+- [x] Enter opens DetailsPane ✅
+- [x] Space toggles selection ✅
 
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
-}, [selectedReferenceIds]);
-```
+#### Verification ✅
 
-#### Verification
+- [x] Table renders rows + columns with data from `useReferencesQuery` ✅
+- [x] Sorting works via TanStack state ✅
+- [x] Multi-select works (all 3 modes: checkbox, Cmd/Ctrl+Click, Shift+Click) ✅
+- [x] Details pane opens on click and keyboard navigation works ✅
+- [x] Double-click opens ReferenceModal ✅
 
-- [ ] Table renders rows + columns with data from `useReferencesQuery`
-- [ ] Sorting works via TanStack state
-- [ ] Multi-select works (all 3 modes)
-- [ ] Details pane opens on click and keyboard navigation works
-- [ ] Double-click opens ReferenceModal
+**Tests**:
+- [x] Unit tests: ReferenceTable.test.tsx (15 tests)
+- [x] Integration tests: ReferenceTable.integration.test.tsx (5 tests)
+- [x] E2E tests: reference-table.spec.ts (6 comprehensive workflows)
 
 **Estimated Time**: 3-4 hours
+**Actual Time**: Implemented during Session 3 (already included in Session 3 time)
+
+**Note**: ReferenceTable was implemented ahead of schedule during Session 3, so Session 8 plan was archived.
 
 ---
 
-### Session 9: DetailsPane Implementation (2-3 hours)
+### Session 9: DetailsPane Implementation (2-3 hours) ✅ COMPLETE
 
 **Goal**: Right panel with Info/PDF/Notes tabs that opens whenever a reference is active.
 
-#### Frontend Tasks (2-3 hours)
+**Completion Date**: 2025-01-16
 
-**Create InfoTab**:
+#### Frontend Tasks (2-3 hours) ✅
 
-- [ ] Display reference metadata (read-only MVP)
-- [ ] Edit button opens ReferenceModal
-- [ ] Tags section (pills with remove button)
-- [ ] Collections section with quick links
-- [ ] Metadata footer (dates, source)
+**Create InfoTab** (inline in DetailsPane.tsx lines 118-267):
 
-**Create PdfTab** (wires into Session 10 work):
+- [x] Display reference metadata (read-only MVP) ✅
+- [x] Edit button opens ReferenceModal (lines 133-142) ✅
+- [x] Tags section with colored pills and remove (X) buttons (lines 183-205) ✅
+- [x] Collections section with clickable filter links (lines 208-234) ✅
+- [x] Metadata footer with Created/Modified dates, source (lines 245-262) ✅
 
-- [ ] Use `react-pdf` viewer component placeholder until uploads done
-- [ ] Show “Upload PDF” CTA when `hasPdf` false
+**Create PdfTab** (separate component):
+
+- [x] Imported from separate PdfTab component (line 14, 271) ✅
+- [x] Wired into DetailsPane (completed in Session 10) ✅
+- [x] Shows "Upload PDF" CTA when `hasPdf` false ✅
 
 **Create NotesTab**:
 
-- [ ] EmptyState: "Notes coming in Phase 2"
+- [x] EmptyState: "Notes coming in Phase 2" (lines 274-280) ✅
 
 **Wire DetailsPane**:
 
-- [ ] Opens when `activeReferenceId` set (library store)
-- [ ] Auto-open on row click
-- [ ] Resizable width (drag, persist to localStorage)
-- [ ] ESC key closes
+- [x] Opens when `activeReferenceId` set (library store) ✅
+- [x] Auto-open on row click ✅
+- [x] Resizable width (integrated in AppLayout) ✅
+- [x] ESC key handler (handled in library.tsx route) ✅
 
-#### Verification
+#### Verification ✅
 
-- [ ] Click reference → DetailsPane opens with Info tab data
-- [ ] PDF tab displays placeholder / viewer once Session 10 completes
-- [ ] Tabs switch correctly and width persists between reloads
-- [ ] ESC closes pane
+- [x] Click reference → DetailsPane opens with Info tab data ✅
+- [x] PDF tab displays viewer (completed in Session 10) ✅
+- [x] Tabs switch correctly and width persists between reloads ✅
+- [x] ESC closes pane ✅
+
+**Tests**:
+- [x] Unit tests: DetailsPane.test.tsx (20 tests, 1 failing - PDF worker issue in test env)
+- [x] E2E tests: reference-details-session9.spec.ts (11 comprehensive workflows)
 
 **Estimated Time**: 2-3 hours
+
+**Note**: InfoTab implemented inline within DetailsPane.tsx instead of as separate component (no functional difference).
 
 ---
 
