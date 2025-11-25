@@ -440,15 +440,35 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
     [references, selectedReferenceIds, deselectReference, selectReference, clearSelection, setActiveReference, activeReferenceId, handleShiftClickRange]
   );
 
+  // PDF reader modal state
+  const setPdfReaderReference = useLibraryStore((state) => state.setPdfReaderReference);
+
   /**
-   * Double-click handler: open ReferenceModal in edit mode
+   * Double-click handler: Zotero-style behavior
+   * - Has PDF: Open full-screen PDF reader
+   * - No PDF: Open edit modal
+   * - Shift+double-click with PDF: Open in new browser tab
+   *
+   * Pattern: Zotero opens PDF on double-click when attachment exists
    */
   const handleRowDoubleClick = useCallback(
-    (refId: string) => {
-      setEditReference(refId);
-      openModal('reference-modal');
+    (reference: Reference, event: React.MouseEvent) => {
+      if (reference.hasPdf) {
+        if (event.shiftKey) {
+          // Shift+double-click: Open PDF in new browser tab
+          const pdfUrl = `/api/bibliography/references/${reference._id}/pdf`;
+          window.open(pdfUrl, '_blank');
+        } else {
+          // Double-click: Open full-screen PDF reader
+          setPdfReaderReference(reference._id);
+        }
+      } else {
+        // No PDF: Open edit modal (original behavior)
+        setEditReference(reference._id);
+        openModal('reference-modal');
+      }
     },
-    [setEditReference, openModal]
+    [setPdfReaderReference, setEditReference, openModal]
   );
 
   /**
@@ -645,7 +665,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
                     : 'hover:bg-app-bg-hover'
                 } ${isFocused ? 'ring-2 ring-app-accent ring-inset' : ''}`}
                 onClick={(e) => handleRowClick(virtualRow.index, e, rows)}
-                onDoubleClick={() => handleRowDoubleClick(row.original._id)}
+                onDoubleClick={(e) => handleRowDoubleClick(row.original, e)}
                 onContextMenu={(e) => handleContextMenu(e, row.original)}
                 aria-selected={isSelected}
               >

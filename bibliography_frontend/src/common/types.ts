@@ -10,12 +10,15 @@ import type {
   Collection as SharedCollection,
   Tag as SharedTag,
   Author as SharedAuthor,
+  Annotation as SharedAnnotation,
   CreateReference,
   UpdateReference,
   CreateCollection,
   UpdateCollection,
   CreateTag,
   UpdateTag,
+  CreateAnnotation,
+  UpdateAnnotation,
 } from '@bibliography/shared';
 
 // Re-export types from shared package
@@ -23,6 +26,7 @@ export type Reference = SharedReference;
 export type Author = SharedAuthor;
 export type Collection = SharedCollection;
 export type Tag = SharedTag;
+export type Annotation = SharedAnnotation;
 
 // Re-export request types
 export type CreateReferenceInput = CreateReference;
@@ -31,6 +35,8 @@ export type CreateCollectionInput = CreateCollection;
 export type UpdateCollectionInput = UpdateCollection;
 export type CreateTagInput = CreateTag;
 export type UpdateTagInput = UpdateTag;
+export type CreateAnnotationInput = CreateAnnotation;
+export type UpdateAnnotationInput = UpdateAnnotation;
 
 // Frontend-specific types that don't have backend equivalents yet
 export interface ProjectLink {

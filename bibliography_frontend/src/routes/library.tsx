@@ -1,13 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useUIStore } from '../store/ui.store';
 import { Suspense, useEffect, useState, useRef } from 'react';
-import { useSuspenseReferencesQuery, type ReferencesQueryParams } from '../features/library/api/references.queries';
+import { useSuspenseReferencesQuery, useReferenceQuery, type ReferencesQueryParams } from '../features/library/api/references.queries';
 import { useTagsQuery } from '../features/library/api/tags.queries';
 import { useLibraryStore } from '../features/library/store/library.store';
 import { ReferenceTable } from '../features/library/components/ReferenceTable';
 import { ReferenceTableSkeleton } from '../features/library/components/ReferenceTableSkeleton';
 import { ImportModal } from '../features/library/components/ImportModal';
 import { ReferenceModal } from '../features/library/components/ReferenceModal';
+import { PdfReaderModal } from '../features/library/components/PdfReaderModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -26,8 +27,16 @@ export function LibraryPage() {
   const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
   const setActiveReference = useLibraryStore((state) => state.setActiveReference);
   const editReferenceId = useLibraryStore((state) => state.editReferenceId);
+  const pdfReaderReferenceId = useLibraryStore((state) => state.pdfReaderReferenceId);
+  const setPdfReaderReference = useLibraryStore((state) => state.setPdfReaderReference);
   const searchQuery = useLibraryStore((state) => state.searchQuery);
   const toggleTag = useLibraryStore((state) => state.toggleTag);
+
+  // Fetch reference for PDF reader modal
+  const { data: pdfReaderReference } = useReferenceQuery(
+    pdfReaderReferenceId || undefined,
+    !!pdfReaderReferenceId
+  );
 
   // Tags query for keyboard shortcuts (1-9 for colored tags)
   const { data: allTags = [] } = useTagsQuery();
@@ -276,6 +285,13 @@ export function LibraryPage() {
 
       {/* Reference Modal (Create/Edit) */}
       <ReferenceModal referenceId={editReferenceId || undefined} />
+
+      {/* PDF Reader Modal (Full-screen - Zotero pattern) */}
+      <PdfReaderModal
+        reference={pdfReaderReference || null}
+        isOpen={!!pdfReaderReferenceId}
+        onClose={() => setPdfReaderReference(null)}
+      />
     </div>
   );
 }

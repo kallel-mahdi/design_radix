@@ -6,6 +6,7 @@ interface LibraryState {
   selectedReferenceIds: Set<string>;
   activeReferenceId: string | null;
   editReferenceId: string | null;
+  pdfReaderReferenceId: string | null; // Full-screen PDF reader (Zotero pattern)
   lastSelectedId: string | null;
   activeCollectionId: string | null;
   expandedCollectionIds: Set<string>;
@@ -23,6 +24,7 @@ interface LibraryActions {
   clearSelection: () => void;
   setActiveReference: (id: string | null) => void;
   setEditReference: (id: string | null) => void;
+  setPdfReaderReference: (id: string | null) => void;
   setActiveCollection: (id: string | null) => void;
   toggleCollectionExpanded: (id: string) => void;
   toggleTag: (tag: string) => void;
@@ -38,6 +40,7 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
         selectedReferenceIds: new Set(),
         activeReferenceId: null,
         editReferenceId: null,
+        pdfReaderReferenceId: null,
         lastSelectedId: null,
         activeCollectionId: null,
         expandedCollectionIds: new Set(),
@@ -99,6 +102,9 @@ export const useLibraryStore = create<LibraryState & LibraryActions>()(
 
         setEditReference: (id) =>
           set({ editReferenceId: id }, false, 'library/setEditReference'),
+
+        setPdfReaderReference: (id) =>
+          set({ pdfReaderReferenceId: id }, false, 'library/setPdfReaderReference'),
 
         setActiveCollection: (id) =>
           set({ activeCollectionId: id }, false, 'library/setActiveCollection'),
@@ -187,3 +193,6 @@ export const useExpandedCollectionIds = () =>
 
 export const useIsCollectionExpanded = (id: string) =>
   useLibraryStore((state) => state.expandedCollectionIds.has(id));
+
+export const usePdfReaderReferenceId = () =>
+  useLibraryStore((state) => state.pdfReaderReferenceId);
