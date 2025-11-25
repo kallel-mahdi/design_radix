@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/common/api/client';
+import { apiClient, ApiError } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { collectionKeys } from './collections.queries';
 import type { Collection, CreateCollectionInput, UpdateCollectionInput } from '@/common/types';
@@ -20,7 +20,7 @@ export function useCreateCollectionMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       if (error.code === 'VALIDATION_ERROR') return;
 
       useUIStore.getState().addToast({
@@ -47,7 +47,7 @@ export function useUpdateCollectionMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       if (error.code === 'VALIDATION_ERROR') return;
 
       useUIStore.getState().addToast({
@@ -72,7 +72,7 @@ export function useDeleteCollectionMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       useUIStore.getState().addToast({
         message: error.message || 'Failed to delete collection',
         type: 'error',
@@ -95,7 +95,7 @@ export function useRestoreCollectionMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       useUIStore.getState().addToast({
         message: error.message || 'Failed to restore collection',
         type: 'error',

@@ -29,6 +29,7 @@ import {
   ColumnDef,
   flexRender,
   SortingState,
+  Row,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useLibraryStore } from '../store/library.store';
@@ -352,7 +353,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
    * Works with sorted rows array (selects based on visible order)
    */
   const handleShiftClickRange = useCallback(
-    (currentIndex: number, sortedRows: any[]) => {
+    (currentIndex: number, sortedRows: Row<Reference>[]) => {
       const currentRow = sortedRows[currentIndex];
       if (!currentRow) return;
 
@@ -393,7 +394,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
    * @param sortedRows - The sorted rows from table.getRowModel()
    */
   const handleRowClick = useCallback(
-    (index: number, event: React.MouseEvent, sortedRows: any[]) => {
+    (index: number, event: React.MouseEvent, sortedRows: Row<Reference>[]) => {
       const row = sortedRows[index];
       if (!row) return;
       const refId = row.original._id;

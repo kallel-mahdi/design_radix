@@ -21,4 +21,6 @@ export const TYPES = {
   DuplicateController: Symbol.for('DuplicateController'),
   SearchController: Symbol.for('SearchController'),
   HealthController: Symbol.for('HealthController'),
+  ImportController: Symbol.for('ImportController'),
+  PdfController: Symbol.for('PdfController'),
 };

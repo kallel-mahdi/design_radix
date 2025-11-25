@@ -1,6 +1,8 @@
 import { Router, type Router as ExpressRouter } from 'express';
 import { container } from '../config/container';
 import { ReferenceController } from '../controllers/ReferenceController';
+import { ImportController } from '../controllers/ImportController';
+import { PdfController } from '../controllers/PdfController';
 import { TYPES } from '../config/types';
 import { validate, validateParams, validateQuery, ObjectIdParamSchema, ReferenceListQuerySchema } from '../middleware/validate';
 import { CreateReferenceSchema, UpdateReferenceSchema, ImportDoiSchema } from '@bibliography/shared';
@@ -24,18 +26,18 @@ router.get('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   return controller.getById(req, res, next);
 });
 
-// Session 6 - DOI Import
+// Session 6 - DOI Import (moved to ImportController)
 router.post('/import-doi', validate(ImportDoiSchema), (req, res, next) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  const controller = container.get<ImportController>(TYPES.ImportController);
   return controller.importFromDoi(req, res, next);
 });
 
-// Session 10.5 - PDF Import with Metadata Extraction
+// Session 10.5 - PDF Import with Metadata Extraction (moved to ImportController)
 // Import uploadPdf middleware (reused from Session 10)
 import { uploadPdf } from '../utils/fileUpload';
 
 router.post('/from-pdf', uploadPdf, (req: any, res: any, next: any) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  const controller = container.get<ImportController>(TYPES.ImportController);
   return controller.createFromPdf(req, res, next);
 });
 
@@ -80,21 +82,21 @@ router.delete('/:id/permanent', validateParams(ObjectIdParamSchema), (req, res, 
 //   return controller.exportReferences(req, res);
 // });
 
-// Session 10 - PDF Management
+// Session 10 - PDF Management (moved to PdfController)
 // uploadPdf middleware imported above (Session 10.5)
 
 router.post('/:id/upload-pdf', validateParams(ObjectIdParamSchema), uploadPdf, (req: any, res: any, next: any) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  const controller = container.get<PdfController>(TYPES.PdfController);
   return controller.uploadPdf(req, res, next);
 });
 
 router.get('/:id/pdf', validateParams(ObjectIdParamSchema), (req, res, next) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  const controller = container.get<PdfController>(TYPES.PdfController);
   return controller.downloadPdf(req, res, next);
 });
 
 router.delete('/:id/pdf', validateParams(ObjectIdParamSchema), (req, res, next) => {
-  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  const controller = container.get<PdfController>(TYPES.PdfController);
   return controller.deletePdf(req, res, next);
 });
 

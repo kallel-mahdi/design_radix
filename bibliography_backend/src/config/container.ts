@@ -25,6 +25,8 @@ import { TagController } from '../controllers/TagController';
 import { ProjectController } from '../controllers/ProjectController';
 import { DuplicateController } from '../controllers/DuplicateController';
 import { HealthController } from '../controllers/HealthController';
+import { ImportController } from '../controllers/ImportController';
+import { PdfController } from '../controllers/PdfController';
 
 const container = new Container();
 let isConfigured = false;
@@ -50,6 +52,8 @@ export function configureContainer() {
   container.bind<ProjectController>(TYPES.ProjectController).to(ProjectController);
   container.bind<DuplicateController>(TYPES.DuplicateController).to(DuplicateController);
   container.bind<HealthController>(TYPES.HealthController).to(HealthController);
+  container.bind<ImportController>(TYPES.ImportController).to(ImportController);
+  container.bind<PdfController>(TYPES.PdfController).to(PdfController);
 
   isConfigured = true;
   return container;

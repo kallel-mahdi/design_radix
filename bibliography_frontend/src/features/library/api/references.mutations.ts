@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/common/api/client';
+import { apiClient, ApiError } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { referenceKeys } from './references.queries';
 import { tagKeys } from './tags.queries';
@@ -21,7 +21,7 @@ export function useCreateReferenceMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Skip validation errors - already shown inline by react-hook-form
       if (error.code === 'VALIDATION_ERROR') return;
 
@@ -51,7 +51,7 @@ export function useUpdateReferenceMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Skip validation errors - already shown inline by react-hook-form
       if (error.code === 'VALIDATION_ERROR') return;
 
@@ -79,7 +79,7 @@ export function useDeleteReferenceMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       useUIStore.getState().addToast({
         message: error.message || 'Failed to delete reference',
         type: 'error',
@@ -104,7 +104,7 @@ export function useRestoreReferenceMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       useUIStore.getState().addToast({
         message: error.message || 'Failed to restore reference',
         type: 'error',
@@ -147,7 +147,7 @@ export function useAddReferenceToCollectionMutation() {
         type: 'success',
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       useUIStore.getState().addToast({
         message: error.message || 'Failed to add reference to collection',
         type: 'error',

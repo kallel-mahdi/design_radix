@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+import NodeCache from 'node-cache';
 import { ApplicationLogger } from '../utils/logger';
 import { ReferenceType } from '@bibliography/shared';
 import { CreateReferenceInput } from '../interfaces/IReferenceService';
@@ -76,6 +77,21 @@ export class CrossrefService {
   private readonly TIMEOUT_MS = 10000;
 
   /**
+   * In-memory cache for Crossref API responses
+   * TTL: 1 hour - DOI metadata rarely changes
+   * PERF: Reduces API calls for repeated DOI lookups
+   */
+  private readonly cache = new NodeCache({ stdTTL: 3600 });
+
+  /**
+   * Clear all cached Crossref responses
+   * Used in tests to ensure cache isolation between test cases
+   */
+  clearCache(): void {
+    this.cache.flushAll();
+  }
+
+  /**
    * Fetch metadata from Crossref API with exponential backoff retry
    *
    * Uses Crossref polite pool (mailto in User-Agent) for priority processing.
@@ -88,7 +104,16 @@ export class CrossrefService {
    * See: docs/sessions/06-plan.md and Zotero's http.js (lines 155-222)
    */
   async fetchMetadata(doi: string, maxRetries = 5): Promise<CrossrefWork> {
-    ApplicationLogger.info('Fetching Crossref metadata', { doi, maxRetries });
+    const normalizedDoi = doi.trim().toLowerCase();
+
+    // Check cache first
+    const cached = this.cache.get<CrossrefWork>(normalizedDoi);
+    if (cached) {
+      ApplicationLogger.info('Crossref cache hit', { doi: normalizedDoi });
+      return cached;
+    }
+
+    ApplicationLogger.info('Fetching Crossref metadata', { doi: normalizedDoi, maxRetries });
 
     const retryDelays = [1000, 2000, 4000, 8000, 16000]; // milliseconds
 
@@ -109,10 +134,13 @@ export class CrossrefService {
         if (response.ok) {
           const data = await response.json() as CrossrefResponse;
           ApplicationLogger.info('Crossref metadata fetched', {
-            doi,
+            doi: normalizedDoi,
             title: data.message.title?.[0]?.substring(0, 50),
             attempts: attempt + 1
           });
+
+          // Cache successful response
+          this.cache.set(normalizedDoi, data.message);
           return data.message;
         }
 
