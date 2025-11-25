@@ -3,6 +3,7 @@ import { container } from '../config/container';
 import { CollectionController } from '../controllers/CollectionController';
 import { TYPES } from '../config/types';
 import { validate, validateParams, ObjectIdParamSchema } from '../middleware/validate';
+import { config } from '../config/environment';
 import {
   CreateCollectionSchema,
   UpdateCollectionSchema,
@@ -39,5 +40,15 @@ router.delete('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   const controller = container.get<CollectionController>(TYPES.CollectionController);
   return controller.delete(req, res, next);
 });
+
+// Test Cleanup Endpoint - FOR TESTING ONLY
+// Deletes all collections for a user (used by E2E tests)
+// Available in test and development environments (NOT production)
+if (config.nodeEnv !== 'production') {
+  router.delete('/test-cleanup', (req, res, next) => {
+    const controller = container.get<CollectionController>(TYPES.CollectionController);
+    return controller.testCleanup(req, res, next);
+  });
+}
 
 export { router as collectionsRouter };

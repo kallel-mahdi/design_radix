@@ -64,15 +64,10 @@ router.delete('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
 });
 
 // Test Cleanup Endpoint - FOR TESTING ONLY
+// Deletes all annotations for a user (used by E2E global teardown)
+// Available in test and development environments (NOT production)
 if (config.nodeEnv !== 'production') {
   router.delete('/test-cleanup', (req, res, next) => {
-    if (req.headers['x-test-cleanup'] !== 'true') {
-      return res.status(400).json({
-        success: false,
-        message: 'Test cleanup requires X-Test-Cleanup: true header',
-        error: 'MISSING_CLEANUP_HEADER',
-      });
-    }
     const controller = container.get<AnnotationController>(TYPES.AnnotationController);
     return controller.testCleanup(req, res, next);
   });

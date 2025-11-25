@@ -21,7 +21,7 @@
  * - Virtualization in MVP (Zotero added later)
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -126,6 +126,19 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
 
   // Virtualization container ref
   const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // Click timeout ref for distinguishing single vs double click
+  // Pattern: delay single-click action to allow double-click to cancel it
+  const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // TanStack Table sorting state (controlled by Zustand)
   const sorting: SortingState = useMemo(
@@ -384,11 +397,12 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
 
   /**
    * Row click handler - multi-select modes:
-   * - Normal click: single selection + open details
-   * - Cmd/Ctrl+Click: toggle individual
-   * - Shift+Click: range selection
+   * - Normal click: single selection + open details (delayed to allow double-click)
+   * - Cmd/Ctrl+Click: toggle individual (immediate)
+   * - Shift+Click: range selection (immediate)
    *
    * Zotero pattern: zotero/chrome/content/zotero/itemTree.js
+   * Double-click detection: Delay single-click action by 200ms to allow double-click to cancel
    *
    * @param index - Index in the sorted rows array (not original references array)
    * @param sortedRows - The sorted rows from table.getRowModel()
@@ -399,44 +413,56 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
       if (!row) return;
       const refId = row.original._id;
 
+      // Clear any pending click timeout
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
+
       if (event.shiftKey) {
-        // Shift+Click: range selection
+        // Shift+Click: range selection (immediate)
         event.preventDefault();
         handleShiftClickRange(index, sortedRows);
+        setFocusedRowIndex(index);
       } else if (event.metaKey || event.ctrlKey) {
-        // Cmd/Ctrl+Click: toggle individual
+        // Cmd/Ctrl+Click: toggle individual (immediate)
         if (selectedReferenceIds.has(refId)) {
           deselectReference(refId);
         } else {
           selectReference(refId);
           setLastSelectedIndex(index);
         }
+        setFocusedRowIndex(index);
       } else {
-        // Normal click: single selection + open details
-        const isCurrentlySelected = selectedReferenceIds.has(refId);
-        const isOnlySelection = selectedReferenceIds.size === 1 && isCurrentlySelected;
+        // Normal click: delayed to allow double-click to cancel
+        // Focus immediately for visual feedback
+        setFocusedRowIndex(index);
 
-        if (isOnlySelection) {
-          // Clicking the only selected item:
-          // - If details pane is open: deselect and close
-          // - If details pane is closed: reopen it
-          if (activeReferenceId === refId) {
-            clearSelection();
-            setActiveReference(null);
+        clickTimeoutRef.current = setTimeout(() => {
+          // Normal click: single selection + open details
+          const isCurrentlySelected = selectedReferenceIds.has(refId);
+          const isOnlySelection = selectedReferenceIds.size === 1 && isCurrentlySelected;
+
+          if (isOnlySelection) {
+            // Clicking the only selected item:
+            // - If details pane is open: deselect and close
+            // - If details pane is closed: reopen it
+            if (activeReferenceId === refId) {
+              clearSelection();
+              setActiveReference(null);
+            } else {
+              // Pane is closed but row is selected - reopen pane
+              setActiveReference(refId);
+            }
           } else {
-            // Pane is closed but row is selected - reopen pane
+            // Select only this item and show details
+            clearSelection();
+            selectReference(refId);
             setActiveReference(refId);
+            setLastSelectedIndex(index);
           }
-        } else {
-          // Select only this item and show details
-          clearSelection();
-          selectReference(refId);
-          setActiveReference(refId);
-          setLastSelectedIndex(index);
-        }
+        }, 200); // 200ms delay to distinguish from double-click
       }
-
-      setFocusedRowIndex(index);
     },
     [references, selectedReferenceIds, deselectReference, selectReference, clearSelection, setActiveReference, activeReferenceId, handleShiftClickRange]
   );
@@ -451,9 +477,16 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
    * - Shift+double-click with PDF: Open in new browser tab
    *
    * Pattern: Zotero opens PDF on double-click when attachment exists
+   * Cancels any pending single-click action to prevent conflict
    */
   const handleRowDoubleClick = useCallback(
     (reference: Reference, event: React.MouseEvent) => {
+      // Cancel any pending single-click action
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
+
       if (reference.hasPdf) {
         if (event.shiftKey) {
           // Shift+double-click: Open PDF in new browser tab

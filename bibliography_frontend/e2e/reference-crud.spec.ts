@@ -84,8 +84,8 @@ test.describe('Reference Creation and Editing', () => {
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
     // Step 7: New reference should appear in the table
-    // Find the row containing our specific title first
-    const row = page.locator('tr', { hasText: title });
+    // Find the row containing our specific title (use data-testid for CSS Grid table)
+    const row = page.locator(`[data-testid="reference-card"]:has-text("${title}")`);
     await expect(row).toBeVisible();
 
     // Verify author and year within that row to avoid matching other references
@@ -236,9 +236,9 @@ test.describe('Reference Creation and Editing', () => {
     // Format should be "Doe, J. & Smith, J." (Family, Initial. & Family, Initial.)
     await expect(page.getByText(title)).toBeVisible();
 
-    // Check for the formatted author string in the table
+    // Check for the formatted author string in the table (use data-testid for CSS Grid table)
     // The UI renders as "Family, Initial. & Family, Initial." for multiple authors
-    const row = page.locator('tr', { hasText: title });
+    const row = page.locator(`[data-testid="reference-card"]:has-text("${title}")`);
     await expect(row).toBeVisible();
 
     // Verify both author family names appear in the row

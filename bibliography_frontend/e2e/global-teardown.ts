@@ -26,6 +26,9 @@ async function globalTeardown() {
 
   let totalRefsDeleted = 0;
   let totalTagsDeleted = 0;
+  let totalAnnotationsDeleted = 0;
+  let totalCollectionsDeleted = 0;
+  let totalPdfsDeleted = 0;
 
   try {
     // Clean up each worker's data
@@ -68,13 +71,64 @@ async function globalTeardown() {
             totalTagsDeleted += result.deletedCount;
           }
         }
+
+        // Clean up annotations
+        const annotationsResponse = await fetch(
+          `${API_BASE_URL}/api/bibliography/annotations/test-cleanup`,
+          {
+            method: 'DELETE',
+            headers: {
+              'x-user-id': userId,
+            },
+          }
+        );
+
+        if (annotationsResponse.ok) {
+          const result = await annotationsResponse.json();
+          if (result.deletedCount > 0) {
+            totalAnnotationsDeleted += result.deletedCount;
+          }
+        }
+
+        // Clean up PDF files
+        const pdfsResponse = await fetch(
+          `${API_BASE_URL}/api/bibliography/references/pdf-cleanup`,
+          {
+            method: 'DELETE',
+            headers: {
+              'x-user-id': userId,
+            },
+          }
+        );
+
+        if (pdfsResponse.ok) {
+          totalPdfsDeleted++;
+        }
+
+        // Clean up collections
+        const collectionsResponse = await fetch(
+          `${API_BASE_URL}/api/bibliography/collections/test-cleanup`,
+          {
+            method: 'DELETE',
+            headers: {
+              'x-user-id': userId,
+            },
+          }
+        );
+
+        if (collectionsResponse.ok) {
+          const result = await collectionsResponse.json();
+          if (result.deletedCount > 0) {
+            totalCollectionsDeleted += result.deletedCount;
+          }
+        }
       } catch (error) {
         console.error(`❌ Error cleaning up ${userId}:`, error);
         // Continue with other workers
       }
     }
 
-    console.log(`\n📊 Total cleanup: ${totalRefsDeleted} references, ${totalTagsDeleted} tags deleted across ${workerCount} worker(s)`);
+    console.log(`\n📊 Total cleanup: ${totalRefsDeleted} references, ${totalTagsDeleted} tags, ${totalAnnotationsDeleted} annotations, ${totalCollectionsDeleted} collections, ${totalPdfsDeleted} PDF cleanups across ${workerCount} worker(s)`);
   } catch (error) {
     console.error('❌ Error during global teardown:', error);
     // Don't throw - we don't want to fail the test run if cleanup fails

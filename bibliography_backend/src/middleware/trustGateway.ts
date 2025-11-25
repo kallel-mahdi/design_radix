@@ -83,9 +83,10 @@ export const bypassGatewayAuth = (
   }
 
   // Only set defaults if headers are not already present (allows test overrides)
-  const userId = (req.headers['x-user-id'] as string) || 'dev-user-123';
-  const userEmail = (req.headers['x-user-email'] as string) || 'dev@example.com';
-  const username = (req.headers['x-user-username'] as string) || 'dev-user';
+  // Use test-user-id to match frontend client.ts default for development
+  const userId = (req.headers['x-user-id'] as string) || 'test-user-id';
+  const userEmail = (req.headers['x-user-email'] as string) || 'test@example.com';
+  const username = (req.headers['x-user-username'] as string) || 'test-user';
   const userRole = (req.headers['x-user-role'] as string) || 'user';
 
   // Set headers for controllers that read directly from headers

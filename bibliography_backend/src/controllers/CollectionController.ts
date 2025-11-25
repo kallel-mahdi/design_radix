@@ -2,8 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { ICollectionService } from '../interfaces/ICollectionService';
 import { TYPES } from '../config/types';
+import { ApplicationLogger } from '../utils/logger';
 import { DocumentNotFoundError } from '../middleware/errorHandler';
 import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
+import { Collection } from '../models/Collection';
 
 @injectable()
 export class CollectionController {
@@ -119,6 +121,38 @@ export class CollectionController {
       }
 
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Test Cleanup Endpoint
+   *
+   * Deletes all collections for a given user.
+   * **FOR TESTING ONLY** - Should be disabled in production
+   *
+   * Used by E2E tests to ensure test isolation and prevent test pollution
+   */
+  async testCleanup(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+
+      ApplicationLogger.info('Test cleanup: Deleting all collections', { userId });
+
+      // Delete all collections for this user
+      const result = await Collection.deleteMany({ userId });
+
+      ApplicationLogger.info('Test cleanup complete', {
+        userId,
+        deletedCount: result.deletedCount
+      });
+
+      res.status(200).json({
+        success: true,
+        message: `Deleted ${result.deletedCount} collections for user ${userId}`,
+        deletedCount: result.deletedCount
+      });
     } catch (error) {
       next(error);
     }

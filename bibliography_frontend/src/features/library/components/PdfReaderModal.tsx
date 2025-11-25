@@ -13,9 +13,10 @@
  * Adapted from PdfTab.tsx for modal context.
  * Zotero reference: zotero/chrome/content/zotero/reader/reader.js
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import type { PDFPageProxy } from 'pdfjs-dist';
 import {
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
@@ -24,10 +25,23 @@ import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
   XMarkIcon,
+  Bars3BottomLeftIcon,
 } from '@heroicons/react/24/outline';
-import type { Reference } from '@/common/types';
+import type { Reference, Annotation } from '@/common/types';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/common/utils';
+import { useAnnotationsQuery } from '../api/annotations.queries';
+import { useCreateAnnotationMutation, useUpdateAnnotationMutation, useDeleteAnnotationMutation } from '../api/annotations.mutations';
+import {
+  AnnotationLayer,
+  AnnotationPopup,
+  AnnotationSidebar,
+  HighlightPopover,
+  useTextSelection,
+  generateSortIndex,
+  pdfToScreenRect,
+  type PdfRect,
+} from './annotations';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 // @ts-ignore - Vite ?url import for worker file
@@ -51,13 +65,47 @@ export const PdfReaderModal: React.FC<PdfReaderModalProps> = ({
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(true);
+  const [pageDimensions, setPageDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
+  const [editingAnnotation, setEditingAnnotation] = useState<Annotation | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch annotations for this reference
+  const { data: annotations = [] } = useAnnotationsQuery(reference?._id, isOpen);
+
+  // Mutations for annotations
+  const createAnnotationMutation = useCreateAnnotationMutation();
+  const updateAnnotationMutation = useUpdateAnnotationMutation();
+  const deleteAnnotationMutation = useDeleteAnnotationMutation();
+
+  // Text selection hook for highlight creation
+  const { selection, clearSelection } = useTextSelection({
+    pageContainerRef,
+    scale,
+    enabled: isOpen && !loading,
+  });
+
+  // Filter annotations for current page (0-based pageIndex)
+  const pageAnnotations = useMemo(() =>
+    annotations.filter(ann => ann.pageIndex === pageNumber - 1),
+    [annotations, pageNumber]
+  );
 
   // Reset state when reference changes
   useEffect(() => {
     if (isOpen) {
+      // Clear stale browser selection to prevent HighlightPopover from appearing
+      // on modal reopen (browser selection persists across modal close/open cycles)
+      window.getSelection()?.removeAllRanges();
       setPageNumber(1);
       setLoading(true);
       setScale(1.0);
+      setPageDimensions(null);
+      setSelectedAnnotationId(null);
+      setEditingAnnotation(null);
+      setPopupPosition(null);
     }
   }, [reference?._id, isOpen]);
 
@@ -80,6 +128,111 @@ export const PdfReaderModal: React.FC<PdfReaderModalProps> = ({
     setNumPages(numPages);
     setLoading(false);
   };
+
+  const handlePageLoadSuccess = (page: PDFPageProxy) => {
+    // Get original page dimensions (at scale 1.0)
+    const viewport = page.getViewport({ scale: 1.0 });
+    setPageDimensions({ width: viewport.width, height: viewport.height });
+  };
+
+  const handleAnnotationClick = useCallback((annotation: Annotation) => {
+    setSelectedAnnotationId(annotation._id);
+    setEditingAnnotation(annotation);
+
+    // Calculate popup position based on annotation's first rect
+    if (pageContainerRef.current && annotation.position.rects.length > 0) {
+      const firstRect = annotation.position.rects[0] as PdfRect;
+      const screenRect = pdfToScreenRect(firstRect, scale);
+      const pageRect = pageContainerRef.current.getBoundingClientRect();
+
+      setPopupPosition({
+        x: pageRect.left + screenRect.x + screenRect.width / 2,
+        y: pageRect.top + screenRect.y + screenRect.height + 10,
+      });
+    }
+  }, [scale]);
+
+  const handleCreateHighlight = useCallback(async (color: string) => {
+    if (!selection || !reference?._id) return;
+
+    const pageIndex = pageNumber - 1;
+    const sortIndex = generateSortIndex(pageIndex, selection.rects);
+
+    await createAnnotationMutation.mutateAsync({
+      referenceId: reference._id,
+      data: {
+        type: 'highlight',
+        pageIndex,
+        position: { rects: selection.rects },
+        content: { text: selection.text },
+        color,
+        sortIndex,
+      },
+    });
+
+    clearSelection();
+  }, [selection, reference?._id, pageNumber, createAnnotationMutation, clearSelection]);
+
+  const handleSidebarAnnotationClick = useCallback((annotation: Annotation) => {
+    // Navigate to the annotation's page and select it
+    setPageNumber(annotation.pageIndex + 1);
+    setSelectedAnnotationId(annotation._id);
+  }, []);
+
+  const handleDeleteAnnotation = useCallback(async (annotation: Annotation) => {
+    if (!reference?._id) return;
+
+    // Simple confirmation
+    if (!window.confirm('Delete this annotation?')) return;
+
+    await deleteAnnotationMutation.mutateAsync({
+      annotationId: annotation._id,
+      referenceId: reference._id,
+    });
+
+    // Clear selection if we deleted the selected annotation
+    if (selectedAnnotationId === annotation._id) {
+      setSelectedAnnotationId(null);
+    }
+  }, [reference?._id, deleteAnnotationMutation, selectedAnnotationId]);
+
+  const handlePopupSave = useCallback(async (data: { comment?: string; color?: string }) => {
+    if (!editingAnnotation || !reference?._id) return;
+
+    await updateAnnotationMutation.mutateAsync({
+      annotationId: editingAnnotation._id,
+      referenceId: reference._id,
+      data: {
+        content: data.comment !== undefined ? { comment: data.comment } : undefined,
+        color: data.color,
+      },
+    });
+
+    setEditingAnnotation(null);
+    setPopupPosition(null);
+  }, [editingAnnotation, reference?._id, updateAnnotationMutation]);
+
+  const handlePopupDelete = useCallback(async () => {
+    if (!editingAnnotation || !reference?._id) return;
+
+    await deleteAnnotationMutation.mutateAsync({
+      annotationId: editingAnnotation._id,
+      referenceId: reference._id,
+    });
+
+    setEditingAnnotation(null);
+    setPopupPosition(null);
+    setSelectedAnnotationId(null);
+  }, [editingAnnotation, reference?._id, deleteAnnotationMutation]);
+
+  const handlePopupClose = useCallback(() => {
+    setEditingAnnotation(null);
+    setPopupPosition(null);
+  }, []);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
 
   const handleZoomIn = useCallback(() => {
     setScale((prev) => Math.min(3.0, prev + 0.25));
@@ -281,6 +434,23 @@ export const PdfReaderModal: React.FC<PdfReaderModalProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={toggleSidebar}
+                        aria-label="Toggle annotations sidebar"
+                        title="Annotations"
+                        className={cn(
+                          "text-gray-300 hover:text-white hover:bg-gray-700",
+                          sidebarOpen && "bg-gray-700 text-white"
+                        )}
+                      >
+                        <Bars3BottomLeftIcon className="w-5 h-5" />
+                        {annotations.length > 0 && (
+                          <span className="ml-1 text-xs">{annotations.length}</span>
+                        )}
+                      </Button>
+                      <div className="w-px h-6 bg-gray-700 mx-1" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={handleDownload}
                         aria-label="Download PDF"
                         title="Download PDF"
@@ -314,64 +484,112 @@ export const PdfReaderModal: React.FC<PdfReaderModalProps> = ({
                 </div>
               </div>
 
-              {/* PDF Viewer */}
-              <div className="flex-1 overflow-auto bg-gray-800 flex items-start justify-center p-6">
-                {/* Loading state: reference is still being fetched */}
-                {!reference && (
-                  <div className="flex flex-col items-center justify-center py-16">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-app-accent mb-4"></div>
-                    <span className="text-gray-400">Loading reference...</span>
-                  </div>
-                )}
+              {/* Content area: PDF + optional sidebar */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* PDF Viewer */}
+                <div className="flex-1 overflow-auto bg-gray-800 flex items-start justify-center p-6">
+                  {/* Loading state: reference is still being fetched */}
+                  {!reference && (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-app-accent mb-4"></div>
+                      <span className="text-gray-400">Loading reference...</span>
+                    </div>
+                  )}
 
-                {/* No PDF state: reference loaded but has no PDF */}
-                {reference && !reference.hasPdf && (
-                  <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                    <span className="text-lg">This reference has no PDF attached</span>
-                    <Button
-                      variant="secondary"
-                      size="default"
-                      onClick={onClose}
-                      className="mt-4"
-                    >
-                      Close
-                    </Button>
-                  </div>
-                )}
+                  {/* No PDF state: reference loaded but has no PDF */}
+                  {reference && !reference.hasPdf && (
+                    <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                      <span className="text-lg">This reference has no PDF attached</span>
+                      <Button
+                        variant="secondary"
+                        size="default"
+                        onClick={onClose}
+                        className="mt-4"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  )}
 
-                {/* PDF loaded state */}
-                {reference?.hasPdf && (
-                  <>
-                    {loading && (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-app-accent"></div>
-                      </div>
-                    )}
-                    <Document
-                      file={fileConfig}
-                      onLoadSuccess={handleLoadSuccess}
-                      onLoadError={(error) => {
-                        console.error('PDF load error:', error);
-                        setLoading(false);
-                      }}
-                      loading={
+                  {/* PDF loaded state */}
+                  {reference?.hasPdf && (
+                    <>
+                      {loading && (
                         <div className="flex items-center justify-center py-8">
                           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-app-accent"></div>
                         </div>
-                      }
-                      className={cn(loading && 'hidden')}
-                    >
-                      <Page
-                        pageNumber={pageNumber}
-                        scale={scale}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={false}
-                        className="shadow-2xl"
-                      />
-                    </Document>
-                  </>
+                      )}
+                      <Document
+                        file={fileConfig}
+                        onLoadSuccess={handleLoadSuccess}
+                        onLoadError={(error) => {
+                          console.error('PDF load error:', error);
+                          setLoading(false);
+                        }}
+                        loading={
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-app-accent"></div>
+                          </div>
+                        }
+                        className={cn(loading && 'hidden')}
+                      >
+                        <div ref={pageContainerRef} className="relative">
+                          <Page
+                            pageNumber={pageNumber}
+                            scale={scale}
+                            renderTextLayer={true}
+                            renderAnnotationLayer={false}
+                            className="shadow-2xl"
+                            onLoadSuccess={handlePageLoadSuccess}
+                          />
+                          {/* Annotation overlay */}
+                          {pageDimensions && (
+                            <AnnotationLayer
+                              annotations={pageAnnotations}
+                              scale={scale}
+                              pageWidth={pageDimensions.width}
+                              pageHeight={pageDimensions.height}
+                              selectedId={selectedAnnotationId}
+                              onAnnotationClick={handleAnnotationClick}
+                            />
+                          )}
+                        </div>
+                      </Document>
+                    </>
+                  )}
+                </div>
+
+                {/* Annotation sidebar */}
+                {sidebarOpen && reference?.hasPdf && (
+                  <AnnotationSidebar
+                    annotations={annotations}
+                    selectedId={selectedAnnotationId}
+                    onAnnotationClick={handleSidebarAnnotationClick}
+                    onAnnotationDelete={handleDeleteAnnotation}
+                  />
                 )}
               </div>
+
+              {/* Highlight popover - appears on text selection */}
+              {selection && (
+                <HighlightPopover
+                  position={selection.popoverPosition}
+                  onColorSelect={handleCreateHighlight}
+                  onClose={clearSelection}
+                />
+              )}
+
+              {/* Annotation popup - appears when clicking on an annotation */}
+              {editingAnnotation && popupPosition && (
+                <AnnotationPopup
+                  annotation={editingAnnotation}
+                  position={popupPosition}
+                  onSave={handlePopupSave}
+                  onDelete={handlePopupDelete}
+                  onClose={handlePopupClose}
+                  isSaving={updateAnnotationMutation.isPending}
+                />
+              )}
             </Dialog.Panel>
           </Transition.Child>
         </div>

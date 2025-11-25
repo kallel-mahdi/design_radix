@@ -14,10 +14,15 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "dev:frontend": "pnpm --filter bibliography-frontend dev",
-    "dev:backend": "pnpm --filter bibliography-backend dev"
+    "dev:backend": "pnpm --filter bibliography-backend dev",
+    "reset:dev": "npx tsx scripts/reset-dev-database.ts",
+    "reset:dev:confirm": "npx tsx scripts/reset-dev-database.ts --confirm"
   },
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
   }
 }

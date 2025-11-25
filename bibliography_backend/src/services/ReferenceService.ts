@@ -344,6 +344,43 @@ export class ReferenceService implements IReferenceService {
     });
   }
 
+  /**
+   * Clear PDF Paths - Test/Development Cleanup
+   *
+   * Deletes all PDF files from disk for a user's references and clears metadata.
+   * Used by global teardown to ensure no orphaned PDFs accumulate on disk.
+   */
+  async clearPdfPaths(userId: string): Promise<void> {
+    const { unlink } = await import('fs/promises');
+
+    // Find all references with PDFs for this user
+    const references = await Reference.find({
+      userId,
+      hasPdf: true,
+      'pdf.storedPath': { $exists: true }
+    });
+
+    for (const reference of references) {
+      if (reference.pdf?.storedPath) {
+        // Delete file from disk
+        await unlink(reference.pdf.storedPath)
+          .then(() => ApplicationLogger.info('PDF file deleted during cleanup', { storedPath: reference.pdf!.storedPath }))
+          .catch((error) => ApplicationLogger.warn('Failed to delete PDF file during cleanup', {
+            storedPath: reference.pdf!.storedPath,
+            error: error instanceof Error ? error.message : String(error)
+          }));
+      }
+    }
+
+    // Clear PDF metadata from all references
+    await Reference.updateMany(
+      { userId, hasPdf: true },
+      { $set: { hasPdf: false }, $unset: { pdf: 1 } }
+    );
+
+    ApplicationLogger.info('PDF paths cleared for user', { userId, referenceCount: references.length });
+  }
+
   private async generateCitationKey(userId: string, data: CreateReferenceInput): Promise<string> {
     const lastName = data.authors?.[0]?.family || 'unknown';
     const year = data.year || new Date().getFullYear();

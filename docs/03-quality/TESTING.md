@@ -437,6 +437,30 @@ export const test = base.extend<{}, WorkerFixtures>({
 
 ---
 
+## Reset Development Database
+
+### Quick Clean Start
+
+```bash
+# Dry run (shows what will be deleted)
+pnpm reset:dev
+
+# Execute deletion (confirms data will be wiped)
+pnpm reset:dev:confirm
+```
+
+**What Gets Deleted:**
+- All MongoDB collections (references, tags, collections, annotations, etc.)
+- All uploaded PDF files from `bibliography_backend/data/bibliography/uploads/`
+- Development database completely reset to empty state
+
+**When to Use:**
+- Before running full E2E test suites (to avoid data accumulation)
+- After manual testing to start fresh
+- When PDF files accumulate on disk (~9.5MB+ per session)
+
+---
+
 ## Running Tests
 
 ### All Tests
@@ -451,6 +475,20 @@ pnpm test:unit --coverage  # With coverage report
 cd bibliography_backend
 pnpm test:integration   # Integration tests (115 tests)
 pnpm test:integration --coverage  # With coverage report
+```
+
+### Full Test Session
+```bash
+# Terminal 1: Reset and start backend
+pnpm reset:dev:confirm
+pnpm --filter bibliography-backend dev
+
+# Terminal 2: Start frontend
+pnpm --filter bibliography-frontend dev
+
+# Terminal 3: Run tests
+cd bibliography_backend && pnpm test
+cd ../bibliography_frontend && pnpm test && pnpm test:e2e
 ```
 
 ### Specific Tests

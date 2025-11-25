@@ -6,6 +6,7 @@ import { ApplicationLogger } from '../utils/logger';
 import { Reference } from '../models/Reference';
 import { DocumentNotFoundError } from '../middleware/errorHandler';
 import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
+import * as fs from 'fs/promises';
 
 /**
  * ReferenceController
@@ -193,6 +194,33 @@ export class ReferenceController {
         success: true,
         message: `Deleted ${result.deletedCount} references for user ${userId}`,
         deletedCount: result.deletedCount
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PDF Cleanup Endpoint
+   *
+   * Deletes all PDF files for a user's references and clears PDF metadata.
+   * **FOR TESTING/DEVELOPMENT ONLY** - Should be disabled in production
+   *
+   * Used by E2E global teardown to clean up disk space after tests
+   */
+  async cleanupPdfFiles(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+
+      ApplicationLogger.info('PDF cleanup: Starting cleanup for user', { userId });
+
+      await this.referenceService.clearPdfPaths(userId);
+
+      ApplicationLogger.info('PDF cleanup complete', { userId });
+
+      res.status(200).json({
+        success: true,
+        message: 'PDF files cleaned up successfully'
       });
     } catch (error) {
       next(error);

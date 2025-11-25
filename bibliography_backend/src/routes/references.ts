@@ -49,6 +49,14 @@ if (config.nodeEnv !== 'production') {
     const controller = container.get<ReferenceController>(TYPES.ReferenceController);
     return controller.testCleanup(req, res, next);
   });
+
+  // PDF Cleanup Endpoint - FOR TESTING ONLY
+  // Deletes all PDF files for a user's references (used by E2E global teardown)
+  // Available in test and development environments (NOT production)
+  router.delete('/pdf-cleanup', (req, res, next) => {
+    const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+    return controller.cleanupPdfFiles(req, res, next);
+  });
 }
 
 router.patch('/:id', validateParams(ObjectIdParamSchema), validate(UpdateReferenceSchema), (req, res, next) => {
