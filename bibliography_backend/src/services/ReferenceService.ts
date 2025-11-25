@@ -19,30 +19,8 @@ export class ReferenceService implements IReferenceService {
     // Prevents duplicate creation due to case differences (e.g., "10.1145/ABC" vs "10.1145/abc")
     const normalizedDoi = data.doi ? data.doi.trim().toLowerCase() : undefined;
 
-    // Normalize authors: auto-generate 'full' if not provided
-    const authors = data.authors?.map(a => {
-      // If full name is explicitly provided, use it as-is
-      if (a.full) {
-        return {
-          given: a.given || '',
-          family: a.family || '',
-          full: a.full
-        };
-      }
-
-      // Otherwise auto-generate from given/family
-      // Pattern: "Family, Given" or just "Family" or just "Given"
-      const fullName = [a.family || '', a.given || '']
-        .filter(Boolean)
-        .join(', ')
-        .trim();
-
-      return {
-        given: a.given || '',
-        family: a.family || '',
-        full: fullName || 'Unknown Author' // Fallback if both are empty
-      };
-    }) || [];
+    // Normalize authors: auto-generate 'full' if not provided (DRY helper)
+    const authors = this.normalizeAuthors(data.authors);
 
     // Generate unique citation key
     const citationKey = await this.generateCitationKey(userId, data);
@@ -140,31 +118,9 @@ export class ReferenceService implements IReferenceService {
       updateData.doi = data.doi.trim().toLowerCase();
     }
 
-    // If authors updated, normalize full names (auto-generate if not provided)
+    // If authors updated, normalize full names (DRY helper)
     if (data.authors) {
-      updateData.authors = data.authors.map(a => {
-        // If full name is explicitly provided, use it as-is
-        if (a.full) {
-          return {
-            given: a.given || '',
-            family: a.family || '',
-            full: a.full
-          };
-        }
-
-        // Otherwise auto-generate from given/family
-        // Pattern: "Family, Given" or just "Family" or just "Given"
-        const fullName = [a.family || '', a.given || '']
-          .filter(Boolean)
-          .join(', ')
-          .trim();
-
-        return {
-          given: a.given || '',
-          family: a.family || '',
-          full: fullName || 'Unknown Author'
-        };
-      });
+      updateData.authors = this.normalizeAuthors(data.authors);
     }
 
     if (data.collectionIds) {
@@ -258,7 +214,7 @@ export class ReferenceService implements IReferenceService {
    * Stores metadata in reference document (Zotero pattern from userdata.sql itemAttachments table).
    */
   async uploadPdf(id: string, userId: string, file: Express.Multer.File): Promise<IReference | null> {
-    const fs = await import('fs');
+    const { unlink } = await import('fs/promises');
 
     // Find reference and ensure ownership
     const reference = await Reference.findOne({ _id: id, userId, deleted: false });
@@ -268,17 +224,14 @@ export class ReferenceService implements IReferenceService {
       return null;
     }
 
-    // Delete old PDF file if exists (replace operation)
+    // Delete old PDF file if exists (replace operation) - async to avoid blocking event loop
     if (reference.pdf?.storedPath) {
-      try {
-        fs.unlinkSync(reference.pdf.storedPath);
-        ApplicationLogger.info('Old PDF file deleted', { storedPath: reference.pdf.storedPath });
-      } catch (error) {
-        ApplicationLogger.warn('Failed to delete old PDF file', {
-          storedPath: reference.pdf.storedPath,
+      await unlink(reference.pdf.storedPath)
+        .then(() => ApplicationLogger.info('Old PDF file deleted', { storedPath: reference.pdf!.storedPath }))
+        .catch((error) => ApplicationLogger.warn('Failed to delete old PDF file', {
+          storedPath: reference.pdf!.storedPath,
           error: error instanceof Error ? error.message : String(error)
-        });
-      }
+        }));
     }
 
     // Update reference with new PDF metadata
@@ -330,7 +283,7 @@ export class ReferenceService implements IReferenceService {
    * Idempotent operation (deleting twice doesn't error).
    */
   async deletePdf(id: string, userId: string): Promise<boolean> {
-    const fs = await import('fs');
+    const { unlink } = await import('fs/promises');
 
     const reference = await Reference.findOne({ _id: id, userId, deleted: false });
 
@@ -339,17 +292,14 @@ export class ReferenceService implements IReferenceService {
       return false;
     }
 
-    // Delete file from disk if exists
+    // Delete file from disk if exists - async to avoid blocking event loop
     if (reference.pdf?.storedPath) {
-      try {
-        fs.unlinkSync(reference.pdf.storedPath);
-        ApplicationLogger.info('PDF file deleted from disk', { storedPath: reference.pdf.storedPath });
-      } catch (error) {
-        ApplicationLogger.warn('Failed to delete PDF file from disk', {
-          storedPath: reference.pdf.storedPath,
+      await unlink(reference.pdf.storedPath)
+        .then(() => ApplicationLogger.info('PDF file deleted from disk', { storedPath: reference.pdf!.storedPath }))
+        .catch((error) => ApplicationLogger.warn('Failed to delete PDF file from disk', {
+          storedPath: reference.pdf!.storedPath,
           error: error instanceof Error ? error.message : String(error)
-        });
-      }
+        }));
     }
 
     // Clear PDF metadata from document
@@ -360,6 +310,38 @@ export class ReferenceService implements IReferenceService {
     ApplicationLogger.info('PDF metadata cleared from reference', { referenceId: id, userId });
 
     return true;
+  }
+
+  /**
+   * Normalize authors: auto-generate 'full' name if not provided
+   * Pattern: "Family, Given" or just "Family" or just "Given"
+   * DRY: Extracted from create() and update() methods
+   */
+  private normalizeAuthors(authors?: Array<{ given?: string; family?: string; full?: string }>): Array<{ given: string; family: string; full: string }> {
+    if (!authors) return [];
+
+    return authors.map(a => {
+      // If full name is explicitly provided, use it as-is
+      if (a.full) {
+        return {
+          given: a.given || '',
+          family: a.family || '',
+          full: a.full
+        };
+      }
+
+      // Otherwise auto-generate from given/family
+      const fullName = [a.family || '', a.given || '']
+        .filter(Boolean)
+        .join(', ')
+        .trim();
+
+      return {
+        given: a.given || '',
+        family: a.family || '',
+        full: fullName || 'Unknown Author'
+      };
+    });
   }
 
   private async generateCitationKey(userId: string, data: CreateReferenceInput): Promise<string> {

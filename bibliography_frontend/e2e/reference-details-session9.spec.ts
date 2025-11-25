@@ -42,6 +42,7 @@ test.describe('Reference Details - Session 9', () => {
       {
         headers: {
           'x-user-id': workerUserId,
+          'x-test-cleanup': 'true',
         },
       }
     );

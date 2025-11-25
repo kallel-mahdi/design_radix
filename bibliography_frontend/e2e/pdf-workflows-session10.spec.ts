@@ -30,7 +30,7 @@ test.describe('PDF Workflows - Session 10', () => {
     // 3. Clean up test data AFTER route intercept is set up
     await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId } }
+      { headers: { 'x-user-id': workerUserId, 'x-test-cleanup': 'true' } }
     );
 
     // 4. Reload to show empty state

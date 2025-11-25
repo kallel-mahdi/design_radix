@@ -22,7 +22,7 @@ test.describe('PDF Import - Session 10.5', () => {
     // Clean up test data
     await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId } }
+      { headers: { 'x-user-id': workerUserId, 'x-test-cleanup': 'true' } }
     );
 
     // Route all requests with worker-specific user ID

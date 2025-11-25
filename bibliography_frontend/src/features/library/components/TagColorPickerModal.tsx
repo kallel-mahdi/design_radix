@@ -85,8 +85,9 @@ export const TagColorPickerModal: React.FC<TagColorPickerModalProps> = ({
       // New tag or uncolored tag: pick random unused color and next available position
       const unusedColors = TAG_COLORS.filter((c) => !usedColors.has(c));
       if (unusedColors.length > 0) {
-        const randomColor = unusedColors[Math.floor(Math.random() * unusedColors.length)];
-        setSelectedColor(randomColor);
+        const randomIndex = Math.floor(Math.random() * unusedColors.length);
+        const randomColor = unusedColors[randomIndex];
+        setSelectedColor(randomColor ?? null);
       } else {
         setSelectedColor(null);
       }

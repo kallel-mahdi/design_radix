@@ -1,4 +1,5 @@
 import winston, { Logger } from 'winston';
+import type { Request, Response, NextFunction } from 'express';
 import { config } from '../config/environment';
 
 // Adapted from editor auth-service logger pattern
@@ -173,7 +174,14 @@ export class ApplicationLogger {
   }
 }
 
-export const requestLogger = (req: any, res: any, next: any) => {
+// Extended Request type for logging middleware
+interface LoggingRequest extends Request {
+  requestId?: string;
+  id?: string;
+  user?: { id?: string };
+}
+
+export const requestLogger = (req: LoggingRequest, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   const requestId = req.id || Math.random().toString(36).substring(7);
 
@@ -187,8 +195,9 @@ export const requestLogger = (req: any, res: any, next: any) => {
     component: 'HTTP_REQUEST'
   });
 
-  const originalEnd = res.end;
-  res.end = function(...args: any[]) {
+  // Store original end and patch for timing (standard Express middleware pattern)
+  const originalEnd = res.end.bind(res);
+  (res as Response).end = function(chunk?: unknown, encodingOrCb?: BufferEncoding | (() => void), cb?: () => void) {
     const duration = Date.now() - startTime;
 
     ApplicationLogger.httpRequest(
@@ -203,8 +212,15 @@ export const requestLogger = (req: any, res: any, next: any) => {
       }
     );
 
-    originalEnd.apply(this, args);
-  };
+    // Call original with proper overload handling
+    if (typeof encodingOrCb === 'function') {
+      return originalEnd(chunk, encodingOrCb);
+    }
+    if (encodingOrCb) {
+      return originalEnd(chunk, encodingOrCb, cb);
+    }
+    return originalEnd(chunk);
+  } as Response['end'];
 
   next();
 };

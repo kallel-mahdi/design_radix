@@ -67,6 +67,7 @@ test.describe('DOI Import Flow', () => {
     const cleanupResponse = await page.request.delete('http://localhost:8005/api/bibliography/references/test-cleanup', {
       headers: {
         'x-user-id': workerUserId,
+        'x-test-cleanup': 'true',
       },
     });
     expect(cleanupResponse.ok()).toBeTruthy();

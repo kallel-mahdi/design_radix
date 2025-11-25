@@ -39,6 +39,7 @@ test.describe('Reference Creation and Editing', () => {
       {
         headers: {
           'x-user-id': workerUserId,
+          'x-test-cleanup': 'true',
         },
       }
     );

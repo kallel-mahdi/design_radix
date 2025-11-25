@@ -46,6 +46,7 @@ test.describe('Test Isolation Verification', () => {
       {
         headers: {
           'x-user-id': workerUserId,
+          'x-test-cleanup': 'true',
         },
       }
     );

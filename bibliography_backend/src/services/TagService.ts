@@ -30,25 +30,29 @@ export class TagService implements ITagService {
     return Tag.findOne({ userId, name });
   }
 
-  async list(userId: string): Promise<Array<any>> {
-    // Get all tags
-    const tags = await Tag.find({ userId });
+  async list(userId: string): Promise<TagWithUsageCount[]> {
+    // Fix N+1 query: Get all tags and usage counts in 2 parallel queries (not N+1)
+    const [tags, tagCounts] = await Promise.all([
+      Tag.find({ userId }),
+      // Single aggregation to count all tag usages at once
+      Reference.aggregate<{ _id: string; count: number }>([
+        { $match: { userId, deleted: false } },
+        { $unwind: '$tags' },
+        { $group: { _id: '$tags', count: { $sum: 1 } } }
+      ])
+    ]);
 
-    // Calculate usage count for each tag using aggregation
-    const tagsWithCounts = await Promise.all(
-      tags.map(async (tag) => {
-        const count = await Reference.countDocuments({
-          userId,
-          tags: tag.name,
-          deleted: false
-        });
+    // Create a map for O(1) lookups
+    const countMap = new Map<string, number>();
+    for (const item of tagCounts) {
+      countMap.set(item._id, item.count);
+    }
 
-        return {
-          ...tag.toObject(),
-          usageCount: count
-        };
-      })
-    );
+    // Combine tags with counts
+    const tagsWithCounts: TagWithUsageCount[] = tags.map(tag => ({
+      ...tag.toObject(),
+      usageCount: countMap.get(tag.name) || 0
+    }));
 
     // Sort by usage count descending (most used tags first)
     return tagsWithCounts.sort((a, b) => b.usageCount - a.usageCount);

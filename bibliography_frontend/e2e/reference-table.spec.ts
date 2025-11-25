@@ -36,6 +36,7 @@ test.describe('ReferenceTable Interactions', () => {
       {
         headers: {
           'x-user-id': workerUserId,
+          'x-test-cleanup': 'true',
         },
       }
     );

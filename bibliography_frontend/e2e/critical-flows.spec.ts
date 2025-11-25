@@ -34,6 +34,7 @@ test.describe('Critical User Flows', () => {
       {
         headers: {
           'x-user-id': workerUserId,
+          'x-test-cleanup': 'true',
         },
       }
     );
