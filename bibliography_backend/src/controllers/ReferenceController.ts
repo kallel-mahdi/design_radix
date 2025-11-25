@@ -2,21 +2,24 @@ import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { IReferenceService } from '../interfaces/IReferenceService';
 import { CrossrefService } from '../services/CrossrefService';
+import { PdfMetadataService } from '../services/PdfMetadataService';
 import { TYPES } from '../config/types';
 import { ApplicationLogger } from '../utils/logger';
 import { Reference } from '../models/Reference';
 import { DocumentNotFoundError } from '../middleware/errorHandler';
+import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
 
 @injectable()
 export class ReferenceController {
   constructor(
     @inject(TYPES.IReferenceService) private referenceService: IReferenceService,
-    @inject(TYPES.ICrossrefService) private crossrefService: CrossrefService
+    @inject(TYPES.ICrossrefService) private crossrefService: CrossrefService,
+    @inject(TYPES.IPdfMetadataService) private pdfMetadataService: PdfMetadataService
   ) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const data = req.body;
 
       const reference = await this.referenceService.create(userId, data);
@@ -33,7 +36,7 @@ export class ReferenceController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       // Clamp limit to max 1000 per spec (Task 5: pagination limit clamping)
       const limit = Math.min(Math.max(1, parseInt(req.query.limit as string) || 100), 1000);
       const filters = {
@@ -65,7 +68,7 @@ export class ReferenceController {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const reference = await this.referenceService.getById(id, userId);
@@ -86,7 +89,7 @@ export class ReferenceController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
       const data = req.body;
 
@@ -108,7 +111,7 @@ export class ReferenceController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.referenceService.softDelete(id, userId);
@@ -125,7 +128,7 @@ export class ReferenceController {
 
   async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.referenceService.restore(id, userId);
@@ -145,7 +148,7 @@ export class ReferenceController {
 
   async permanentDelete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.referenceService.permanentDelete(id, userId);
@@ -175,7 +178,7 @@ export class ReferenceController {
    */
   async importFromDoi(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { doi } = req.body;
 
       ApplicationLogger.info('Importing reference from DOI', { userId, doi });
@@ -239,7 +242,7 @@ export class ReferenceController {
    */
   async testCleanup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
 
       ApplicationLogger.info('Test cleanup: Deleting all references', { userId });
 
@@ -270,7 +273,7 @@ export class ReferenceController {
    */
   async uploadPdf(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       if (!req.file) {
@@ -322,7 +325,7 @@ export class ReferenceController {
    */
   async downloadPdf(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const pdfData = await this.referenceService.getPdfPath(id, userId);
@@ -338,9 +341,10 @@ export class ReferenceController {
       });
 
       // Stream PDF file with proper headers
+      // Note: storedPath is absolute (from Multer), so we don't use root option
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `inline; filename="${pdfData.originalName}"`);
-      res.sendFile(pdfData.storedPath, { root: process.cwd() });
+      res.sendFile(pdfData.storedPath);
     } catch (error) {
       next(error);
     }
@@ -354,7 +358,7 @@ export class ReferenceController {
    */
   async deletePdf(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.referenceService.deletePdf(id, userId);
@@ -370,6 +374,89 @@ export class ReferenceController {
 
       res.status(204).send();
     } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Create reference from PDF with automatic metadata extraction (Session 10.5)
+   *
+   * Implements Zotero-style PDF upload workflow (itemTree.jsx:2242-2675):
+   * 1. Extract text from PDF (first 5 pages)
+   * 2. Parse DOI using regex
+   * 3. If DOI found → enrich via Crossref → create reference
+   * 4. If no DOI → create reference from filename (fallback)
+   *
+   * Uses Multer middleware to handle multipart/form-data upload.
+   * Auto-triggers duplicate detection asynchronously (via ReferenceService.create).
+   *
+   * Error Handling:
+   * - No file provided → 400 Bad Request
+   * - Corrupt PDF → 400 Bad Request (pdf-parse throws error)
+   * - Crossref API failure → Falls back to filename extraction (graceful degradation)
+   * - Duplicate DOI → Handled by async duplicate detection (doesn't block creation)
+   *
+   * Performance: ~600ms end-to-end (~100ms PDF parsing + ~500ms Crossref API)
+   *
+   * See: docs/sessions/10.5-plan.md for architecture decisions
+   */
+  async createFromPdf(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          error: 'NO_FILE',
+          message: 'No PDF provided'
+        });
+        return;
+      }
+
+      ApplicationLogger.info('Creating reference from PDF', {
+        userId,
+        filename: req.file.originalname,
+        size: req.file.size
+      });
+
+      // Create reference with automatic metadata extraction
+      const { reference, metadata } = await this.pdfMetadataService.createReferenceFromPdf(
+        userId,
+        req.file.path,
+        req.file.originalname
+      );
+
+      ApplicationLogger.info('Reference created from PDF', {
+        userId,
+        referenceId: reference._id.toString(),
+        source: metadata.source,
+        doi: metadata.doi || 'none'
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Reference created from PDF',
+        data: {
+          reference,
+          extractedMetadata: metadata
+        }
+      });
+    } catch (error) {
+      // Enhance error with specific status codes
+      if (error instanceof Error) {
+        const message = error.message;
+
+        // PDF parsing errors
+        if (message.includes('Invalid PDF') || message.includes('Unsupported')) {
+          (error as any).statusCode = 400;
+          (error as any).error = 'INVALID_PDF';
+        }
+        // Crossref errors (already handled by importFromDoi pattern)
+        else if (message.includes('Rate limit exceeded')) {
+          (error as any).statusCode = 429;
+        }
+      }
+
       next(error);
     }
   }

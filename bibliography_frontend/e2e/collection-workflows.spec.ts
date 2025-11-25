@@ -10,8 +10,19 @@ import { test, expect } from './fixtures/workerFixtures';
  * - Drag-drop reordering
  * - Collection-based filtering
  *
- * TODO: Implement collection management UI (Session 8) before enabling these tests
- * SKIPPED: Collection tree, context menus, and collection CRUD UI not yet implemented
+ * IMPLEMENTED:
+ * - TreeView with nested collections, expand/collapse
+ * - TreeNode with color indicators
+ * - "New Collection" button in sidebar header
+ * - Context menu (right-click): New Subcollection, Rename, Delete, Assign Color
+ * - CollectionColorPickerModal
+ * - PromptDialog for rename and create operations
+ *
+ * STILL MISSING (tests need these):
+ * - Reference context menu with "Add to Collection" option
+ * - "Move to" context menu option for reparenting
+ * - Trash view showing deleted collections
+ * - Reference count badge (currently shows "0")
  *
  * Worker Isolation:
  * - Each Playwright worker uses a unique user ID (test-user-0, test-user-1, etc.)
@@ -19,6 +30,8 @@ import { test, expect } from './fixtures/workerFixtures';
  * - Worker A cannot delete Worker B's data
  */
 
+// NOTE: Collection workflows tests use reference-card selector and context menus that don't exist
+// Skip entire describe block until these UI features are implemented
 test.describe.skip('Collection Workflows', () => {
   test.beforeEach(async ({ page, workerUserId }) => {
     // Intercept all API calls to inject worker-scoped user ID
@@ -107,8 +120,8 @@ test.describe.skip('Collection Workflows', () => {
     await page.locator('button[aria-label*="Select color #FF6B6B"]').click();
     await page.getByRole('button', { name: /Apply/i }).click();
 
-    // Verify color indicator appears
-    const colorIndicator = page.locator('[data-testid="collection-color-indicator"]');
+    // Verify color indicator appears (TreeNode uses data-testid="color-indicator")
+    const colorIndicator = page.locator('[data-testid="color-indicator"]');
     await expect(colorIndicator).toBeVisible();
 
     // Verify color is correct (red)

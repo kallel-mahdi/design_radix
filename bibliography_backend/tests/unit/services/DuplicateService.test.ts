@@ -332,7 +332,7 @@ describe('DuplicateService Unit Tests', () => {
       const unresolved = await service.listUnresolved('user-123');
 
       expect(unresolved).toHaveLength(1);
-      expect(unresolved[0].resolved).toBe(false);
+      expect(unresolved[0].status).toBe('pending');
     });
 
     it('should not list resolved candidates', async () => {
@@ -386,16 +386,15 @@ describe('DuplicateService Unit Tests', () => {
       const candidates = await service.detectForReference('user-123', duplicate._id.toString());
       const resolved = await service.resolve('user-123', candidates[0]._id.toString(), 'keep-existing');
 
-      expect(resolved?.resolved).toBe(true);
-      expect(resolved?.resolution).toBe('keep-existing');
+      expect(resolved?.status).toBe('keep-existing');
       expect(resolved?.resolvedAt).toBeDefined();
 
-      // Duplicate should be soft deleted
+      // Duplicate should be permanently deleted
       const deletedRef = await Reference.findById(duplicate._id);
-      expect(deletedRef?.deleted).toBe(true);
+      expect(deletedRef).toBeNull();
     });
 
-    it('should resolve duplicate with keep-both', async () => {
+    it('should throw error for merged action (not implemented in MVP)', async () => {
       const ref1 = await Reference.create({
         userId: 'user-123',
         type: 'article',
@@ -415,15 +414,11 @@ describe('DuplicateService Unit Tests', () => {
       });
 
       const candidates = await service.detectForReference('user-123', ref2._id.toString());
-      const resolved = await service.resolve('user-123', candidates[0]._id.toString(), 'keep-both');
 
-      expect(resolved?.resolution).toBe('keep-both');
-
-      // Both references should still exist
-      const existingRef = await Reference.findById(ref1._id);
-      const duplicateRef = await Reference.findById(ref2._id);
-      expect(existingRef?.deleted).toBe(false);
-      expect(duplicateRef?.deleted).toBe(false);
+      // Merge functionality is not available in MVP
+      await expect(
+        service.resolve('user-123', candidates[0]._id.toString(), 'merged')
+      ).rejects.toThrow('MERGE_NOT_IMPLEMENTED');
     });
 
     it('should return null for non-existent candidate', async () => {

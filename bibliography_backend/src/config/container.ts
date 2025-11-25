@@ -16,6 +16,7 @@ import { TagService } from '../services/TagService';
 import { ProjectService } from '../services/ProjectService';
 import { DuplicateService } from '../services/DuplicateService';
 import { CrossrefService } from '../services/CrossrefService';
+import { PdfMetadataService } from '../services/PdfMetadataService'; // Session 10.5
 
 // Controllers
 import { ReferenceController } from '../controllers/ReferenceController';
@@ -40,6 +41,7 @@ export function configureContainer() {
   container.bind<IProjectService>(TYPES.IProjectService).to(ProjectService).inSingletonScope();
   container.bind<IDuplicateService>(TYPES.IDuplicateService).to(DuplicateService).inSingletonScope();
   container.bind<CrossrefService>(TYPES.ICrossrefService).to(CrossrefService).inSingletonScope();
+  container.bind<PdfMetadataService>(TYPES.IPdfMetadataService).to(PdfMetadataService).inSingletonScope(); // Session 10.5
 
   // Bind controllers (transient scope - new instance per request)
   container.bind<ReferenceController>(TYPES.ReferenceController).to(ReferenceController);

@@ -48,11 +48,21 @@ vi.mock('@/store/ui.store', () => ({
   })),
 }));
 
-// Mock icons
+// Mock icons - all icons used by ReferenceTable and its dependencies
 vi.mock('@heroicons/react/24/outline', () => ({
   PaperClipIcon: () => <span data-testid="paperclip-icon">📎</span>,
   ChevronUpIcon: () => <span data-testid="chevron-up">↑</span>,
   ChevronDownIcon: () => <span data-testid="chevron-down">↓</span>,
+  FolderPlusIcon: () => <span data-testid="folder-plus-icon">📁</span>,
+  TagIcon: () => <span data-testid="tag-icon">🏷️</span>,
+  TrashIcon: () => <span data-testid="trash-icon">🗑️</span>,
+  // CollectionPickerModal icons
+  MagnifyingGlassIcon: () => <span data-testid="search-icon">🔍</span>,
+  FolderIcon: () => <span data-testid="folder-icon">📁</span>,
+  // ContextMenu and other icons
+  PencilIcon: () => <span data-testid="pencil-icon">✏️</span>,
+  XMarkIcon: () => <span data-testid="x-mark-icon">✕</span>,
+  PlusIcon: () => <span data-testid="plus-icon">+</span>,
 }));
 
 // Mock Tag component

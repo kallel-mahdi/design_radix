@@ -118,7 +118,7 @@ export function formDataToUpdateInput(data: Partial<ReferenceFormData>) {
       const hasFull = author.full && author.full.trim().length > 0;
       return hasGiven || hasFamily || hasFull;
     });
-    filtered.authors = validAuthors;
+    filtered['authors'] = validAuthors;
   }
 
   return {

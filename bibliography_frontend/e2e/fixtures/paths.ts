@@ -59,6 +59,26 @@ export const FIXTURE_PATHS = {
      * Use for: Performance testing, edge cases
      */
     large: path.join(__dirname, 'pdfs/large-paper.pdf'),
+
+    /**
+     * PDF with embedded DOI (9.4KB)
+     * DOI: 10.1371/journal.pntd.0003350
+     * Use for: Crossref enrichment tests (Session 10.5)
+     */
+    withDoiZotero: path.join(__dirname, 'pdfs/with-doi-zotero.pdf'),
+
+    /**
+     * PDF without DOI - descriptive filename (22KB)
+     * Filename: smith-2023-machine-learning.pdf
+     * Use for: Filename fallback tests (Session 10.5)
+     */
+    noDoiDescriptive: path.join(__dirname, 'pdfs/smith-2023-machine-learning.pdf'),
+
+    /**
+     * Corrupt/invalid PDF (500 bytes)
+     * Use for: Error handling tests
+     */
+    corrupt: path.join(__dirname, 'pdfs/corrupt.pdf'),
   },
 
   /**

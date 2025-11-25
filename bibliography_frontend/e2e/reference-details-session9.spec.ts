@@ -23,7 +23,20 @@ test.describe('Reference Details - Session 9', () => {
   test.beforeEach(async ({ page, workerUserId }) => {
     testId = `test-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    // Cleanup BEFORE test (worker-scoped)
+    // 1. Inject worker-scoped user ID into all API calls FIRST
+    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+      const headers = {
+        ...route.request().headers(),
+        'x-user-id': workerUserId,
+      };
+      await route.continue({ headers });
+    });
+
+    // 2. Navigate to library page
+    await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Cleanup AFTER route intercept is set up (worker-scoped)
     const cleanupResponse = await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
       {
@@ -34,18 +47,6 @@ test.describe('Reference Details - Session 9', () => {
     );
     expect(cleanupResponse.ok()).toBeTruthy();
 
-    // Inject worker-scoped user ID into all API calls
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // Navigate to library page
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('Library')).toBeVisible();
 
     // Create test collections

@@ -3,7 +3,7 @@ import { apiClient } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { referenceKeys, type ReferencesQueryParams } from './references.queries';
 import type { Reference } from '@/common/types';
-import { ReferenceSchema, ImportDoiInput } from '@bibliography/shared';
+import { ReferenceSchema, type ImportDoi } from '@bibliography/shared';
 
 function matchesReferenceFilters(reference: Reference, filters?: ReferencesQueryParams) {
   if (!filters) {
@@ -74,9 +74,9 @@ export function useImportFromDoiMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: ImportDoiInput): Promise<Reference> => {
+    mutationFn: async (input: ImportDoi): Promise<Reference> => {
       const response = await apiClient.post<Reference>('/references/import-doi', input);
-      return ReferenceSchema.parse(response.data);
+      return ReferenceSchema.parse(response);
     },
     onSuccess: (reference) => {
       const listQueries = queryClient.getQueryCache().findAll({ queryKey: referenceKeys.lists() });

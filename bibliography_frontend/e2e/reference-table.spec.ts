@@ -11,6 +11,17 @@
  */
 
 import { test, expect } from './fixtures/workerFixtures';
+import { Page } from '@playwright/test';
+
+/**
+ * Wait for HeadlessUI dialog to properly close after transition.
+ * HeadlessUI dialogs have a ~200ms close transition that can intercept pointer events.
+ */
+async function waitForDialogClose(page: Page): Promise<void> {
+  await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
+  // Extra buffer for HeadlessUI portal cleanup
+  await page.waitForTimeout(250);
+}
 
 test.describe('ReferenceTable Interactions', () => {
   let testId: string;
@@ -63,12 +74,10 @@ test.describe('ReferenceTable Interactions', () => {
       await page.getByTestId('author-0-family-input').fill(ref.author);
       await page.getByTestId('reference-year-input').fill(ref.year);
 
-      // Submit and wait
+      // Submit and wait for modal to close
       await page.getByTestId('reference-submit-button').click();
+      await waitForDialogClose(page);
       await page.waitForLoadState('networkidle');
-
-      // Wait for modal to close
-      await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 5000 });
 
       // CRITICAL: Wait for success toast to confirm creation completed
       // Use .first() because previous toasts might still be visible when creating multiple references

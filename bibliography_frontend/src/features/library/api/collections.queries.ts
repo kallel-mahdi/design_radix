@@ -17,7 +17,7 @@ export function useCollectionsQuery() {
     queryKey: collectionKeys.list(),
     queryFn: async (): Promise<Collection[]> => {
       const response = await apiClient.get<Collection[]>('/collections');
-      const parsed = CollectionListSchema.parse(response.data);
+      const parsed = CollectionListSchema.parse(response);
       // Filter out deleted collections - they should only appear in trash view
       return parsed.filter(collection => !collection.deleted);
     },

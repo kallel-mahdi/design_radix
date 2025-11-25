@@ -28,7 +28,7 @@ describe('Error Envelope Structure', () => {
     expect(response.body).toMatchObject({
       success: false,
       message: expect.any(String),
-      code: 'VALIDATION_ERROR',
+      error: 'VALIDATION_ERROR',
     });
     expect(response.body).toHaveProperty('details');
   });
@@ -40,11 +40,11 @@ describe('Error Envelope Structure', () => {
       .expect(404);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('NOT_FOUND');
+    expect(response.body.error).toBe('NOT_FOUND');
     expect(response.body).toHaveProperty('message');
   });
 
-  // TODO: Add test for DUPLICATE_KEY code once update method implements duplicate key handling
+  // TODO: Add test for DUPLICATE_KEY error once update method implements duplicate key handling
   // Currently the update method doesn't catch MongoDB unique index violations
   it.skip('should return DUPLICATE_KEY code for citation key conflicts', async () => {
     // Test skipped - duplicate key handling not fully implemented in update method
@@ -57,7 +57,7 @@ describe('Error Envelope Structure', () => {
       .expect(400);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
     expect(response.body.message).toContain('Invalid');
   });
 
@@ -68,7 +68,7 @@ describe('Error Envelope Structure', () => {
       .expect(400);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
   });
 
   it('should return validation error for invalid enum values', async () => {
@@ -79,7 +79,7 @@ describe('Error Envelope Structure', () => {
       .expect(400);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
   });
 
   it('should include error details array for validation errors', async () => {
@@ -93,7 +93,7 @@ describe('Error Envelope Structure', () => {
       .expect(400);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
     expect(Array.isArray(response.body.details)).toBe(true);
     expect(response.body.details.length).toBeGreaterThan(0);
     expect(response.body.details[0]).toHaveProperty('field');

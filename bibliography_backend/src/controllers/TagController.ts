@@ -3,6 +3,9 @@ import { injectable, inject } from 'inversify';
 import { ITagService } from '../interfaces/ITagService';
 import { TYPES } from '../config/types';
 import { DocumentNotFoundError, ConflictError } from '../middleware/errorHandler';
+import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
+import { ApplicationLogger } from '../utils/logger';
+import { Tag } from '../models/Tag';
 
 @injectable()
 export class TagController {
@@ -12,7 +15,7 @@ export class TagController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const data = req.body;
 
       const tag = await this.tagService.create(userId, data);
@@ -29,7 +32,7 @@ export class TagController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const tags = await this.tagService.list(userId);
 
       res.status(200).json({
@@ -43,7 +46,7 @@ export class TagController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
       const data = req.body;
 
@@ -65,7 +68,7 @@ export class TagController {
 
   async rename(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { oldName } = req.params;
       const { newName } = req.body;
 
@@ -92,7 +95,7 @@ export class TagController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.tagService.delete(id, userId);
@@ -109,7 +112,7 @@ export class TagController {
 
   async updateColor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { name } = req.params;
       const { color, position } = req.body;
 
@@ -123,6 +126,30 @@ export class TagController {
         success: true,
         message: 'Tag color updated successfully',
         data: tag
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Test cleanup endpoint - Deletes all tags for a user
+   * FOR E2E TESTING ONLY - not available in production
+   */
+  async testCleanup(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+
+      ApplicationLogger.info('Test cleanup: Deleting all tags', { userId });
+
+      const result = await Tag.deleteMany({ userId });
+
+      ApplicationLogger.info('Test cleanup complete', { userId, deletedCount: result.deletedCount });
+
+      res.status(200).json({
+        success: true,
+        message: 'Tags deleted successfully',
+        deletedCount: result.deletedCount
       });
     } catch (error) {
       next(error);

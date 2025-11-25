@@ -294,9 +294,10 @@ describe('TagService Unit Tests', () => {
       // Create 10th tag without color
       await service.create('user-123', { name: 'tag10' });
 
-      // Try to color the 10th tag
+      // Try to color the 10th tag with null position (let service auto-assign)
+      // This triggers MAX_COLORED_TAGS because all 9 positions are taken
       await expect(
-        service.updateColor('tag10', 'user-123', '#FF0000', 10)
+        service.updateColor('tag10', 'user-123', '#FF0000', null)
       ).rejects.toThrow('MAX_COLORED_TAGS');
     });
 

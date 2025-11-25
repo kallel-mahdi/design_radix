@@ -56,12 +56,11 @@ describe('ProjectService Unit Tests', () => {
       expect(link2.projectId).toBe('proj-2');
     });
 
-    it('should handle linking with non-existent reference id', async () => {
-      // Should not throw - just create the link
-      const link = await service.linkReference('user-123', 'proj-1', '507f1f77bcf86cd799439011');
-
-      expect(link).toBeDefined();
-      expect(link.referenceId?.toString()).toBe('507f1f77bcf86cd799439011');
+    it('should throw error when linking non-existent reference', async () => {
+      // Service validates reference exists before creating link
+      await expect(
+        service.linkReference('user-123', 'proj-1', '507f1f77bcf86cd799439011')
+      ).rejects.toThrow('Reference not found');
     });
   });
 
@@ -146,11 +145,11 @@ describe('ProjectService Unit Tests', () => {
       expect(link2.projectId).toBe('proj-2');
     });
 
-    it('should handle linking with non-existent collection id', async () => {
-      const link = await service.linkCollection('user-123', 'proj-1', '507f1f77bcf86cd799439011');
-
-      expect(link).toBeDefined();
-      expect(link.collectionId?.toString()).toBe('507f1f77bcf86cd799439011');
+    it('should throw error when linking non-existent collection', async () => {
+      // Service validates collection exists before creating link
+      await expect(
+        service.linkCollection('user-123', 'proj-1', '507f1f77bcf86cd799439011')
+      ).rejects.toThrow('Collection not found');
     });
   });
 
@@ -323,7 +322,7 @@ describe('ProjectService Unit Tests', () => {
       expect(projectLinks).toEqual([]);
     });
 
-    it('should only return projects for that user', async () => {
+    it('should throw when user queries reference they do not own', async () => {
       const reference = await refService.create('user-123', {
         type: 'article',
         title: 'Test Paper',
@@ -332,9 +331,10 @@ describe('ProjectService Unit Tests', () => {
 
       await service.linkReference('user-123', 'proj-1', reference._id.toString());
 
-      const projectLinks = await service.getReferenceProjects('user-456', reference._id.toString());
-
-      expect(projectLinks).toEqual([]);
+      // user-456 doesn't own this reference, service validates ownership
+      await expect(
+        service.getReferenceProjects('user-456', reference._id.toString())
+      ).rejects.toThrow('Reference not found');
     });
   });
 
@@ -360,14 +360,15 @@ describe('ProjectService Unit Tests', () => {
       expect(projectLinks).toEqual([]);
     });
 
-    it('should only return projects for that user', async () => {
+    it('should throw when user queries collection they do not own', async () => {
       const collection = await colService.create('user-123', { name: 'Test Collection' });
 
       await service.linkCollection('user-123', 'proj-1', collection._id.toString());
 
-      const projectLinks = await service.getCollectionProjects('user-456', collection._id.toString());
-
-      expect(projectLinks).toEqual([]);
+      // user-456 doesn't own this collection, service validates ownership
+      await expect(
+        service.getCollectionProjects('user-456', collection._id.toString())
+      ).rejects.toThrow('Collection not found');
     });
   });
 });

@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { mockReferences, mockCollections, mockTags } from '../fixtures/mockData';
+import type { Author } from '@/common/types';
 
 /**
  * MSW Handlers - Intercept API calls during tests
@@ -8,6 +9,19 @@ import { mockReferences, mockCollections, mockTags } from '../fixtures/mockData'
 
 // In tests, API client calls backend directly (no Vite proxy)
 const API_BASE_URL = 'http://localhost:8005/api/bibliography';
+
+// Request body types for type-safe handlers
+interface CreateReferenceBody {
+  authors?: Author[];
+  tags?: string[];
+  collectionIds?: string[];
+  [key: string]: unknown;
+}
+
+interface TagColorUpdateBody {
+  color: string | null;
+  position: number | null;
+}
 
 export const handlers = [
   // References Endpoints
@@ -42,15 +56,15 @@ export const handlers = [
   }),
 
   http.post(`${API_BASE_URL}/references`, async ({ request }) => {
-    const data = await request.json();
+    const data = await request.json() as CreateReferenceBody;
     const newRef = {
       _id: `ref-${Date.now()}`,
       userId: 'test-user-123',
       ...data,
       citationKey: `key-${Date.now()}`,
-      authors: data.authors || [],
-      tags: data.tags || [],
-      collectionIds: data.collectionIds || [],
+      authors: data.authors ?? [],
+      tags: data.tags ?? [],
+      collectionIds: data.collectionIds ?? [],
       hasPdf: false,
       deleted: false,
       createdAt: new Date().toISOString(),
@@ -60,7 +74,7 @@ export const handlers = [
   }),
 
   http.get(`${API_BASE_URL}/references/:id`, ({ params }) => {
-    const ref = mockReferences.find((r) => r._id === params.id);
+    const ref = mockReferences.find((r) => r._id === params['id']);
     if (!ref) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -68,17 +82,17 @@ export const handlers = [
   }),
 
   http.patch(`${API_BASE_URL}/references/:id`, async ({ params, request }) => {
-    const ref = mockReferences.find((r) => r._id === params.id);
+    const ref = mockReferences.find((r) => r._id === params['id']);
     if (!ref) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
-    const updates = await request.json();
+    const updates = await request.json() as Record<string, unknown>;
     const updated = { ...ref, ...updates, updatedAt: new Date().toISOString() };
     return HttpResponse.json({ success: true, data: updated });
   }),
 
   http.delete(`${API_BASE_URL}/references/:id`, ({ params }) => {
-    const ref = mockReferences.find((r) => r._id === params.id);
+    const ref = mockReferences.find((r) => r._id === params['id']);
     if (!ref) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -88,7 +102,7 @@ export const handlers = [
   }),
 
   http.patch(`${API_BASE_URL}/references/:id/restore`, ({ params }) => {
-    const ref = mockReferences.find((r) => r._id === params.id);
+    const ref = mockReferences.find((r) => r._id === params['id']);
     if (!ref) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -104,7 +118,7 @@ export const handlers = [
   }),
 
   http.post(`${API_BASE_URL}/collections`, async ({ request }) => {
-    const data = await request.json();
+    const data = await request.json() as Record<string, unknown>;
     const newCollection = {
       _id: `col-${Date.now()}`,
       userId: 'test-user-123',
@@ -117,7 +131,7 @@ export const handlers = [
   }),
 
   http.get(`${API_BASE_URL}/collections/:id`, ({ params }) => {
-    const col = mockCollections.find((c) => c._id === params.id);
+    const col = mockCollections.find((c) => c._id === params['id']);
     if (!col) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -125,17 +139,17 @@ export const handlers = [
   }),
 
   http.patch(`${API_BASE_URL}/collections/:id`, async ({ params, request }) => {
-    const col = mockCollections.find((c) => c._id === params.id);
+    const col = mockCollections.find((c) => c._id === params['id']);
     if (!col) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
-    const updates = await request.json();
+    const updates = await request.json() as Record<string, unknown>;
     const updated = { ...col, ...updates, updatedAt: new Date().toISOString() };
     return HttpResponse.json({ success: true, data: updated });
   }),
 
   http.delete(`${API_BASE_URL}/collections/:id`, ({ params }) => {
-    const col = mockCollections.find((c) => c._id === params.id);
+    const col = mockCollections.find((c) => c._id === params['id']);
     if (!col) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -145,7 +159,7 @@ export const handlers = [
   }),
 
   http.patch(`${API_BASE_URL}/collections/:id/restore`, ({ params }) => {
-    const col = mockCollections.find((c) => c._id === params.id);
+    const col = mockCollections.find((c) => c._id === params['id']);
     if (!col) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -156,20 +170,19 @@ export const handlers = [
 
   // Tags Endpoints
   http.get(`${API_BASE_URL}/tags`, () => {
-    const nonDeleted = mockTags.filter((t) => !t.deleted);
-    // Sort by usageCount descending
-    const sorted = [...nonDeleted].sort((a, b) => b.usageCount - a.usageCount);
+    // Tags don't have soft-delete, return all
+    const sorted = [...mockTags].sort((a, b) => b.usageCount - a.usageCount);
     return HttpResponse.json({ success: true, data: sorted });
   }),
 
   http.post(`${API_BASE_URL}/tags`, async ({ request }) => {
-    const data = await request.json();
+    const data = await request.json() as Record<string, unknown>;
     const newTag = {
       _id: `tag-${Date.now()}`,
       userId: 'test-user-123',
-      ...data,
-      color: data.color || null,
-      position: data.position || null,
+      name: data['name'] as string,
+      color: (data['color'] as string | null) ?? null,
+      position: (data['position'] as number | null) ?? null,
       automatic: false,
       usageCount: 0,
       createdAt: new Date().toISOString(),
@@ -179,7 +192,7 @@ export const handlers = [
   }),
 
   http.get(`${API_BASE_URL}/tags/:id`, ({ params }) => {
-    const tag = mockTags.find((t) => t._id === params.id);
+    const tag = mockTags.find((t) => t._id === params['id']);
     if (!tag) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
@@ -187,33 +200,33 @@ export const handlers = [
   }),
 
   http.patch(`${API_BASE_URL}/tags/:id`, async ({ params, request }) => {
-    const tag = mockTags.find((t) => t._id === params.id);
+    const tag = mockTags.find((t) => t._id === params['id']);
     if (!tag) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
-    const updates = await request.json();
+    const updates = await request.json() as Record<string, unknown>;
     const updated = { ...tag, ...updates, updatedAt: new Date().toISOString() };
     return HttpResponse.json({ success: true, data: updated });
   }),
 
   http.patch(`${API_BASE_URL}/tags/:name/color`, async ({ params, request }) => {
-    const tag = mockTags.find((t) => t.name === params.name);
+    const tag = mockTags.find((t) => t.name === params['name']);
     if (!tag) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
-    const { color, position } = await request.json();
-    tag.color = color;
-    tag.position = position;
+    const body = await request.json() as TagColorUpdateBody;
+    tag.color = body.color;
+    tag.position = body.position;
     return HttpResponse.json({ success: true, data: tag });
   }),
 
   http.delete(`${API_BASE_URL}/tags/:id`, ({ params }) => {
-    const tag = mockTags.find((t) => t._id === params.id);
-    if (!tag) {
+    const tagIndex = mockTags.findIndex((t) => t._id === params['id']);
+    if (tagIndex === -1) {
       return HttpResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
-    tag.deleted = true;
-    tag.deletedAt = new Date().toISOString();
+    // Tags use hard delete, not soft delete
+    mockTags.splice(tagIndex, 1);
     return HttpResponse.json({ success: true }, { status: 204 });
   }),
 ];

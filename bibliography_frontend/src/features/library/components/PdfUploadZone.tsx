@@ -167,6 +167,7 @@ export const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
           onChange={handleFileChange}
           className="hidden"
           disabled={disabled}
+          data-testid="pdf-file-input-replace"
         />
       </div>
     );
@@ -177,6 +178,7 @@ export const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
     <div className="space-y-2">
       <label className="block text-sm font-medium text-app-text-secondary">PDF Attachment</label>
       <div
+        data-testid="pdf-upload-zone"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -210,6 +212,7 @@ export const PdfUploadZone: React.FC<PdfUploadZoneProps> = ({
           onChange={handleFileChange}
           className="hidden"
           disabled={disabled}
+          data-testid="pdf-file-input"
         />
       </div>
 

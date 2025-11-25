@@ -3,6 +3,7 @@ import { injectable, inject } from 'inversify';
 import { ICollectionService } from '../interfaces/ICollectionService';
 import { TYPES } from '../config/types';
 import { DocumentNotFoundError } from '../middleware/errorHandler';
+import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
 
 @injectable()
 export class CollectionController {
@@ -12,7 +13,7 @@ export class CollectionController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const data = req.body;
 
       const collection = await this.collectionService.create(userId, data);
@@ -29,7 +30,7 @@ export class CollectionController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const collections = await this.collectionService.list(userId);
 
       res.status(200).json({
@@ -44,7 +45,7 @@ export class CollectionController {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const collection = await this.collectionService.getById(id, userId);
@@ -65,7 +66,7 @@ export class CollectionController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
       const data = req.body;
 
@@ -87,7 +88,7 @@ export class CollectionController {
 
   async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const collection = await this.collectionService.restore(id, userId);
@@ -108,7 +109,7 @@ export class CollectionController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
       const { id } = req.params;
 
       const success = await this.collectionService.delete(id, userId);

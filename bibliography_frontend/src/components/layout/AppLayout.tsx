@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 import { ActivityBar } from './ActivityBar';
 import { DetailsPane } from './DetailsPane';
@@ -9,9 +10,12 @@ import { usePanelPersistence } from '@/common/hooks/usePanelPersistence';
 import { useReferencesQuery } from '@/features/library/api/references.queries';
 import { useCollectionsQuery } from '@/features/library/api/collections.queries';
 import { useTagsQuery } from '@/features/library/api/tags.queries';
+import { useCreateCollectionMutation } from '@/features/library/api/collections.mutations';
 import { TreeView } from '@/features/library/components/TreeView';
 import { TagSelector } from '@/features/library/components/TagSelector';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { PromptDialog } from '@/components/ui/PromptDialog';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -57,6 +61,10 @@ export const AppLayout: React.FC = () => {
   // Fetch tags for sidebar
   const { data: tags = [], isLoading: tagsLoading } = useTagsQuery();
 
+  // New Collection dialog state
+  const [newCollectionDialogOpen, setNewCollectionDialogOpen] = useState(false);
+  const createCollectionMutation = useCreateCollectionMutation();
+
   // Panel persistence: Sidebar | Main | Details (when open)
   const { defaultLayout, onLayout } = usePanelPersistence(
     'app-layout-panels',
@@ -88,8 +96,15 @@ export const AppLayout: React.FC = () => {
             </div>
 
             {/* Collections */}
-            <div className="p-4 border-b border-app-border">
+            <div className="p-4 border-b border-app-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-app-text-primary">Collections</h2>
+              <button
+                onClick={() => setNewCollectionDialogOpen(true)}
+                className="p-1 rounded text-app-text-secondary hover:text-app-text-primary hover:bg-app-surface-hover transition-colors"
+                aria-label="New Collection"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex-1 overflow-auto">
               {collectionsLoading ? (
@@ -144,6 +159,21 @@ export const AppLayout: React.FC = () => {
           </>
         )}
       </ResizablePanelGroup>
+
+      {/* New Collection Dialog */}
+      <PromptDialog
+        isOpen={newCollectionDialogOpen}
+        onClose={() => setNewCollectionDialogOpen(false)}
+        onConfirm={(name) => {
+          createCollectionMutation.mutate({ name, parentId: undefined });
+          setNewCollectionDialogOpen(false);
+        }}
+        title="New Collection"
+        description="Create a new top-level collection"
+        placeholder="Collection name"
+        confirmLabel="Create"
+        isLoading={createCollectionMutation.isPending}
+      />
     </div>
   );
 };

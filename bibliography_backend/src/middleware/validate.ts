@@ -21,7 +21,7 @@ export const validate = <T extends z.ZodTypeAny>(schema: T) => {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          code: 'VALIDATION_ERROR',
+          error: 'VALIDATION_ERROR',
           details,
         });
       }
@@ -50,7 +50,7 @@ export const validateParams = <T extends z.ZodTypeAny>(schema: T) => {
         return res.status(400).json({
           success: false,
           message: 'Invalid path parameters',
-          code: 'VALIDATION_ERROR',
+          error: 'VALIDATION_ERROR',
           details,
         });
       }
@@ -79,7 +79,7 @@ export const validateQuery = <T extends z.ZodTypeAny>(schema: T) => {
         return res.status(400).json({
           success: false,
           message: 'Invalid query parameters',
-          code: 'VALIDATION_ERROR',
+          error: 'VALIDATION_ERROR',
           details,
         });
       }
@@ -107,7 +107,7 @@ export const validateHeaders = <T extends z.ZodTypeAny>(schema: T) => {
         return res.status(401).json({
           success: false,
           message: 'Missing or invalid headers',
-          code: 'UNAUTHORIZED',
+          error: 'UNAUTHORIZED',
           details,
         });
       }

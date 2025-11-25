@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { useLibraryStore } from '@/features/library/store/library.store';
 import { useUpdateReferenceMutation } from '@/features/library/api/references.mutations';
 import { PdfTab } from '@/features/library/components/PdfTab';
+import { TagPicker } from '@/features/library/components/TagPicker';
 import { format } from 'date-fns';
 
 interface DetailsPaneProps {
@@ -47,7 +48,7 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
     queryKey: ['references', 'detail', referenceId],
     queryFn: async (): Promise<Reference> => {
       const response = await apiClient.get<Reference>(`/references/${referenceId}`);
-      return ReferenceSchema.parse(response.data); // Use response.data to unwrap API envelope
+      return ReferenceSchema.parse(response); // API client now returns unwrapped data
     },
     enabled: !!referenceId,
   });
@@ -66,6 +67,17 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
     updateReference({
       id: reference._id,
       data: { tags: updatedTags }
+    });
+  };
+
+  // Handler: Add tag
+  const handleAddTag = (tagName: string) => {
+    if (!reference) return;
+    const currentTags = reference.tags || [];
+    if (currentTags.includes(tagName)) return;
+    updateReference({
+      id: reference._id,
+      data: { tags: [...currentTags, tagName] }
     });
   };
 
@@ -192,11 +204,11 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
                   </div>
                 )}
 
-                {/* Tags Section - Enhanced with remove buttons */}
+                {/* Tags Section - Enhanced with remove buttons and Add Tag */}
                 <div>
                   <p className="text-sm font-medium text-app-text-muted mb-2">Tags</p>
                   {reference.tags && reference.tags.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-2">
                       {reference.tags.map((tag) => (
                         <Tag
                           key={tag}
@@ -207,8 +219,12 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-app-text-muted italic">No tags</p>
+                    <p className="text-sm text-app-text-muted italic mb-2">No tags</p>
                   )}
+                  <TagPicker
+                    assignedTags={reference.tags || []}
+                    onAddTag={handleAddTag}
+                  />
                 </div>
 
                 {/* Collections Section - NEW with clickable filter links */}

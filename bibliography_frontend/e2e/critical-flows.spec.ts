@@ -15,7 +15,20 @@ import { test, expect } from './fixtures/workerFixtures';
 
 test.describe('Critical User Flows', () => {
   test.beforeEach(async ({ page, workerUserId }) => {
-    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
+    // 1. Intercept all API calls FIRST to inject worker-scoped user ID
+    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+      const headers = {
+        ...route.request().headers(),
+        'x-user-id': workerUserId,
+      };
+      await route.continue({ headers });
+    });
+
+    // 2. Navigate to library page
+    await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Cleanup AFTER route intercept is set up (worker-scoped cleanup)
     const cleanupResponse = await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
       {
@@ -26,19 +39,8 @@ test.describe('Critical User Flows', () => {
     );
     expect(cleanupResponse.ok()).toBeTruthy();
 
-    // Intercept all API calls to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // Navigate to library page
-    await page.goto('http://localhost:5173/library');
-
-    // Wait for the page to load
+    // 4. Reload to show empty state
+    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
@@ -73,6 +75,8 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText('2024')).toBeVisible();
   });
 
+  // TODO: Collection context menu (rename, delete, restore) not fully implemented
+  // Skip until collection management UI is complete
   test.skip('Collection Management: Create → Rename → Organize → Delete → Restore', async ({ page }) => {
     // Step 1: Create new collection
     await page.getByRole('button', { name: /New Collection/i }).click();
@@ -121,12 +125,13 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText('Research Papers 2024')).toBeVisible();
   });
 
+  // TODO: Tag context menu for color assignment not implemented
+  // Skip until tag management UI is complete
   test.skip('Tag Management: Create → Assign Color → Filter by Multiple Tags', async ({ page }) => {
     // Assume we have a reference visible
     await expect(page.getByRole('article').first()).toBeVisible();
 
-    // Step 1: Create a new tag by typing in tag selector
-    await page.getByRole('button', { name: /Tags/i }).click();
+    // Step 1: Create a new tag (TagSelector is always visible)
     await page.getByPlaceholder(/Search tags/i).fill('machine-learning');
     await page.keyboard.press('Enter');
 
@@ -137,9 +142,9 @@ test.describe('Critical User Flows', () => {
     await page.getByText('machine-learning').click({ button: 'right' });
     await page.getByRole('menuitem', { name: /Assign Color/i }).click();
 
-    // Select color #1 (red)
-    await page.locator('button[aria-label*="Select color"]').first().click();
-    await page.getByRole('button', { name: /Apply|Confirm/i }).click();
+    // Select color (first color swatch)
+    await page.locator('[data-testid="color-swatch"]').first().click();
+    await page.getByRole('button', { name: /Set Color/i }).click();
 
     // Verify tag has color indicator
     await expect(page.locator('[data-testid="tag-color-indicator"]')).toBeVisible();
@@ -165,6 +170,8 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText(/Active Filters/i)).not.toBeVisible();
   });
 
+  // TODO: Bulk operations UI not yet implemented (multi-select, bulk tag, bulk delete)
+  // Re-enable once bulk operations features are added
   test.skip('Bulk Operations: Select Multiple → Tag → Delete → Restore', async ({ page }) => {
     // Wait for references to load
     await page.waitForSelector('[data-testid="reference-card"]', { timeout: 5000 });
@@ -208,6 +215,7 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText('important')).toBeVisible();
   });
 
+  // TODO: Sort menu and filter persistence not fully implemented
   test.skip('Search and Sort: Combine Filters → Sort by Author → Persist Preferences', async ({ page }) => {
     // Step 1: Apply collection filter
     await page.getByText('ML Papers').click();
@@ -239,6 +247,7 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText(/ML Papers/i)).not.toBeVisible();
   });
 
+  // TODO: Error boundary retry UI not implemented
   test.skip('Error Recovery: API Failure → Retry → Success', async ({ page }) => {
     // This test requires mocking network failures
     // For now, we'll test the UI response to errors
@@ -268,6 +277,7 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByRole('article').first()).toBeVisible();
   });
 
+  // TODO: BibTeX import and duplicate resolution UI not implemented
   test.skip('Duplicate Detection: Import → Detect → Resolve', async ({ page }) => {
     // Step 1: Import a reference (via BibTeX or manual)
     await page.getByRole('button', { name: /Import/i }).click();
@@ -309,6 +319,7 @@ test.describe('Critical User Flows', () => {
     await expect(page.getByText(/Merged successfully/i)).toBeVisible();
   });
 
+  // TODO: Test expects reference-card but UI uses table rows with details pane (not modal)
   test.skip('Reference Details Modal: View → Edit → Save → Verify', async ({ page }) => {
     // Click on first reference
     await page.locator('[data-testid="reference-card"]').first().click();

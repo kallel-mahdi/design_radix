@@ -203,13 +203,14 @@ describe('Tags API Integration Tests', () => {
         .post('/api/bibliography/tags')
         .send({ name: 'tag10' });
 
+      // Don't provide position - let service try to auto-assign and fail with MAX_COLORED_TAGS
       const response = await request(app)
         .patch('/api/bibliography/tags/tag10/color')
-        .send({ color: '#FF0000', position: 10 })
+        .send({ color: '#FF0000' })
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('MAX_COLORED_TAGS');
+      expect(response.body.error).toBe('MAX_COLORED_TAGS');
     });
 
     it('should enforce position between 1 and 9', async () => {

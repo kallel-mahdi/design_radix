@@ -17,7 +17,7 @@ export function useTagsQuery() {
     queryKey: tagKeys.list(),
     queryFn: async (): Promise<Tag[]> => {
       const response = await apiClient.get<Tag[]>('/tags');
-      return TagListSchema.parse(response.data);
+      return TagListSchema.parse(response);
     },
     staleTime: QUERY_STALE_TIME_MS
   });

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { tagKeys } from './tags.queries';
+import { referenceKeys } from './references.queries';
 import type { Tag, CreateTagInput, UpdateTagInput } from '@/common/types';
 import { TagSchema } from '@bibliography/shared';
 
@@ -11,7 +12,7 @@ export function useCreateTagMutation() {
   return useMutation({
     mutationFn: async (data: CreateTagInput): Promise<Tag> => {
       const response = await apiClient.post<Tag>('/tags', data);
-      return TagSchema.parse(response.data);
+      return TagSchema.parse(response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -37,7 +38,7 @@ export function useUpdateTagMutation() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateTagInput }): Promise<Tag> => {
       const response = await apiClient.patch<Tag>(`/tags/${id}`, data);
-      return TagSchema.parse(response.data);
+      return TagSchema.parse(response);
     },
     onSuccess: (updatedTag) => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -75,7 +76,7 @@ export function useSetTagColorMutation() {
         color,
         position,
       });
-      return TagSchema.parse(response.data);
+      return TagSchema.parse(response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -101,10 +102,12 @@ export function useRenameTagMutation() {
       const response = await apiClient.patch<Tag>(`/tags/${oldName}/rename`, {
         newName,
       });
-      return TagSchema.parse(response.data);
+      return TagSchema.parse(response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
+      // Also invalidate references since backend renames tag in all references
+      queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
       useUIStore.getState().addToast({
         message: 'Tag renamed successfully',
         type: 'success',
@@ -135,6 +138,8 @@ export function useDeleteTagMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
+      // Also invalidate references since backend removes this tag from all references
+      queryClient.invalidateQueries({ queryKey: referenceKeys.lists() });
       useUIStore.getState().addToast({
         message: 'Tag deleted successfully',
         type: 'success',

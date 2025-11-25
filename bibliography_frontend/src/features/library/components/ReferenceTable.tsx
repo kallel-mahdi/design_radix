@@ -35,10 +35,14 @@ import { useLibraryStore } from '../store/library.store';
 import { useUIStore } from '@/store/ui.store';
 import type { Reference } from '@/common/types';
 import { Tag } from '@/components/ui/Tag';
+import { ContextMenu } from '@/components/ui/ContextMenu';
+import { CollectionPickerModal } from './CollectionPickerModal';
+import { useAddReferenceToCollectionMutation } from '../api/references.mutations';
 import {
   PaperClipIcon,
   ChevronUpIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  FolderPlusIcon,
 } from '@heroicons/react/24/outline';
 
 interface ReferenceTableProps {
@@ -94,6 +98,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
   const selectAll = useLibraryStore((state) => state.selectAll);
   const clearSelection = useLibraryStore((state) => state.clearSelection);
   const setActiveReference = useLibraryStore((state) => state.setActiveReference);
+  const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
   const setEditReference = useLibraryStore((state) => state.setEditReference);
   const sortBy = useLibraryStore((state) => state.sortBy);
   const sortOrder = useLibraryStore((state) => state.sortOrder);
@@ -103,6 +108,20 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
   // Local state for shift-click range selection
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [focusedRowIndex, setFocusedRowIndex] = useState<number>(0);
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    position: { x: number; y: number };
+    referenceId: string | null;
+    reference: Reference | null;
+  }>({ isOpen: false, position: { x: 0, y: 0 }, referenceId: null, reference: null });
+
+  // Collection picker modal state
+  const [collectionPickerOpen, setCollectionPickerOpen] = useState(false);
+
+  // Mutations
+  const addToCollectionMutation = useAddReferenceToCollectionMutation();
 
   // Virtualization container ref
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -285,6 +304,10 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
     [references, selectedReferenceIds, selectReference, deselectReference, selectAll, clearSelection]
   );
 
+  // Valid sortable column IDs that match LibraryState['sortBy']
+  type SortableColumn = 'title' | 'year' | 'dateAdded' | 'authors';
+  const sortableColumns: SortableColumn[] = ['title', 'year', 'dateAdded', 'authors'];
+
   // TanStack Table instance
   const table = useReactTable({
     data: references,
@@ -297,7 +320,10 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
       const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
       if (newSorting.length > 0 && newSorting[0]) {
         const { id, desc } = newSorting[0];
-        setSorting(id as any, desc ? 'desc' : 'asc');
+        // Type guard: only update store for valid sortable columns
+        if (sortableColumns.includes(id as SortableColumn)) {
+          setSorting(id as SortableColumn, desc ? 'desc' : 'asc');
+        }
       }
     },
     getCoreRowModel: getCoreRowModel(),
@@ -390,9 +416,16 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
         const isOnlySelection = selectedReferenceIds.size === 1 && isCurrentlySelected;
 
         if (isOnlySelection) {
-          // Clicking the only selected item: deselect and clear active
-          clearSelection();
-          setActiveReference(null);
+          // Clicking the only selected item:
+          // - If details pane is open: deselect and close
+          // - If details pane is closed: reopen it
+          if (activeReferenceId === refId) {
+            clearSelection();
+            setActiveReference(null);
+          } else {
+            // Pane is closed but row is selected - reopen pane
+            setActiveReference(refId);
+          }
         } else {
           // Select only this item and show details
           clearSelection();
@@ -404,7 +437,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
 
       setFocusedRowIndex(index);
     },
-    [references, selectedReferenceIds, deselectReference, selectReference, clearSelection, setActiveReference, handleShiftClickRange]
+    [references, selectedReferenceIds, deselectReference, selectReference, clearSelection, setActiveReference, activeReferenceId, handleShiftClickRange]
   );
 
   /**
@@ -463,6 +496,68 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
       }
     },
     [rows, focusedRowIndex, selectedReferenceIds, setActiveReference, deselectReference, selectReference, selectAll]
+  );
+
+  /**
+   * Context menu handler for right-click on rows
+   */
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent, reference: Reference) => {
+      event.preventDefault();
+      setContextMenu({
+        isOpen: true,
+        position: { x: event.clientX, y: event.clientY },
+        referenceId: reference._id,
+        reference,
+      });
+    },
+    []
+  );
+
+  /**
+   * Close context menu
+   */
+  const closeContextMenu = useCallback(() => {
+    setContextMenu((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  /**
+   * Handle "Add to Collection" from context menu
+   */
+  const handleAddToCollection = useCallback(() => {
+    if (contextMenu.referenceId) {
+      setCollectionPickerOpen(true);
+    }
+    closeContextMenu();
+  }, [contextMenu.referenceId, closeContextMenu]);
+
+  /**
+   * Handle collection selection from picker modal
+   */
+  const handleCollectionSelect = useCallback(
+    (collectionId: string) => {
+      if (contextMenu.referenceId && contextMenu.reference) {
+        addToCollectionMutation.mutate({
+          referenceId: contextMenu.referenceId,
+          collectionId,
+          currentCollectionIds: contextMenu.reference.collectionIds || [],
+        });
+      }
+      setCollectionPickerOpen(false);
+    },
+    [contextMenu.referenceId, contextMenu.reference, addToCollectionMutation]
+  );
+
+  // Context menu items
+  const contextMenuItems = useMemo(
+    () => [
+      {
+        label: 'Add to Collection',
+        icon: <FolderPlusIcon className="w-4 h-4" />,
+        onClick: handleAddToCollection,
+      },
+    ],
+    [handleAddToCollection]
   );
 
   // Empty state
@@ -534,6 +629,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
             return (
               <tr
                 key={row.id}
+                data-testid="reference-card"
                 data-index={virtualRow.index}
                 style={{
                   position: 'absolute',
@@ -550,6 +646,7 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
                 } ${isFocused ? 'ring-2 ring-app-accent ring-inset' : ''}`}
                 onClick={(e) => handleRowClick(virtualRow.index, e, rows)}
                 onDoubleClick={() => handleRowDoubleClick(row.original._id)}
+                onContextMenu={(e) => handleContextMenu(e, row.original)}
                 aria-selected={isSelected}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -566,6 +663,22 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
           })}
         </tbody>
       </table>
+
+      {/* Context Menu */}
+      <ContextMenu
+        isOpen={contextMenu.isOpen}
+        position={contextMenu.position}
+        onClose={closeContextMenu}
+        items={contextMenuItems}
+      />
+
+      {/* Collection Picker Modal */}
+      <CollectionPickerModal
+        isOpen={collectionPickerOpen}
+        onClose={() => setCollectionPickerOpen(false)}
+        onSelect={handleCollectionSelect}
+        excludeCollectionIds={contextMenu.reference?.collectionIds || []}
+      />
     </div>
   );
 }

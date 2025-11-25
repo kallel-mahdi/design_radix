@@ -24,6 +24,36 @@
   --color-app-border: #1F2330;                /* Default border */
   --color-app-border-hover: #2A2F3D;          /* Border on hover */
   --color-app-border-accent: #04E39E;         /* Accent border (neon green) */
+
+  /* Box Shadows */
+  --shadow-accent: 0 4px 6px -1px rgba(4, 227, 158, 0.1), 0 2px 4px -1px rgba(4, 227, 158, 0.06);
+  --shadow-accent-lg: 0 10px 15px -3px rgba(4, 227, 158, 0.1), 0 4px 6px -2px rgba(4, 227, 158, 0.05);
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-soft-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.3s ease-in-out;
+  --animate-slide-in-right: slideInRight 0.3s ease-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  /* Keyframes */
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes slideInRight {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideUp {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+  }
 }
 
 @layer base {

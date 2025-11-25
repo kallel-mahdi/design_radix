@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApplicationLogger } from '../utils/logger';
+import { config } from '../config/environment';
 
 // Adapted from editor document-service error handler
 
 interface CustomError extends Error {
   statusCode?: number;
   code?: string;
+  error?: string; // Session 10.5: Error code for API responses (e.g., 'INVALID_PDF', 'NO_FILE')
   details?: any;
 }
 
@@ -23,7 +25,7 @@ export const errorHandler = (
 
   let statusCode = error.statusCode || 500;
   let message = error.message || 'Internal Server Error';
-  let code = error.code || error.name || 'INTERNAL_ERROR';
+  let errorCode = error.error || error.code || error.name || 'INTERNAL_ERROR'; // Session 10.5: Prefer error field
   let details = error.details || null;
 
   // Parse error message for known error codes
@@ -37,7 +39,7 @@ export const errorHandler = (
   for (const pattern of errorMessagePatterns) {
     if (message.startsWith(pattern + ':')) {
       statusCode = 400;
-      code = pattern;
+      errorCode = pattern;
       break;
     }
   }
@@ -46,47 +48,53 @@ export const errorHandler = (
   if (error.name === 'ValidationError') {
     statusCode = 400;
     message = 'Validation Error';
-    code = 'VALIDATION_ERROR';
+    errorCode = 'VALIDATION_ERROR';
     details = error.details || error.message;
   } else if (error.name === 'CastError') {
     statusCode = 400;
     message = 'Invalid ID format';
-    code = 'INVALID_ID';
+    errorCode = 'INVALID_ID';
   } else if (error.name === 'DocumentNotFoundError') {
     statusCode = 404;
     message = 'Document not found';
-    code = 'NOT_FOUND';
+    errorCode = 'NOT_FOUND';
   } else if (error.name === 'UnauthorizedError') {
     statusCode = 401;
     message = 'Unauthorized';
-    code = 'UNAUTHORIZED';
+    errorCode = 'UNAUTHORIZED';
   } else if (error.name === 'ForbiddenError') {
     statusCode = 403;
     message = 'Forbidden';
-    code = 'FORBIDDEN';
+    errorCode = 'FORBIDDEN';
   } else if (error.name === 'ConflictError') {
     statusCode = 409;
     message = 'Conflict';
-    code = 'CONFLICT';
+    errorCode = 'CONFLICT';
   } else if (error.code === '11000' || (error as any).code === 11000) {
     statusCode = 409;
     message = 'Duplicate key error';
-    code = 'DUPLICATE_KEY';
+    errorCode = 'DUPLICATE_KEY';
+  }
+
+  // Session 10.5: Handle Multer file filter errors (thrown by fileUpload middleware)
+  if (message.includes('Invalid file type') || message.includes('Only PDF files')) {
+    statusCode = 400;
+    errorCode = 'INVALID_FILE_TYPE';
   }
 
   // Don't expose internal errors in production
-  if (process.env.NODE_ENV === 'production' && statusCode === 500) {
+  if (config.nodeEnv === 'production' && statusCode === 500) {
     message = 'Internal Server Error';
-    code = 'INTERNAL_ERROR';
+    errorCode = 'INTERNAL_ERROR';
     details = null;
   }
 
   const errorResponse = {
     success: false,
     message,
-    code,
+    error: errorCode, // Session 10.5: Use 'error' field for consistency with controller responses
     ...(details && { details }),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(config.nodeEnv === 'development' && { stack: error.stack })
   };
 
   res.status(statusCode).json(errorResponse);

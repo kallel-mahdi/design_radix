@@ -1,12 +1,12 @@
 import { injectable } from 'inversify';
-import { ITagService, CreateTagInput, UpdateTagInput } from '../interfaces/ITagService';
+import { ITagService, CreateTagInput, UpdateTagInput, TagWithUsageCount } from '../interfaces/ITagService';
 import { Tag, ITag } from '../models/Tag';
 import { Reference } from '../models/Reference';
 import { ApplicationLogger } from '../utils/logger';
 
 @injectable()
 export class TagService implements ITagService {
-  async create(userId: string, data: CreateTagInput): Promise<ITag> {
+  async create(userId: string, data: CreateTagInput): Promise<TagWithUsageCount> {
     ApplicationLogger.info('Creating tag', { userId, name: data.name });
 
     const tag = await Tag.create({
@@ -18,7 +18,8 @@ export class TagService implements ITagService {
     });
 
     ApplicationLogger.info('Tag created', { userId, tagId: tag._id.toString() });
-    return tag;
+    // Return tag with usageCount: 0 (newly created tag has no usages)
+    return { ...tag.toObject(), usageCount: 0 };
   }
 
   async getById(id: string, userId: string): Promise<ITag | null> {
@@ -61,7 +62,7 @@ export class TagService implements ITagService {
     );
   }
 
-  async updateColor(name: string, userId: string, color: string | null, position?: number | null): Promise<ITag | null> {
+  async updateColor(name: string, userId: string, color: string | null, position?: number | null): Promise<TagWithUsageCount | null> {
     ApplicationLogger.info('Updating tag color', { userId, name, color, position });
 
     const tag = await Tag.findOne({ userId, name });
@@ -131,15 +132,27 @@ export class TagService implements ITagService {
       }
 
       ApplicationLogger.info('Tag color cleared', { userId, name, tagId: tag._id.toString() });
-      return tag;
+      // Calculate usage count
+      const usageCount = await Reference.countDocuments({
+        userId,
+        tags: name,
+        deleted: false
+      });
+      return { ...tag.toObject(), usageCount };
     }
 
     await tag.save();
     ApplicationLogger.info('Tag color updated', { userId, name, tagId: tag._id.toString(), position });
-    return tag;
+    // Calculate usage count
+    const usageCount = await Reference.countDocuments({
+      userId,
+      tags: name,
+      deleted: false
+    });
+    return { ...tag.toObject(), usageCount };
   }
 
-  async rename(oldName: string, newName: string, userId: string): Promise<ITag | null> {
+  async rename(oldName: string, newName: string, userId: string): Promise<TagWithUsageCount | null> {
     ApplicationLogger.info('Renaming tag', { userId, oldName, newName });
 
     // Check if new name already exists
@@ -174,7 +187,14 @@ export class TagService implements ITagService {
       referencesUpdated: updateResult.modifiedCount
     });
 
-    return tag;
+    // Calculate usage count for the renamed tag
+    const usageCount = await Reference.countDocuments({
+      userId,
+      tags: newName,
+      deleted: false
+    });
+
+    return { ...tag.toObject(), usageCount };
   }
 
   async delete(id: string, userId: string): Promise<boolean> {

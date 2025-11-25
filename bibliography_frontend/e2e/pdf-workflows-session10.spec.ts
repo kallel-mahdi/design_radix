@@ -16,21 +16,25 @@ import { FIXTURE_PATHS } from './fixtures/paths';
 
 test.describe('PDF Workflows - Session 10', () => {
   test.beforeEach(async ({ page, workerUserId }) => {
-    // Clean up test data
-    await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId } }
-    );
-
-    // Route all requests with worker-specific user ID
+    // 1. Route all requests FIRST with worker-specific user ID
     await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
       await route.continue({
         headers: { ...route.request().headers(), 'x-user-id': workerUserId }
       });
     });
 
-    // Navigate to library
+    // 2. Navigate to library
     await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Clean up test data AFTER route intercept is set up
+    await page.request.delete(
+      'http://localhost:8005/api/bibliography/references/test-cleanup',
+      { headers: { 'x-user-id': workerUserId } }
+    );
+
+    // 4. Reload to show empty state
+    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
@@ -40,9 +44,9 @@ test.describe('PDF Workflows - Session 10', () => {
     await page.getByLabel('Title').fill('Test Paper with PDF');
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
 
-    // 2. Upload PDF using file input
-    const pdfUploadZone = page.locator('[data-testid="pdf-upload-zone"], .pdf-upload-zone, input[type="file"][accept*="pdf"]').first();
-    await pdfUploadZone.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
+    // 2. Upload PDF using file input (target the hidden input directly)
+    const pdfInput = page.getByTestId('pdf-file-input');
+    await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
 
     // 3. Verify "Pending upload" indicator shows
     await expect(page.getByText(/pending upload/i)).toBeVisible();
@@ -75,7 +79,7 @@ test.describe('PDF Workflows - Session 10', () => {
     await page.getByRole('button', { name: 'New Reference' }).click();
     await page.getByLabel('Title').fill('PDF Controls Test');
     await page.getByTestId('author-0-family-input').fill('ControlsAuthor');
-    const pdfInput = page.locator('input[type="file"][accept*="pdf"]').first();
+    const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.smallTest);
     await page.getByRole('button', { name: /save|create/i }).click();
 
@@ -115,7 +119,7 @@ test.describe('PDF Workflows - Session 10', () => {
     await page.getByRole('button', { name: 'New Reference' }).click();
     await page.getByLabel('Title').fill('PDF Replacement Test');
     await page.getByTestId('author-0-family-input').fill('ReplaceAuthor');
-    const pdfInput1 = page.locator('input[type="file"][accept*="pdf"]').first();
+    const pdfInput1 = page.getByTestId('pdf-file-input');
     await pdfInput1.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
     await page.getByRole('button', { name: /save|create/i }).click();
 
@@ -129,14 +133,14 @@ test.describe('PDF Workflows - Session 10', () => {
     // Wait for modal to be fully visible (HeadlessUI transition)
     await expect(page.getByRole('heading', { name: 'Edit Reference' })).toBeVisible();
 
-    // Click Replace button (PDF already exists)
+    // Click Replace button (PDF already exists) - triggers the hidden file input
     const replaceButton = page.getByRole('button', { name: /replace/i });
     if (await replaceButton.isVisible()) {
       await replaceButton.click();
     }
 
-    // Upload new PDF
-    const pdfInput2 = page.locator('input[type="file"][accept*="pdf"]').first();
+    // Upload new PDF using the replace input
+    const pdfInput2 = page.getByTestId('pdf-file-input-replace');
     await pdfInput2.setInputFiles(FIXTURE_PATHS.pdfs.smallTest);
 
     // Save changes
@@ -159,7 +163,7 @@ test.describe('PDF Workflows - Session 10', () => {
     await page.getByRole('button', { name: 'New Reference' }).click();
     await page.getByLabel('Title').fill('PDF Delete Test');
     await page.getByTestId('author-0-family-input').fill('DeleteAuthor');
-    const pdfInput = page.locator('input[type="file"][accept*="pdf"]').first();
+    const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
     await page.getByRole('button', { name: /save|create/i }).click();
 
@@ -199,6 +203,10 @@ test.describe('PDF Workflows - Session 10', () => {
     // Submit without PDF (PDF is optional)
     await page.getByRole('button', { name: /save|create/i }).click();
 
+    // Wait for modal to close and success toast
+    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
+
     // Verify reference created without PDF
     await expect(page.getByText('Invalid Upload Test')).toBeVisible();
     await page.getByText('Invalid Upload Test').click();
@@ -227,7 +235,7 @@ test.describe('PDF Workflows - Session 10', () => {
     await page.getByRole('button', { name: 'New Reference' }).click();
     await page.getByLabel('Title').fill('Complete Workflow Test');
     await page.getByTestId('author-0-family-input').fill('WorkflowAuthor');
-    const pdfInput = page.locator('input[type="file"][accept*="pdf"]').first();
+    const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
     await page.getByRole('button', { name: /save|create/i }).click();
 
@@ -264,7 +272,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
     // Wait for modal to open completely
     await expect(page.getByRole('heading', { name: 'Edit Reference' })).toBeVisible();
-    const pdfInput2 = page.locator('input[type="file"][accept*="pdf"]').first();
+    const pdfInput2 = page.getByTestId('pdf-file-input');
     await pdfInput2.setInputFiles(FIXTURE_PATHS.pdfs.smallTest);
     await page.getByRole('button', { name: /save|update/i }).click();
 

@@ -301,12 +301,18 @@ describe('DetailsPane - Session 9 Enhancements', () => {
     });
 
     it('should switch to PDF tab', async () => {
+      // Override with hasPdf: false to avoid pdf.js worker issues in tests
+      queryClient.setQueryData(['references', 'detail', 'ref-123'], {
+        ...mockReference,
+        hasPdf: false,
+      });
+
       const onTabChange = vi.fn();
       renderDetailsPane({ activeTab: 'pdf', onTabChange });
 
       await waitFor(() => {
-        // PDF tab should show the placeholder text
-        expect(screen.getByText('PDF viewer coming in Session 7')).toBeInTheDocument();
+        // PDF tab should show the "No PDF attached" message when reference has no PDF
+        expect(screen.getByText('No PDF attached')).toBeInTheDocument();
       });
     });
 

@@ -39,16 +39,18 @@ test.describe('DOI Import Flow', () => {
   const EXPECTED_TITLE = '"Everyone wants to do the model work, not the data work": Data Cascades in High-Stakes AI';
   const EXPECTED_TITLE_PARTIAL = 'Data Cascades in High-Stakes AI'; // Use partial match for wrapped text
 
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
-    const cleanupResponse = await page.request.delete('http://localhost:8005/api/bibliography/references/test-cleanup', {
-      headers: {
-        'x-user-id': workerUserId,
-      },
-    });
-    expect(cleanupResponse.ok()).toBeTruthy();
+  // Helper to open import modal via dropdown menu
+  async function openImportModalViaDOI(page: import('@playwright/test').Page) {
+    // Click Import button to open dropdown
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // Click "Import from DOI" in the dropdown menu
+    await page.getByRole('menuitem', { name: /Import from DOI/i }).click();
+    // Wait for modal to be visible
+    await expect(page.getByRole('heading', { name: 'Import Reference' })).toBeVisible();
+  }
 
-    // Intercept API calls to inject worker-scoped user ID
+  test.beforeEach(async ({ page, workerUserId }) => {
+    // 1. Intercept API calls FIRST to inject worker-scoped user ID
     await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
       const headers = {
         ...route.request().headers(),
@@ -57,19 +59,28 @@ test.describe('DOI Import Flow', () => {
       await route.continue({ headers });
     });
 
-    // Navigate to library page
+    // 2. Navigate to library page
     await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Cleanup AFTER route intercept is set up (headers will be correct)
+    const cleanupResponse = await page.request.delete('http://localhost:8005/api/bibliography/references/test-cleanup', {
+      headers: {
+        'x-user-id': workerUserId,
+      },
+    });
+    expect(cleanupResponse.ok()).toBeTruthy();
+
+    // 4. Reload to show empty state
+    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
   test('should successfully import reference from DOI (one-step)', async ({ page }) => {
-    // Step 1: Click Import button
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // Step 1: Open import modal via dropdown
+    await openImportModalViaDOI(page);
 
-    // Step 2: Verify modal opened
-    await expect(page.getByRole('heading', { name: 'Import Reference' })).toBeVisible();
-
-    // Step 3: Enter DOI
+    // Step 2: Enter DOI
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
 
@@ -95,7 +106,7 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should show error for invalid DOI format', async ({ page }) => {
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
 
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill('invalid-doi');
@@ -105,7 +116,7 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should show error toast for non-existent DOI', async ({ page }) => {
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
 
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill('10.9999/nonexistent');
@@ -118,7 +129,7 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should allow fixing typo after error', async ({ page }) => {
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
 
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill('10.9999/wrong');
@@ -140,7 +151,7 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should import DOI with Enter key', async ({ page }) => {
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
 
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
@@ -170,7 +181,7 @@ test.describe('DOI Import Flow', () => {
 
   test('should show message when importing duplicate DOI', async ({ page }) => {
     // Import DOI first time
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
     const importButton = page.getByRole('button', { name: /^Import Reference$/i });
@@ -194,7 +205,7 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should show loading state during import', async ({ page }) => {
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
 
@@ -216,7 +227,7 @@ test.describe('DOI Import Flow', () => {
 
   test('should reset state when modal closed and reopened', async ({ page }) => {
     // Open modal, import reference
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImportModalViaDOI(page);
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
     await page.getByRole('button', { name: /^Import Reference$/i }).click();
@@ -226,8 +237,8 @@ test.describe('DOI Import Flow', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('heading', { name: 'Import Reference' })).not.toBeVisible();
 
-    // Reopen modal
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // Reopen modal via dropdown
+    await openImportModalViaDOI(page);
 
     // Verify state is reset
     const reopenedDoiInput = page.getByLabel('DOI');
@@ -242,8 +253,8 @@ test.describe('DOI Import Flow', () => {
     const SECOND_DOI = '10.1145/3290605.3300507';
     const SECOND_TITLE_PARTIAL = 'Cultivating Care through Ambiguity'; // Partial match for wrapped text
 
-    // Open modal once
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // Open modal once via dropdown
+    await openImportModalViaDOI(page);
     const doiInput = page.getByLabel('DOI');
     const importButton = page.getByRole('button', { name: /^Import Reference$/i });
 
@@ -268,8 +279,8 @@ test.describe('DOI Import Flow', () => {
   });
 
   test('should persist reference after page refresh', async ({ page }) => {
-    // Import reference
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // Import reference via dropdown
+    await openImportModalViaDOI(page);
     const doiInput = page.getByLabel('DOI');
     await doiInput.fill(TEST_DOI);
     await page.getByRole('button', { name: /^Import Reference$/i }).click();

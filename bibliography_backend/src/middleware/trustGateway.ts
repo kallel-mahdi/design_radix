@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApplicationLogger } from '../utils/logger';
+import { config } from '../config/environment';
 
 // Adapted from editor document-service trustGateway middleware
 
@@ -77,7 +78,7 @@ export const bypassGatewayAuth = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (process.env.NODE_ENV === 'production') {
+  if (config.nodeEnv === 'production') {
     throw new Error('bypassGatewayAuth middleware cannot be used in production');
   }
 

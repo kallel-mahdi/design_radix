@@ -20,7 +20,20 @@ test.describe('Reference Creation and Editing', () => {
     // Generate unique test ID for each test
     testId = `test-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
+    // 1. Intercept all API calls FIRST to inject worker-scoped user ID
+    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+      const headers = {
+        ...route.request().headers(),
+        'x-user-id': workerUserId,
+      };
+      await route.continue({ headers });
+    });
+
+    // 2. Navigate to library page
+    await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Cleanup AFTER route intercept is set up (worker-scoped cleanup)
     const cleanupResponse = await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
       {
@@ -31,17 +44,8 @@ test.describe('Reference Creation and Editing', () => {
     );
     expect(cleanupResponse.ok()).toBeTruthy();
 
-    // Intercept all API calls to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // Navigate to library page
-    await page.goto('http://localhost:5173/library');
+    // 4. Reload to show empty state
+    await page.reload();
     await page.waitForLoadState('networkidle');
 
     // Wait for page to load

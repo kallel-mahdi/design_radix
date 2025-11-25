@@ -170,10 +170,11 @@ describe('ReferenceModal', () => {
       });
     });
 
-    it('should show PDF upload placeholder with "Coming in Phase 2" message', () => {
+    it('should render PDF upload zone', () => {
       render(<ReferenceModal />);
 
-      expect(screen.getByText(/coming in phase 2/i)).toBeInTheDocument();
+      // PDF upload was implemented in Session 10
+      expect(screen.getByTestId('pdf-upload-zone')).toBeInTheDocument();
     });
   });
 

@@ -198,9 +198,9 @@ class ApiClient {
 
   /**
    * Handle response and show error toasts
-   * Returns the full ApiResponse envelope {success, message, data, pagination?}
+   * Extracts and returns the data directly (unwrapped)
    */
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+  private async handleResponse<T>(response: Response): Promise<T> {
     let data: any;
 
     try {
@@ -237,19 +237,25 @@ class ApiClient {
       throw error;
     }
 
-    // Return the full ApiResponse envelope (success, message, data, pagination)
-    return data as ApiResponse<T>;
+    // Handle 204 No Content (empty response)
+    if (response.status === 204 || data === null) {
+      return undefined as T;
+    }
+
+    // Extract and return the data directly (unwrapped from envelope)
+    const apiResponse = data as ApiResponse<T>;
+    return apiResponse.data;
   }
 
   /**
    * Generic request method with token refresh support
-   * Returns the full ApiResponse envelope {success, message, data, pagination?}
+   * Returns the data directly (unwrapped)
    */
   private async request<T>(
     endpoint: string,
     method: string,
     options?: RequestOptions,
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const url = this.buildURL(endpoint, options?.params);
     const headers = this.buildHeaders(options?.headers as Record<string, string>);
 
@@ -315,45 +321,45 @@ class ApiClient {
     }
   }
 
-  // HTTP Methods - All return full ApiResponse envelope
-  public async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  // HTTP Methods - All return unwrapped data directly
+  public async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, 'GET', options);
   }
 
-  public async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, 'POST', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, 'PATCH', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, 'PUT', {
       ...options,
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, 'DELETE', options);
   }
 
   /**
    * Upload file to server
-   * Returns the full ApiResponse envelope {success, message, data}
+   * Returns the data directly (unwrapped)
    */
   public async uploadFile<T>(
     endpoint: string,
     file: File,
     options?: RequestOptions,
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const url = this.buildURL(endpoint, options?.params);
     const headers = this.buildHeaders();
 

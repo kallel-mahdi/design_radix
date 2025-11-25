@@ -126,11 +126,11 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
         fields.forEach((field, index) => {
           // Check if we have a mode for this field.id already
           if (prev[field.id]) {
-            newModes[field.id] = prev[field.id];
+            newModes[field.id] = prev[field.id]!; // Non-null: checked in if condition
           }
           // Otherwise check if we have a temporary index-based mode (from edit mode init)
           else if (prev[String(index)]) {
-            newModes[field.id] = prev[String(index)];
+            newModes[field.id] = prev[String(index)]!; // Non-null: checked in if condition
           }
           // Otherwise default to structured
           else {

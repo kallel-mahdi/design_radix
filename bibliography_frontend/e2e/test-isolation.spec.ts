@@ -13,10 +13,34 @@
  */
 
 import { test, expect } from './fixtures/workerFixtures';
+import { Page } from '@playwright/test';
+
+/**
+ * Wait for HeadlessUI dialog to properly close after transition.
+ * HeadlessUI dialogs have a ~200ms close transition that can intercept pointer events.
+ */
+async function waitForDialogClose(page: Page): Promise<void> {
+  await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
+  // Extra buffer for HeadlessUI portal cleanup
+  await page.waitForTimeout(250);
+}
 
 test.describe('Test Isolation Verification', () => {
   test.beforeEach(async ({ page, workerUserId }) => {
-    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
+    // 1. Intercept API calls FIRST to inject worker-scoped user ID
+    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+      const headers = {
+        ...route.request().headers(),
+        'x-user-id': workerUserId,
+      };
+      await route.continue({ headers });
+    });
+
+    // 2. Navigate to library page
+    await page.goto('http://localhost:5173/library');
+    await page.waitForLoadState('networkidle');
+
+    // 3. Cleanup AFTER route intercept is set up (headers will be correct)
     const cleanupResponse = await page.request.delete(
       'http://localhost:8005/api/bibliography/references/test-cleanup',
       {
@@ -27,17 +51,8 @@ test.describe('Test Isolation Verification', () => {
     );
     expect(cleanupResponse.ok()).toBeTruthy();
 
-    // Intercept API calls to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // Navigate to library page
-    await page.goto('http://localhost:5173/library');
+    // 4. Reload to show empty state
+    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
@@ -52,14 +67,17 @@ test.describe('Test Isolation Verification', () => {
     await page.getByTestId('author-0-family-input').fill('IsolationTest1');
 
     await page.getByTestId('reference-submit-button').click();
+    await waitForDialogClose(page);
     await page.waitForLoadState('networkidle');
 
     // Wait for success toast
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
     // Count total rows in table (should be exactly 1)
-    const rows = await page.locator('tbody tr').count();
-    expect(rows).toBe(1);
+    // Note: Using role-based selector as the table uses aria roles, not tbody
+    const rows = page.getByRole('table', { name: 'Reference list' }).getByRole('row');
+    // Subtract 1 for header row
+    await expect(rows).toHaveCount(2); // 1 header + 1 data row
 
     // Verify it's our reference
     await expect(page.getByText(`Test 1 ${testId}`)).toBeVisible();
@@ -76,14 +94,15 @@ test.describe('Test Isolation Verification', () => {
     await page.getByTestId('author-0-family-input').fill('IsolationTest2');
 
     await page.getByTestId('reference-submit-button').click();
+    await waitForDialogClose(page);
     await page.waitForLoadState('networkidle');
 
     // Wait for success toast
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
     // Count total rows in table (should be exactly 1, not 2!)
-    const rows = await page.locator('tbody tr').count();
-    expect(rows).toBe(1);
+    const rows = page.getByRole('table', { name: 'Reference list' }).getByRole('row');
+    await expect(rows).toHaveCount(2); // 1 header + 1 data row
 
     // Verify it's our reference
     await expect(page.getByText(`Test 2 ${testId}`)).toBeVisible();
@@ -100,14 +119,15 @@ test.describe('Test Isolation Verification', () => {
     await page.getByTestId('author-0-family-input').fill('IsolationTest3');
 
     await page.getByTestId('reference-submit-button').click();
+    await waitForDialogClose(page);
     await page.waitForLoadState('networkidle');
 
     // Wait for success toast
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
     // Count total rows in table (should be exactly 1, not 3!)
-    const rows = await page.locator('tbody tr').count();
-    expect(rows).toBe(1);
+    const rows = page.getByRole('table', { name: 'Reference list' }).getByRole('row');
+    await expect(rows).toHaveCount(2); // 1 header + 1 data row
 
     // Verify it's our reference
     await expect(page.getByText(`Test 3 ${testId}`)).toBeVisible();
@@ -115,22 +135,25 @@ test.describe('Test Isolation Verification', () => {
 
   test('cleanup verification - should start with empty table', async ({ page }) => {
     // This test verifies that cleanup is working
-    // After beforeEach cleanup, table should be empty
+    // After beforeEach cleanup, table should be empty (show empty state)
 
     // Wait for page to fully load
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
-    // Count rows (should be 0 or show empty state)
-    const rows = await page.locator('tbody tr').count();
+    // Verify empty state is shown (no references after cleanup)
+    // Table should only have header row, or show empty state message
+    const table = page.getByRole('table', { name: 'Reference list' });
+    const rows = table.getByRole('row');
 
-    // If there are rows, they should be empty state indicators, not actual references
-    if (rows > 0) {
-      // Check if it's an empty state message
+    // Should have only header row (1 row) when empty, or show empty state
+    const rowCount = await rows.count();
+    if (rowCount > 1) {
+      // If more than header, check if it's empty state message
       const emptyState = page.getByText(/no references/i);
       await expect(emptyState).toBeVisible();
     } else {
-      // No rows is also acceptable (empty table)
-      expect(rows).toBe(0);
+      // Only header row = empty table
+      expect(rowCount).toBeLessThanOrEqual(1);
     }
   });
 });

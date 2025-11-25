@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/common/api/client';
+import { useUIStore } from '@/store/ui.store';
+import { useLibraryStore } from '../store/library.store';
 import type { Reference } from '@/common/types';
 
 /**
@@ -51,7 +53,7 @@ export function useUploadPdfMutation() {
         file
       );
 
-      return response.data;
+      return response;
     },
 
     onMutate: async ({ referenceId }) => {
@@ -172,6 +174,113 @@ export function useDeletePdfMutation() {
       }
       if (context?.previousDetail) {
         queryClient.setQueryData(['references', 'detail', referenceId], context.previousDetail);
+      }
+    },
+  });
+}
+
+/**
+ * Backend response for createFromPdf endpoint (Session 10.5)
+ */
+interface CreateFromPdfResponse {
+  reference: Reference;
+  extractedMetadata: {
+    doi?: string;
+    source: 'crossref' | 'filename-fallback';
+  };
+}
+
+/**
+ * Create Reference from PDF mutation (Session 10.5)
+ *
+ * Implements Zotero-style PDF upload workflow:
+ * 1. Upload PDF file
+ * 2. Backend extracts text and parses DOI
+ * 3. If DOI found → enriches via Crossref
+ * 4. If no DOI → creates reference from filename
+ * 5. Reference created with PDF attached
+ *
+ * Features:
+ * - Automatic metadata extraction (DOI parsing + Crossref enrichment)
+ * - Graceful fallback to filename when no DOI found
+ * - Toast notifications indicating source (Crossref vs filename)
+ * - Auto-select newly created reference in library
+ * - Invalidates references list to trigger refetch
+ *
+ * Adapted from import.mutations.ts (useImportFromDoiMutation) pattern
+ * See: docs/sessions/10.5-plan.md for architecture decisions
+ */
+export function useCreateReferenceFromPdfMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (file: File): Promise<CreateFromPdfResponse> => {
+      // Use apiClient.uploadFile() for multipart/form-data
+      const response = await apiClient.uploadFile<CreateFromPdfResponse>(
+        '/references/from-pdf',
+        file
+      );
+
+      return response;
+    },
+
+    onMutate: () => {
+      // Show processing toast
+      useUIStore.getState().addToast({
+        message: 'Processing PDF...',
+        type: 'info',
+        duration: 0, // Indefinite until success/error
+      });
+    },
+
+    onSuccess: (response) => {
+      const { reference, extractedMetadata } = response;
+
+      // Invalidate references list to trigger refetch
+      queryClient.invalidateQueries({ queryKey: ['references', 'list'] });
+
+      // Auto-select newly created reference
+      useLibraryStore.getState().setActiveReference(reference._id);
+
+      // Show success toast with source indicator
+      const source = extractedMetadata.source === 'crossref' ? 'from Crossref' : 'from filename';
+      const titlePreview = reference.title.substring(0, 50);
+      const message = `Added: ${titlePreview}${reference.title.length > 50 ? '...' : ''} (${source})`;
+
+      useUIStore.getState().addToast({
+        message,
+        type: extractedMetadata.source === 'crossref' ? 'success' : 'warning',
+        duration: 5000,
+      });
+    },
+
+    onError: (error) => {
+      console.error('PDF Import Error:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+      });
+
+      // Show error toast based on error type
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (message.includes('Invalid PDF') || message.includes('Unsupported')) {
+        useUIStore.getState().addToast({
+          message: 'Invalid PDF file. Please upload a valid PDF.',
+          type: 'error',
+          duration: 5000,
+        });
+      } else if (message.includes('already exists')) {
+        useUIStore.getState().addToast({
+          message: 'Reference with this DOI already exists in your library.',
+          type: 'error',
+          duration: 5000,
+        });
+      } else {
+        useUIStore.getState().addToast({
+          message: 'Failed to process PDF. Please try again.',
+          type: 'error',
+          duration: 5000,
+        });
       }
     },
   });

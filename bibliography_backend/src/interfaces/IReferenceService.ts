@@ -23,6 +23,15 @@ export interface CreateReferenceInput {
     provider: 'doi' | 'bibtex' | 'csl-json' | 'ris' | 'manual';
     payload: any;
   };
+  // Session 10.5: PDF metadata (for createReferenceFromPdf workflow)
+  hasPdf?: boolean;
+  pdf?: {
+    storedPath: string;
+    originalName: string;
+    size: number;
+    mimeType: string;
+    uploadedAt: Date;
+  };
 }
 
 export interface UpdateReferenceInput {

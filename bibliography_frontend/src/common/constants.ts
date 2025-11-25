@@ -21,7 +21,7 @@ export const QUERY_RETRY_DELAY_MS = 500; // Initial delay in ms (exponential bac
  * UI Interaction
  */
 export const SEARCH_DEBOUNCE_MS = 300; // Debounce search input by 300ms
-export const TOAST_DURATION_MS = 3000; // Toast notifications last 3 seconds
+export const TOAST_DURATION_MS = 5000; // Toast notifications last 5 seconds (increased for E2E test reliability)
 export const MAX_COLORED_TAGS = 9; // Maximum number of tags with custom colors
 
 /**

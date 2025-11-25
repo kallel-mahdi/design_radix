@@ -11,6 +11,7 @@ export const TYPES = {
   ICrossrefService: Symbol.for('ICrossrefService'),
   ISearchService: Symbol.for('ISearchService'),
   IPdfService: Symbol.for('IPdfService'),
+  IPdfMetadataService: Symbol.for('IPdfMetadataService'), // Session 10.5
 
   // Controllers
   ReferenceController: Symbol.for('ReferenceController'),

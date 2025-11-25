@@ -4,6 +4,7 @@ import { ReferenceController } from '../controllers/ReferenceController';
 import { TYPES } from '../config/types';
 import { validate, validateParams, validateQuery, ObjectIdParamSchema, ReferenceListQuerySchema } from '../middleware/validate';
 import { CreateReferenceSchema, UpdateReferenceSchema, ImportDoiSchema } from '@bibliography/shared';
+import { config } from '../config/environment';
 
 const router: ExpressRouter = Router();
 
@@ -29,10 +30,19 @@ router.post('/import-doi', validate(ImportDoiSchema), (req, res, next) => {
   return controller.importFromDoi(req, res, next);
 });
 
+// Session 10.5 - PDF Import with Metadata Extraction
+// Import uploadPdf middleware (reused from Session 10)
+import { uploadPdf } from '../utils/fileUpload';
+
+router.post('/from-pdf', uploadPdf, (req: any, res: any, next: any) => {
+  const controller = container.get<ReferenceController>(TYPES.ReferenceController);
+  return controller.createFromPdf(req, res, next);
+});
+
 // Test Cleanup Endpoint - FOR TESTING ONLY
 // Deletes all references for a user (used by E2E tests)
 // Available in test and development environments (NOT production)
-if (process.env.NODE_ENV !== 'production') {
+if (config.nodeEnv !== 'production') {
   router.delete('/test-cleanup', (req, res, next) => {
     const controller = container.get<ReferenceController>(TYPES.ReferenceController);
     return controller.testCleanup(req, res, next);
@@ -71,7 +81,7 @@ router.delete('/:id/permanent', validateParams(ObjectIdParamSchema), (req, res, 
 // });
 
 // Session 10 - PDF Management
-import { uploadPdf } from '../utils/fileUpload';
+// uploadPdf middleware imported above (Session 10.5)
 
 router.post('/:id/upload-pdf', validateParams(ObjectIdParamSchema), uploadPdf, (req: any, res: any, next: any) => {
   const controller = container.get<ReferenceController>(TYPES.ReferenceController);

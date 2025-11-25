@@ -13,7 +13,7 @@
  * - 8/8 test cases passed
  *
  * Confidence Levels:
- *    - High (≥90%): Root cause identified, solution verified, no duplication, architecture-compliant
+ *    - High (≥90%): Root cause identified, solution verified, no duplication, iarchitecture-compliant
  *    - Medium (70-89%): Multiple approaches possible, trade-offs require consideration
  *    - Low (<70%): Investigation incomplete, unclear root cause, missing official docs
  */
@@ -39,6 +39,7 @@ export interface Context {
  * Pre-implementation confidence assessment
  *
  * Usage:
+ * 
  *   const checker = new ConfidenceChecker();
  *   const confidence = await checker.assess(context);
  *

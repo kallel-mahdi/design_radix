@@ -64,8 +64,9 @@ export class ReferenceService implements IReferenceService {
       authors,
       citationKey,
       collectionIds,
-      deleted: false,
-      hasPdf: false
+      deleted: false
+      // hasPdf comes from data parameter (when creating from PDF)
+      // or defaults to false via Mongoose schema (normal reference creation)
     });
 
     ApplicationLogger.info('Reference created', { userId, referenceId: reference._id.toString(), citationKey });

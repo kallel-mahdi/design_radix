@@ -51,11 +51,11 @@ export class ErrorBoundary extends Component<
 
       // Default fallback UI
       return (
-        <div className="flex min-h-screen items-center justify-center bg-surface-1">
-          <div className="max-w-md rounded-lg border border-error bg-surface-2 p-6 shadow-lg">
+        <div className="flex min-h-screen items-center justify-center bg-app-bg-secondary">
+          <div className="max-w-md rounded-lg border border-red-500 bg-app-surface p-6 shadow-lg">
             <div className="mb-4 flex items-center gap-2">
               <svg
-                className="h-6 w-6 text-error"
+                className="h-6 w-6 text-red-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<
               contact support if the problem persists.
             </p>
 
-            <details className="mb-4 rounded border border-app-border bg-surface-1 p-3">
+            <details className="mb-4 rounded border border-app-border bg-app-bg-secondary p-3">
               <summary className="cursor-pointer text-sm font-medium text-app-text-primary">
                 Error details
               </summary>
@@ -97,7 +97,7 @@ export class ErrorBoundary extends Component<
                 Reload App
               </button>
               <button
-                className="rounded border border-app-border bg-surface-1 px-4 py-2 text-sm font-medium text-app-text-primary hover:bg-surface-3 transition-colors"
+                className="rounded border border-app-border bg-app-bg-secondary px-4 py-2 text-sm font-medium text-app-text-primary hover:bg-app-surface-hover transition-colors"
                 onClick={this.resetError}
                 type="button"
               >

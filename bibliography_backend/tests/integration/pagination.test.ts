@@ -25,7 +25,7 @@ describe('Pagination Guardrails', () => {
       .expect(400);
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
   });
 
   it('should enforce minimum limit of 1', async () => {
@@ -35,7 +35,7 @@ describe('Pagination Guardrails', () => {
       .expect(400); // Validation should reject 0
 
     expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.error).toBe('VALIDATION_ERROR');
   });
 
   it('should return pagination metadata', async () => {

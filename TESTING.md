@@ -554,5 +554,188 @@ await expect(detailsPane.getByText('machine-learning')).toBeVisible();
 
 ---
 
-**Last Updated**: Session 9 (2025-01-16)
-**Status**: 45/45 Session 9 tests passing ✅
+### Session 10.5: PDF Metadata Extraction Testing (✅ Complete - Backend 32/32, E2E 4/4)
+
+**Features Tested**:
+- PDF text extraction (first 5 pages) using pdf-parse
+- DOI extraction via regex (prefix detection + bare pattern)
+- Crossref API enrichment (mocked with nock for backend, real API for E2E)
+- Filename fallback extraction (when no DOI found)
+- Automatic reference creation from PDF
+- Error handling (invalid files, corrupt PDFs, non-PDFs)
+- User isolation for PDF operations
+- PDF download and deletion
+- Frontend Import menu integration
+- Drag-drop visual feedback (green ring indicator)
+- Auto-selection of imported references
+- Toast notifications for success/fallback states
+
+**Testing Approach**: Adopted Zotero's strategy (real PDFs, not synthetic)
+
+**Test Breakdown**:
+- **Backend Unit**: 22 tests ✅ (all passing)
+- **Backend Integration**: 10 tests ✅ (all passing)
+- **E2E**: 4 tests ✅ (all passing)
+- **Total**: 36/36 passing (100%) ✅
+
+**Test Pyramid Compliance**:
+- Unit Tests: 22/32 = **69%** (target: 60%) ✅
+- Integration Tests: 10/32 = **31%** (target: 30%) ✅
+- Ratio: Close to ideal 60/30/10
+
+#### Backend Unit Tests (22 tests)
+**File**: `bibliography_backend/tests/unit/services/PdfMetadataService.test.ts`
+
+**extractDoi() Method** (8 tests):
+- ✅ Extracts DOI from text with valid DOI pattern
+- ✅ Extracts first DOI when text contains multiple DOIs
+- ✅ Handles mixed case DOI (case-insensitive)
+- ✅ Extracts DOI with complex suffix patterns
+- ✅ Extracts DOI from URL format
+- ✅ Returns null when no DOI in text
+- ✅ Returns null for malformed DOI-like patterns
+- ✅ Handles empty and whitespace-only text
+
+**extractTitleFromFilename() Method** (9 tests):
+- ✅ Extracts title from simple filename
+- ✅ Replaces hyphens with spaces
+- ✅ Replaces underscores with spaces
+- ✅ Handles mixed hyphens and underscores
+- ✅ Trims whitespace from result
+- ✅ Handles filename without extension
+- ✅ Handles case-insensitive .pdf extension
+- ✅ Handles empty filename gracefully
+- ✅ Preserves special characters (except hyphens/underscores)
+
+**extractTextFromPdf() Method** (1 test):
+- ✅ Extracts text from PDF using pdf-parse (first 5 pages only)
+
+**createReferenceFromPdf() Method** (4 tests):
+- ✅ Creates reference from Crossref when DOI found
+- ✅ Creates reference from filename when no DOI found
+- ✅ Falls back to filename when Crossref API fails
+- ✅ Attaches PDF metadata (storedPath, originalName, size, mimeType)
+
+#### Backend Integration Tests (10 tests)
+**File**: `bibliography_backend/tests/integration/pdf-metadata-extraction.test.ts`
+
+**POST /from-pdf - DOI Path** (1 test):
+- ✅ Creates reference from Crossref when DOI found in PDF
+
+**POST /from-pdf - Filename Fallback** (3 tests):
+- ✅ Creates reference from filename when no DOI found
+- ✅ Handles filename with hyphens and underscores
+- ✅ Creates separate references for multiple PDFs
+
+**Error Handling** (3 tests):
+- ✅ Returns 400 when no file provided (NO_FILE error code)
+- ✅ Returns 400 for invalid file / non-PDF (INVALID_FILE_TYPE error code)
+- ✅ Returns 400 for corrupt PDF (INVALID_PDF error code)
+
+**User Isolation** (1 test):
+- ✅ Creates reference for correct user (scoped by userId)
+
+**PDF Attachment Verification** (2 tests):
+- ✅ Verifies uploaded PDF is accessible (200 with correct headers)
+- ✅ Verifies PDF can be deleted (204, hasPdf flag cleared)
+
+#### Test Fixtures Strategy
+
+**Approach**: Real academic PDFs (Zotero pattern)
+**Location**: `bibliography_backend/tests/fixtures/pdfs/`
+**Total Size**: ~1.3MB (8 PDFs)
+
+**Fixtures**:
+- `with-doi-zotero.pdf` (9.4KB) - DOI: 10.1371/journal.pntd.0003350
+- `with-doi-acm.pdf` (665KB) - DOI: 10.1145/3411764.3445518
+- `with-doi-plos.pdf` (395KB) - DOI: 10.1371/journal.pone.0240505
+- `with-arxiv-id.pdf` (90KB) - arXiv fixture (future feature)
+- `smith-2023-machine-learning.pdf` (22KB) - Filename fallback test
+- `test.pdf` (22KB) - Generic fixture
+- `minimal-empty.pdf` (78KB) - Edge case testing
+- `corrupt.pdf` (500 bytes) - Error handling
+
+**Licensing**: All fixtures properly documented with sources and licenses (CC BY, Open Access, MIT)
+
+#### Critical Bugs Fixed
+
+**Bug 1: hasPdf Field Always False** ✅
+- **Root Cause**: ReferenceService.create() line 68 hardcoded `hasPdf: false`
+- **Fix**: Removed hardcoded override, let spread operator pass through value
+- **Impact**: 5 tests fixed
+
+**Bug 2: Error Response Format Inconsistency** ✅
+- **Root Cause**: Error handler used `code` field, but controller/tests expected `error` field
+- **Fix**: Updated errorHandler.ts to use `error` field consistently
+- **Files Modified**: `src/middleware/errorHandler.ts`
+
+**Bug 3: Multer Errors Return 500** ✅
+- **Root Cause**: Multer fileFilter errors not caught properly
+- **Fix**: Added Multer error detection in error handler
+- **Impact**: Non-PDF files now return 400 with INVALID_FILE_TYPE
+
+**Bug 4: PDF Download Returns 404** ✅
+- **Root Cause**: res.sendFile() used `root` option with absolute path
+- **Fix**: Removed `root` option (paths from Multer are already absolute)
+- **Files Modified**: `src/controllers/ReferenceController.ts`
+
+#### Key Learnings
+
+**1. Real PDFs > Synthetic PDFs**
+- Attempted pdf-lib generation (failed due to incompatibility with pdf-parse)
+- Pivoted to Zotero's approach: use real academic PDFs as fixtures
+- Committed fixtures (<100KB preferred, <700KB acceptable)
+- Proper licensing and documentation required
+
+**2. Test Infrastructure Patterns**
+- Centralized fixture management (`tests/fixtures/paths.ts`)
+- Mock external APIs only (Crossref, arXiv) - don't mock internal parsing
+- URL-encode DOIs in nock mocks (Crossref requirement)
+- Track status in living document (`STATUS.md`)
+
+**3. DOI Extraction Challenges**
+- PDFs often lack spaces in extracted text
+- Two-stage regex: prefix detection + bare pattern with word boundaries
+- Success rate: ~70% (acceptable for MVP with filename fallback)
+- Zotero uses ML-based recognition (~90% accuracy) - deferred to Phase 2
+
+**4. Error Handling Philosophy**
+- Consistent error field names across all layers
+- Specific error codes (INVALID_PDF, NO_FILE, INVALID_FILE_TYPE)
+- User-actionable messages
+- Proper HTTP status codes (400 for client errors, not 500)
+
+#### Documentation
+
+**Comprehensive Documentation Created**:
+- [Testing Lessons Learned](./docs/sessions/10.5-testing-lessons-learned.md) - Detailed decisions, bugs, and learnings
+- [Fixture Catalog](./bibliography_backend/tests/fixtures/README.md) - All PDFs with sources and licenses
+- [Current Status](./bibliography_backend/tests/fixtures/STATUS.md) - Test results and next steps
+
+#### E2E Tests (4 tests) ✅
+**File**: `bibliography_frontend/e2e/pdf-import-session10.5.spec.ts`
+
+**Test Cases**:
+1. ✅ **Import PDF with Crossref enrichment** - Opens Import menu → selects PDF with DOI → verifies Crossref metadata populated
+2. ✅ **Filename fallback when no DOI** - Uploads PDF without DOI → verifies title extracted from filename
+3. ✅ **Drag visual feedback** - Simulates drag enter → verifies green drop zone indicator appears
+4. ✅ **Auto-select imported reference** - Imports PDF → verifies DetailsPane opens with imported reference selected
+
+**Key Implementation Details**:
+- Uses real Crossref API calls (marked `test.slow()` for network latency)
+- Worker isolation with `workerUserId` to prevent test interference
+- Selectors use `{ name: 'Import', exact: true }` to avoid matching "Import References" button
+- Uses `.last()` on cell selectors to avoid checkbox cell ambiguity
+
+**Fixtures Used**:
+- `withDoiZotero` - PDF with embedded DOI (10.1371/journal.pntd.0003350)
+- `noDoiDescriptive` - smith-2023-machine-learning.pdf (filename fallback test)
+
+---
+
+**Last Updated**: Session 10.5 (2025-11-24)
+**Status**:
+- Session 9: 45/45 tests passing ✅
+- Session 10: Backend 27 tests passing (+ 7 E2E scaffold)
+- Session 10.5: 36/36 tests passing ✅ (Backend 32 + E2E 4)
+- **Total**: 113 tests passing

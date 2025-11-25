@@ -19,6 +19,33 @@ This directory contains PDF files used for E2E and integration testing. These fi
 - **License**: Public domain
 - **Use case**: Tests requiring visible PDF content
 
+### Session 10.5: PDF Metadata Extraction Fixtures (Committed to Git)
+
+**with-doi-zotero.pdf** (~9.4KB)
+- **Purpose**: Test DOI extraction from PDF with embedded DOI
+- **DOI**: 10.1371/journal.pntd.0003350
+- **Source**: Copied from Zotero test fixtures
+- **License**: CC BY (PLOS Open Access)
+- **Use case**: Testing Crossref enrichment workflow
+
+**smith-2023-machine-learning.pdf** (~22KB)
+- **Purpose**: Test filename fallback when no DOI found
+- **Source**: Minimal empty PDF with descriptive filename
+- **License**: MIT
+- **Use case**: Testing filename-to-title extraction
+
+**minimal-empty.pdf** (~78KB)
+- **Purpose**: Edge case testing (valid but empty PDF)
+- **Source**: Generated programmatically
+- **License**: MIT
+- **Use case**: PDF attachment verification, delete workflows
+
+**corrupt.pdf** (~500 bytes)
+- **Purpose**: Test error handling for corrupt/invalid PDFs
+- **Source**: Intentionally corrupted PDF header
+- **License**: MIT
+- **Use case**: Error handling tests (INVALID_PDF error code)
+
 ### arXiv Papers (Downloaded, NOT Committed)
 
 These papers are downloaded from arXiv.org for local testing only. They are excluded from version control and must be downloaded using the provided script.
@@ -140,6 +167,12 @@ Available paths:
 - `FIXTURE_PATHS.pdfs.small` - Small arXiv paper (~500KB)
 - `FIXTURE_PATHS.pdfs.medium` - Medium arXiv paper (~2MB)
 - `FIXTURE_PATHS.pdfs.large` - Large arXiv paper (~1-2MB)
+
+**Session 10.5 paths:**
+- `FIXTURE_PATHS.pdfs.withDoiZotero` - PDF with embedded DOI for Crossref enrichment
+- `FIXTURE_PATHS.pdfs.noDoiDescriptive` - PDF with descriptive filename (no DOI)
+- `FIXTURE_PATHS.pdfs.minimalEmpty` - Empty PDF for edge case testing
+- `FIXTURE_PATHS.pdfs.corrupt` - Corrupt PDF for error handling tests
 
 ## Troubleshooting
 

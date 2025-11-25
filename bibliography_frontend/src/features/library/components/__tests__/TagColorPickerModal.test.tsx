@@ -1,422 +1,402 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, userEvent } from '@/test/utils/testUtils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, userEvent, within } from '@/test/utils/testUtils';
 import { TagColorPickerModal } from '../TagColorPickerModal';
 import type { Tag } from '@/common/types';
 
 describe('TagColorPickerModal Component', () => {
-  const mockTag: Tag = {
+  const createTag = (overrides: Partial<Tag> = {}): Tag => ({
     _id: 'tag-1',
     userId: 'user-1',
     name: 'machine-learning',
-    color: '#FF6B6B',
-    position: 1,
+    color: null,
+    position: null,
     usageCount: 5,
     deleted: false,
     deletedAt: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
-  };
+    ...overrides,
+  });
+
+  const coloredTag = createTag({
+    color: '#FF6B6B',
+    position: 1,
+  });
+
+  const uncoloredTag = createTag({
+    color: null,
+    position: null,
+  });
 
   const mockTags: Tag[] = [
-    mockTag,
-    {
+    coloredTag,
+    createTag({
       _id: 'tag-2',
-      userId: 'user-1',
       name: 'ai',
       color: '#4ECDC4',
       position: 2,
-      usageCount: 3,
-      deleted: false,
-      deletedAt: null,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
-    },
+    }),
   ];
 
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
-    tag: mockTag,
+    tag: uncoloredTag,
     allTags: mockTags,
     onColorAndPositionSelect: vi.fn(),
     isLoading: false,
   };
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe('Rendering', () => {
-    it('should render modal when isOpen is true', () => {
+    it('should render modal with "Set Tag Color" title', () => {
       render(<TagColorPickerModal {...defaultProps} />);
-      expect(screen.getByText('Assign Color & Position')).toBeInTheDocument();
+      expect(screen.getByText('Set Tag Color')).toBeInTheDocument();
     });
 
     it('should not render modal when isOpen is false', () => {
       render(<TagColorPickerModal {...defaultProps} isOpen={false} />);
-      expect(screen.queryByText('Assign Color & Position')).not.toBeInTheDocument();
+      expect(screen.queryByText('Set Tag Color')).not.toBeInTheDocument();
     });
 
-    it('should render all 9 color options', () => {
+    it('should render 9 color swatches', () => {
       render(<TagColorPickerModal {...defaultProps} />);
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
-      expect(colorButtons).toHaveLength(9);
+      const swatches = screen.getAllByTestId('color-swatch');
+      expect(swatches).toHaveLength(9);
     });
 
-    it('should display position numbers in color buttons', () => {
+    it('should render color swatches without position numbers', () => {
       render(<TagColorPickerModal {...defaultProps} />);
-      // Positions 1-9 should be displayed (except occupied ones)
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
-
-      const hasPositions = colorButtons.some((btn) => {
-        const text = btn.textContent?.trim();
-        return text && !isNaN(parseInt(text));
+      const swatches = screen.getAllByTestId('color-swatch');
+      swatches.forEach((swatch) => {
+        // Swatches should not contain number text
+        expect(swatch.textContent).toBe('');
       });
+    });
 
-      expect(hasPositions).toBe(true);
+    it('should render position dropdown', () => {
+      render(<TagColorPickerModal {...defaultProps} />);
+      expect(screen.getByRole('combobox', { name: /Select position/i })).toBeInTheDocument();
+    });
+
+    it('should render keyboard instruction when position is selected', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} />);
+      expect(screen.getByText(/to add\/remove this tag from selected items/i)).toBeInTheDocument();
+    });
+
+    it('should render max tags info message', () => {
+      render(<TagColorPickerModal {...defaultProps} />);
+      expect(screen.getByText(/Maximum of 9 tags can have colors assigned/i)).toBeInTheDocument();
+    });
+
+    it('should always render Cancel button', () => {
+      render(<TagColorPickerModal {...defaultProps} />);
+      expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
+    });
+
+    it('should always render Set Color button', () => {
+      render(<TagColorPickerModal {...defaultProps} />);
+      expect(screen.getByRole('button', { name: /Set Color/i })).toBeInTheDocument();
+    });
+
+    it('should show Remove Color only when tag has existing color', () => {
+      // With colored tag
+      const { rerender } = render(<TagColorPickerModal {...defaultProps} tag={coloredTag} />);
+      expect(screen.getByRole('button', { name: /Remove Color/i })).toBeInTheDocument();
+
+      // With uncolored tag
+      rerender(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} />);
+      expect(screen.queryByRole('button', { name: /Remove Color/i })).not.toBeInTheDocument();
     });
   });
 
-  describe('Occupied Positions', () => {
-    it('should show occupied positions from other tags', () => {
-      render(<TagColorPickerModal {...defaultProps} />);
-
-      // Position 2 should be occupied by tag-2
-      const text = screen.queryByText('Taken');
-      // May or may not show depending on layout
-      expect(screen.getByText('Assign Color & Position')).toBeInTheDocument();
+  describe('Initial State', () => {
+    it('should pre-select a color for new/uncolored tag', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
+      const swatches = screen.getAllByTestId('color-swatch');
+      // At least one swatch should be selected (has aria-pressed="true")
+      const selectedSwatches = swatches.filter(
+        (swatch) => swatch.getAttribute('aria-pressed') === 'true'
+      );
+      expect(selectedSwatches.length).toBe(1);
     });
 
-    it('should show "✕" for occupied positions', () => {
-      render(<TagColorPickerModal {...defaultProps} />);
-      const xButtons = screen.queryAllByText('✕');
-      // At least one position should be occupied
-      expect(xButtons.length).toBeGreaterThanOrEqual(0);
+    it('should pre-select next available position for new tag', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      expect(dropdown).toHaveValue('1');
     });
 
-    it('should disable occupied color buttons', () => {
-      const tagsWithOccupiedPositions: Tag[] = [
-        mockTag,
-        { ...mockTags[1], position: 1 }, // Occupy position 1
-      ];
+    it('should show current color and position for existing colored tag', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} />);
 
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          allTags={tagsWithOccupiedPositions}
-        />
-      );
+      // Check selected color
+      const swatches = screen.getAllByTestId('color-swatch');
+      const redSwatch = swatches[0]; // First color is red (#FF6B6B)
+      expect(redSwatch.getAttribute('aria-pressed')).toBe('true');
 
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
-
-      // First button should be disabled (position 1 occupied)
-      expect(colorButtons[0]).toBeDisabled();
+      // Check position
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      expect(dropdown).toHaveValue('1');
     });
   });
 
   describe('Color Selection', () => {
-    it('should select a color when clicked', async () => {
+    it('should allow selecting any of 9 colors', async () => {
       const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: null, position: null }}
-        />
-      );
+      // Use coloredTag to have known initial state (red = index 0)
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[]} />);
 
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
+      const swatches = screen.getAllByTestId('color-swatch');
 
-      // Click first color
-      await user.click(colorButtons[0]);
-
-      // Button should have selected styling
-      expect(colorButtons[0]).toHaveClass('border-app-accent');
+      // Click a different color than the pre-selected one (index 0 = red)
+      await user.click(swatches[2]);
+      expect(swatches[2].getAttribute('aria-pressed')).toBe('true');
     });
 
-    it('should auto-select first available position when color is selected', async () => {
+    it('should highlight selected color with visual indicator', async () => {
       const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: null, position: null }}
-        />
-      );
+      // Use coloredTag to have known initial state (red = index 0)
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[]} />);
 
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
+      const swatches = screen.getAllByTestId('color-swatch');
+      // Click a different color than the pre-selected one (index 0 = red)
+      await user.click(swatches[3]);
 
-      // Click first available color
-      await user.click(colorButtons[2]); // Skip position 1 and 2 which are occupied
-
-      // Position selector should appear
-      const positionButtons = screen.getAllByRole('button').filter(
-        (btn) => ['3', '4', '5', '6', '7', '8', '9'].includes(btn.textContent?.trim() || '')
-      );
-
-      expect(positionButtons.length).toBeGreaterThan(0);
+      // Selected swatch should have border-app-accent class
+      expect(swatches[3]).toHaveClass('border-app-accent');
     });
 
-    it('should deselect color and position when clicking selected color again', async () => {
+    it('should allow changing color selection', async () => {
       const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
-        />
-      );
+      // Use coloredTag to have a known initial color selection
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[]} />);
 
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
+      const swatches = screen.getAllByTestId('color-swatch');
 
-      // Click selected color to deselect
-      await user.click(colorButtons[0]);
+      // First swatch (red) should be selected (coloredTag has #FF6B6B)
+      expect(swatches[0].getAttribute('aria-pressed')).toBe('true');
 
-      // Position selector should disappear
-      expect(screen.queryByText('Select Position (1-9)')).not.toBeInTheDocument();
+      // Change to second color
+      await user.click(swatches[1]);
+      expect(swatches[0].getAttribute('aria-pressed')).toBe('false');
+      expect(swatches[1].getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('should deselect color when clicking selected color again', async () => {
+      const user = userEvent.setup();
+      // Use coloredTag to have a known initial color selection
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[]} />);
+
+      const swatches = screen.getAllByTestId('color-swatch');
+
+      // First swatch (red) should be selected
+      expect(swatches[0].getAttribute('aria-pressed')).toBe('true');
+
+      // Click it again to deselect
+      await user.click(swatches[0]);
+      expect(swatches[0].getAttribute('aria-pressed')).toBe('false');
     });
   });
 
   describe('Position Selection', () => {
-    it('should show position selector when color is selected', async () => {
-      const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: null, position: null }}
-        />
-      );
+    it('should show dropdown with available positions', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
 
-      expect(screen.queryByText('Select Position (1-9)')).not.toBeInTheDocument();
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      const options = within(dropdown).getAllByRole('option');
 
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
-
-      // Select a color
-      await user.click(colorButtons[3]); // Position 4
-
-      // Position selector should appear
-      expect(screen.getByText('Select Position (1-9)')).toBeInTheDocument();
+      // Should have options 1-9
+      expect(options).toHaveLength(9);
     });
 
-    it('should allow selecting available positions', async () => {
-      const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
-        />
-      );
+    it('should exclude positions used by other tags', () => {
+      // Create a tag with different name to properly test position exclusion
+      const differentTag = createTag({ _id: 'different-tag', name: 'different-tag', color: null, position: null });
+      // mockTags has positions 1 and 2 used by tags with different names
+      render(<TagColorPickerModal {...defaultProps} tag={differentTag} allTags={mockTags} />);
 
-      // Position buttons should be available
-      const positionButtons = screen.getAllByRole('button').filter(
-        (btn) => ['3', '4', '5', '6', '7', '8', '9'].includes(btn.textContent?.trim() || '')
-      );
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      const options = within(dropdown).getAllByRole('option');
 
-      expect(positionButtons.length).toBeGreaterThan(0);
-
-      // Select a position
-      if (positionButtons.length > 0) {
-        await user.click(positionButtons[0]);
-        expect(positionButtons[0]).toHaveClass('border-app-accent');
-      }
+      // Should have 7 options (3-9) since positions 1 and 2 are taken by other tags
+      expect(options).toHaveLength(7);
+      expect(options.map((o) => o.textContent)).toEqual(['3', '4', '5', '6', '7', '8', '9']);
     });
 
-    it('should toggle position selection when clicked again', async () => {
+    it('should allow selecting any available position', async () => {
       const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
-        />
-      );
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
 
-      const positionButtons = screen.getAllByRole('button').filter(
-        (btn) => ['3', '4', '5', '6', '7', '8', '9'].includes(btn.textContent?.trim() || '')
-      );
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
 
-      if (positionButtons.length > 0) {
-        // Click to select
-        await user.click(positionButtons[0]);
-        expect(positionButtons[0]).toHaveClass('border-app-accent');
-
-        // Click again to deselect
-        await user.click(positionButtons[0]);
-        expect(positionButtons[0]).not.toHaveClass('border-app-accent');
-      }
+      await user.selectOptions(dropdown, '5');
+      expect(dropdown).toHaveValue('5');
     });
 
-    it('should show warning when all positions are occupied', () => {
-      // Create 9 tags at positions 1-9 (current tag has NO position/color)
-      const otherColoredTags: Tag[] = [
-        { _id: 'tag-1', userId: 'user-1', name: 'tag1', color: '#FF6B6B', position: 1, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-2', userId: 'user-1', name: 'tag2', color: '#4ECDC4', position: 2, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-3', userId: 'user-1', name: 'nlp', color: '#45B7D1', position: 3, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-4', userId: 'user-1', name: 'vision', color: '#FFA07A', position: 4, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-5', userId: 'user-1', name: 'nlp2', color: '#98D8C8', position: 5, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-6', userId: 'user-1', name: 'nlp3', color: '#F7DC6F', position: 6, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-7', userId: 'user-1', name: 'nlp4', color: '#BB8FCE', position: 7, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-8', userId: 'user-1', name: 'nlp5', color: '#85C1E2', position: 8, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-        { _id: 'tag-9', userId: 'user-1', name: 'nlp6', color: '#F8B88B', position: 9, usageCount: 0, deleted: false, deletedAt: null, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-      ];
+    it('should allow keeping current position for existing tag', () => {
+      // Tag has position 1, which is "used" by the same tag
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[coloredTag]} />);
 
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          allTags={[{ ...mockTag, color: null, position: null }, ...otherColoredTags]} // Current tag has NO position/color
-          tag={{ ...mockTag, color: null, position: null }} // Current tag has NO position/color
-        />
-      );
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      expect(dropdown).toHaveValue('1');
 
-      // Should show warning since all 9 positions are occupied by other tags
-      expect(screen.getByText(/All positions are occupied/i)).toBeInTheDocument();
+      // Position 1 should be available since it's the current tag's position
+      const options = within(dropdown).getAllByRole('option');
+      expect(options.map((o) => o.textContent)).toContain('1');
     });
   });
 
-  describe('Action Buttons', () => {
-    it('should show "Cancel" button when no color is selected', () => {
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: null, position: null }}
-        />
-      );
-
-      const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-      expect(cancelButton).toBeInTheDocument();
-    });
-
-    it('should show "Apply Color & Position" button when both are selected', async () => {
-      const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
-        />
-      );
-
-      const applyButton = screen.getByRole('button', { name: /Apply Color & Position/i });
-      expect(applyButton).toBeInTheDocument();
-      expect(applyButton).not.toBeDisabled();
-    });
-
-    it('should auto-select first available position when color is selected', async () => {
-      const user = userEvent.setup();
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: null, position: null }}
-        />
-      );
-
-      const colorButtons = screen.getAllByRole('button').filter(
-        (btn) => btn.className.includes('aspect-square')
-      );
-
-      // Select color - should auto-select first available position
-      await user.click(colorButtons[3]);
-
-      // Button text should change to "Apply Color & Position" and be enabled
-      const applyButton = screen.getByRole('button', { name: /Apply Color & Position/i });
-      expect(applyButton).not.toBeDisabled();
-    });
-
-    it('should call onColorAndPositionSelect when Apply button clicked', async () => {
+  describe('Actions', () => {
+    it('should call onColorAndPositionSelect with selected values on Set Color', async () => {
       const user = userEvent.setup();
       const onColorAndPositionSelect = vi.fn();
 
       render(
         <TagColorPickerModal
           {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
+          tag={coloredTag} // Use colored tag so we know the initial state
+          allTags={[]}
           onColorAndPositionSelect={onColorAndPositionSelect}
         />
       );
 
-      const applyButton = screen.getByRole('button', { name: /Apply Color & Position/i });
-      await user.click(applyButton);
+      // coloredTag has color #FF6B6B and position 1
+      // Just click Set Color to confirm the existing values
+      await user.click(screen.getByRole('button', { name: /Set Color/i }));
 
       expect(onColorAndPositionSelect).toHaveBeenCalledWith('#FF6B6B', 1);
     });
 
-    it('should show "Remove Color" button when color is selected', () => {
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
-        />
-      );
-
-      const removeButton = screen.getByRole('button', { name: /Remove Color/i });
-      expect(removeButton).toBeInTheDocument();
-    });
-
-    it('should call onColorAndPositionSelect(null, null) when Remove Color clicked', async () => {
+    it('should call onColorAndPositionSelect(null, null) on Remove Color', async () => {
       const user = userEvent.setup();
       const onColorAndPositionSelect = vi.fn();
 
       render(
         <TagColorPickerModal
           {...defaultProps}
-          tag={{ ...mockTag, color: '#FF6B6B', position: 1 }}
+          tag={coloredTag}
           onColorAndPositionSelect={onColorAndPositionSelect}
         />
       );
 
-      const removeButton = screen.getByRole('button', { name: /Remove Color/i });
-      await user.click(removeButton);
+      await user.click(screen.getByRole('button', { name: /Remove Color/i }));
 
       expect(onColorAndPositionSelect).toHaveBeenCalledWith(null, null);
     });
+
+    it('should call onClose on Cancel', async () => {
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+
+      render(<TagColorPickerModal {...defaultProps} onClose={onClose} />);
+
+      await user.click(screen.getByRole('button', { name: /Cancel/i }));
+
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 
-  describe('Loading State', () => {
+  describe('Edge Cases', () => {
+    it('should disable Set Color when all 9 positions are occupied', () => {
+      // Create 9 tags with all positions taken
+      const allColoredTags: Tag[] = Array.from({ length: 9 }, (_, i) =>
+        createTag({
+          _id: `tag-${i}`,
+          name: `tag-${i}`,
+          color: '#FF6B6B',
+          position: i + 1,
+        })
+      );
+
+      render(
+        <TagColorPickerModal
+          {...defaultProps}
+          tag={createTag({ _id: 'new-tag', name: 'new-tag' })}
+          allTags={allColoredTags}
+        />
+      );
+
+      const setColorButton = screen.getByRole('button', { name: /Set Color/i });
+      expect(setColorButton).toBeDisabled();
+    });
+
+    it('should show warning when all positions are occupied', () => {
+      const allColoredTags: Tag[] = Array.from({ length: 9 }, (_, i) =>
+        createTag({
+          _id: `tag-${i}`,
+          name: `tag-${i}`,
+          color: '#FF6B6B',
+          position: i + 1,
+        })
+      );
+
+      render(
+        <TagColorPickerModal
+          {...defaultProps}
+          tag={createTag({ _id: 'new-tag', name: 'new-tag' })}
+          allTags={allColoredTags}
+        />
+      );
+
+      expect(screen.getByText(/All positions are occupied/i)).toBeInTheDocument();
+    });
+
     it('should disable buttons when isLoading is true', () => {
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          isLoading={true}
-        />
-      );
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} isLoading={true} />);
 
-      const buttons = screen.getAllByRole('button').filter(
-        (btn) => btn.textContent?.includes('Apply Color & Position') || btn.textContent?.includes('Remove Color')
-      );
-
-      buttons.forEach((btn) => {
-        expect(btn).toBeDisabled();
-      });
+      expect(screen.getByRole('button', { name: /Set Color/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /Cancel/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /Remove Color/i })).toBeDisabled();
     });
 
-    it('should enable buttons when isLoading is false', () => {
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          isLoading={false}
-        />
-      );
+    it('should render with null tag', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={null} />);
+      expect(screen.getByText('Set Tag Color')).toBeInTheDocument();
+    });
 
-      const removeButton = screen.getByRole('button', { name: /Remove Color/i });
-      expect(removeButton).not.toBeDisabled();
+    it('should disable Set Color when no color is selected', async () => {
+      const user = userEvent.setup();
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
+
+      // Deselect the pre-selected color
+      const swatches = screen.getAllByTestId('color-swatch');
+      const selectedSwatch = swatches.find(
+        (s) => s.getAttribute('aria-pressed') === 'true'
+      );
+      if (selectedSwatch) {
+        await user.click(selectedSwatch);
+      }
+
+      const setColorButton = screen.getByRole('button', { name: /Set Color/i });
+      expect(setColorButton).toBeDisabled();
     });
   });
 
-  describe('Null Tag', () => {
-    it('should render with null tag', () => {
-      render(
-        <TagColorPickerModal
-          {...defaultProps}
-          tag={null}
-        />
-      );
+  describe('Keyboard Instruction', () => {
+    it('should display the selected position number in keyboard instruction', () => {
+      render(<TagColorPickerModal {...defaultProps} tag={coloredTag} allTags={[]} />);
 
-      expect(screen.getByText('Assign Color & Position')).toBeInTheDocument();
+      // Modal renders in a portal, so use document.querySelector
+      const kbd = document.querySelector('kbd');
+      expect(kbd).toBeInTheDocument();
+      expect(kbd?.textContent).toBe('1');
+    });
+
+    it('should update keyboard instruction when position changes', async () => {
+      const user = userEvent.setup();
+      render(<TagColorPickerModal {...defaultProps} tag={uncoloredTag} allTags={[]} />);
+
+      const dropdown = screen.getByRole('combobox', { name: /Select position/i });
+      await user.selectOptions(dropdown, '5');
+
+      // Modal renders in a portal, so use document.querySelector
+      const kbd = document.querySelector('kbd');
+      expect(kbd).toBeInTheDocument();
+      expect(kbd?.textContent).toBe('5');
     });
   });
 });
