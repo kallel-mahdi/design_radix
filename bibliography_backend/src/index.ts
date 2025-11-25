@@ -19,6 +19,7 @@ import { tagsRouter } from './routes/tags';
 import { projectsRouter } from './routes/projects';
 import { duplicatesRouter } from './routes/duplicates';
 import { healthRouter } from './routes/health';
+import { annotationsRouter, referenceAnnotationsRouter } from './routes/annotations';
 
 const app: Express = express();
 
@@ -61,10 +62,12 @@ if (config.trustGatewayAuth) {
 
 // Routes
 app.use('/api/bibliography/references', referencesRouter);
+app.use('/api/bibliography/references/:referenceId/annotations', referenceAnnotationsRouter); // Nested annotations
 app.use('/api/bibliography/collections', collectionsRouter);
 app.use('/api/bibliography/tags', tagsRouter);
 app.use('/api/bibliography/projects', projectsRouter);
 app.use('/api/bibliography/duplicates', duplicatesRouter);
+app.use('/api/bibliography/annotations', annotationsRouter); // Direct annotation routes
 app.use('/health', healthRouter);
 
 // Error handler (must be last)
@@ -74,7 +77,9 @@ app.use(errorHandler);
 mongoose
   .connect(config.mongodbUrl)
   .then(() => {
-    ApplicationLogger.info('MongoDB connected', { database: config.mongodbUrl });
+    // Log only database name, not full URL (may contain credentials)
+    const dbName = config.mongodbUrl.split('/').pop()?.split('?')[0] || 'unknown';
+    ApplicationLogger.info('MongoDB connected', { database: dbName });
 
     // Start server
     app.listen(config.port, () => {

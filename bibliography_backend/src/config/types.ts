@@ -12,6 +12,7 @@ export const TYPES = {
   ISearchService: Symbol.for('ISearchService'),
   IPdfService: Symbol.for('IPdfService'),
   IPdfMetadataService: Symbol.for('IPdfMetadataService'), // Session 10.5
+  IAnnotationService: Symbol.for('IAnnotationService'), // PDF annotations
 
   // Controllers
   ReferenceController: Symbol.for('ReferenceController'),
@@ -21,4 +22,5 @@ export const TYPES = {
   DuplicateController: Symbol.for('DuplicateController'),
   SearchController: Symbol.for('SearchController'),
   HealthController: Symbol.for('HealthController'),
+  AnnotationController: Symbol.for('AnnotationController'), // PDF annotations
 };

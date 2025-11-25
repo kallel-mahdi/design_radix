@@ -385,3 +385,86 @@ export const ErrorCodes = {
 } as const;
 
 export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
+
+/**
+ * Annotation Schemas (Zotero-inspired PDF annotations)
+ *
+ * Zotero stores annotations in JSON format in the database.
+ * We follow the same pattern for MongoDB.
+ *
+ * Reference: zotero/chrome/content/zotero/xpcom/data/annotations.js
+ */
+
+// Annotation types (MVP: highlight, note only)
+export const AnnotationTypeSchema = z.enum(['highlight', 'note']);
+export type AnnotationType = z.infer<typeof AnnotationTypeSchema>;
+
+// Zotero color palette (5 colors)
+export const ZoteroColorSchema = z.enum([
+  '#ffd400', // Yellow
+  '#ff6666', // Red
+  '#2ea8e5', // Blue
+  '#a28ae5', // Purple
+  '#5fb236', // Green
+]);
+
+// Position schema for highlights
+const AnnotationPositionSchema = z.object({
+  // Bounding rectangles: [x1, y1, x2, y2] in PDF coordinate space
+  rects: z.array(z.tuple([z.number(), z.number(), z.number(), z.number()])),
+});
+
+// Content schema
+const AnnotationContentSchema = z.object({
+  text: z.string().optional(), // Highlighted text (extracted from PDF)
+  comment: z.string().optional(), // User's note/comment
+});
+
+/**
+ * Annotation Schema (response)
+ */
+export const AnnotationSchema = z.object({
+  _id: z.string(),
+  userId: z.string(),
+  referenceId: z.string(),
+  type: AnnotationTypeSchema,
+  pageIndex: z.number(), // 0-based page index
+  position: AnnotationPositionSchema,
+  content: AnnotationContentSchema,
+  color: z.string(), // Hex color
+  sortIndex: z.string(), // Zotero-style sort index: "XXXXX|YYYYY|ZZZZZ"
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/**
+ * Create Annotation Schema (request)
+ */
+export const CreateAnnotationSchema = z.object({
+  type: AnnotationTypeSchema,
+  pageIndex: z.number().min(0),
+  position: AnnotationPositionSchema,
+  content: AnnotationContentSchema,
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid hex color'),
+  sortIndex: z.string().optional(), // Auto-generated if not provided
+});
+
+/**
+ * Update Annotation Schema (request)
+ */
+export const UpdateAnnotationSchema = z.object({
+  content: AnnotationContentSchema.optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid hex color').optional(),
+});
+
+/**
+ * Type inference
+ */
+export type Annotation = z.infer<typeof AnnotationSchema>;
+export type CreateAnnotation = z.infer<typeof CreateAnnotationSchema>;
+export type UpdateAnnotation = z.infer<typeof UpdateAnnotationSchema>;
+
+/**
+ * Array schema for list responses
+ */
+export const AnnotationListSchema = z.array(AnnotationSchema);

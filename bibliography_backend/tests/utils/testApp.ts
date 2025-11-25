@@ -11,6 +11,7 @@ import { tagsRouter } from '../../src/routes/tags';
 import { duplicatesRouter } from '../../src/routes/duplicates';
 import { projectsRouter } from '../../src/routes/projects';
 import { healthRouter } from '../../src/routes/health';
+import { annotationsRouter, referenceAnnotationsRouter } from '../../src/routes/annotations';
 
 export function createTestApp() {
   const app = express();
@@ -28,6 +29,8 @@ export function createTestApp() {
 
   // Routes
   app.use('/api/bibliography/references', referencesRouter);
+  app.use('/api/bibliography/references/:referenceId/annotations', referenceAnnotationsRouter);
+  app.use('/api/bibliography/annotations', annotationsRouter);
   app.use('/api/bibliography/collections', collectionsRouter);
   app.use('/api/bibliography/tags', tagsRouter);
   app.use('/api/bibliography/duplicates', duplicatesRouter);
