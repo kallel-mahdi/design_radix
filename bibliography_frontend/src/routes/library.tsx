@@ -238,8 +238,9 @@ export function LibraryPage() {
         </div>
 
         {/* Content - with drag-drop support (Session 10.5) */}
+        {/* NOTE: Use min-h-0 instead of overflow-auto to allow flex child to shrink properly */}
         <div
-          className={`flex-1 overflow-auto relative ${
+          className={`flex-1 min-h-0 relative ${
             isDragging ? 'ring-2 ring-green-500 ring-inset bg-green-50/50' : ''
           }`}
           onDragOver={handleDragOver}
@@ -324,7 +325,8 @@ function ReferenceListContent({ queryParams, onImport }: ReferenceListContentPro
   }
 
   return (
-    <div className="flex-1 overflow-auto">
+    // NOTE: h-full lets ReferenceTable handle its own scrolling with overflow-auto
+    <div className="h-full">
       <ReferenceTable references={references} />
     </div>
   );

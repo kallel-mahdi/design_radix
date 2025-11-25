@@ -590,6 +590,10 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
     );
   }
 
+  // Column widths for CSS grid - use minmax(0, ...) to prevent grid blowout
+  // When content is wider than column, minmax(0, X) allows truncation to work
+  const gridTemplateColumns = '48px minmax(0, 300px) minmax(0, 200px) 80px minmax(0, 200px) minmax(0, 150px) 60px minmax(0, 150px)';
+
   return (
     <div
       ref={tableContainerRef}
@@ -599,91 +603,111 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      <table className="w-full border-collapse">
-        <thead className="sticky top-0 bg-app-surface z-10">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-app-border">
-              {headerGroup.headers.map((header) => {
-                const canSort = header.column.getCanSort();
-                const sorted = header.column.getIsSorted();
+      {/* Header row - sticky */}
+      <div
+        role="rowgroup"
+        className="sticky top-0 bg-app-surface z-10 border-b border-app-border"
+      >
+        {table.getHeaderGroups().map((headerGroup) => (
+          <div
+            key={headerGroup.id}
+            role="row"
+            className="grid"
+            style={{ gridTemplateColumns }}
+          >
+            {headerGroup.headers.map((header) => {
+              const canSort = header.column.getCanSort();
+              const sorted = header.column.getIsSorted();
 
-                return (
-                  <th
-                    key={header.id}
-                    role="columnheader"
-                    data-testid={canSort ? `column-header-${header.id}` : undefined}
-                    style={{ width: header.getSize() }}
-                    className={`px-3 py-3 text-left text-sm font-medium text-app-text-primary ${
-                      canSort ? 'cursor-pointer select-none hover:bg-app-surface-hover' : ''
-                    }`}
-                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                    aria-sort={
-                      sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined
-                    }
-                  >
-                    <div className="flex items-center gap-2">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {canSort && sorted && (
-                        <span className="text-app-accent">
-                          {sorted === 'asc' ? (
-                            <ChevronUpIcon className="h-4 w-4" />
-                          ) : (
-                            <ChevronDownIcon className="h-4 w-4" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody style={{ height: `${totalSize}px` }} className="relative">
-          {virtualRows.map((virtualRow) => {
-            const row = rows[virtualRow.index];
-            if (!row) return null;
+              return (
+                <div
+                  key={header.id}
+                  role="columnheader"
+                  data-testid={canSort ? `column-header-${header.id}` : undefined}
+                  className={`px-3 py-3 text-left text-sm font-medium text-app-text-primary ${
+                    canSort ? 'cursor-pointer select-none hover:bg-app-surface-hover' : ''
+                  }`}
+                  onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                  aria-sort={
+                    sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {canSort && sorted && (
+                      <span className="text-app-accent">
+                        {sorted === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4" />
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
 
-            const isSelected = selectedReferenceIds.has(row.original._id);
-            const isFocused = focusedRowIndex === virtualRow.index;
+      {/* Body rows - virtualized with absolute positioning */}
+      <div
+        role="rowgroup"
+        style={{ height: `${totalSize}px`, position: 'relative' }}
+      >
+        {virtualRows.map((virtualRow) => {
+          const row = rows[virtualRow.index];
+          if (!row) return null;
 
-            return (
-              <tr
-                key={row.id}
-                data-testid="reference-card"
-                data-index={virtualRow.index}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-                className={`border-b border-app-border cursor-pointer transition-colors ${
+          const isSelected = selectedReferenceIds.has(row.original._id);
+          const isFocused = focusedRowIndex === virtualRow.index;
+
+          return (
+            <div
+              key={row.id}
+              role="row"
+              data-testid="reference-card"
+              data-index={virtualRow.index}
+              className="grid"
+              style={{
+                gridTemplateColumns,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              <div
+                className={`col-span-full grid border-b border-app-border cursor-pointer transition-colors ${
                   isSelected
                     ? 'bg-app-accent/5 border-l-4 border-l-app-accent'
                     : 'hover:bg-app-bg-hover'
                 } ${isFocused ? 'ring-2 ring-app-accent ring-inset' : ''}`}
+                style={{ gridTemplateColumns }}
                 onClick={(e) => handleRowClick(virtualRow.index, e, rows)}
                 onDoubleClick={(e) => handleRowDoubleClick(row.original, e)}
                 onContextMenu={(e) => handleContextMenu(e, row.original)}
                 aria-selected={isSelected}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td
+                  <div
                     key={cell.id}
-                    style={{ width: cell.column.getSize() }}
-                    className="px-3 py-3 text-sm"
+                    role="cell"
+                    className="px-3 py-3 text-sm flex items-center min-w-0 overflow-hidden"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                    <span className="truncate w-full">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </span>
+                  </div>
                 ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Context Menu */}
       <ContextMenu

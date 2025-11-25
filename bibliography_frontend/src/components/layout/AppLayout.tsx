@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 import { ActivityBar } from './ActivityBar';
 import { DetailsPane } from './DetailsPane';
 import { SearchBar } from './SearchBar';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '@/features/library/store/library.store';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/Resizable';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle, type ImperativePanelHandle } from '@/components/ui/Resizable';
 import { usePanelPersistence } from '@/common/hooks/usePanelPersistence';
 import { useReferencesQuery } from '@/features/library/api/references.queries';
 import { useCollectionsQuery } from '@/features/library/api/collections.queries';
@@ -65,11 +65,26 @@ export const AppLayout: React.FC = () => {
   const [newCollectionDialogOpen, setNewCollectionDialogOpen] = useState(false);
   const createCollectionMutation = useCreateCollectionMutation();
 
-  // Panel persistence: Sidebar | Main | Details (when open)
+  // Panel persistence: Sidebar | Main | Details (always 3 panels, details is collapsible)
   const { defaultLayout, onLayout } = usePanelPersistence(
-    'app-layout-panels',
-    detailsPaneOpen && activeReferenceId ? [25, 50, 25] : [25, 75]
+    'app-layout-panels-v2', // New key to avoid loading stale 2-panel layouts
+    [25, 50, 25]
   );
+
+  // Ref for controlling details panel collapse/expand
+  const detailsPanelRef = useRef<ImperativePanelHandle>(null);
+
+  // Sync details panel collapse state with UI store
+  const shouldShowDetails = detailsPaneOpen && activeReferenceId;
+  useEffect(() => {
+    if (detailsPanelRef.current) {
+      if (shouldShowDetails) {
+        detailsPanelRef.current.expand();
+      } else {
+        detailsPanelRef.current.collapse();
+      }
+    }
+  }, [shouldShowDetails]);
 
   return (
     <div className="h-screen flex bg-app-bg text-app-text-primary overflow-hidden">
@@ -84,7 +99,7 @@ export const AppLayout: React.FC = () => {
       {/* Resizable Panel Group */}
       <ResizablePanelGroup direction="horizontal" className="flex-1" onLayout={onLayout}>
         {/* Sidebar Panel */}
-        <ResizablePanel defaultSize={defaultLayout[0]} minSize={15} maxSize={40}>
+        <ResizablePanel id="sidebar" order={1} defaultSize={defaultLayout[0]} minSize={15} maxSize={40}>
           <aside className="h-full bg-app-surface border-r border-app-border flex flex-col overflow-hidden">
             {/* Search Bar */}
             <div className="p-4 border-b border-app-border">
@@ -137,27 +152,36 @@ export const AppLayout: React.FC = () => {
         <ResizableHandle withHandle />
 
         {/* Main Content Panel */}
-        <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
+        <ResizablePanel id="main" order={2} defaultSize={defaultLayout[1]} minSize={30}>
           <main className="h-full flex flex-col overflow-hidden">
             <Outlet />
           </main>
         </ResizablePanel>
 
-        {/* Details Pane - Conditional */}
-        {detailsPaneOpen && activeReferenceId && (
-          <>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={defaultLayout[2] || 25} minSize={20} maxSize={50}>
-              <DetailsPane
-                isOpen={true}
-                onClose={() => setDetailsPaneOpen(false)}
-                referenceId={activeReferenceId}
-                activeTab={detailsPaneTab}
-                onTabChange={setDetailsPaneTab}
-              />
-            </ResizablePanel>
-          </>
-        )}
+        {/* Details Pane - Always rendered, controlled via collapsible */}
+        <ResizableHandle withHandle />
+        <ResizablePanel
+          id="details"
+          order={3}
+          ref={detailsPanelRef}
+          defaultSize={defaultLayout[2]}
+          minSize={20}
+          maxSize={50}
+          collapsible={true}
+          collapsedSize={0}
+          onCollapse={() => setDetailsPaneOpen(false)}
+          onExpand={() => setDetailsPaneOpen(true)}
+        >
+          {shouldShowDetails && activeReferenceId && (
+            <DetailsPane
+              isOpen={true}
+              onClose={() => setDetailsPaneOpen(false)}
+              referenceId={activeReferenceId}
+              activeTab={detailsPaneTab}
+              onTabChange={setDetailsPaneTab}
+            />
+          )}
+        </ResizablePanel>
       </ResizablePanelGroup>
 
       {/* New Collection Dialog */}
