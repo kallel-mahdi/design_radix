@@ -2,6 +2,9 @@ import request from 'supertest';
 import { connectInMemoryMongo, clearDatabase, disconnectInMemoryMongo } from '../utils/mongoMemoryServer';
 import { createTestApp } from '../utils/testApp';
 import { Reference } from '../../src/models/Reference';
+import { container } from '../../src/config/container';
+import { CrossrefService } from '../../src/services/CrossrefService';
+import { TYPES } from '../../src/config/types';
 
 const app = createTestApp();
 
@@ -20,6 +23,9 @@ describe('DOI Import API Integration Tests', () => {
   afterEach(async () => {
     await clearDatabase();
     jest.clearAllMocks();
+    // Clear Crossref cache to ensure test isolation
+    const crossrefService = container.get<CrossrefService>(TYPES.ICrossrefService);
+    crossrefService.clearCache();
   });
 
   const mockCrossrefResponse = {

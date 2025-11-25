@@ -31,7 +31,7 @@ export interface ITagService {
   create(userId: string, data: CreateTagInput): Promise<TagWithUsageCount>;
   getById(id: string, userId: string): Promise<ITag | null>;
   getByName(name: string, userId: string): Promise<ITag | null>;
-  list(userId: string): Promise<Array<any>>;
+  list(userId: string): Promise<TagWithUsageCount[]>;
   update(id: string, userId: string, data: UpdateTagInput): Promise<ITag | null>;
   updateColor(name: string, userId: string, color: string | null, position?: number | null): Promise<TagWithUsageCount | null>;
   rename(oldName: string, newName: string, userId: string): Promise<TagWithUsageCount | null>;

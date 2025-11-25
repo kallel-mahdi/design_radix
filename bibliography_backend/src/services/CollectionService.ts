@@ -147,45 +147,53 @@ export class CollectionService implements ICollectionService {
   }
 
   /**
-   * Recursively find all descendants of a collection
+   * Find all descendants of a collection using $graphLookup
+   * PERF: Single aggregation query instead of recursive N+1 queries
    */
-  private async findAllDescendants(userId: string, parentId: string): Promise<any[]> {
-    const children = await Collection.find({
-      userId,
-      parentId: new mongoose.Types.ObjectId(parentId),
-      deleted: false
-    });
-
-    const allDescendants: any[] = [...children];
-
-    // Recursively find descendants of each child
-    for (const child of children) {
-      const grandchildren = await this.findAllDescendants(userId, child._id.toString());
-      allDescendants.push(...grandchildren);
-    }
-
-    return allDescendants;
+  private async findAllDescendants(userId: string, parentId: string): Promise<ICollection[]> {
+    const result = await Collection.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(parentId), userId, deleted: false } },
+      {
+        $graphLookup: {
+          from: 'collections',
+          startWith: '$_id',
+          connectFromField: '_id',
+          connectToField: 'parentId',
+          as: 'descendants',
+          maxDepth: 5,
+          restrictSearchWithMatch: { userId, deleted: false }
+        }
+      },
+      { $unwind: { path: '$descendants', preserveNullAndEmptyArrays: true } },
+      { $replaceRoot: { newRoot: { $ifNull: ['$descendants', { _id: null }] } } },
+      { $match: { _id: { $ne: null } } }
+    ]);
+    return result;
   }
 
   /**
-   * Recursively find all deleted descendants of a collection
+   * Find all deleted descendants of a collection using $graphLookup
+   * PERF: Single aggregation query instead of recursive N+1 queries
    */
-  private async findAllDeletedDescendants(userId: string, parentId: string): Promise<any[]> {
-    const children = await Collection.find({
-      userId,
-      parentId: new mongoose.Types.ObjectId(parentId),
-      deleted: true
-    });
-
-    const allDescendants: any[] = [...children];
-
-    // Recursively find descendants of each child
-    for (const child of children) {
-      const grandchildren = await this.findAllDeletedDescendants(userId, child._id.toString());
-      allDescendants.push(...grandchildren);
-    }
-
-    return allDescendants;
+  private async findAllDeletedDescendants(userId: string, parentId: string): Promise<ICollection[]> {
+    const result = await Collection.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(parentId), userId, deleted: true } },
+      {
+        $graphLookup: {
+          from: 'collections',
+          startWith: '$_id',
+          connectFromField: '_id',
+          connectToField: 'parentId',
+          as: 'descendants',
+          maxDepth: 5,
+          restrictSearchWithMatch: { userId, deleted: true }
+        }
+      },
+      { $unwind: { path: '$descendants', preserveNullAndEmptyArrays: true } },
+      { $replaceRoot: { newRoot: { $ifNull: ['$descendants', { _id: null }] } } },
+      { $match: { _id: { $ne: null } } }
+    ]);
+    return result;
   }
 
   private async getNextPosition(userId: string, parentId: string | null): Promise<number> {
@@ -197,42 +205,69 @@ export class CollectionService implements ICollectionService {
   /**
    * Calculate the depth of a collection (how many levels from root)
    * Root collections have depth 1
+   * PERF: Uses $graphLookup to traverse ancestors in one query
    */
   private async calculateDepth(userId: string, collectionId: string): Promise<number> {
-    const collection = await Collection.findOne({ _id: collectionId, userId, deleted: false });
+    const result = await Collection.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(collectionId), userId, deleted: false } },
+      {
+        $graphLookup: {
+          from: 'collections',
+          startWith: '$parentId',
+          connectFromField: 'parentId',
+          connectToField: '_id',
+          as: 'ancestors',
+          maxDepth: 5,
+          restrictSearchWithMatch: { userId, deleted: false }
+        }
+      },
+      { $project: { depth: { $add: [{ $size: '$ancestors' }, 1] } } }
+    ]);
 
-    if (!collection) {
+    if (result.length === 0) {
       throw new Error('COLLECTION_NOT_FOUND: Collection does not exist');
     }
 
-    if (!collection.parentId) {
-      return 1; // Root level
-    }
-
-    // Recursively calculate parent depth
-    return 1 + await this.calculateDepth(userId, collection.parentId.toString());
+    return result[0].depth;
   }
 
   /**
    * Calculate the maximum depth of a subtree rooted at collectionId
    * (how many levels deep the deepest descendant is)
+   * PERF: Uses $graphLookup with depthField to find max depth in one query
    */
   private async calculateSubtreeDepth(userId: string, collectionId: string): Promise<number> {
-    const children = await Collection.find({
-      userId,
-      parentId: new mongoose.Types.ObjectId(collectionId),
-      deleted: false
-    });
+    const result = await Collection.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(collectionId), userId, deleted: false } },
+      {
+        $graphLookup: {
+          from: 'collections',
+          startWith: '$_id',
+          connectFromField: '_id',
+          connectToField: 'parentId',
+          as: 'descendants',
+          maxDepth: 5,
+          depthField: 'level',
+          restrictSearchWithMatch: { userId, deleted: false }
+        }
+      },
+      {
+        $project: {
+          maxDepth: {
+            $cond: {
+              if: { $eq: [{ $size: '$descendants' }, 0] },
+              then: 1,
+              else: { $add: [{ $max: '$descendants.level' }, 2] }
+            }
+          }
+        }
+      }
+    ]);
 
-    if (children.length === 0) {
-      return 1; // Leaf node
+    if (result.length === 0) {
+      return 1; // Collection doesn't exist or is deleted
     }
 
-    // Recursively find max depth among children
-    const childDepths = await Promise.all(
-      children.map(child => this.calculateSubtreeDepth(userId, child._id.toString()))
-    );
-
-    return 1 + Math.max(...childDepths);
+    return result[0].maxDepth;
   }
 }

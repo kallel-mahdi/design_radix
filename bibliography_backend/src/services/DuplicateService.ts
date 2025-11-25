@@ -16,6 +16,7 @@ export class DuplicateService implements IDuplicateService {
    * 3. Title + first author match (lower confidence)
    *
    * NOTE: Follows Zotero's duplicate detection algorithm
+   * PERF: Uses batch operations to avoid N+1 queries
    */
   async detectForReference(userId: string, referenceId: string): Promise<IDuplicateCandidate[]> {
     ApplicationLogger.info('Detecting duplicates', { userId, referenceId });
@@ -25,7 +26,13 @@ export class DuplicateService implements IDuplicateService {
       return [];
     }
 
-    const candidates: IDuplicateCandidate[] = [];
+    // Collect all potential matches with their confidence and reason
+    type MatchReason = 'isbn' | 'doi' | 'title-creator';
+    const potentialMatches: Array<{
+      matchId: mongoose.Types.ObjectId;
+      reason: MatchReason;
+      confidence: number;
+    }> = [];
 
     // Stage 1: ISBN match
     if (reference.isbn) {
@@ -37,24 +44,11 @@ export class DuplicateService implements IDuplicateService {
       });
 
       for (const match of isbnMatches) {
-        const existing = await DuplicateCandidate.findOne({
-          userId,
-          existingReferenceId: match._id,
-          duplicateReferenceId: reference._id
+        potentialMatches.push({
+          matchId: match._id,
+          reason: 'isbn',
+          confidence: 0.95
         });
-
-        if (!existing) {
-          const candidate = await DuplicateCandidate.create({
-            userId,
-            existingReferenceId: match._id,
-            duplicateReferenceId: reference._id,
-            matchReason: 'isbn',
-            confidence: 0.95
-          });
-          candidates.push(candidate);
-        } else {
-          candidates.push(existing);
-        }
       }
     }
 
@@ -68,23 +62,13 @@ export class DuplicateService implements IDuplicateService {
       });
 
       for (const match of doiMatches) {
-        const existing = await DuplicateCandidate.findOne({
-          userId,
-          existingReferenceId: match._id,
-          duplicateReferenceId: reference._id
-        });
-
-        if (!existing) {
-          const candidate = await DuplicateCandidate.create({
-            userId,
-            existingReferenceId: match._id,
-            duplicateReferenceId: reference._id,
-            matchReason: 'doi',
+        // Skip if already matched by ISBN
+        if (!potentialMatches.some(p => p.matchId.equals(match._id))) {
+          potentialMatches.push({
+            matchId: match._id,
+            reason: 'doi',
             confidence: 0.9
           });
-          candidates.push(candidate);
-        } else {
-          candidates.push(existing);
         }
       }
     }
@@ -103,35 +87,60 @@ export class DuplicateService implements IDuplicateService {
         });
 
         for (const match of titleMatches) {
+          // Skip if already matched by ISBN or DOI
+          if (potentialMatches.some(p => p.matchId.equals(match._id))) {
+            continue;
+          }
+
           const matchTitleNormalized = this.normalizeTitle(match.title);
           const similarity = this.calculateSimilarity(titleNormalized, matchTitleNormalized);
 
           if (similarity > 0.85) {
-            const existing = await DuplicateCandidate.findOne({
-              userId,
-              existingReferenceId: match._id,
-              duplicateReferenceId: reference._id
+            potentialMatches.push({
+              matchId: match._id,
+              reason: 'title-creator',
+              confidence: similarity
             });
-
-            if (!existing) {
-              const candidate = await DuplicateCandidate.create({
-                userId,
-                existingReferenceId: match._id,
-                duplicateReferenceId: reference._id,
-                matchReason: 'title-creator',
-                confidence: similarity
-              });
-              candidates.push(candidate);
-            } else {
-              candidates.push(existing);
-            }
           }
         }
       }
     }
 
-    ApplicationLogger.info('Duplicates detected', { userId, referenceId, count: candidates.length });
-    return candidates;
+    if (potentialMatches.length === 0) {
+      return [];
+    }
+
+    // BATCH: Check existing candidates in one query
+    const matchIds = potentialMatches.map(m => m.matchId);
+    const existingCandidates = await DuplicateCandidate.find({
+      userId,
+      existingReferenceId: { $in: matchIds },
+      duplicateReferenceId: reference._id
+    });
+
+    const existingSet = new Set(
+      existingCandidates.map(c => c.existingReferenceId.toString())
+    );
+
+    // BATCH: Create all new candidates at once
+    const toCreate = potentialMatches
+      .filter(m => !existingSet.has(m.matchId.toString()))
+      .map(m => ({
+        userId,
+        existingReferenceId: m.matchId,
+        duplicateReferenceId: reference._id,
+        matchReason: m.reason,
+        confidence: m.confidence
+      }));
+
+    let newCandidates: IDuplicateCandidate[] = [];
+    if (toCreate.length > 0) {
+      newCandidates = await DuplicateCandidate.insertMany(toCreate);
+    }
+
+    const allCandidates = [...existingCandidates, ...newCandidates];
+    ApplicationLogger.info('Duplicates detected', { userId, referenceId, count: allCandidates.length });
+    return allCandidates;
   }
 
   async listUnresolved(userId: string): Promise<IDuplicateCandidate[]> {
