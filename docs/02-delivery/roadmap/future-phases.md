@@ -12,6 +12,17 @@
 ### Frontend Enhancements (70-90 hours)
 
 **Productivity Features**:
+- [ ] **Duplicates Resolution UI** (8-10 hours) - HIGH PRIORITY
+  - Two-column comparison cards (Figma Frame 36)
+  - Side-by-side field comparison with diff highlighting
+  - Match reason badge (ISBN/DOI/title-creator with confidence %)
+  - Action buttons: Keep Existing, Keep Both
+  - Merge functionality (Phase 1.5 - advanced)
+  - DuplicateComparisonCard component
+  - React Query hooks (useDuplicatesQuery, useResolveDuplicateMutation)
+  - Integration tests + E2E tests
+  - **Backend**: Already complete (detection + resolution API ready)
+  - **MVP Status**: Button disabled, deferred to Phase 1
 - [ ] Comprehensive keyboard shortcuts
   - Document full Zotero shortcut map
   - Implement: Cmd+E (export), Cmd+Shift+I (import), Cmd+Shift+C (copy citation placeholder)
@@ -57,6 +68,16 @@
   - RIS export (database compatibility)
   - JSON export (full data dump)
   - CSV export (spreadsheet integration)
+- [ ] **Advanced Filters Panel** (7-9 hours) - MEDIUM PRIORITY
+  - Author facets with counts (searchable checkbox list)
+  - Venue facets with counts (searchable checkbox list)
+  - Year range dual-thumb slider
+  - Tag facets (reuse existing TagSelector pattern)
+  - "Clear All Filters" button
+  - Collapsible sections matching Figma Frame 19
+  - **Backend**: Requires aggregation APIs (SearchService with MongoDB $facet)
+  - **Frontend**: Reuse TagSelector pattern for filter sections
+  - **MVP Status**: Deferred (current filtering sufficient for MVP)
 
 **Performance Optimizations**:
 - [ ] Virtual scrolling for 10k+ references (TanStack Virtual)

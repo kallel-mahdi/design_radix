@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from '@tanstack/react-router';
 import { ActivityBar } from './ActivityBar';
 import { DetailsPane } from './DetailsPane';
 import { SearchBar } from './SearchBar';
+import { SettingsMenu } from './SettingsMenu';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '@/features/library/store/library.store';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle, type ImperativePanelHandle } from '@/components/ui/Resizable';
@@ -101,13 +102,16 @@ export const AppLayout: React.FC = () => {
         {/* Sidebar Panel */}
         <ResizablePanel id="sidebar" order={1} defaultSize={defaultLayout[0]} minSize={15} maxSize={40}>
           <aside className="h-full bg-app-surface border-r border-app-border flex flex-col overflow-hidden">
-            {/* Search Bar */}
-            <div className="p-4 border-b border-app-border">
+            {/* Search Bar and Settings */}
+            <div className="p-4 border-b border-app-border space-y-3">
               <SearchBar
                 onSearch={handleSearch}
                 onClear={handleClearSearch}
                 placeholder="Search references..."
               />
+              <div className="flex justify-end">
+                <SettingsMenu />
+              </div>
             </div>
 
             {/* Collections */}

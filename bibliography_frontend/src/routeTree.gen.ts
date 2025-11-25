@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrashRouteImport } from './routes/trash'
+import { Route as TagsRouteImport } from './routes/tags'
+import { Route as SharingRouteImport } from './routes/sharing'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as LibraryRouteImport } from './routes/library'
@@ -19,6 +21,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const TrashRoute = TrashRouteImport.update({
   id: '/trash',
   path: '/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagsRoute = TagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SharingRoute = SharingRouteImport.update({
+  id: '/sharing',
+  path: '/sharing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -53,6 +65,8 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/sharing': typeof SharingRoute
+  '/tags': typeof TagsRoute
   '/trash': typeof TrashRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +75,8 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/sharing': typeof SharingRoute
+  '/tags': typeof TagsRoute
   '/trash': typeof TrashRoute
 }
 export interface FileRoutesById {
@@ -70,6 +86,8 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
+  '/sharing': typeof SharingRoute
+  '/tags': typeof TagsRoute
   '/trash': typeof TrashRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +98,19 @@ export interface FileRouteTypes {
     | '/library'
     | '/projects'
     | '/search'
+    | '/sharing'
+    | '/tags'
     | '/trash'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/duplicates' | '/library' | '/projects' | '/search' | '/trash'
+  to:
+    | '/'
+    | '/duplicates'
+    | '/library'
+    | '/projects'
+    | '/search'
+    | '/sharing'
+    | '/tags'
+    | '/trash'
   id:
     | '__root__'
     | '/'
@@ -90,6 +118,8 @@ export interface FileRouteTypes {
     | '/library'
     | '/projects'
     | '/search'
+    | '/sharing'
+    | '/tags'
     | '/trash'
   fileRoutesById: FileRoutesById
 }
@@ -99,6 +129,8 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   ProjectsRoute: typeof ProjectsRoute
   SearchRoute: typeof SearchRoute
+  SharingRoute: typeof SharingRoute
+  TagsRoute: typeof TagsRoute
   TrashRoute: typeof TrashRoute
 }
 
@@ -109,6 +141,20 @@ declare module '@tanstack/react-router' {
       path: '/trash'
       fullPath: '/trash'
       preLoaderRoute: typeof TrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tags': {
+      id: '/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof TagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sharing': {
+      id: '/sharing'
+      path: '/sharing'
+      fullPath: '/sharing'
+      preLoaderRoute: typeof SharingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -155,6 +201,8 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   ProjectsRoute: ProjectsRoute,
   SearchRoute: SearchRoute,
+  SharingRoute: SharingRoute,
+  TagsRoute: TagsRoute,
   TrashRoute: TrashRoute,
 }
 export const routeTree = rootRouteImport

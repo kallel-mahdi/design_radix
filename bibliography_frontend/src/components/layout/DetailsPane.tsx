@@ -300,11 +300,14 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({
             <PdfTab reference={reference || null} />
           </Tab.Panel>
 
-          {/* Notes Tab - Placeholder for Phase 2 */}
+          {/* Notes Tab - Empty state, Phase 2 feature */}
           <Tab.Panel className="p-4 h-full flex items-center justify-center">
-            <div className="text-center text-app-text-secondary">
-              <p className="mb-2">Notes feature coming in Phase 2</p>
-              <p className="text-sm text-app-text-muted">Add personal notes to your references</p>
+            <div className="text-center max-w-xs">
+              <div className="mb-4 flex justify-center">
+                <DocumentTextIcon className="w-12 h-12 text-app-accent" />
+              </div>
+              <h3 className="text-lg font-semibold text-app-text mb-2">NOTES</h3>
+              <p className="text-app-text-muted">No notes have been added</p>
             </div>
           </Tab.Panel>
         </Tab.Panels>
