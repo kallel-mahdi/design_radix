@@ -5,7 +5,7 @@ import { ImportController } from '../controllers/ImportController';
 import { PdfController } from '../controllers/PdfController';
 import { TYPES } from '../config/types';
 import { validate, validateParams, validateQuery, ObjectIdParamSchema, ReferenceListQuerySchema } from '../middleware/validate';
-import { CreateReferenceSchema, UpdateReferenceSchema, ImportDoiSchema } from '@bibliography/shared';
+import { CreateReferenceSchema, UpdateReferenceSchema } from '@bibliography/shared';
 import { config } from '../config/environment';
 
 const router: ExpressRouter = Router();
@@ -26,27 +26,13 @@ router.get('/:id', validateParams(ObjectIdParamSchema), (req, res, next) => {
   return controller.getById(req, res, next);
 });
 
-// Session 6 - DOI Import (moved to ImportController)
-router.post('/import-doi', validate(ImportDoiSchema), (req, res, next) => {
-  const controller = container.get<ImportController>(TYPES.ImportController);
-  return controller.importFromDoi(req, res, next);
-});
-
 // Session 10.5 - PDF Import with Metadata Extraction (moved to ImportController)
-// Import uploadPdf middleware (reused from Session 10)
+// Zotero-style direct create: upload PDF → extract metadata → create reference in one step
 import { uploadPdf } from '../utils/fileUpload';
 
-// DEPRECATED: Use /pdf/extract + POST /references instead (unified flow)
 router.post('/from-pdf', uploadPdf, (req: any, res: any, next: any) => {
   const controller = container.get<ImportController>(TYPES.ImportController);
   return controller.createFromPdf(req, res, next);
-});
-
-// Unified Architecture: Extract metadata from PDF without creating reference
-// Frontend calls this, then shows pre-filled ReferenceModal, then creates via POST /references
-router.post('/pdf/extract', uploadPdf, (req: any, res: any, next: any) => {
-  const controller = container.get<PdfController>(TYPES.PdfController);
-  return controller.extractMetadata(req, res, next);
 });
 
 // Test Cleanup Endpoint - FOR TESTING ONLY

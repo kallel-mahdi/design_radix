@@ -291,15 +291,6 @@ export const DuplicateResolutionSchema = z.object({
   action: z.enum(['keep-existing', 'keep-new', 'merged']),
 });
 
-// DOI Import Schema (Session 6)
-// Uses Crossref-recommended regex (matches 99.3% of Crossref DOIs)
-// See: docs/sessions/06-plan.md for validation rationale
-export const ImportDoiSchema = z.object({
-  doi: z.string()
-    .min(1, 'DOI is required')
-    .regex(/^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i, 'Invalid DOI format'),
-});
-
 /**
  * Type inference for request schemas
  */
@@ -315,7 +306,6 @@ export type DeleteProjectLink = z.infer<typeof DeleteProjectLinkSchema>;
 export type CreateProjectLinkCollection = z.infer<typeof CreateProjectLinkCollectionSchema>;
 export type DeleteProjectLinkCollection = z.infer<typeof DeleteProjectLinkCollectionSchema>;
 export type DuplicateResolution = z.infer<typeof DuplicateResolutionSchema>;
-export type ImportDoi = z.infer<typeof ImportDoiSchema>;
 
 /**
  * API Response Envelope Types

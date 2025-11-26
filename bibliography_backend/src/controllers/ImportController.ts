@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { IReferenceService } from '../interfaces/IReferenceService';
-import { CrossrefService } from '../services/CrossrefService';
 import { PdfMetadataService } from '../services/PdfMetadataService';
 import { BibTeXService } from '../services/BibTeXService';
 import { TYPES } from '../config/types';
@@ -13,8 +12,8 @@ import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
  * ImportController
  *
  * Handles reference import from external sources:
- * - DOI import via Crossref API
- * - PDF import with metadata extraction
+ * - PDF import with metadata extraction (extracts DOI → Crossref lookup)
+ * - BibTeX import/export
  *
  * Split from ReferenceController for Single Responsibility Principle.
  */
@@ -22,77 +21,9 @@ import { GatewayAuthenticatedRequest } from '../middleware/trustGateway';
 export class ImportController {
   constructor(
     @inject(TYPES.IReferenceService) private referenceService: IReferenceService,
-    @inject(TYPES.ICrossrefService) private crossrefService: CrossrefService,
     @inject(TYPES.IPdfMetadataService) private pdfMetadataService: PdfMetadataService,
     @inject(TYPES.IBibTeXService) private bibtexService: BibTeXService
   ) {}
-
-  /**
-   * Import reference from DOI via Crossref API (One-Step Flow)
-   *
-   * Fetches metadata from Crossref, maps to our schema, and creates reference immediately.
-   * Follows Zotero's pattern: no preview step, metadata is trusted.
-   *
-   * Duplicate handling: Checks database BEFORE Crossref API call.
-   * If DOI exists: returns existing reference (200)
-   * If DOI not exists: fetches from Crossref → creates reference (201)
-   *
-   * Auto-triggers duplicate detection asynchronously (via ReferenceService.create).
-   */
-  async importFromDoi(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const userId = (req as GatewayAuthenticatedRequest).user.id;
-      const { doi } = req.body;
-
-      ApplicationLogger.info('Importing reference from DOI', { userId, doi });
-
-      const existing = await Reference.findOne({ userId, doi: doi.trim().toLowerCase(), deleted: false });
-
-      if (existing) {
-        ApplicationLogger.info('DOI already exists in library', { userId, doi, referenceId: existing._id.toString() });
-        res.status(200).json({
-          success: true,
-          message: 'Reference already exists in your library',
-          data: existing
-        });
-        return;
-      }
-
-      // Fetch metadata from Crossref API
-      const crossrefData = await this.crossrefService.fetchMetadata(doi);
-
-      // Map Crossref data to CreateReferenceInput
-      const referenceInput = this.crossrefService.mapToReferenceInput(crossrefData);
-
-      // Create reference (auto-triggers duplicate detection)
-      const reference = await this.referenceService.create(userId, referenceInput);
-
-      ApplicationLogger.info('Reference imported from DOI', {
-        userId,
-        doi,
-        referenceId: reference._id.toString()
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'Reference imported from DOI successfully',
-        data: reference
-      });
-    } catch (error) {
-      // Enhance error with specific status codes before passing to error handler
-      if (error instanceof Error) {
-        const message = error.message;
-        if (message.includes('DOI not found')) {
-          (error as any).statusCode = 404;
-        } else if (message.includes('Rate limit exceeded')) {
-          (error as any).statusCode = 429;
-        } else if (message.includes('Network error') || message.includes('timeout')) {
-          (error as any).statusCode = 503;
-        }
-      }
-      next(error);
-    }
-  }
 
   /**
    * Create reference from PDF with automatic metadata extraction (Session 10.5)
