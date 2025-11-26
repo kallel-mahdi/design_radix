@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useUIStore } from '../store/ui.store';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { useSuspenseReferencesQuery, useReferenceQuery, type ReferencesQueryParams } from '../features/library/api/references.queries';
-import { useTagsQuery } from '../features/library/api/tags.queries';
+// NOTE: useTagsQuery moved to useKeyboardShortcuts hook for 1-9 tag shortcuts
 import { useLibraryStore } from '../features/library/store/library.store';
 import { ReferenceTable } from '../features/library/components/ReferenceTable';
 import { ReferenceTableSkeleton } from '../features/library/components/ReferenceTableSkeleton';
@@ -15,6 +15,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { FolderOpenIcon, PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, ChevronDownIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { Menu } from '@headlessui/react';
 import { useCreateReferenceFromPdfMutation } from '../features/library/api/pdf.mutations';
+import { useExportToBibtexMutation } from '../features/library/api/import.mutations';
 
 export const Route = createFileRoute('/library')({
   component: LibraryPage,
@@ -25,12 +26,10 @@ export function LibraryPage() {
   const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
   const activeTags = useLibraryStore((state) => state.activeTags);
   const activeReferenceId = useLibraryStore((state) => state.activeReferenceId);
-  const setActiveReference = useLibraryStore((state) => state.setActiveReference);
   const editReferenceId = useLibraryStore((state) => state.editReferenceId);
   const pdfReaderReferenceId = useLibraryStore((state) => state.pdfReaderReferenceId);
   const setPdfReaderReference = useLibraryStore((state) => state.setPdfReaderReference);
   const searchQuery = useLibraryStore((state) => state.searchQuery);
-  const toggleTag = useLibraryStore((state) => state.toggleTag);
 
   // Fetch reference for PDF reader modal
   const { data: pdfReaderReference } = useReferenceQuery(
@@ -38,14 +37,12 @@ export function LibraryPage() {
     !!pdfReaderReferenceId
   );
 
-  // Tags query for keyboard shortcuts (1-9 for colored tags)
-  const { data: allTags = [] } = useTagsQuery();
-
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createFromPdfMutation = useCreateReferenceFromPdfMutation();
+  const exportBibtexMutation = useExportToBibtexMutation();
 
   useEffect(() => {
     setActiveView('library');
@@ -67,47 +64,8 @@ export function LibraryPage() {
     }
   }, [editReferenceId]); // openModal is stable from Zustand, no need in deps
 
-  // ESC key handler: Close DetailsPane and clear active reference
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && activeReferenceId) {
-        setDetailsPaneOpen(false);
-        setActiveReference(null);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeReferenceId, setDetailsPaneOpen, setActiveReference]);
-
-  /**
-   * Keyboard shortcuts 1-9: Toggle colored tag filters
-   * - Keys '1' through '9' toggle the tag with the corresponding position
-   * - Only colored tags (with position 1-9) respond to shortcuts
-   * - Pattern copied from Zotero: zotero/chrome/content/zotero/collectionTree.js
-   */
-  useEffect(() => {
-    const handleTagShortcut = (event: KeyboardEvent) => {
-      // Skip if typing in an input field
-      const target = event.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        return;
-      }
-
-      // Check for number keys 1-9
-      const position = parseInt(event.key);
-      if (position >= 1 && position <= 9) {
-        // Find tag with this position
-        const tagWithPosition = allTags.find((tag) => tag.position === position);
-        if (tagWithPosition) {
-          toggleTag(tagWithPosition.name);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleTagShortcut);
-    return () => window.removeEventListener('keydown', handleTagShortcut);
-  }, [allTags, toggleTag]);
+  // NOTE: Keyboard shortcuts (ESC, 1-9 tags, Cmd+N, Cmd+F, Delete) are now
+  // centralized in useKeyboardShortcuts hook, mounted in AppLayout.
 
   // Handle PDF file selection (from file picker)
   // Note: Collection validation happens BEFORE file picker opens (in menu item onClick)
@@ -263,10 +221,14 @@ export function LibraryPage() {
           <Button
             variant="secondary"
             size="default"
-            onClick={() => console.log('Export references')}
+            onClick={() => exportBibtexMutation.mutate(
+              activeCollectionId ? { collectionId: activeCollectionId } : undefined
+            )}
+            loading={exportBibtexMutation.isPending}
+            disabled={exportBibtexMutation.isPending}
           >
             <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
-            Export
+            Export BibTeX
           </Button>
         </div>
 

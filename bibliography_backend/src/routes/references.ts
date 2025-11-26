@@ -87,16 +87,30 @@ router.delete('/:id/permanent', validateParams(ObjectIdParamSchema), (req, res, 
   return controller.permanentDelete(req, res, next);
 });
 
-// TODO: Session 7 - File Import/Export (methods not implemented yet)
-// router.post('/import-bibtex', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.importBibtex(req, res);
-// });
+// Session 12 - BibTeX Import/Export
+// Import can be file upload (.bib) or raw text in body
+import multer from 'multer';
+const uploadBibtex = multer({
+  dest: 'uploads/bibtex/',
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/x-bibtex' || file.originalname.endsWith('.bib')) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+}).single('file');
 
-// router.post('/export', (req, res) => {
-//   const controller = container.get<ReferenceController>(TYPES.ReferenceController);
-//   return controller.exportReferences(req, res);
-// });
+router.post('/import-bibtex', uploadBibtex, (req, res, next) => {
+  const controller = container.get<ImportController>(TYPES.ImportController);
+  return controller.importFromBibtex(req, res, next);
+});
+
+router.post('/export-bibtex', (req, res, next) => {
+  const controller = container.get<ImportController>(TYPES.ImportController);
+  return controller.exportToBibtex(req, res, next);
+});
 
 // Session 10 - PDF Management (moved to PdfController)
 // uploadPdf middleware imported above (Session 10.5)

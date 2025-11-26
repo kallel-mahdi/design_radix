@@ -54,6 +54,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     >
       <MagnifyingGlassIcon className="h-5 w-5 text-app-text-secondary flex-shrink-0" />
       <input
+        id="global-search-input"
         autoFocus={autoFocus}
         className="flex-1 bg-transparent text-app-text-primary placeholder:text-app-text-secondary focus:outline-none"
         onChange={(e) => setQuery(e.target.value)}

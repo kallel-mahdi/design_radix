@@ -19,6 +19,9 @@ import { DuplicateService } from '../services/DuplicateService';
 import { CrossrefService } from '../services/CrossrefService';
 import { PdfMetadataService } from '../services/PdfMetadataService'; // Session 10.5
 import { AnnotationService } from '../services/AnnotationService'; // PDF annotations
+import { BibTeXService } from '../services/BibTeXService'; // Session 12: BibTeX import/export
+import { SearchService } from '../services/SearchService'; // Session 14: Search with facets
+import { ISearchService } from '../interfaces/ISearchService';
 
 // Controllers
 import { ReferenceController } from '../controllers/ReferenceController';
@@ -30,6 +33,7 @@ import { HealthController } from '../controllers/HealthController';
 import { ImportController } from '../controllers/ImportController';
 import { PdfController } from '../controllers/PdfController';
 import { AnnotationController } from '../controllers/AnnotationController'; // PDF annotations
+import { SearchController } from '../controllers/SearchController'; // Session 14: Search
 
 const container = new Container();
 let isConfigured = false;
@@ -48,6 +52,8 @@ export function configureContainer() {
   container.bind<CrossrefService>(TYPES.ICrossrefService).to(CrossrefService).inSingletonScope();
   container.bind<PdfMetadataService>(TYPES.IPdfMetadataService).to(PdfMetadataService).inSingletonScope(); // Session 10.5
   container.bind<IAnnotationService>(TYPES.IAnnotationService).to(AnnotationService).inSingletonScope(); // PDF annotations
+  container.bind<BibTeXService>(TYPES.IBibTeXService).to(BibTeXService).inSingletonScope(); // Session 12: BibTeX
+  container.bind<ISearchService>(TYPES.ISearchService).to(SearchService).inSingletonScope(); // Session 14: Search
 
   // Bind controllers (transient scope - new instance per request)
   container.bind<ReferenceController>(TYPES.ReferenceController).to(ReferenceController);
@@ -59,6 +65,7 @@ export function configureContainer() {
   container.bind<ImportController>(TYPES.ImportController).to(ImportController);
   container.bind<PdfController>(TYPES.PdfController).to(PdfController);
   container.bind<AnnotationController>(TYPES.AnnotationController).to(AnnotationController); // PDF annotations
+  container.bind<SearchController>(TYPES.SearchController).to(SearchController); // Session 14: Search
 
   isConfigured = true;
   return container;

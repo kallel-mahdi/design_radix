@@ -16,7 +16,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import type { PDFPageProxy } from 'pdfjs-dist';
+import type { PageCallback } from 'react-pdf/dist/esm/shared/types.js';
 import {
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
@@ -129,10 +129,9 @@ export const PdfReaderModal: React.FC<PdfReaderModalProps> = ({
     setLoading(false);
   };
 
-  const handlePageLoadSuccess = (page: PDFPageProxy) => {
-    // Get original page dimensions (at scale 1.0)
-    const viewport = page.getViewport({ scale: 1.0 });
-    setPageDimensions({ width: viewport.width, height: viewport.height });
+  const handlePageLoadSuccess = (page: PageCallback) => {
+    // react-pdf's PageCallback includes width/height directly
+    setPageDimensions({ width: page.originalWidth, height: page.originalHeight });
   };
 
   const handleAnnotationClick = useCallback((annotation: Annotation) => {
