@@ -8,7 +8,7 @@ test.describe('Notes Tab Empty State (Figma Frame 31)', () => {
 
   test('should display Notes tab with empty state', async ({ page }) => {
     // Create a reference first
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Notes Test Reference');
     await page.getByTestId('author-0-family-input').fill('NotesAuthor');

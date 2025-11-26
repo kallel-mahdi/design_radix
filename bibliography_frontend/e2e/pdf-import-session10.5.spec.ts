@@ -1,8 +1,8 @@
 /**
  * E2E Tests: PDF Import with Automatic Metadata Extraction (Session 10.5)
  *
- * Tests the new PDF import workflow:
- * - Import PDF via Import menu (file picker)
+ * Tests the PDF import workflow via "Add Reference" button:
+ * - Click "Add Reference" → Opens file picker
  * - Automatic DOI extraction from PDF text
  * - Crossref enrichment when DOI found
  * - Filename fallback when no DOI
@@ -23,53 +23,45 @@ test.describe('PDF Import - Session 10.5', () => {
     await setupLibrary();
   });
 
-  test('should import PDF via Import menu with Crossref enrichment', async ({ page }) => {
+  test('should import PDF via Add Reference button with Crossref enrichment', async ({ page }) => {
     // Mark test as slow since it makes real Crossref API calls
     test.slow();
 
-    // 1. Open Import menu (use exact match to avoid "Import References" button)
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
-
-    // 2. Click "Import from PDF..." to trigger file chooser
+    // 1. Click "Add Reference" button to trigger file chooser
     const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.getByRole('menuitem', { name: /import from pdf/i }).click();
+    await page.getByRole('button', { name: 'Add Reference' }).click();
     const fileChooser = await fileChooserPromise;
 
-    // 3. Upload PDF with embedded DOI
+    // 2. Upload PDF with embedded DOI
     await fileChooser.setFiles(FIXTURE_PATHS.pdfs.withDoiZotero);
 
-    // 4. Wait for success toast with "from Crossref" (real API call ~500ms)
-    // Skip checking for "Processing PDF..." as it may be too fast to catch
+    // 3. Wait for success toast with "from Crossref" (real API call ~500ms)
     await expect(page.getByRole('alert').filter({ hasText: /from crossref/i }))
       .toBeVisible({ timeout: 15000 });
 
-    // 6. Verify reference created with Crossref-enriched metadata
+    // 4. Verify reference created with Crossref-enriched metadata
     // The fixture PDF DOI 10.1371/journal.pntd.0003350 resolves to:
     // Title: "Shaping the Research Agenda" (use .last() to avoid checkbox cell)
     await expect(page.getByRole('cell', { name: /shaping.*research.*agenda/i }).last()).toBeVisible();
 
-    // 7. Verify reference has DOI populated
+    // 5. Verify reference has DOI populated
     await expect(page.getByRole('link', { name: /10\.1371\/journal\.pntd/i }).first()).toBeVisible();
   });
 
   test('should fallback to filename when no DOI found in PDF', async ({ page }) => {
-    // 1. Open Import menu (use exact match to avoid "Import References" button)
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
-
-    // 2. Click "Import from PDF..." to trigger file chooser
+    // 1. Click "Add Reference" button to trigger file chooser
     const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.getByRole('menuitem', { name: /import from pdf/i }).click();
+    await page.getByRole('button', { name: 'Add Reference' }).click();
     const fileChooser = await fileChooserPromise;
 
-    // 3. Upload PDF without DOI (filename: smith-2023-machine-learning.pdf)
+    // 2. Upload PDF without DOI (filename: smith-2023-machine-learning.pdf)
     await fileChooser.setFiles(FIXTURE_PATHS.pdfs.noDoiDescriptive);
 
-    // 4. Wait for warning toast with "from filename" indicator
-    // Skip checking for "Processing PDF..." as it may be too fast to catch
+    // 3. Wait for warning toast with "from filename" indicator
     await expect(page.getByRole('alert').filter({ hasText: /from filename/i }))
       .toBeVisible({ timeout: 10000 });
 
-    // 6. Verify reference created with filename-derived title
+    // 4. Verify reference created with filename-derived title
     // Filename "smith-2023-machine-learning.pdf" → "smith 2023 machine learning"
     // Use .last() to avoid checkbox cell
     await expect(page.getByRole('cell', { name: /smith.*machine.*learning/i }).last()).toBeVisible();
@@ -125,10 +117,9 @@ test.describe('PDF Import - Session 10.5', () => {
   });
 
   test('should auto-select imported reference and show DetailsPane', async ({ page }) => {
-    // 1. Import PDF via menu (use exact match to avoid "Import References" button)
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    // 1. Click "Add Reference" button to import PDF
     const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.getByRole('menuitem', { name: /import from pdf/i }).click();
+    await page.getByRole('button', { name: 'Add Reference' }).click();
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(FIXTURE_PATHS.pdfs.noDoiDescriptive);
 

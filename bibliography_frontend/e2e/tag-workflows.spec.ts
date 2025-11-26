@@ -47,7 +47,7 @@ test.describe('Tag Workflows', () => {
     await setupLibrary();
 
     // Create a test reference for tag operations
-    const newRefButton = page.getByRole('button', { name: /New Reference/i });
+    const newRefButton = page.getByRole('button', { name: /Manual Entry/i });
     await expect(newRefButton).toBeVisible({ timeout: 10000 });
     await newRefButton.click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
@@ -228,7 +228,7 @@ test.describe('Tag Workflows', () => {
 
   test('Tag Usage Count Updates When References Added/Removed', async ({ page }) => {
     // Create a second reference (beforeEach creates 1, we need 2 total)
-    await page.getByRole('button', { name: /New Reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Second Reference for Usage Count');
     await page.getByTestId('reference-type-select').selectOption('article');
@@ -350,7 +350,7 @@ test.describe('Tag Workflows', () => {
 
   test('Delete Tag → References Lose Tag Association', async ({ page }) => {
     // Create a second reference (beforeEach creates 1, we need 2 total)
-    await page.getByRole('button', { name: /New Reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Second Reference for Tags');
     await page.getByTestId('reference-type-select').selectOption('article');

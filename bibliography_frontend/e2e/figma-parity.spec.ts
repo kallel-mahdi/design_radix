@@ -160,7 +160,7 @@ test.describe('Figma Parity - MVP Features', () => {
   test.describe('Notes Tab Empty State - Figma Frame 31', () => {
     // Helper: create a reference for tests in this describe block
     async function createTestReference(page: import('@playwright/test').Page) {
-      await page.getByRole('button', { name: /new reference/i }).click();
+      await page.getByRole('button', { name: /Manual Entry/i }).click();
       await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
       await page.getByTestId('reference-title-input').fill('Figma Test Reference');
       await page.getByTestId('author-0-family-input').fill('FigmaAuthor');
@@ -337,7 +337,7 @@ test.describe('Figma Parity - MVP Features', () => {
 
     test('Frame 31 - Notes Empty State should match design', async ({ page }) => {
       // Create a reference first
-      await page.getByRole('button', { name: /new reference/i }).click();
+      await page.getByRole('button', { name: /Manual Entry/i }).click();
       await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
       await page.getByTestId('reference-title-input').fill('Frame 31 Test');
       await page.getByTestId('author-0-family-input').fill('Frame31Author');

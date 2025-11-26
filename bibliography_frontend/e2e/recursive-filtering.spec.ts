@@ -9,7 +9,7 @@ import { test, expect } from './fixtures/workerFixtures';
  *
  * Also tests Issue #5 functionality:
  * - Visual feedback for selected collection (left border)
- * - Validation: "New Reference" button prevents opening modal without collection selected
+ * - Validation: "Manual Entry" button prevents opening modal without collection selected
  *
  * Worker Isolation:
  * - Each Playwright worker uses a unique user ID
@@ -31,11 +31,11 @@ test.describe('Recursive Collection Filtering', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('New Reference button should require collection selection (Issue #5)', async ({
+  test('Manual Entry button should require collection selection (Issue #5)', async ({
     page,
   }) => {
-    // Step 1: Try clicking "New Reference" without selecting a collection
-    const newRefButton = page.getByRole('button', { name: /New Reference/i });
+    // Step 1: Try clicking "Manual Entry" without selecting a collection
+    const newRefButton = page.getByRole('button', { name: /Manual Entry/i });
 
     // Click the button
     await newRefButton.click();
@@ -63,13 +63,13 @@ test.describe('Recursive Collection Filtering', () => {
     // This should give it visual feedback (left border as per Issue #5)
     await page.getByText('Test Papers').click();
 
-    // Step 5: Now "New Reference" should work (no error)
+    // Step 5: Now "Manual Entry" should work (no error)
     // This is the happy path - after selecting a collection, the modal should open
     await newRefButton.click();
 
     // The modal should open successfully
     // We expect to see either the modal or at least no error toast
-    const referenceModalOrNewReferenceText = page.getByText(/New Reference|Type|Title/i);
+    const referenceModalOrNewReferenceText = page.getByText(/Manual Entry|Type|Title/i);
     await expect(referenceModalOrNewReferenceText).toBeVisible({ timeout: 5000 }).catch(() => {
       console.log('Modal may have opened but text not found - this is acceptable');
     });
@@ -107,6 +107,6 @@ test.describe('Recursive Collection Filtering', () => {
     // and the app doesn't error out
 
     // Verify page is still responsive
-    await expect(page.getByRole('button', { name: /New Reference/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Manual Entry/i })).toBeVisible();
   });
 });

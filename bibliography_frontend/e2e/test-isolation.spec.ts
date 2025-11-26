@@ -35,7 +35,7 @@ test.describe('Test Isolation Verification', () => {
     const testId = `isolation-test-1-${Date.now()}`;
 
     // Create a reference
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 1 ${testId}`);
@@ -62,7 +62,7 @@ test.describe('Test Isolation Verification', () => {
     const testId = `isolation-test-2-${Date.now()}`;
 
     // Create a reference
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 2 ${testId}`);
@@ -87,7 +87,7 @@ test.describe('Test Isolation Verification', () => {
     const testId = `isolation-test-3-${Date.now()}`;
 
     // Create a reference
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 3 ${testId}`);

@@ -34,7 +34,7 @@ test.describe('PDF Annotations', () => {
     title: string
   ) {
     // Create reference
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill(title);
     await page.getByTestId('author-0-family-input').fill('AnnotationTestAuthor');

@@ -23,7 +23,7 @@ test.describe('Critical User Flows', () => {
     // Test reference creation workflow (Session 8 - IMPLEMENTED)
 
     // Step 1: Create a new reference
-    await page.getByRole('button', { name: /New Reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
 
     // Verify modal opened (wait for input instead of heading)
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });

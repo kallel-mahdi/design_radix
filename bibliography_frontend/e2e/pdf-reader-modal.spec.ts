@@ -20,7 +20,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('double-click on reference WITH PDF opens PDF reader modal', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('PDF Reader Test');
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
@@ -63,7 +63,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('close button closes PDF reader modal', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Close Button Test');
     await page.getByTestId('author-0-family-input').fill('CloseAuthor');
@@ -92,7 +92,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('Escape key closes PDF reader modal', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Escape Test');
     await page.getByTestId('author-0-family-input').fill('EscapeAuthor');
@@ -121,7 +121,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('double-click on reference WITHOUT PDF opens edit modal', async ({ page }) => {
     // Create reference without PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('No PDF Reference');
     await page.getByTestId('author-0-family-input').fill('NoPdfAuthor');
@@ -140,7 +140,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('zoom in button increases zoom percentage', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('ZoomInButtonTest');
     await page.getByTestId('author-0-family-input').fill('ZoomAuthor');
@@ -171,7 +171,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('zoom out button decreases zoom percentage', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('ZoomOutButtonTest');
     await page.getByTestId('author-0-family-input').fill('ZoomOutAuthor');
@@ -202,7 +202,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('keyboard shortcuts + and - control zoom', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Keyboard Zoom Test');
     await page.getByTestId('author-0-family-input').fill('KeyboardAuthor');
@@ -239,7 +239,7 @@ test.describe('PDF Reader Modal', () => {
 
   test('prev/next page buttons are disabled on single-page PDF', async ({ page }) => {
     // Create reference with PDF (minimal.pdf is single-page)
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Single Page Test');
     await page.getByTestId('author-0-family-input').fill('SinglePageAuthor');

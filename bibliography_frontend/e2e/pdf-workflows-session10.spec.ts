@@ -22,7 +22,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should upload PDF via ReferenceModal and view in PdfTab', async ({ page }) => {
     // 1. Create new reference
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Test Paper with PDF');
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
@@ -59,7 +59,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should show zoom and navigation controls in PdfTab', async ({ page }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('PDF Controls Test');
     await page.getByTestId('author-0-family-input').fill('ControlsAuthor');
@@ -100,7 +100,7 @@ test.describe('PDF Workflows - Session 10', () => {
     });
 
     // Create reference with minimal PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('PDF Replacement Test');
     await page.getByTestId('author-0-family-input').fill('ReplaceAuthor');
@@ -145,7 +145,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should delete PDF via DELETE endpoint', async ({ page, workerUserId }) => {
     // Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('PDF Delete Test');
     await page.getByTestId('author-0-family-input').fill('DeleteAuthor');
@@ -182,7 +182,7 @@ test.describe('PDF Workflows - Session 10', () => {
   });
 
   test('should handle upload errors gracefully', async ({ page }) => {
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Invalid Upload Test');
     await page.getByTestId('author-0-family-input').fill('ErrorAuthor');
@@ -210,7 +210,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should show empty state when no PDF attached', async ({ page }) => {
     // Create reference without PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('No PDF Reference');
     await page.getByTestId('author-0-family-input').fill('NoPdfAuthor');
@@ -234,7 +234,7 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should handle complete workflow: create → upload → view → delete', async ({ page, workerUserId }) => {
     // 1. Create reference with PDF
-    await page.getByRole('button', { name: 'New Reference' }).click();
+    await page.getByRole('button', { name: 'Manual Entry' }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Complete Workflow Test');
     await page.getByTestId('author-0-family-input').fill('WorkflowAuthor');

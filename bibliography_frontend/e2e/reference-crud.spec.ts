@@ -28,8 +28,8 @@ test.describe('Reference Creation and Editing', () => {
     const title = `E2E Test Article ${testId}`;
     const author = `Smith${testId}`;
 
-    // Step 1: Click "New Reference" button
-    await page.getByRole('button', { name: /new reference/i }).click();
+    // Step 1: Click "Manual Entry" button to create reference
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
 
     // Step 2: Modal should open (wait for input)
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
@@ -69,7 +69,7 @@ test.describe('Reference Creation and Editing', () => {
     const updatedTitle = `Updated Title ${testId}`;
 
     // First create a reference to edit
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill(originalTitle);
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
@@ -115,7 +115,7 @@ test.describe('Reference Creation and Editing', () => {
 
   test('should handle keyboard shortcuts in modal', async ({ page }) => {
     // Open create modal
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill required fields
@@ -142,7 +142,7 @@ test.describe('Reference Creation and Editing', () => {
     await expect(page.getByTestId('reference-title-input')).not.toBeVisible();
 
     // Open modal again
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill some data
@@ -161,7 +161,7 @@ test.describe('Reference Creation and Editing', () => {
 
   test('should validate required fields', async ({ page }) => {
     // Open create modal
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Try to submit without required title
@@ -180,7 +180,7 @@ test.describe('Reference Creation and Editing', () => {
     const author1 = `Doe${testId}`;
     const author2 = `Smith${testId}`;
 
-    await page.getByRole('button', { name: /new reference/i }).click();
+    await page.getByRole('button', { name: /Manual Entry/i }).click();
     await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill title

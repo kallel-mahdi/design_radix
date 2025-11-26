@@ -41,7 +41,7 @@ test.describe('ReferenceTable Interactions', () => {
     ];
 
     for (const ref of references) {
-      await page.getByRole('button', { name: /new reference/i }).click();
+      await page.getByRole('button', { name: /Manual Entry/i }).click();
       await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
       // Fill form fields
