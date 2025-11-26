@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '../store/library.store';
-import type { Reference, Author } from '@/common/types';
+import type { Reference } from '@/common/types';
 
 /**
  * PDF Upload/Delete Mutations (Session 10)
@@ -46,9 +46,9 @@ export function useUploadPdfMutation() {
 
   return useMutation({
     mutationFn: async ({ referenceId, file }: UploadPdfVariables): Promise<PdfData> => {
-      // Use apiClient.uploadFile() instead of post() to avoid JSON.stringify corrupting FormData
-      // uploadFile() properly handles multipart/form-data with correct Content-Type boundary
-      const response = await apiClient.uploadFile<PdfData>(
+      // Use apiClient.uploadPdf() for multipart/form-data with 'file' field name
+      // Backend multer config: upload.single('file')
+      const response = await apiClient.uploadPdf<PdfData>(
         `/references/${referenceId}/upload-pdf`,
         file
       );
@@ -180,131 +180,50 @@ export function useDeletePdfMutation() {
 }
 
 /**
- * PDF Extract Response (Unified Architecture)
- * Returns extracted metadata + PDF info, but does NOT create reference
- */
-interface PdfExtractResponse {
-  metadata: {
-    type: string;
-    title: string;
-    authors: Author[];
-    year?: number;
-    venue?: string;
-    doi?: string;
-    url?: string;
-    abstract?: string;
-  };
-  pdfInfo: {
-    storedPath: string;
-    originalName: string;
-    size: number;
-    mimeType: string;
-    uploadedAt: string;
-  };
-  source: 'crossref' | 'filename-fallback';
-}
-
-/**
- * Extract metadata from PDF without creating reference (Unified Architecture)
+ * Create Reference from PDF - Zotero-style Direct Create
  *
- * This is the first step in the unified PDF import flow:
- * 1. Upload PDF → extract metadata → return data
- * 2. Caller then creates reference via useCreateReferenceMutation
+ * Single-step flow: upload PDF → extract metadata → create reference
+ * Uses /references/from-pdf endpoint which handles everything server-side.
  *
- * This ensures both manual and PDF flows use the same reference creation path.
- */
-export function usePdfExtractMutation() {
-  return useMutation({
-    mutationFn: async (file: File): Promise<PdfExtractResponse> => {
-      const response = await apiClient.uploadFile<PdfExtractResponse>(
-        '/references/pdf/extract',
-        file
-      );
-      return response;
-    },
-
-    onMutate: () => {
-      useUIStore.getState().addToast({
-        message: 'Extracting metadata from PDF...',
-        type: 'info',
-        duration: 0,
-      });
-    },
-
-    onError: (error) => {
-      console.error('PDF Extract Error:', {
-        error,
-        message: error instanceof Error ? error.message : String(error),
-      });
-
-      const message = error instanceof Error ? error.message : String(error);
-      if (message.includes('Invalid PDF') || message.includes('Unsupported')) {
-        useUIStore.getState().addToast({
-          message: 'Invalid PDF file. Please upload a valid PDF.',
-          type: 'error',
-          duration: 5000,
-        });
-      } else {
-        useUIStore.getState().addToast({
-          message: 'Failed to extract PDF metadata. Please try again.',
-          type: 'error',
-          duration: 5000,
-        });
-      }
-    },
-  });
-}
-
-/**
- * Create Reference from PDF - Unified Flow (Zotero-style instant creation)
- *
- * Combines PDF extraction + reference creation in one user action:
- * 1. Extract metadata from PDF via /pdf/extract
- * 2. Create reference via /references (same as manual creation)
- *
- * This is a convenience wrapper that chains the two operations.
- * The key benefit: both manual and PDF flows use POST /references.
+ * Response includes both the created reference and extraction metadata source.
  */
 interface CreateFromPdfVariables {
   file: File;
   collectionId: string;
 }
 
+interface CreateFromPdfResponse {
+  reference: Reference;
+  extractedMetadata: {
+    doi?: string;
+    source: 'crossref' | 'filename-fallback';
+  };
+}
+
 export function useCreateReferenceFromPdfMutation() {
   const queryClient = useQueryClient();
-  const extractMutation = usePdfExtractMutation();
 
   return useMutation({
-    mutationFn: async ({ file, collectionId }: CreateFromPdfVariables): Promise<{ reference: Reference; source: 'crossref' | 'filename-fallback' }> => {
-      // Step 1: Extract metadata from PDF
-      const extractResult = await extractMutation.mutateAsync(file);
-
-      // Step 2: Create reference via unified endpoint (same as manual creation)
-      const referenceData = {
-        type: extractResult.metadata.type as Reference['type'],
-        title: extractResult.metadata.title,
-        authors: extractResult.metadata.authors,
-        year: extractResult.metadata.year,
-        venue: extractResult.metadata.venue,
-        doi: extractResult.metadata.doi,
-        url: extractResult.metadata.url,
-        abstract: extractResult.metadata.abstract,
-        tags: [],
-        collectionIds: [collectionId],
-        sourceRaw: {
-          provider: 'manual' as const, // PDF import is effectively manual entry with auto-fill
-          payload: { source: 'pdf-import', extractedFrom: extractResult.source },
-        },
-        // Include PDF info so reference is created with PDF attached
-        hasPdf: true,
-        pdf: extractResult.pdfInfo,
-      };
-
-      const reference = await apiClient.post<Reference>('/references', referenceData);
-      return { reference, source: extractResult.source };
+    mutationFn: async ({ file, collectionId }: CreateFromPdfVariables): Promise<CreateFromPdfResponse> => {
+      // Use apiClient.uploadPdf which handles multipart/form-data with 'file' field name
+      // Backend multer config: upload.single('file')
+      const response = await apiClient.uploadPdf<CreateFromPdfResponse>(
+        '/references/from-pdf',
+        file,
+        { collectionId }
+      );
+      return response;
     },
 
-    onSuccess: ({ reference, source }) => {
+    onMutate: () => {
+      useUIStore.getState().addToast({
+        message: 'Importing PDF...',
+        type: 'info',
+        duration: 3000,
+      });
+    },
+
+    onSuccess: ({ reference, extractedMetadata }) => {
       // Invalidate references list
       queryClient.invalidateQueries({ queryKey: ['references', 'list'] });
 
@@ -312,13 +231,13 @@ export function useCreateReferenceFromPdfMutation() {
       useLibraryStore.getState().setActiveReference(reference._id);
 
       // Show success toast
-      const sourceLabel = source === 'crossref' ? 'from Crossref' : 'from filename';
+      const sourceLabel = extractedMetadata.source === 'crossref' ? 'from Crossref' : 'from filename';
       const titlePreview = reference.title.substring(0, 50);
       const message = `Added: ${titlePreview}${reference.title.length > 50 ? '...' : ''} (${sourceLabel})`;
 
       useUIStore.getState().addToast({
         message,
-        type: source === 'crossref' ? 'success' : 'warning',
+        type: extractedMetadata.source === 'crossref' ? 'success' : 'warning',
         duration: 5000,
       });
     },

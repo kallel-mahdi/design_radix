@@ -6,16 +6,14 @@ import { useSuspenseReferencesQuery, useReferenceQuery, type ReferencesQueryPara
 import { useLibraryStore } from '../features/library/store/library.store';
 import { ReferenceTable } from '../features/library/components/ReferenceTable';
 import { ReferenceTableSkeleton } from '../features/library/components/ReferenceTableSkeleton';
-import { ImportModal } from '../features/library/components/ImportModal';
 import { ReferenceModal } from '../features/library/components/ReferenceModal';
 import { PdfReaderModal } from '../features/library/components/PdfReaderModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { FolderOpenIcon, PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, ChevronDownIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
-import { Menu } from '@headlessui/react';
+import { FolderOpenIcon, PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { useCreateReferenceFromPdfMutation } from '../features/library/api/pdf.mutations';
-import { useExportToBibtexMutation } from '../features/library/api/import.mutations';
+import { useImportFromBibtexMutation, useExportToBibtexMutation } from '../features/library/api/import.mutations';
 
 export const Route = createFileRoute('/library')({
   component: LibraryPage,
@@ -37,11 +35,12 @@ export function LibraryPage() {
     !!pdfReaderReferenceId
   );
 
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const bibtexInputRef = useRef<HTMLInputElement>(null);
 
   const createFromPdfMutation = useCreateReferenceFromPdfMutation();
+  const importBibtexMutation = useImportFromBibtexMutation();
   const exportBibtexMutation = useExportToBibtexMutation();
 
   useEffect(() => {
@@ -68,7 +67,7 @@ export function LibraryPage() {
   // centralized in useKeyboardShortcuts hook, mounted in AppLayout.
 
   // Handle PDF file selection (from file picker)
-  // Note: Collection validation happens BEFORE file picker opens (in menu item onClick)
+  // Note: Collection validation happens BEFORE file picker opens (in button onClick)
   const handlePdfFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // activeCollectionId is guaranteed to exist here (validated before file picker)
@@ -82,6 +81,17 @@ export function LibraryPage() {
         type: 'error',
         duration: 5000,
       });
+    }
+  };
+
+  // Handle BibTeX file selection
+  const handleBibtexFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const content = await file.text();
+      importBibtexMutation.mutate({ bibtex: content, createImmediately: true });
+      // Reset input so same file can be selected again
+      event.target.value = '';
     }
   };
 
@@ -137,10 +147,77 @@ export function LibraryPage() {
           <p className="text-app-text-secondary mt-1">Organize your references and collections</p>
         </div>
 
-        {/* Toolbar - Always visible */}
+        {/* Toolbar - Option C: Add Reference (PDF) | Import BibTeX | Export BibTeX */}
         <div className="px-6 py-4 border-b border-app-border flex items-center gap-3">
+          {/* Primary action: Add Reference from PDF */}
           <Button
             variant="primary"
+            size="default"
+            onClick={() => {
+              if (!activeCollectionId) {
+                addToast({
+                  message: 'Please select a collection first',
+                  type: 'error',
+                  duration: 5000,
+                });
+                return;
+              }
+              pdfInputRef.current?.click();
+            }}
+            loading={createFromPdfMutation.isPending}
+            disabled={createFromPdfMutation.isPending}
+          >
+            <DocumentTextIcon className="w-5 h-5 mr-2" />
+            Add Reference
+          </Button>
+
+          {/* Hidden file input for PDF upload */}
+          <input
+            ref={pdfInputRef}
+            type="file"
+            accept=".pdf"
+            onChange={handlePdfFileSelect}
+            className="hidden"
+          />
+
+          {/* Import BibTeX button */}
+          <Button
+            variant="secondary"
+            size="default"
+            onClick={() => bibtexInputRef.current?.click()}
+            loading={importBibtexMutation.isPending}
+            disabled={importBibtexMutation.isPending}
+          >
+            <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+            Import
+          </Button>
+
+          {/* Hidden file input for BibTeX upload */}
+          <input
+            ref={bibtexInputRef}
+            type="file"
+            accept=".bib"
+            onChange={handleBibtexFileSelect}
+            className="hidden"
+          />
+
+          {/* Export BibTeX button */}
+          <Button
+            variant="secondary"
+            size="default"
+            onClick={() => exportBibtexMutation.mutate(
+              activeCollectionId ? { collectionId: activeCollectionId } : undefined
+            )}
+            loading={exportBibtexMutation.isPending}
+            disabled={exportBibtexMutation.isPending}
+          >
+            <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
+            Export
+          </Button>
+
+          {/* Manual entry via secondary action */}
+          <Button
+            variant="ghost"
             size="default"
             onClick={() => {
               if (!activeCollectionId) {
@@ -155,80 +232,7 @@ export function LibraryPage() {
             }}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
-            New Reference
-          </Button>
-
-          {/* Import Dropdown (Session 10.5) */}
-          <Menu as="div" className="relative">
-            <Menu.Button as={Button} variant="secondary" size="default">
-              <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
-              Import
-              <ChevronDownIcon className="w-4 h-4 ml-2" />
-            </Menu.Button>
-
-            <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-              <div className="py-1">
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => setIsImportModalOpen(true)}
-                      className={`${
-                        active ? 'bg-gray-100' : ''
-                      } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
-                    >
-                      <ArrowDownTrayIcon className="w-5 h-5 mr-3" />
-                      Import from DOI
-                    </button>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => {
-                        // Validate collection is selected before opening file picker
-                        if (!activeCollectionId) {
-                          addToast({
-                            message: 'Please select a collection first',
-                            type: 'error',
-                            duration: 5000,
-                          });
-                          return;
-                        }
-                        fileInputRef.current?.click();
-                      }}
-                      className={`${
-                        active ? 'bg-gray-100' : ''
-                      } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
-                    >
-                      <DocumentTextIcon className="w-5 h-5 mr-3" />
-                      Import from PDF...
-                    </button>
-                  )}
-                </Menu.Item>
-              </div>
-            </Menu.Items>
-          </Menu>
-
-          {/* Hidden file input for PDF upload */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            onChange={handlePdfFileSelect}
-            className="hidden"
-          />
-
-          <Button
-            variant="secondary"
-            size="default"
-            onClick={() => exportBibtexMutation.mutate(
-              activeCollectionId ? { collectionId: activeCollectionId } : undefined
-            )}
-            loading={exportBibtexMutation.isPending}
-            disabled={exportBibtexMutation.isPending}
-          >
-            <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
-            Export BibTeX
+            Manual Entry
           </Button>
         </div>
 
@@ -265,19 +269,10 @@ export function LibraryPage() {
             )}
           >
             <Suspense fallback={<ReferenceTableSkeleton rows={10} />}>
-              <ReferenceListContent
-                queryParams={queryParams}
-                onImport={() => setIsImportModalOpen(true)}
-              />
+              <ReferenceListContent queryParams={queryParams} />
             </Suspense>
           </ErrorBoundary>
         </div>
-
-      {/* Import Modal */}
-      <ImportModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-      />
 
       {/* Reference Modal (Create/Edit) */}
       <ReferenceModal referenceId={editReferenceId || undefined} />
@@ -302,10 +297,9 @@ export function LibraryPage() {
  */
 interface ReferenceListContentProps {
   queryParams: ReferencesQueryParams;
-  onImport: () => void;
 }
 
-function ReferenceListContent({ queryParams, onImport }: ReferenceListContentProps) {
+function ReferenceListContent({ queryParams }: ReferenceListContentProps) {
   const { data: references } = useSuspenseReferencesQuery(queryParams);
 
   if (references.length === 0) {
@@ -313,8 +307,7 @@ function ReferenceListContent({ queryParams, onImport }: ReferenceListContentPro
       <EmptyState
         icon={FolderOpenIcon}
         title="No references yet"
-        description="Import your first reference to get started organizing your research"
-        action={{ label: "Import References", onClick: onImport }}
+        description="Add a PDF or import a BibTeX file to get started"
       />
     );
   }

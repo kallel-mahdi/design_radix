@@ -352,10 +352,11 @@ class ApiClient {
   }
 
   /**
-   * Upload file to server with optional additional form fields
+   * Upload PDF file to server with optional additional form fields
+   * Uses 'file' as the field name (matches backend multer config: upload.single('file'))
    * Returns the data directly (unwrapped)
    */
-  public async uploadFile<T>(
+  public async uploadPdf<T>(
     endpoint: string,
     file: File,
     additionalFields?: Record<string, string>,
