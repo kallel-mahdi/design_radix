@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/common/api/client';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '../store/library.store';
-import type { Reference } from '@/common/types';
+import type { Reference, Author } from '@/common/types';
 
 /**
  * PDF Upload/Delete Mutations (Session 10)
@@ -180,76 +180,145 @@ export function useDeletePdfMutation() {
 }
 
 /**
- * Backend response for createFromPdf endpoint (Session 10.5)
+ * PDF Extract Response (Unified Architecture)
+ * Returns extracted metadata + PDF info, but does NOT create reference
  */
-interface CreateFromPdfResponse {
-  reference: Reference;
-  extractedMetadata: {
+interface PdfExtractResponse {
+  metadata: {
+    type: string;
+    title: string;
+    authors: Author[];
+    year?: number;
+    venue?: string;
     doi?: string;
-    source: 'crossref' | 'filename-fallback';
+    url?: string;
+    abstract?: string;
   };
+  pdfInfo: {
+    storedPath: string;
+    originalName: string;
+    size: number;
+    mimeType: string;
+    uploadedAt: string;
+  };
+  source: 'crossref' | 'filename-fallback';
 }
 
 /**
- * Create Reference from PDF mutation (Session 10.5)
+ * Extract metadata from PDF without creating reference (Unified Architecture)
  *
- * Implements Zotero-style PDF upload workflow:
- * 1. Upload PDF file
- * 2. Backend extracts text and parses DOI
- * 3. If DOI found → enriches via Crossref
- * 4. If no DOI → creates reference from filename
- * 5. Reference created with PDF attached
+ * This is the first step in the unified PDF import flow:
+ * 1. Upload PDF → extract metadata → return data
+ * 2. Caller then creates reference via useCreateReferenceMutation
  *
- * Features:
- * - Automatic metadata extraction (DOI parsing + Crossref enrichment)
- * - Graceful fallback to filename when no DOI found
- * - Toast notifications indicating source (Crossref vs filename)
- * - Auto-select newly created reference in library
- * - Invalidates references list to trigger refetch
- *
- * Adapted from import.mutations.ts (useImportFromDoiMutation) pattern
- * See: docs/sessions/10.5-plan.md for architecture decisions
+ * This ensures both manual and PDF flows use the same reference creation path.
  */
-export function useCreateReferenceFromPdfMutation() {
-  const queryClient = useQueryClient();
-
+export function usePdfExtractMutation() {
   return useMutation({
-    mutationFn: async (file: File): Promise<CreateFromPdfResponse> => {
-      // Use apiClient.uploadFile() for multipart/form-data
-      const response = await apiClient.uploadFile<CreateFromPdfResponse>(
-        '/references/from-pdf',
+    mutationFn: async (file: File): Promise<PdfExtractResponse> => {
+      const response = await apiClient.uploadFile<PdfExtractResponse>(
+        '/references/pdf/extract',
         file
       );
-
       return response;
     },
 
     onMutate: () => {
-      // Show processing toast
       useUIStore.getState().addToast({
-        message: 'Processing PDF...',
+        message: 'Extracting metadata from PDF...',
         type: 'info',
-        duration: 0, // Indefinite until success/error
+        duration: 0,
       });
     },
 
-    onSuccess: (response) => {
-      const { reference, extractedMetadata } = response;
+    onError: (error) => {
+      console.error('PDF Extract Error:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+      });
 
-      // Invalidate references list to trigger refetch
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('Invalid PDF') || message.includes('Unsupported')) {
+        useUIStore.getState().addToast({
+          message: 'Invalid PDF file. Please upload a valid PDF.',
+          type: 'error',
+          duration: 5000,
+        });
+      } else {
+        useUIStore.getState().addToast({
+          message: 'Failed to extract PDF metadata. Please try again.',
+          type: 'error',
+          duration: 5000,
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Create Reference from PDF - Unified Flow (Zotero-style instant creation)
+ *
+ * Combines PDF extraction + reference creation in one user action:
+ * 1. Extract metadata from PDF via /pdf/extract
+ * 2. Create reference via /references (same as manual creation)
+ *
+ * This is a convenience wrapper that chains the two operations.
+ * The key benefit: both manual and PDF flows use POST /references.
+ */
+interface CreateFromPdfVariables {
+  file: File;
+  collectionId: string;
+}
+
+export function useCreateReferenceFromPdfMutation() {
+  const queryClient = useQueryClient();
+  const extractMutation = usePdfExtractMutation();
+
+  return useMutation({
+    mutationFn: async ({ file, collectionId }: CreateFromPdfVariables): Promise<{ reference: Reference; source: 'crossref' | 'filename-fallback' }> => {
+      // Step 1: Extract metadata from PDF
+      const extractResult = await extractMutation.mutateAsync(file);
+
+      // Step 2: Create reference via unified endpoint (same as manual creation)
+      const referenceData = {
+        type: extractResult.metadata.type as Reference['type'],
+        title: extractResult.metadata.title,
+        authors: extractResult.metadata.authors,
+        year: extractResult.metadata.year,
+        venue: extractResult.metadata.venue,
+        doi: extractResult.metadata.doi,
+        url: extractResult.metadata.url,
+        abstract: extractResult.metadata.abstract,
+        tags: [],
+        collectionIds: [collectionId],
+        sourceRaw: {
+          provider: 'manual' as const, // PDF import is effectively manual entry with auto-fill
+          payload: { source: 'pdf-import', extractedFrom: extractResult.source },
+        },
+        // Include PDF info so reference is created with PDF attached
+        hasPdf: true,
+        pdf: extractResult.pdfInfo,
+      };
+
+      const reference = await apiClient.post<Reference>('/references', referenceData);
+      return { reference, source: extractResult.source };
+    },
+
+    onSuccess: ({ reference, source }) => {
+      // Invalidate references list
       queryClient.invalidateQueries({ queryKey: ['references', 'list'] });
 
       // Auto-select newly created reference
       useLibraryStore.getState().setActiveReference(reference._id);
 
-      // Show success toast with source indicator
-      const source = extractedMetadata.source === 'crossref' ? 'from Crossref' : 'from filename';
+      // Show success toast
+      const sourceLabel = source === 'crossref' ? 'from Crossref' : 'from filename';
       const titlePreview = reference.title.substring(0, 50);
-      const message = `Added: ${titlePreview}${reference.title.length > 50 ? '...' : ''} (${source})`;
+      const message = `Added: ${titlePreview}${reference.title.length > 50 ? '...' : ''} (${sourceLabel})`;
 
       useUIStore.getState().addToast({
         message,
-        type: extractedMetadata.source === 'crossref' ? 'success' : 'warning',
+        type: source === 'crossref' ? 'success' : 'warning',
         duration: 5000,
       });
     },
@@ -260,9 +329,7 @@ export function useCreateReferenceFromPdfMutation() {
         message: error instanceof Error ? error.message : String(error),
       });
 
-      // Show error toast based on error type
       const message = error instanceof Error ? error.message : String(error);
-
       if (message.includes('Invalid PDF') || message.includes('Unsupported')) {
         useUIStore.getState().addToast({
           message: 'Invalid PDF file. Please upload a valid PDF.',
@@ -277,7 +344,7 @@ export function useCreateReferenceFromPdfMutation() {
         });
       } else {
         useUIStore.getState().addToast({
-          message: 'Failed to process PDF. Please try again.',
+          message: 'Failed to import PDF. Please try again.',
           type: 'error',
           duration: 5000,
         });

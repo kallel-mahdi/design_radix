@@ -200,6 +200,18 @@ export const DuplicateCandidateListSchema = z.array(DuplicateCandidateSchema);
  * Request schemas for create/update operations
  */
 
+/**
+ * PDF Metadata Input Schema (for creating reference with PDF attached)
+ * Used in unified architecture where PDF is uploaded first, then reference created
+ */
+const PdfMetadataInputSchema = z.object({
+  storedPath: z.string(),
+  originalName: z.string(),
+  size: z.number(),
+  mimeType: z.string(),
+  uploadedAt: z.string(), // ISO 8601 string from frontend
+});
+
 // Create Reference Schema - only required fields for creating a reference
 export const CreateReferenceSchema = z.object({
   type: ReferenceTypeSchema,
@@ -214,6 +226,9 @@ export const CreateReferenceSchema = z.object({
   tags: z.array(z.string()).optional(),
   collectionIds: z.array(z.string()).optional(),
   sourceRaw: SourceRawSchema,
+  // Unified Architecture: PDF metadata from /pdf/extract endpoint
+  hasPdf: z.boolean().optional(),
+  pdf: PdfMetadataInputSchema.optional(),
 });
 
 // Update Reference Schema - all fields optional

@@ -125,7 +125,8 @@ export const AppLayout: React.FC = () => {
                 <PlusIcon className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 overflow-auto">
+            {/* Collections Tree - takes 60% of remaining space */}
+            <div className="flex-[3] min-h-0 overflow-auto">
               {collectionsLoading ? (
                 <div className="flex items-center justify-center h-full">
                   <LoadingSpinner />
@@ -141,14 +142,16 @@ export const AppLayout: React.FC = () => {
               )}
             </div>
 
-            {/* Tags */}
-            {tagsLoading ? (
-              <div className="p-4 border-t border-app-border flex items-center justify-center">
-                <LoadingSpinner />
-              </div>
-            ) : (
-              <TagSelector tags={tags} isLoading={false} />
-            )}
+            {/* Tags - takes 40% of remaining space */}
+            <div className="flex-[2] min-h-0 overflow-auto border-t border-app-border">
+              {tagsLoading ? (
+                <div className="p-4 flex items-center justify-center">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <TagSelector tags={tags} isLoading={false} />
+              )}
+            </div>
           </aside>
         </ResizablePanel>
 

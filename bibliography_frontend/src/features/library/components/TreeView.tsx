@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { TreeNode } from './TreeNode';
 import { CollectionColorPickerModal } from './CollectionColorPickerModal';
 import { useLibraryStore, useIsCollectionExpanded } from '../store/library.store';
+import { useUIStore } from '@/store/ui.store';
 import { ContextMenu, type ContextMenuItem } from '@/components/ui/ContextMenu';
 import { PromptDialog } from '@/components/ui/PromptDialog';
 import { PencilIcon, TrashIcon, SwatchIcon, FolderPlusIcon } from '@heroicons/react/24/outline';
@@ -11,6 +12,7 @@ import {
   useUpdateCollectionMutation,
   useDeleteCollectionMutation,
 } from '../api/collections.mutations';
+import { useAddReferenceToCollectionMutation } from '../api/references.mutations';
 
 interface TreeViewProps {
   collections: Collection[];
@@ -75,6 +77,7 @@ interface TreeItemProps {
   depth: number;
   onSelectCollection: (id: string) => void;
   onContextMenu: (collection: Collection, e: React.MouseEvent) => void;
+  onDrop?: (collectionId: string, referenceId: string, referenceTitle: string) => void;
   activeCollectionId: string | null;
 }
 
@@ -83,6 +86,7 @@ const TreeItem: React.FC<TreeItemProps> = ({
   depth,
   onSelectCollection,
   onContextMenu,
+  onDrop,
   activeCollectionId,
 }) => {
   const { toggleCollectionExpanded } = useLibraryStore();
@@ -97,6 +101,7 @@ const TreeItem: React.FC<TreeItemProps> = ({
         onToggleExpand={() => toggleCollectionExpanded(item._id)}
         onSelect={() => onSelectCollection(item._id)}
         onContextMenu={onContextMenu}
+        onDrop={onDrop}
         isActive={activeCollectionId === item._id}
         hasChildren={hasChildren}
         depth={depth}
@@ -109,6 +114,7 @@ const TreeItem: React.FC<TreeItemProps> = ({
           depth={depth + 1}
           onSelectCollection={onSelectCollection}
           onContextMenu={onContextMenu}
+          onDrop={onDrop}
           activeCollectionId={activeCollectionId}
         />
       )}
@@ -124,6 +130,7 @@ interface TreeRenderProps {
   depth: number;
   onSelectCollection: (id: string) => void;
   onContextMenu: (collection: Collection, e: React.MouseEvent) => void;
+  onDrop?: (collectionId: string, referenceId: string, referenceTitle: string) => void;
   activeCollectionId: string | null;
 }
 
@@ -132,6 +139,7 @@ const TreeRender: React.FC<TreeRenderProps> = ({
   depth,
   onSelectCollection,
   onContextMenu,
+  onDrop,
   activeCollectionId,
 }) => {
   return (
@@ -143,6 +151,7 @@ const TreeRender: React.FC<TreeRenderProps> = ({
           depth={depth}
           onSelectCollection={onSelectCollection}
           onContextMenu={onContextMenu}
+          onDrop={onDrop}
           activeCollectionId={activeCollectionId}
         />
       ))}
@@ -181,6 +190,30 @@ export const TreeView: React.FC<TreeViewProps> = ({
   const createCollectionMutation = useCreateCollectionMutation();
   const updateCollectionMutation = useUpdateCollectionMutation();
   const deleteCollectionMutation = useDeleteCollectionMutation();
+  const addToCollectionMutation = useAddReferenceToCollectionMutation();
+
+  // UI Store
+  const { addToast } = useUIStore();
+
+  // Handle drop of reference onto collection (Issue #6 - Drag-and-Drop)
+  const handleDrop = useCallback(
+    (collectionId: string, referenceId: string, referenceTitle: string) => {
+      addToCollectionMutation.mutate(
+        { referenceId, collectionId, currentCollectionIds: [] },
+        {
+          onSuccess: () => {
+            const collectionName = collections.find(c => c._id === collectionId)?.name;
+            addToast({
+              message: `Moved "${referenceTitle}" to "${collectionName}"`,
+              type: 'success',
+              duration: 3000,
+            });
+          },
+        }
+      );
+    },
+    [addToCollectionMutation, collections, addToast]
+  );
 
   // Context menu handler
   const handleContextMenu = (collection: Collection, e: React.MouseEvent) => {
@@ -260,6 +293,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
           depth={0}
           onSelectCollection={onSelectCollection}
           onContextMenu={handleContextMenu}
+          onDrop={handleDrop}
           activeCollectionId={activeCollectionId}
         />
       </div>

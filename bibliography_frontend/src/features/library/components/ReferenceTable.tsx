@@ -714,12 +714,18 @@ export function ReferenceTable({ references }: ReferenceTableProps) {
               }}
             >
               <div
-                className={`col-span-full grid border-b border-app-border cursor-pointer transition-colors ${
+                className={`col-span-full grid border-b border-app-border cursor-move transition-colors ${
                   isSelected
                     ? 'bg-app-accent/5 border-l-4 border-l-app-accent'
                     : 'hover:bg-app-bg-hover'
                 } ${isFocused ? 'ring-2 ring-app-accent ring-inset' : ''}`}
                 style={{ gridTemplateColumns }}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('referenceId', row.original._id);
+                  e.dataTransfer.setData('referenceTitle', row.original.title || 'Untitled');
+                }}
                 onClick={(e) => handleRowClick(virtualRow.index, e, rows)}
                 onDoubleClick={(e) => handleRowDoubleClick(row.original, e)}
                 onContextMenu={(e) => handleContextMenu(e, row.original)}

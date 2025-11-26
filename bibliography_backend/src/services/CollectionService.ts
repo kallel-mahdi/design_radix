@@ -132,6 +132,44 @@ export class CollectionService implements ICollectionService {
     return collection;
   }
 
+  /**
+   * Get all descendant collection IDs (including the collection itself)
+   * Used for recursive filtering: when a parent collection is selected,
+   * show references from all child collections too
+   *
+   * @param userId - User ID for ownership verification
+   * @param collectionId - The parent collection ID
+   * @returns Array of collection IDs (parent + all descendants)
+   */
+  async getAllDescendantIds(userId: string, collectionId: string): Promise<string[]> {
+    const descendants: string[] = [collectionId]; // Include self
+
+    const result = await Collection.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(collectionId), userId, deleted: false } },
+      {
+        $graphLookup: {
+          from: 'collections',
+          startWith: '$_id',
+          connectFromField: '_id',
+          connectToField: 'parentId',
+          as: 'descendants',
+          maxDepth: 5,
+          restrictSearchWithMatch: { userId, deleted: false }
+        }
+      },
+      { $unwind: { path: '$descendants', preserveNullAndEmptyArrays: true } },
+      { $replaceRoot: { newRoot: { $ifNull: ['$descendants', { _id: null }] } } },
+      { $match: { _id: { $ne: null } } }
+    ]);
+
+    // Add descendant IDs to result array
+    for (const doc of result) {
+      descendants.push(doc._id.toString());
+    }
+
+    return descendants;
+  }
+
   async permanentDelete(id: string, userId: string): Promise<boolean> {
     ApplicationLogger.warn('Permanently deleting collection', { userId, collectionId: id });
 

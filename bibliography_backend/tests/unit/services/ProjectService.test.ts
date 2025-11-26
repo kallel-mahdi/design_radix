@@ -14,8 +14,8 @@ describe('ProjectService Unit Tests', () => {
     await connectInMemoryMongo();
     service = new ProjectService();
     const dupService = new DuplicateService();
-    refService = new ReferenceService(dupService);
     colService = new CollectionService();
+    refService = new ReferenceService(dupService, colService);
   });
 
   afterAll(async () => {

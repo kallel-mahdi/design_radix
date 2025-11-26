@@ -110,10 +110,12 @@ export function LibraryPage() {
   }, [allTags, toggleTag]);
 
   // Handle PDF file selection (from file picker)
+  // Note: Collection validation happens BEFORE file picker opens (in menu item onClick)
   const handlePdfFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      createFromPdfMutation.mutate(file);
+    // activeCollectionId is guaranteed to exist here (validated before file picker)
+    if (file && file.type === 'application/pdf' && activeCollectionId) {
+      createFromPdfMutation.mutate({ file, collectionId: activeCollectionId });
       // Reset input so same file can be selected again
       event.target.value = '';
     } else if (file) {
@@ -139,9 +141,19 @@ export function LibraryPage() {
     event.preventDefault();
     setIsDragging(false);
 
+    // Validate collection is selected (consistent UX with New Reference)
+    if (!activeCollectionId) {
+      addToast({
+        message: 'Please select a collection first',
+        type: 'error',
+        duration: 5000,
+      });
+      return;
+    }
+
     const file = event.dataTransfer.files[0];
     if (file && file.type === 'application/pdf') {
-      createFromPdfMutation.mutate(file);
+      createFromPdfMutation.mutate({ file, collectionId: activeCollectionId });
     } else if (file) {
       addToast({
         message: 'Only PDF files are supported',
@@ -172,7 +184,17 @@ export function LibraryPage() {
           <Button
             variant="primary"
             size="default"
-            onClick={() => openModal('reference-modal')}
+            onClick={() => {
+              if (!activeCollectionId) {
+                addToast({
+                  message: 'Please select a collection first',
+                  type: 'error',
+                  duration: 5000,
+                });
+                return;
+              }
+              openModal('reference-modal');
+            }}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
             New Reference
@@ -204,7 +226,18 @@ export function LibraryPage() {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => {
+                        // Validate collection is selected before opening file picker
+                        if (!activeCollectionId) {
+                          addToast({
+                            message: 'Please select a collection first',
+                            type: 'error',
+                            duration: 5000,
+                          });
+                          return;
+                        }
+                        fileInputRef.current?.click();
+                      }}
                       className={`${
                         active ? 'bg-gray-100' : ''
                       } flex items-center w-full px-4 py-2 text-sm text-gray-700`}

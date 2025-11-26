@@ -125,17 +125,22 @@ export class ImportController {
         return;
       }
 
+      // Read optional collectionId from form data
+      const collectionId = req.body?.collectionId as string | undefined;
+
       ApplicationLogger.info('Creating reference from PDF', {
         userId,
         filename: req.file.originalname,
-        size: req.file.size
+        size: req.file.size,
+        collectionId
       });
 
       // Create reference with automatic metadata extraction
       const { reference, metadata } = await this.pdfMetadataService.createReferenceFromPdf(
         userId,
         req.file.path,
-        req.file.originalname
+        req.file.originalname,
+        collectionId
       );
 
       ApplicationLogger.info('Reference created from PDF', {

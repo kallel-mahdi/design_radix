@@ -1,6 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { IReferenceService, CreateReferenceInput, UpdateReferenceInput, ReferenceFilters } from '../interfaces/IReferenceService';
 import { IDuplicateService } from '../interfaces/IDuplicateService';
+import { ICollectionService } from '../interfaces/ICollectionService';
 import { Reference, IReference } from '../models/Reference';
 import { ApplicationLogger } from '../utils/logger';
 import { TYPES } from '../config/types';
@@ -9,7 +10,8 @@ import mongoose from 'mongoose';
 @injectable()
 export class ReferenceService implements IReferenceService {
   constructor(
-    @inject(TYPES.IDuplicateService) private duplicateService: IDuplicateService
+    @inject(TYPES.IDuplicateService) private duplicateService: IDuplicateService,
+    @inject(TYPES.ICollectionService) private collectionService: ICollectionService
   ) {}
 
   async create(userId: string, data: CreateReferenceInput): Promise<IReference> {
@@ -74,7 +76,11 @@ export class ReferenceService implements IReferenceService {
 
     if (filters.collectionId) {
       try {
-        query.collectionIds = new mongoose.Types.ObjectId(filters.collectionId);
+        // Recursive filtering: include references from all descendant collections
+        const collectionIds = await this.collectionService.getAllDescendantIds(userId, filters.collectionId);
+        query.collectionIds = {
+          $in: collectionIds.map(id => new mongoose.Types.ObjectId(id))
+        };
       } catch (error) {
         throw new Error(`Invalid collectionId format: ${filters.collectionId}`);
       }

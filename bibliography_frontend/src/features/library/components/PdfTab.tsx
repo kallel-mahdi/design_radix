@@ -8,6 +8,7 @@ import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
   DocumentTextIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import type { Reference } from '@/common/types';
 import { Button } from '@/components/ui/Button';
@@ -44,11 +45,13 @@ export const PdfTab: React.FC<PdfTabProps> = ({ reference }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Reset page number when reference changes
+  // Reset state when reference changes
   useEffect(() => {
     setPageNumber(1);
     setLoading(true);
+    setError(null);
   }, [reference?._id]);
 
   if (!reference?.hasPdf) {
@@ -198,17 +201,35 @@ export const PdfTab: React.FC<PdfTabProps> = ({ reference }) => {
 
       {/* PDF Viewer */}
       <div className="flex-1 overflow-auto bg-app-bg flex items-start justify-center p-4">
-        {loading && (
+        {loading && !error && (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-accent"></div>
           </div>
         )}
-        <Document
+        {error && (
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <ExclamationTriangleIcon className="w-12 h-12 mb-2 text-red-500" />
+            <p className="text-lg font-medium text-red-500 text-center mb-4">{error}</p>
+            <Button
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+              }}
+              variant="secondary"
+              size="sm"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+        {!error && (
+          <Document
           file={pdfUrl}
           onLoadSuccess={handleLoadSuccess}
-          onLoadError={(error) => {
-            console.error('PDF load error:', error);
+          onLoadError={(err) => {
+            console.error('PDF load error:', err);
             setLoading(false);
+            setError('Failed to load PDF. The file may be corrupted or incompatible.');
           }}
           loading={
             <div className="flex items-center justify-center py-8">
@@ -225,6 +246,7 @@ export const PdfTab: React.FC<PdfTabProps> = ({ reference }) => {
             className="shadow-lg"
           />
         </Document>
+        )}
       </div>
     </div>
   );

@@ -352,12 +352,13 @@ class ApiClient {
   }
 
   /**
-   * Upload file to server
+   * Upload file to server with optional additional form fields
    * Returns the data directly (unwrapped)
    */
   public async uploadFile<T>(
     endpoint: string,
     file: File,
+    additionalFields?: Record<string, string>,
     options?: RequestOptions,
   ): Promise<T> {
     const url = this.buildURL(endpoint, options?.params);
@@ -368,6 +369,13 @@ class ApiClient {
 
     const formData = new FormData();
     formData.append('file', file);
+
+    // Append additional fields to FormData
+    if (additionalFields) {
+      for (const [key, value] of Object.entries(additionalFields)) {
+        formData.append(key, value);
+      }
+    }
 
     try {
       const response = await this.fetchWithTimeout(url, {

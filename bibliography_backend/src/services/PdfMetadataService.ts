@@ -135,12 +135,14 @@ export class PdfMetadataService {
   async createReferenceFromPdf(
     userId: string,
     filePath: string,
-    originalName: string
+    originalName: string,
+    collectionId?: string
   ): Promise<{ reference: IReference; metadata: { doi?: string; source: 'crossref' | 'filename-fallback' } }> {
     ApplicationLogger.info('Creating reference from PDF', {
       userId,
       originalName,
-      filePath
+      filePath,
+      collectionId
     });
 
     try {
@@ -164,6 +166,7 @@ export class PdfMetadataService {
           // Create reference with PDF attached
           const reference = await this.referenceService.create(userId, {
             ...referenceInput,
+            collectionIds: collectionId ? [collectionId] : [],
             hasPdf: true,
             pdf: {
               storedPath: filePath,
@@ -205,7 +208,7 @@ export class PdfMetadataService {
         title,
         authors: [], // Empty authors array
         tags: [],
-        collectionIds: [],
+        collectionIds: collectionId ? [collectionId] : [],
         sourceRaw: {
           provider: 'manual',
           payload: { source: 'pdf-filename-fallback', originalName }

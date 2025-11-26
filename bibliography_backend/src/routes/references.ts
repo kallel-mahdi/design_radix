@@ -36,9 +36,17 @@ router.post('/import-doi', validate(ImportDoiSchema), (req, res, next) => {
 // Import uploadPdf middleware (reused from Session 10)
 import { uploadPdf } from '../utils/fileUpload';
 
+// DEPRECATED: Use /pdf/extract + POST /references instead (unified flow)
 router.post('/from-pdf', uploadPdf, (req: any, res: any, next: any) => {
   const controller = container.get<ImportController>(TYPES.ImportController);
   return controller.createFromPdf(req, res, next);
+});
+
+// Unified Architecture: Extract metadata from PDF without creating reference
+// Frontend calls this, then shows pre-filled ReferenceModal, then creates via POST /references
+router.post('/pdf/extract', uploadPdf, (req: any, res: any, next: any) => {
+  const controller = container.get<PdfController>(TYPES.PdfController);
+  return controller.extractMetadata(req, res, next);
 });
 
 // Test Cleanup Endpoint - FOR TESTING ONLY

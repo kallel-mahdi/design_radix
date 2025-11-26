@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useModalState, useUIStore } from '@/store/ui.store';
 import { useReferenceQuery } from '../api/references.queries';
+import { useCollectionsQuery } from '../api/collections.queries';
 import {
   useCreateReferenceMutation,
   useUpdateReferenceMutation,
@@ -42,9 +43,11 @@ interface ReferenceModalProps {
 
 export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) => {
   const isOpen = useModalState('reference-modal');
-  const { closeModal } = useUIStore();
+  const { closeModal, addToast } = useUIStore();
   const setEditReference = useLibraryStore((state) => state.setEditReference);
+  const activeCollectionId = useLibraryStore((state) => state.activeCollectionId);
   const queryClient = useQueryClient();
+  const { data: collections } = useCollectionsQuery();
   const createMutation = useCreateReferenceMutation();
   const updateMutation = useUpdateReferenceMutation();
   const uploadPdfMutation = useUploadPdfMutation();
@@ -173,8 +176,23 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
           queryKey: ['references', 'detail', referenceId]
         });
       } else {
-        const newReference = await createMutation.mutateAsync(formDataToCreateInput(data));
+        // Include activeCollectionId when creating new reference
+        const createData = {
+          ...formDataToCreateInput(data),
+          collectionIds: activeCollectionId ? [activeCollectionId] : [],
+        };
+        const newReference = await createMutation.mutateAsync(createData);
         savedReferenceId = newReference._id;
+
+        // Show success toast with collection name (Issue #5)
+        const collectionName = collections?.find(c => c._id === activeCollectionId)?.name;
+        if (collectionName && activeCollectionId) {
+          addToast({
+            message: `Added to "${collectionName}"`,
+            type: 'success',
+            duration: 3000,
+          });
+        }
       }
 
       // Session 10: Upload PDF if file selected
@@ -204,7 +222,7 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ referenceId }) =
       // Reset submission flag on error so user can retry
       isSubmitting.current = false;
     }
-  }, [isEditMode, referenceId, updateMutation, createMutation, uploadPdfMutation, selectedPdfFile, closeModal, setEditReference, form]);
+  }, [isEditMode, referenceId, updateMutation, createMutation, uploadPdfMutation, selectedPdfFile, closeModal, setEditReference, form, collections, activeCollectionId, addToast, queryClient]);
 
   // Handle modal close
   const handleClose = useCallback(() => {

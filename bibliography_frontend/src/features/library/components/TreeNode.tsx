@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRightIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/common/utils';
 import type { Collection } from '@/common/types';
@@ -9,6 +9,7 @@ interface TreeNodeProps {
   onToggleExpand: () => void;
   onSelect: () => void;
   onContextMenu?: (collection: Collection, e: React.MouseEvent) => void;
+  onDrop?: (collectionId: string, referenceId: string, referenceTitle: string) => void;
   isActive: boolean;
   hasChildren: boolean;
   depth: number;
@@ -20,23 +21,52 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
   onToggleExpand,
   onSelect,
   onContextMenu,
+  onDrop,
   isActive,
   hasChildren,
   depth,
 }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     onContextMenu?.(collection, e);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const referenceId = e.dataTransfer.getData('referenceId');
+    const referenceTitle = e.dataTransfer.getData('referenceTitle');
+    if (referenceId && onDrop) {
+      onDrop(collection._id, referenceId, referenceTitle);
+    }
   };
 
   return (
     <div
       className={cn(
         'flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 group',
-        isActive ? 'bg-app-accent/20' : 'hover:bg-app-surface-hover'
+        isActive
+          ? 'bg-app-accent/20 border-l-4 border-app-accent'
+          : 'hover:bg-app-surface-hover border-l-4 border-transparent',
+        isDragOver && 'bg-app-accent/30 ring-2 ring-app-accent'
       )}
       style={{ paddingLeft: `${16 + depth * 16}px` }}
       onContextMenu={handleContextMenu}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       {/* Chevron/Expand Icon */}
       <button

@@ -1,5 +1,6 @@
 import { ReferenceService } from '../../../src/services/ReferenceService';
 import { DuplicateService } from '../../../src/services/DuplicateService';
+import { CollectionService } from '../../../src/services/CollectionService';
 import { Reference } from '../../../src/models/Reference';
 import { Collection } from '../../../src/models/Collection'; // Session 9: Required for populate() in getById
 import { connectInMemoryMongo, clearDatabase, disconnectInMemoryMongo } from '../../utils/mongoMemoryServer';
@@ -7,11 +8,13 @@ import { connectInMemoryMongo, clearDatabase, disconnectInMemoryMongo } from '..
 describe('ReferenceService Unit Tests', () => {
   let service: ReferenceService;
   let duplicateService: DuplicateService;
+  let collectionService: CollectionService;
 
   beforeAll(async () => {
     await connectInMemoryMongo();
     duplicateService = new DuplicateService();
-    service = new ReferenceService(duplicateService);
+    collectionService = new CollectionService();
+    service = new ReferenceService(duplicateService, collectionService);
   });
 
   afterAll(async () => {

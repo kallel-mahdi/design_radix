@@ -21,4 +21,5 @@ export interface ICollectionService {
   delete(id: string, userId: string): Promise<boolean>;
   restore(id: string, userId: string): Promise<ICollection | null>;
   permanentDelete(id: string, userId: string): Promise<boolean>;
+  getAllDescendantIds(userId: string, collectionId: string): Promise<string[]>;
 }
