@@ -3,6 +3,7 @@ import { injectable, inject } from 'inversify';
 import { IReferenceService } from '../interfaces/IReferenceService';
 import { CrossrefService } from '../services/CrossrefService';
 import { PdfMetadataService } from '../services/PdfMetadataService';
+import { BibTeXService } from '../services/BibTeXService';
 import { TYPES } from '../config/types';
 import { ApplicationLogger } from '../utils/logger';
 import { Reference } from '../models/Reference';
@@ -22,7 +23,8 @@ export class ImportController {
   constructor(
     @inject(TYPES.IReferenceService) private referenceService: IReferenceService,
     @inject(TYPES.ICrossrefService) private crossrefService: CrossrefService,
-    @inject(TYPES.IPdfMetadataService) private pdfMetadataService: PdfMetadataService
+    @inject(TYPES.IPdfMetadataService) private pdfMetadataService: PdfMetadataService,
+    @inject(TYPES.IBibTeXService) private bibtexService: BibTeXService
   ) {}
 
   /**
@@ -169,6 +171,147 @@ export class ImportController {
         }
       }
 
+      next(error);
+    }
+  }
+
+  /**
+   * Import references from BibTeX (Session 12)
+   *
+   * Accepts either:
+   * - File upload (multipart/form-data with .bib file)
+   * - Raw text body (application/json with { bibtex: "..." })
+   *
+   * Returns parsed entries for preview, optionally creates immediately.
+   */
+  async importFromBibtex(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+
+      // Get BibTeX content from file or body
+      let bibtexContent: string;
+      if (req.file) {
+        // Read file content
+        const fs = await import('fs/promises');
+        bibtexContent = await fs.readFile(req.file.path, 'utf-8');
+      } else if (req.body.bibtex) {
+        bibtexContent = req.body.bibtex;
+      } else {
+        res.status(400).json({
+          success: false,
+          error: 'NO_CONTENT',
+          message: 'No BibTeX content provided. Upload a .bib file or send bibtex in body.'
+        });
+        return;
+      }
+
+      ApplicationLogger.info('Importing from BibTeX', {
+        userId,
+        contentLength: bibtexContent.length,
+        fromFile: !!req.file
+      });
+
+      // Parse BibTeX
+      const parseResult = this.bibtexService.parse(bibtexContent);
+
+      // If immediate create is requested, create references
+      const createImmediately = req.body.createImmediately === true;
+      const createdReferences = [];
+      const createErrors: Array<{ citationKey: string; error: string }> = [];
+
+      if (createImmediately && parseResult.references.length > 0) {
+        for (const parsed of parseResult.references) {
+          try {
+            const input = this.bibtexService.toCreateInput(parsed);
+            const reference = await this.referenceService.create(userId, input);
+            createdReferences.push(reference);
+          } catch (err) {
+            createErrors.push({
+              citationKey: parsed.citationKey,
+              error: err instanceof Error ? err.message : 'Failed to create'
+            });
+          }
+        }
+      }
+
+      ApplicationLogger.info('BibTeX import complete', {
+        userId,
+        parsedCount: parseResult.references.length,
+        errorCount: parseResult.errors.length,
+        createdCount: createdReferences.length
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          parsed: parseResult.references,
+          parseErrors: parseResult.errors,
+          created: createdReferences,
+          createErrors
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Export references to BibTeX format (Session 12)
+   *
+   * Accepts:
+   * - referenceIds: Array of specific reference IDs to export
+   * - collectionId: Export all references in a collection
+   * - (none): Export all user's references
+   */
+  async exportToBibtex(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as GatewayAuthenticatedRequest).user.id;
+      const { referenceIds, collectionId } = req.body;
+
+      ApplicationLogger.info('Exporting to BibTeX', {
+        userId,
+        referenceIds: referenceIds?.length,
+        collectionId
+      });
+
+      // Build query to fetch references
+      let references;
+      if (referenceIds && referenceIds.length > 0) {
+        // Export specific references
+        references = await Reference.find({
+          userId,
+          _id: { $in: referenceIds },
+          deleted: false
+        });
+      } else if (collectionId) {
+        // Export collection
+        references = await Reference.find({
+          userId,
+          collectionIds: collectionId,
+          deleted: false
+        });
+      } else {
+        // Export all
+        references = await Reference.find({
+          userId,
+          deleted: false
+        });
+      }
+
+      // Generate BibTeX
+      const bibtexContent = this.bibtexService.export(references);
+
+      ApplicationLogger.info('BibTeX export complete', {
+        userId,
+        referenceCount: references.length,
+        contentLength: bibtexContent.length
+      });
+
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="export.bib"');
+      res.status(200).send(bibtexContent);
+    } catch (error) {
       next(error);
     }
   }

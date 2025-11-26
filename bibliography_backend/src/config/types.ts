@@ -13,6 +13,7 @@ export const TYPES = {
   IPdfService: Symbol.for('IPdfService'),
   IPdfMetadataService: Symbol.for('IPdfMetadataService'), // Session 10.5
   IAnnotationService: Symbol.for('IAnnotationService'), // PDF annotations
+  IBibTeXService: Symbol.for('IBibTeXService'), // BibTeX import/export
 
   // Controllers
   ReferenceController: Symbol.for('ReferenceController'),

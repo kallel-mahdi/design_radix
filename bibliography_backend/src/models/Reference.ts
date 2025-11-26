@@ -91,7 +91,24 @@ ReferenceSchema.index({ userId: 1, collectionIds: 1 });
 ReferenceSchema.index({ userId: 1, tags: 1 });
 ReferenceSchema.index({ doi: 1 });
 ReferenceSchema.index({ isbn: 1 });
-ReferenceSchema.index({ title: 'text', abstract: 'text' });
+// Text index for full-text search (Session 14)
+// Includes title, abstract, authors, venue for comprehensive search
+ReferenceSchema.index({
+  title: 'text',
+  abstract: 'text',
+  'authors.full': 'text',
+  venue: 'text',
+  citationKey: 'text'
+}, {
+  weights: {
+    title: 10,        // Title matches are most important
+    'authors.full': 5, // Author matches are second
+    citationKey: 5,   // Citation key matches (for quick lookup)
+    venue: 3,         // Venue matches
+    abstract: 1       // Abstract matches (least important)
+  },
+  name: 'reference_text_index'
+});
 // Citation keys must be unique per user (not globally)
 // Following Zotero's per-library uniqueness pattern (userdata.sql line 168: UNIQUE (libraryID, key))
 // This allows different users to use the same citation keys in their own libraries

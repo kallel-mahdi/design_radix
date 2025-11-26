@@ -7,7 +7,7 @@ import { SettingsMenu } from './SettingsMenu';
 import { useUIStore } from '@/store/ui.store';
 import { useLibraryStore } from '@/features/library/store/library.store';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle, type ImperativePanelHandle } from '@/components/ui/Resizable';
-import { usePanelPersistence } from '@/common/hooks/usePanelPersistence';
+import { usePanelPersistence, useKeyboardShortcuts } from '@/common/hooks';
 import { useReferencesQuery } from '@/features/library/api/references.queries';
 import { useCollectionsQuery } from '@/features/library/api/collections.queries';
 import { useTagsQuery } from '@/features/library/api/tags.queries';
@@ -28,6 +28,9 @@ export const AppLayout: React.FC = () => {
     setDetailsPaneTab,
     setDetailsPaneOpen,
   } = useUIStore();
+
+  // Centralized keyboard shortcuts (Cmd/Ctrl+N, Cmd/Ctrl+F, Delete, Escape, 1-9)
+  useKeyboardShortcuts();
 
   const handleViewChange = (view: typeof activeView) => {
     setActiveView(view);
