@@ -44,7 +44,7 @@ export function Toast({ id, message, type = 'info', onClose }: ToastProps) {
 
 	return (
 		<div
-			className={cn(toastVariants({ type }))}
+			className={cn(toastVariants({ type }), 'pointer-events-none')}
 			role="alert"
 			aria-live="polite"
 			aria-atomic="true"
@@ -53,7 +53,7 @@ export function Toast({ id, message, type = 'info', onClose }: ToastProps) {
 			<p className="flex-1 text-sm font-medium">{message}</p>
 			<button
 				onClick={() => onClose(id)}
-				className="flex-shrink-0 hover:opacity-70 transition-opacity"
+				className="flex-shrink-0 hover:opacity-70 transition-opacity pointer-events-auto"
 				aria-label="Close notification"
 			>
 				<XMarkIcon className="w-5 h-5" />

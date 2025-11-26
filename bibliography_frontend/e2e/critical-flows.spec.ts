@@ -14,35 +14,9 @@ import { test, expect } from './fixtures/workerFixtures';
  */
 
 test.describe('Critical User Flows', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // 1. Intercept all API calls FIRST to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // 2. Navigate to library page
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Cleanup AFTER route intercept is set up (worker-scoped cleanup)
-    const cleanupResponse = await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      {
-        headers: {
-          'x-user-id': workerUserId,
-          'x-test-cleanup': 'true',
-        },
-      }
-    );
-    expect(cleanupResponse.ok()).toBeTruthy();
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('should create reference and verify in table', async ({ page }) => {
@@ -51,8 +25,8 @@ test.describe('Critical User Flows', () => {
     // Step 1: Create a new reference
     await page.getByRole('button', { name: /New Reference/i }).click();
 
-    // Verify modal opened
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    // Verify modal opened (wait for input instead of heading)
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill form using data-testid
     await page.getByTestId('reference-title-input').fill('Deep Reinforcement Learning for Robotics');
@@ -64,8 +38,8 @@ test.describe('Critical User Flows', () => {
     await page.getByTestId('reference-submit-button').click();
     await page.waitForLoadState('networkidle');
 
-    // Verify modal closed
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 3000 });
+    // Verify modal closed (check input is gone)
+    await expect(page.getByTestId('reference-title-input')).not.toBeVisible({ timeout: 3000 });
 
     // Verify success toast
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });

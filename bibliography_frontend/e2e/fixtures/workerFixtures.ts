@@ -18,7 +18,8 @@
  * https://playwright.dev/docs/test-fixtures#worker-scoped-fixtures
  */
 
-import { test as base } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 type WorkerFixtures = {
   /**
@@ -32,6 +33,66 @@ type WorkerFixtures = {
    */
   workerUserId: string;
 };
+
+type TestFixtures = {
+  /**
+   * Sets up the library page with routing, cleanup, and a collection.
+   * Call this in beforeEach to get a ready-to-use library page.
+   */
+  setupLibrary: () => Promise<void>;
+
+  /**
+   * Waits for any visible toast notifications to disappear.
+   * Use this before clicking on elements that might be blocked by toasts.
+   *
+   * Root cause: Toast notifications have pointer-events-auto, blocking clicks
+   * in the top-right area of the screen (where Details Pane tabs are).
+   */
+  waitForToasts: () => Promise<void>;
+};
+
+/**
+ * Helper to set up API routing with worker-scoped user ID.
+ */
+async function setupRouting(page: Page, workerUserId: string): Promise<void> {
+  await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
+    const headers = {
+      ...route.request().headers(),
+      'x-user-id': workerUserId,
+    };
+    await route.continue({ headers });
+  });
+}
+
+/**
+ * Helper to cleanup test data for a worker.
+ */
+async function cleanupTestData(page: Page, workerUserId: string): Promise<void> {
+  const cleanupResponse = await page.request.delete(
+    'http://localhost:8005/api/bibliography/references/test-cleanup',
+    {
+      headers: {
+        'x-user-id': workerUserId,
+        'x-test-cleanup': 'true',
+      },
+    }
+  );
+  expect(cleanupResponse.ok()).toBeTruthy();
+}
+
+/**
+ * Helper to create a collection and select it (required before creating references).
+ */
+async function createAndSelectCollection(page: Page, name: string = 'Test Collection'): Promise<void> {
+  await page.getByRole('button', { name: 'New Collection' }).click();
+  await expect(page.getByPlaceholder('Collection name')).toBeVisible();
+  await page.getByPlaceholder('Collection name').fill(name);
+  await page.getByRole('button', { name: 'Create' }).click();
+  await expect(page.getByPlaceholder('Collection name')).not.toBeVisible();
+  await page.waitForLoadState('networkidle');
+  // Select the collection (use first() in case of duplicates from parallel tests)
+  await page.getByRole('button', { name: new RegExp(name) }).first().click();
+}
 
 /**
  * Custom test object with worker-scoped fixtures.
@@ -57,7 +118,7 @@ type WorkerFixtures = {
  * });
  * ```
  */
-export const test = base.extend<{}, WorkerFixtures>({
+export const test = base.extend<TestFixtures, WorkerFixtures>({
   /**
    * Worker-scoped fixture: runs ONCE per worker, shared across all tests in that worker.
    *
@@ -78,10 +139,77 @@ export const test = base.extend<{}, WorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+
+  /**
+   * Test-scoped fixture: sets up the library page with everything needed.
+   * Handles: routing, cleanup, navigation, collection creation.
+   *
+   * Usage:
+   * ```ts
+   * test.beforeEach(async ({ setupLibrary }) => {
+   *   await setupLibrary();
+   * });
+   * ```
+   */
+  setupLibrary: async ({ page, workerUserId }, use) => {
+    const setup = async () => {
+      // 1. Set up API routing with worker user ID
+      await setupRouting(page, workerUserId);
+
+      // 2. Navigate to library
+      await page.goto('http://localhost:5173/library');
+      await page.waitForLoadState('networkidle');
+
+      // 3. Cleanup any existing test data
+      await cleanupTestData(page, workerUserId);
+
+      // 4. Reload to show clean state
+      await page.reload();
+      await page.waitForLoadState('networkidle');
+
+      // 5. Create and select a collection (required before creating references)
+      await createAndSelectCollection(page);
+
+      // 6. Verify page loaded
+      await expect(page.getByText('Library')).toBeVisible();
+    };
+
+    await use(setup);
+  },
+
+  /**
+   * Test-scoped fixture: waits for toast notifications to disappear.
+   *
+   * Why this exists:
+   * - Toast container has pointer-events-none but individual toasts have pointer-events-auto
+   * - Toasts positioned at top-right (top-4 right-4) overlap with Details Pane tabs
+   * - Toasts last 5 seconds (TOAST_DURATION_MS) which is longer than test actions
+   * - During parallel execution, CPU load can slow animations, making toasts persist longer
+   *
+   * Usage:
+   * ```ts
+   * await page.getByRole('button', { name: 'Create' }).click();
+   * await waitForToasts(); // Wait before clicking elements that might be blocked
+   * await page.getByRole('tab', { name: 'PDF' }).click();
+   * ```
+   */
+  waitForToasts: async ({ page }, use) => {
+    const wait = async () => {
+      // Wait for any toast (role="alert") to disappear
+      // Use a generous timeout since toasts last 5 seconds + animation time
+      try {
+        await expect(page.getByRole('alert')).not.toBeVisible({ timeout: 6000 });
+      } catch {
+        // If no toasts were ever visible, that's fine
+      }
+    };
+
+    await use(wait);
+  },
 });
 
 /**
  * Re-export expect to allow single import in test files:
  * import { test, expect } from './fixtures/workerFixtures';
  */
-export { expect } from '@playwright/test';
+export { expect };

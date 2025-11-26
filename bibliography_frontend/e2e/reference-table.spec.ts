@@ -26,37 +26,12 @@ async function waitForDialogClose(page: Page): Promise<void> {
 test.describe('ReferenceTable Interactions', () => {
   let testId: string;
 
-  test.beforeEach(async ({ page, workerUserId }) => {
+  test.beforeEach(async ({ page, setupLibrary }) => {
     // Generate unique test ID for each test run (with random suffix to avoid parallel collisions)
     testId = `table-test-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    // Cleanup BEFORE test to ensure clean state (worker-scoped cleanup)
-    const cleanupResponse = await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      {
-        headers: {
-          'x-user-id': workerUserId,
-          'x-test-cleanup': 'true',
-        },
-      }
-    );
-    expect(cleanupResponse.ok()).toBeTruthy();
-
-    // Intercept API calls to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // Navigate to library page
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // Wait for page to load
-    await expect(page.getByText('Library')).toBeVisible();
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
 
     // Create test references with specific years for sorting tests
     const references = [
@@ -67,7 +42,7 @@ test.describe('ReferenceTable Interactions', () => {
 
     for (const ref of references) {
       await page.getByRole('button', { name: /new reference/i }).click();
-      await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+      await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
       // Fill form fields
       await page.getByTestId('reference-title-input').fill(ref.title);

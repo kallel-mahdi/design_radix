@@ -16,41 +16,12 @@ test.describe('Reference Creation and Editing', () => {
   // Generate unique test identifier to avoid collisions between test runs
   let testId: string;
 
-  test.beforeEach(async ({ page, workerUserId }) => {
+  test.beforeEach(async ({ setupLibrary }) => {
     // Generate unique test ID for each test
     testId = `test-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    // 1. Intercept all API calls FIRST to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // 2. Navigate to library page
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Cleanup AFTER route intercept is set up (worker-scoped cleanup)
-    const cleanupResponse = await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      {
-        headers: {
-          'x-user-id': workerUserId,
-          'x-test-cleanup': 'true',
-        },
-      }
-    );
-    expect(cleanupResponse.ok()).toBeTruthy();
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-
-    // Wait for page to load
-    await expect(page.getByText('Library')).toBeVisible();
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('should create a new reference with complete workflow', async ({ page }) => {
@@ -60,8 +31,8 @@ test.describe('Reference Creation and Editing', () => {
     // Step 1: Click "New Reference" button
     await page.getByRole('button', { name: /new reference/i }).click();
 
-    // Step 2: Modal should open
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    // Step 2: Modal should open (wait for input)
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Step 3: Fill in form fields using data-testid
     await page.getByTestId('reference-type-select').selectOption('article');
@@ -78,7 +49,7 @@ test.describe('Reference Creation and Editing', () => {
     await page.waitForLoadState('networkidle'); // Wait for API call
 
     // Step 5: Modal should close
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('reference-title-input')).not.toBeVisible({ timeout: 3000 });
 
     // Step 6: Success toast should appear
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
@@ -99,7 +70,7 @@ test.describe('Reference Creation and Editing', () => {
 
     // First create a reference to edit
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill(originalTitle);
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
     await page.getByTestId('reference-submit-button').click();
@@ -145,7 +116,7 @@ test.describe('Reference Creation and Editing', () => {
   test('should handle keyboard shortcuts in modal', async ({ page }) => {
     // Open create modal
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill required fields
     await page.getByTestId('reference-title-input').fill('Keyboard Shortcut E2E');
@@ -161,18 +132,18 @@ test.describe('Reference Creation and Editing', () => {
     await page.waitForLoadState('networkidle');
 
     // Should submit and close
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('reference-title-input')).not.toBeVisible({ timeout: 3000 });
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
-    // Wait for toast to disappear before opening new modal
-    await page.waitForTimeout(3000);
+    // Get count of references before testing escape
+    const rowsBefore = await page.getByRole('row').count();
 
     // Ensure no modal is open before proceeding
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).not.toBeVisible();
 
     // Open modal again
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill some data
     await page.getByTestId('reference-title-input').fill('Will be discarded');
@@ -181,16 +152,17 @@ test.describe('Reference Creation and Editing', () => {
     await page.keyboard.press('Escape');
 
     // Should close without saving
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('reference-title-input')).not.toBeVisible({ timeout: 3000 });
 
-    // No success toast (since we cancelled)
-    await expect(page.getByText(/reference created successfully/i)).not.toBeVisible();
+    // Verify no new reference was created (row count unchanged)
+    const rowsAfter = await page.getByRole('row').count();
+    expect(rowsAfter).toBe(rowsBefore);
   });
 
   test('should validate required fields', async ({ page }) => {
     // Open create modal
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Try to submit without required title
     await page.getByTestId('reference-submit-button').click();
@@ -200,7 +172,7 @@ test.describe('Reference Creation and Editing', () => {
     await expect(page.getByText(/title is required|required/i)).toBeVisible();
 
     // Modal should still be open
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
   });
 
   test('should handle multiple authors', async ({ page }) => {
@@ -209,7 +181,7 @@ test.describe('Reference Creation and Editing', () => {
     const author2 = `Smith${testId}`;
 
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     // Fill title
     await page.getByTestId('reference-title-input').fill(title);

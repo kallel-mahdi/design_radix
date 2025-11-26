@@ -14,34 +14,16 @@ import { test, expect } from './fixtures/workerFixtures';
 import { FIXTURE_PATHS } from './fixtures/paths';
 
 test.describe('PDF Annotations', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // 1. Route all requests with worker-specific user ID
-    // Need to intercept both backend (8005) and frontend (5173) origins
-    // because react-pdf fetches PDF from frontend origin which gets proxied
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      await route.continue({
-        headers: { ...route.request().headers(), 'x-user-id': workerUserId },
-      });
-    });
+  test.beforeEach(async ({ page, setupLibrary, workerUserId }) => {
+    // Also route frontend proxy (react-pdf fetches from frontend origin)
     await page.route('http://localhost:5173/api/bibliography/**', async (route) => {
       await route.continue({
         headers: { ...route.request().headers(), 'x-user-id': workerUserId },
       });
     });
 
-    // 2. Navigate to library
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Clean up test data
-    await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId, 'x-test-cleanup': 'true' } }
-    );
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   /**
@@ -53,7 +35,8 @@ test.describe('PDF Annotations', () => {
   ) {
     // Create reference
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill(title);
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill(title);
     await page.getByTestId('author-0-family-input').fill('AnnotationTestAuthor');
 
     // Upload PDF with text content

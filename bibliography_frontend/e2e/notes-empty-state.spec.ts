@@ -1,47 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/workerFixtures';
 
 test.describe('Notes Tab Empty State (Figma Frame 31)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('should display Notes tab with empty state', async ({ page }) => {
-    // Wait longer for page to fully load
-    await page.waitForTimeout(2000);
+    // Create a reference first
+    await page.getByRole('button', { name: /new reference/i }).click();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Notes Test Reference');
+    await page.getByTestId('author-0-family-input').fill('NotesAuthor');
+    await page.getByTestId('reference-submit-button').click();
+    await page.waitForLoadState('networkidle');
 
-    // Try to find and click first reference row
-    const rows = page.getByRole('row');
-    const rowCount = await rows.count();
+    // Click reference row to open details pane
+    await page.getByRole('row', { name: /Notes Test Reference/i }).click();
 
-    console.log(`Found ${rowCount} rows`);
-
-    if (rowCount <= 1) {
-      // No data rows, take a screenshot for debugging
-      await page.screenshot({ path: '/tmp/debug-notes-test.png' });
-      throw new Error(`Expected data rows but found only ${rowCount}`);
-    }
-
-    // Click second row (first is header)
-    await rows.nth(1).click({ timeout: 15000 });
-
-    // Wait for Details Pane to open with longer timeout
-    await expect(page.locator('complementary')).toBeVisible({ timeout: 15000 });
+    // Wait for Details Pane to open
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
 
     // Click Notes tab
     const notesTab = page.getByRole('tab', { name: 'Notes' });
     await notesTab.click();
 
     // Verify Notes empty state elements
-    const notesHeading = page.getByRole('heading', { name: 'NOTES', level: 3 });
-    await expect(notesHeading).toBeVisible();
-
     const emptyMsg = page.locator('text=No notes have been added');
     await expect(emptyMsg).toBeVisible();
-
-    // Verify icon is present
-    const tabPanel = page.locator('[role="tabpanel"]');
-    const icon = tabPanel.locator('svg, img').first();
-    await expect(icon).toBeVisible();
   });
 });

@@ -6,11 +6,11 @@ import type { Page } from '@playwright/test';
  * Prevents "headlessui-portal-root intercepts pointer events" flakiness.
  */
 async function waitForDialogClose(page: Page) {
-  // Wait for any dialog to be hidden
+  // Wait for any dialog to be hidden (longer timeout for parallel test runs)
   await page.waitForFunction(() => {
     const dialogs = document.querySelectorAll('[role="dialog"]');
     return dialogs.length === 0;
-  }, { timeout: 5000 });
+  }, { timeout: 15000 });
   // Wait for HeadlessUI portal animation cleanup (200ms transition + buffer)
   await page.waitForTimeout(250);
 }
@@ -42,23 +42,15 @@ async function waitForDialogClose(page: Page) {
  */
 
 test.describe('Tag Workflows', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // Intercept all API calls to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
+  test.beforeEach(async ({ page, setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
 
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // Create a test reference for tag operations - wait for button to be available
+    // Create a test reference for tag operations
     const newRefButton = page.getByRole('button', { name: /New Reference/i });
     await expect(newRefButton).toBeVisible({ timeout: 10000 });
     await newRefButton.click();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Test Reference for Tags');
     await page.getByTestId('reference-type-select').selectOption('article');
     await page.getByTestId('reference-year-input').fill('2024');
@@ -186,40 +178,41 @@ test.describe('Tag Workflows', () => {
   });
 
   test('Filter by Multiple Tags → Clear All Filters', async ({ page }) => {
-    // Create and apply first tag (TagSelector is always visible)
+    const sidebar = page.getByRole('complementary').first();
+    const referenceRow = page.getByRole('row', { name: /Test Reference for Tags/i });
+
+    // Create first tag
     await page.getByPlaceholder(/Search tags/i).fill('ai');
     await page.keyboard.press('Enter');
-    // Wait for toast to disappear before interacting with other elements
-    await page.waitForTimeout(500);
+    await expect(sidebar.getByText('ai')).toBeVisible();
     await page.waitForLoadState('networkidle');
 
-    // Apply to reference (UI uses table rows, not reference-card)
-    const referenceRow = page.getByRole('row', { name: /Test Reference for Tags/i });
-    await referenceRow.click();
-    await expect(page.getByRole('complementary', { name: 'Reference Details' })).toBeVisible();
-    await page.getByRole('button', { name: /Add Tag/i }).click();
-    // Click in TagPicker dropdown
-    await page.getByRole('complementary', { name: 'Reference Details' }).getByText('ai').first().click();
-    await page.keyboard.press('Escape');
-
-    // Create and apply second tag
+    // Create second tag
     await page.getByPlaceholder(/Search tags/i).fill('machine-learning');
     await page.keyboard.press('Enter');
+    await expect(sidebar.getByText('machine-learning')).toBeVisible();
     await page.waitForLoadState('networkidle');
 
-    // Click reference row to re-open details pane
+    // Apply first tag to reference
     await referenceRow.click();
-    // Wait for details pane to open (use longer timeout)
-    await expect(page.getByRole('complementary', { name: 'Reference Details' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
     await page.getByRole('button', { name: /Add Tag/i }).click();
-    // Click in TagPicker dropdown
-    await page.getByRole('complementary', { name: 'Reference Details' }).getByText('machine-learning').first().click();
-    await page.waitForLoadState('networkidle');
+    // Wait for tag picker and click tag (use locator within tag picker area)
+    await page.getByPlaceholder(/Search or create tag/i).waitFor({ state: 'visible' });
+    await page.locator('[aria-label="Reference Details"]').getByText('ai', { exact: true }).click();
+    await page.keyboard.press('Escape');
+
+    // Apply second tag to reference
+    await referenceRow.click();
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /Add Tag/i }).click();
+    await page.getByPlaceholder(/Search or create tag/i).waitFor({ state: 'visible' });
+    await page.locator('[aria-label="Reference Details"]').getByText('machine-learning').click();
     await page.keyboard.press('Escape');
 
     // Filter by both tags (click tags in sidebar)
-    await page.getByRole('complementary').first().getByText('ai').click();
-    await page.getByRole('complementary').first().getByText('machine-learning').click();
+    await sidebar.getByRole('button', { name: /^ai\s+\d+$/ }).click();
+    await sidebar.getByRole('button', { name: /^machine-learning\s+\d+$/ }).click();
 
     // Verify active filters section (use filter chip buttons to avoid ambiguity with sidebar)
     await expect(page.getByText(/Active Filters/i)).toBeVisible();
@@ -236,6 +229,7 @@ test.describe('Tag Workflows', () => {
   test('Tag Usage Count Updates When References Added/Removed', async ({ page }) => {
     // Create a second reference (beforeEach creates 1, we need 2 total)
     await page.getByRole('button', { name: /New Reference/i }).click();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Second Reference for Usage Count');
     await page.getByTestId('reference-type-select').selectOption('article');
     await page.getByTestId('reference-year-input').fill('2024');
@@ -357,6 +351,7 @@ test.describe('Tag Workflows', () => {
   test('Delete Tag → References Lose Tag Association', async ({ page }) => {
     // Create a second reference (beforeEach creates 1, we need 2 total)
     await page.getByRole('button', { name: /New Reference/i }).click();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('reference-title-input').fill('Second Reference for Tags');
     await page.getByTestId('reference-type-select').selectOption('article');
     await page.getByTestId('reference-year-input').fill('2024');

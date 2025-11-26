@@ -13,33 +13,16 @@ import { test, expect } from './fixtures/workerFixtures';
 import { FIXTURE_PATHS } from './fixtures/paths';
 
 test.describe('PDF Reader Modal', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // 1. Route all requests with worker-specific user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      await route.continue({
-        headers: { ...route.request().headers(), 'x-user-id': workerUserId },
-      });
-    });
-
-    // 2. Navigate to library
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Clean up test data
-    await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId, 'x-test-cleanup': 'true' } }
-    );
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('double-click on reference WITH PDF opens PDF reader modal', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('PDF Reader Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('PDF Reader Test');
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
 
     // Upload PDF - click on drop zone then set file
@@ -81,7 +64,8 @@ test.describe('PDF Reader Modal', () => {
   test('close button closes PDF reader modal', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Close Button Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Close Button Test');
     await page.getByTestId('author-0-family-input').fill('CloseAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');
@@ -109,7 +93,8 @@ test.describe('PDF Reader Modal', () => {
   test('Escape key closes PDF reader modal', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Escape Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Escape Test');
     await page.getByTestId('author-0-family-input').fill('EscapeAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');
@@ -137,7 +122,8 @@ test.describe('PDF Reader Modal', () => {
   test('double-click on reference WITHOUT PDF opens edit modal', async ({ page }) => {
     // Create reference without PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('No PDF Reference');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('No PDF Reference');
     await page.getByTestId('author-0-family-input').fill('NoPdfAuthor');
     await page.getByRole('button', { name: /create/i }).click();
 
@@ -155,7 +141,8 @@ test.describe('PDF Reader Modal', () => {
   test('zoom in button increases zoom percentage', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('ZoomInButtonTest');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('ZoomInButtonTest');
     await page.getByTestId('author-0-family-input').fill('ZoomAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');
@@ -185,7 +172,8 @@ test.describe('PDF Reader Modal', () => {
   test('zoom out button decreases zoom percentage', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('ZoomOutButtonTest');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('ZoomOutButtonTest');
     await page.getByTestId('author-0-family-input').fill('ZoomOutAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');
@@ -215,7 +203,8 @@ test.describe('PDF Reader Modal', () => {
   test('keyboard shortcuts + and - control zoom', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Keyboard Zoom Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Keyboard Zoom Test');
     await page.getByTestId('author-0-family-input').fill('KeyboardAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');
@@ -251,7 +240,8 @@ test.describe('PDF Reader Modal', () => {
   test('prev/next page buttons are disabled on single-page PDF', async ({ page }) => {
     // Create reference with PDF (minimal.pdf is single-page)
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Single Page Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Single Page Test');
     await page.getByTestId('author-0-family-input').fill('SinglePageAuthor');
 
     const pdfDropZone = page.locator('text=Drop PDF here or click to browse');

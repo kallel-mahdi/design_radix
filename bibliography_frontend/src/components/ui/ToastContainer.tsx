@@ -31,7 +31,7 @@ export function ToastContainer() {
 			aria-atomic="false"
 		>
 			{toasts.map((toast) => (
-				<div key={toast.id} className="pointer-events-auto animate-slide-in-right">
+				<div key={toast.id} className="animate-slide-in-right">
 					<Toast
 						id={toast.id}
 						message={toast.message}

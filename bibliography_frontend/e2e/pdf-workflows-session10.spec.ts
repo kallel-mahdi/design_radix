@@ -15,33 +15,16 @@ import { test, expect } from './fixtures/workerFixtures';
 import { FIXTURE_PATHS } from './fixtures/paths';
 
 test.describe('PDF Workflows - Session 10', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // 1. Route all requests FIRST with worker-specific user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      await route.continue({
-        headers: { ...route.request().headers(), 'x-user-id': workerUserId }
-      });
-    });
-
-    // 2. Navigate to library
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Clean up test data AFTER route intercept is set up
-    await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      { headers: { 'x-user-id': workerUserId, 'x-test-cleanup': 'true' } }
-    );
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('should upload PDF via ReferenceModal and view in PdfTab', async ({ page }) => {
     // 1. Create new reference
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Test Paper with PDF');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Test Paper with PDF');
     await page.getByTestId('author-0-family-input').fill('TestAuthor');
 
     // 2. Upload PDF using file input (target the hidden input directly)
@@ -77,7 +60,8 @@ test.describe('PDF Workflows - Session 10', () => {
   test('should show zoom and navigation controls in PdfTab', async ({ page }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('PDF Controls Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('PDF Controls Test');
     await page.getByTestId('author-0-family-input').fill('ControlsAuthor');
     const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.smallTest);
@@ -117,7 +101,8 @@ test.describe('PDF Workflows - Session 10', () => {
 
     // Create reference with minimal PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('PDF Replacement Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('PDF Replacement Test');
     await page.getByTestId('author-0-family-input').fill('ReplaceAuthor');
     const pdfInput1 = page.getByTestId('pdf-file-input');
     await pdfInput1.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
@@ -161,7 +146,8 @@ test.describe('PDF Workflows - Session 10', () => {
   test('should delete PDF via DELETE endpoint', async ({ page, workerUserId }) => {
     // Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('PDF Delete Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('PDF Delete Test');
     await page.getByTestId('author-0-family-input').fill('DeleteAuthor');
     const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
@@ -197,7 +183,8 @@ test.describe('PDF Workflows - Session 10', () => {
 
   test('should handle upload errors gracefully', async ({ page }) => {
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Invalid Upload Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Invalid Upload Test');
     await page.getByTestId('author-0-family-input').fill('ErrorAuthor');
 
     // Submit without PDF (PDF is optional)
@@ -207,9 +194,16 @@ test.describe('PDF Workflows - Session 10', () => {
     await expect(page.getByRole('heading', { name: 'Create Reference' })).not.toBeVisible({ timeout: 5000 });
     await expect(page.getByText(/reference created successfully/i)).toBeVisible({ timeout: 5000 });
 
+    // Wait for toast to disappear before interacting
+    await expect(page.getByRole('alert')).not.toBeVisible({ timeout: 6000 }).catch(() => {});
+
     // Verify reference created without PDF
     await expect(page.getByText('Invalid Upload Test')).toBeVisible();
     await page.getByText('Invalid Upload Test').click();
+
+    // Wait for details pane to open
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
+
     await page.getByRole('tab', { name: 'PDF' }).click();
     await expect(page.getByText(/no pdf attached/i)).toBeVisible();
   });
@@ -217,12 +211,20 @@ test.describe('PDF Workflows - Session 10', () => {
   test('should show empty state when no PDF attached', async ({ page }) => {
     // Create reference without PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('No PDF Reference');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('No PDF Reference');
     await page.getByTestId('author-0-family-input').fill('NoPdfAuthor');
     await page.getByRole('button', { name: /save|create/i }).click();
 
+    // Wait for toast to disappear before interacting
+    await expect(page.getByRole('alert')).not.toBeVisible({ timeout: 6000 }).catch(() => {});
+
     // Open DetailsPane
     await page.getByText('No PDF Reference').click();
+
+    // Wait for details pane to open
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
+
     await page.getByRole('tab', { name: 'PDF' }).click();
 
     // Verify empty state
@@ -233,7 +235,8 @@ test.describe('PDF Workflows - Session 10', () => {
   test('should handle complete workflow: create → upload → view → delete', async ({ page, workerUserId }) => {
     // 1. Create reference with PDF
     await page.getByRole('button', { name: 'New Reference' }).click();
-    await page.getByLabel('Title').fill('Complete Workflow Test');
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
+    await page.getByTestId('reference-title-input').fill('Complete Workflow Test');
     await page.getByTestId('author-0-family-input').fill('WorkflowAuthor');
     const pdfInput = page.getByTestId('pdf-file-input');
     await pdfInput.setInputFiles(FIXTURE_PATHS.pdfs.minimal);
@@ -242,8 +245,15 @@ test.describe('PDF Workflows - Session 10', () => {
     // 2. Verify reference appears
     await expect(page.getByText('Complete Workflow Test')).toBeVisible();
 
+    // Wait for toast to disappear before interacting
+    await expect(page.getByRole('alert')).not.toBeVisible({ timeout: 6000 }).catch(() => {});
+
     // 3. Open and view PDF
     await page.getByText('Complete Workflow Test').click();
+
+    // Wait for details pane to open
+    await expect(page.locator('[aria-label="Reference Details"]')).toBeVisible({ timeout: 5000 });
+
     await page.getByRole('tab', { name: 'PDF' }).click();
     await expect(page.getByText(/no pdf attached/i)).not.toBeVisible();
 

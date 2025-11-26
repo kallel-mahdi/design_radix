@@ -26,35 +26,9 @@ async function waitForDialogClose(page: Page): Promise<void> {
 }
 
 test.describe('Test Isolation Verification', () => {
-  test.beforeEach(async ({ page, workerUserId }) => {
-    // 1. Intercept API calls FIRST to inject worker-scoped user ID
-    await page.route('http://localhost:8005/api/bibliography/**', async (route) => {
-      const headers = {
-        ...route.request().headers(),
-        'x-user-id': workerUserId,
-      };
-      await route.continue({ headers });
-    });
-
-    // 2. Navigate to library page
-    await page.goto('http://localhost:5173/library');
-    await page.waitForLoadState('networkidle');
-
-    // 3. Cleanup AFTER route intercept is set up (headers will be correct)
-    const cleanupResponse = await page.request.delete(
-      'http://localhost:8005/api/bibliography/references/test-cleanup',
-      {
-        headers: {
-          'x-user-id': workerUserId,
-          'x-test-cleanup': 'true',
-        },
-      }
-    );
-    expect(cleanupResponse.ok()).toBeTruthy();
-
-    // 4. Reload to show empty state
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ setupLibrary }) => {
+    // Use centralized setup (routing, cleanup, collection creation)
+    await setupLibrary();
   });
 
   test('parallel test 1 - should see only its own reference', async ({ page }) => {
@@ -62,7 +36,7 @@ test.describe('Test Isolation Verification', () => {
 
     // Create a reference
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 1 ${testId}`);
     await page.getByTestId('author-0-family-input').fill('IsolationTest1');
@@ -89,7 +63,7 @@ test.describe('Test Isolation Verification', () => {
 
     // Create a reference
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 2 ${testId}`);
     await page.getByTestId('author-0-family-input').fill('IsolationTest2');
@@ -114,7 +88,7 @@ test.describe('Test Isolation Verification', () => {
 
     // Create a reference
     await page.getByRole('button', { name: /new reference/i }).click();
-    await expect(page.getByRole('heading', { name: 'Create Reference' })).toBeVisible();
+    await expect(page.getByTestId('reference-title-input')).toBeVisible({ timeout: 5000 });
 
     await page.getByTestId('reference-title-input').fill(`Test 3 ${testId}`);
     await page.getByTestId('author-0-family-input').fill('IsolationTest3');
