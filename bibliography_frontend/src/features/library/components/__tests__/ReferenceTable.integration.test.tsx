@@ -219,15 +219,18 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      // Click first reference row
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      // Click first reference row (uses div with aria-selected, has click handlers)
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
       await user.click(firstRow!);
 
-      // Verify store state updated
-      const { selectedReferenceIds, activeReferenceId } = useLibraryStore.getState();
-      expect(selectedReferenceIds.has('ref-1')).toBe(true);
-      expect(selectedReferenceIds.size).toBe(1);
-      expect(activeReferenceId).toBe('ref-1');
+      // Normal click has 200ms delay to distinguish from double-click
+      // Wait for the delayed action to complete
+      await waitFor(() => {
+        const { selectedReferenceIds, activeReferenceId } = useLibraryStore.getState();
+        expect(selectedReferenceIds.has('ref-1')).toBe(true);
+        expect(selectedReferenceIds.size).toBe(1);
+        expect(activeReferenceId).toBe('ref-1');
+      }, { timeout: 500 });
     });
 
     it('should sync checkbox selection with library.store', async () => {
@@ -273,13 +276,15 @@ describe('ReferenceTable Integration Tests', () => {
       render(<ReferenceTable references={mockReferences} />);
 
       // Click same row again
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
       await user.click(firstRow!);
 
-      // Verify selection cleared
-      const { selectedReferenceIds, activeReferenceId } = useLibraryStore.getState();
-      expect(selectedReferenceIds.size).toBe(0);
-      expect(activeReferenceId).toBe(null);
+      // Normal click has 200ms delay - wait for the delayed action to complete
+      await waitFor(() => {
+        const { selectedReferenceIds, activeReferenceId } = useLibraryStore.getState();
+        expect(selectedReferenceIds.size).toBe(0);
+        expect(activeReferenceId).toBe(null);
+      }, { timeout: 500 });
     });
   });
 
@@ -288,8 +293,8 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      const firstRow = screen.getByText('First Reference').closest('tr');
-      const secondRow = screen.getByText('Second Reference').closest('tr');
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
+      const secondRow = screen.getByText('Second Reference').closest('[aria-selected]');
 
       // Cmd+Click first row (hold Meta, click, release Meta)
       await user.keyboard('{Meta>}');
@@ -318,7 +323,7 @@ describe('ReferenceTable Integration Tests', () => {
 
       render(<ReferenceTable references={mockReferences} />);
 
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
 
       // Cmd+Click to deselect
       await user.keyboard('{Meta>}');
@@ -336,17 +341,22 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      // Normal click first row (sets lastSelectedIndex)
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      // Normal click first row (sets lastSelectedIndex) - has 200ms delay
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
       await user.click(firstRow!);
 
-      // Shift+Click third row (should select ref-1, ref-2, ref-3)
-      const thirdRow = screen.getByText('Third Reference').closest('tr');
+      // Wait for the first click's delayed action to complete
+      await waitFor(() => {
+        expect(useLibraryStore.getState().selectedReferenceIds.has('ref-1')).toBe(true);
+      }, { timeout: 500 });
+
+      // Shift+Click third row (should select ref-1, ref-2, ref-3) - immediate action
+      const thirdRow = screen.getByText('Third Reference').closest('[aria-selected]');
       await user.keyboard('{Shift>}');
       await user.click(thirdRow!);
       await user.keyboard('{/Shift}');
 
-      // Verify range selected
+      // Verify range selected (Shift+Click is immediate, no wait needed)
       const { selectedReferenceIds } = useLibraryStore.getState();
       expect(selectedReferenceIds.size).toBe(3);
       expect(selectedReferenceIds.has('ref-1')).toBe(true);
@@ -388,7 +398,7 @@ describe('ReferenceTable Integration Tests', () => {
       render(<ReferenceTable references={mockReferences} />);
 
       // Click "Authors" header
-      const authorsHeader = screen.getByText('Authors').closest('th');
+      const authorsHeader = screen.getByText('Authors').closest('[role="columnheader"]');
       await user.click(authorsHeader!);
 
       // Verify store updated
@@ -400,7 +410,7 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      const titleHeader = screen.getByText('Title').closest('th');
+      const titleHeader = screen.getByText('Title').closest('[role="columnheader"]');
 
       // Currently sorted by year desc, first click on Title should set title asc
       await user.click(titleHeader!);
@@ -421,7 +431,7 @@ describe('ReferenceTable Integration Tests', () => {
       render(<ReferenceTable references={mockReferences} />);
 
       // Click "Year" header
-      const yearHeader = screen.getByText('Year').closest('th');
+      const yearHeader = screen.getByText('Year').closest('[role="columnheader"]');
       await user.click(yearHeader!);
 
       // Wait for persistence
@@ -440,7 +450,7 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
 
       // Double-click row
       await user.dblClick(firstRow!);
@@ -459,11 +469,14 @@ describe('ReferenceTable Integration Tests', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      const secondRow = screen.getByText('Second Reference').closest('tr');
+      const secondRow = screen.getByText('Second Reference').closest('[aria-selected]');
       await user.click(secondRow!);
 
-      const { activeReferenceId } = useLibraryStore.getState();
-      expect(activeReferenceId).toBe('ref-2');
+      // Normal click has 200ms delay - wait for the delayed action to complete
+      await waitFor(() => {
+        const { activeReferenceId } = useLibraryStore.getState();
+        expect(activeReferenceId).toBe('ref-2');
+      }, { timeout: 500 });
     });
 
     it('should not change activeReferenceId on Cmd+Click', async () => {
@@ -474,7 +487,7 @@ describe('ReferenceTable Integration Tests', () => {
 
       render(<ReferenceTable references={mockReferences} />);
 
-      const secondRow = screen.getByText('Second Reference').closest('tr');
+      const secondRow = screen.getByText('Second Reference').closest('[aria-selected]');
 
       // Cmd+Click should not change activeReferenceId
       await user.keyboard('{Meta>}');
@@ -496,14 +509,17 @@ describe('ReferenceTable Integration Tests', () => {
 
       render(<ReferenceTable references={mockReferences} />);
 
-      const firstRow = screen.getByText('First Reference').closest('tr');
+      const firstRow = screen.getByText('First Reference').closest('[aria-selected]');
 
       // Click same row to clear
       await user.click(firstRow!);
 
-      const { activeReferenceId, selectedReferenceIds } = useLibraryStore.getState();
-      expect(activeReferenceId).toBe(null);
-      expect(selectedReferenceIds.size).toBe(0);
+      // Normal click has 200ms delay - wait for the delayed action to complete
+      await waitFor(() => {
+        const { activeReferenceId, selectedReferenceIds } = useLibraryStore.getState();
+        expect(activeReferenceId).toBe(null);
+        expect(selectedReferenceIds.size).toBe(0);
+      }, { timeout: 500 });
     });
   });
 });

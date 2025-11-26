@@ -28,10 +28,15 @@ vi.mock('@/store/ui.store', () => ({
   useUIStore: vi.fn(),
 }));
 
-// Mock the references query
+// Mock the references queries
 vi.mock('@/features/library/api/references.queries', () => ({
   useReferencesQuery: vi.fn(() => ({
     data: [],
+    isLoading: false,
+    error: null,
+  })),
+  useReferenceQuery: vi.fn(() => ({
+    data: null,
     isLoading: false,
     error: null,
   })),

@@ -14,10 +14,21 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@/test/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { PdfReaderModal } from '../PdfReaderModal';
 import type { Reference } from '@/common/types';
+
+// Mock annotation queries and mutations
+vi.mock('../api/annotations.queries', () => ({
+  useAnnotationsQuery: vi.fn(() => ({ data: [], isLoading: false })),
+}));
+
+vi.mock('../api/annotations.mutations', () => ({
+  useCreateAnnotationMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+  useUpdateAnnotationMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+  useDeleteAnnotationMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+}));
 
 // Mock react-pdf
 vi.mock('react-pdf', () => ({
@@ -59,7 +70,7 @@ vi.mock('@headlessui/react', () => {
   return { Dialog, Transition };
 });
 
-// Mock icons
+// Mock icons - must include ALL icons used by PdfReaderModal
 vi.mock('@heroicons/react/24/outline', () => ({
   MagnifyingGlassMinusIcon: () => <span data-testid="zoom-out-icon">-</span>,
   MagnifyingGlassPlusIcon: () => <span data-testid="zoom-in-icon">+</span>,
@@ -68,6 +79,7 @@ vi.mock('@heroicons/react/24/outline', () => ({
   ArrowDownTrayIcon: () => <span data-testid="download-icon">↓</span>,
   ArrowTopRightOnSquareIcon: () => <span data-testid="new-tab-icon">↗</span>,
   XMarkIcon: () => <span data-testid="close-icon">×</span>,
+  Bars3BottomLeftIcon: () => <span data-testid="sidebar-icon">☰</span>,
 }));
 
 // Mock Button component

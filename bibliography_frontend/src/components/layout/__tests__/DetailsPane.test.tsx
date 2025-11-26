@@ -321,7 +321,7 @@ describe('DetailsPane - Session 9 Enhancements', () => {
       renderDetailsPane({ activeTab: 'notes', onTabChange });
 
       await waitFor(() => {
-        expect(screen.getByText(/notes feature coming/i)).toBeInTheDocument();
+        expect(screen.getByText(/no notes have been added/i)).toBeInTheDocument();
       });
     });
   });

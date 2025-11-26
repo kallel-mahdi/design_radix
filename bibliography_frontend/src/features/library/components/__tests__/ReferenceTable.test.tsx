@@ -48,6 +48,23 @@ vi.mock('@/store/ui.store', () => ({
   })),
 }));
 
+// Mock mutations
+vi.mock('../../api/references.mutations', () => ({
+  useAddReferenceToCollectionMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+  })),
+}));
+
+// Mock CollectionPickerModal
+vi.mock('../CollectionPickerModal', () => ({
+  CollectionPickerModal: () => null,
+}));
+
+// Mock ContextMenu
+vi.mock('@/components/ui/ContextMenu', () => ({
+  ContextMenu: () => null,
+}));
+
 // Mock icons - all icons used by ReferenceTable and its dependencies
 vi.mock('@heroicons/react/24/outline', () => ({
   PaperClipIcon: () => <span data-testid="paperclip-icon">📎</span>,
@@ -165,6 +182,7 @@ describe('ReferenceTable', () => {
     setActiveReference: vi.fn(),
     setEditReference: vi.fn(),
     setSorting: vi.fn(),
+    setPdfReaderReference: vi.fn(),
   };
 
   beforeEach(() => {
@@ -174,8 +192,9 @@ describe('ReferenceTable', () => {
     (useLibraryStore as any).mockImplementation((selector: any) => {
       const state = {
         selectedReferenceIds: new Set<string>(),
-        sortBy: 'title',
-        sortOrder: 'asc',
+        activeReferenceId: null,
+        sortBy: 'title' as const,
+        sortOrder: 'asc' as const,
         ...mockStoreActions,
       };
       return selector(state);
@@ -186,7 +205,8 @@ describe('ReferenceTable', () => {
     it('should render table with 8 column headers', () => {
       const { container } = render(<ReferenceTable references={mockReferences} />);
 
-      expect(container.querySelector('table')).toBeInTheDocument();
+      // Component uses div with role="table" instead of actual <table> element
+      expect(container.querySelector('[role="table"]')).toBeInTheDocument();
       expect(screen.getByText('Title')).toBeInTheDocument();
       expect(screen.getByText('Authors')).toBeInTheDocument();
       expect(screen.getByText('Year')).toBeInTheDocument();
@@ -320,8 +340,9 @@ describe('ReferenceTable', () => {
       (useLibraryStore as any).mockImplementation((selector: any) => {
         const state = {
           selectedReferenceIds: new Set(),
-          sortBy: 'title',
-          sortOrder: 'asc',
+          activeReferenceId: null,
+          sortBy: 'title' as const,
+          sortOrder: 'asc' as const,
           ...mockStoreActions,
         };
         return selector(state);
@@ -336,7 +357,8 @@ describe('ReferenceTable', () => {
       const user = userEvent.setup();
       render(<ReferenceTable references={mockReferences} />);
 
-      const titleHeader = screen.getByText('Title').closest('th');
+      // Component uses div with role="columnheader" instead of actual <th> element
+      const titleHeader = screen.getByText('Title').closest('[role="columnheader"]');
       await user.click(titleHeader!);
 
       expect(mockStoreActions.setSorting).toHaveBeenCalled();
@@ -363,8 +385,9 @@ describe('ReferenceTable', () => {
       (useLibraryStore as any).mockImplementation((selector: any) => {
         const state = {
           selectedReferenceIds: new Set(['ref-1']),
-          sortBy: 'title',
-          sortOrder: 'asc',
+          activeReferenceId: null,
+          sortBy: 'title' as const,
+          sortOrder: 'asc' as const,
           ...mockStoreActions,
         };
         return selector(state);
@@ -382,8 +405,9 @@ describe('ReferenceTable', () => {
       (useLibraryStore as any).mockImplementation((selector: any) => {
         const state = {
           selectedReferenceIds: new Set(['ref-1']),
-          sortBy: 'title',
-          sortOrder: 'asc',
+          activeReferenceId: null,
+          sortBy: 'title' as const,
+          sortOrder: 'asc' as const,
           ...mockStoreActions,
         };
         return selector(state);
@@ -396,8 +420,11 @@ describe('ReferenceTable', () => {
         within(row).queryByText('Machine Learning Fundamentals')
       );
 
-      expect(selectedRow).toHaveClass('border-l-app-accent');
-      expect(selectedRow).toHaveAttribute('aria-selected', 'true');
+      // The selected styling is on a nested div with aria-selected
+      // The row contains a div with the styling classes
+      const styledDiv = selectedRow?.querySelector('.border-l-app-accent');
+      expect(styledDiv).toBeInTheDocument();
+      expect(styledDiv).toHaveAttribute('aria-selected', 'true');
     });
   });
 
@@ -428,8 +455,9 @@ describe('ReferenceTable', () => {
       (useLibraryStore as any).mockImplementation((selector: any) => {
         const state = {
           selectedReferenceIds: new Set(['ref-1']),
-          sortBy: 'title',
-          sortOrder: 'asc',
+          activeReferenceId: null,
+          sortBy: 'title' as const,
+          sortOrder: 'asc' as const,
           ...mockStoreActions,
         };
         return selector(state);
@@ -442,7 +470,9 @@ describe('ReferenceTable', () => {
         within(row).queryByText('Machine Learning Fundamentals')
       );
 
-      expect(selectedRow).toHaveAttribute('aria-selected', 'true');
+      // aria-selected is on the nested styled div
+      const styledDiv = selectedRow?.querySelector('[aria-selected="true"]');
+      expect(styledDiv).toBeInTheDocument();
     });
 
     it('should have aria-label on checkboxes', () => {
