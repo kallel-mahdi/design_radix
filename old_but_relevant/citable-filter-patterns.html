@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable - Filter Panel UX Patterns</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #080a10;
+      --bg-secondary: #0e1218;
+      --bg-tertiary: #161c24;
+      --bg-hover: #1e2630;
+      --text-primary: #e6ecf6;
+      --text-secondary: #a4b4c8;
+      --text-muted: #6d7a8c;
+      --text-disabled: #3d4754;
+      --accent-primary: #0ea5e9;
+      --accent-secondary: #38bdf8;
+      --accent-success: #22c55e;
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+      --selection: rgba(14, 165, 233, 0.22);
+    }
+
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-primary); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    .toggle-btn { transition: all 150ms ease; }
+    .toggle-btn:hover { background-color: var(--bg-hover); }
+    .toggle-btn.active { background-color: var(--selection); color: var(--accent-primary); }
+
+    .filter-section { border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 16px; }
+    .filter-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+    .filter-checkbox {
+      appearance: none; width: 16px; height: 16px;
+      border: 1.5px solid var(--border-default); border-radius: 3px;
+      background-color: transparent; cursor: pointer; transition: all 150ms; flex-shrink: 0;
+    }
+    .filter-checkbox:hover { border-color: var(--accent-primary); }
+    .filter-checkbox:checked {
+      background-color: var(--accent-primary); border-color: var(--accent-primary);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    }
+
+    .filter-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; margin: 0 -8px; border-radius: 6px;
+      cursor: pointer; transition: background-color 150ms;
+    }
+    .filter-item:hover { background-color: var(--bg-hover); }
+    .filter-item.disabled { opacity: 0.4; cursor: not-allowed; }
+    .filter-item.disabled:hover { background-color: transparent; }
+
+    .filter-search {
+      width: 100%; background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-default); border-radius: 6px;
+      padding: 8px 12px 8px 32px; color: var(--text-primary); font-size: 13px;
+    }
+    .filter-search:focus { outline: none; border-color: var(--accent-primary); }
+    .filter-search::placeholder { color: var(--text-muted); }
+
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 8px 4px 10px; background-color: var(--selection);
+      border-radius: 9999px; font-size: 12px; color: var(--accent-primary);
+    }
+    .filter-chip button {
+      display: flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 9999px;
+      background-color: rgba(14, 165, 233, 0.3); transition: background-color 150ms;
+    }
+    .filter-chip button:hover { background-color: rgba(14, 165, 233, 0.5); }
+
+    .show-more-btn { font-size: 12px; color: var(--accent-primary); padding: 4px 0; }
+    .show-more-btn:hover { color: var(--accent-secondary); }
+
+    .search-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background-color: var(--bg-secondary); border: 1px solid var(--border-default);
+      border-radius: 6px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .combobox-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background-color: var(--bg-secondary); border: 1px solid var(--border-default);
+      border-radius: 8px; margin-top: 4px; max-height: 320px; overflow-y: auto; z-index: 20;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .combobox-category {
+      padding: 8px 12px; font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ref-table th {
+      text-align: left; font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); padding: 12px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .ref-table td {
+      padding: 12px 16px; font-size: 13px;
+      border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary);
+    }
+    .ref-table tr:hover td { background-color: var(--bg-hover); }
+
+    .tag-badge {
+      display: inline-block; padding: 2px 8px;
+      background-color: var(--bg-tertiary); border-radius: 4px;
+      font-size: 11px; color: var(--accent-primary); margin: 2px;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="app" class="min-h-screen">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 border-b" style="border-color: var(--border-default);">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: var(--bg-tertiary);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="auroraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a855f7"/><stop offset="35%" stop-color="#0ea5e9"/>
+                <stop offset="65%" stop-color="#22c55e"/><stop offset="100%" stop-color="#fbbf24"/>
+              </linearGradient>
+            </defs>
+            <path d="M4 6L12 2L20 6V18L12 22L4 18V6Z" stroke="url(#auroraGradient)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M4 6L12 10L20 6" stroke="url(#auroraGradient)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M12 10V22" stroke="url(#auroraGradient)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="text-lg font-bold">Filter Patterns</span>
+      </div>
+
+      <!-- Pattern Toggle -->
+      <div class="flex items-center gap-2 p-1 rounded-lg" style="background-color: var(--bg-secondary); border: 1px solid var(--border-default);">
+        <button id="patternA" class="toggle-btn text-xs px-2.5 py-1.5 rounded-md" style="color: var(--text-muted);" onclick="setPattern('A')">A: Multi-Search</button>
+        <button id="patternB" class="toggle-btn text-xs px-2.5 py-1.5 rounded-md" style="color: var(--text-muted);" onclick="setPattern('B')">B: Top 5 + Search</button>
+        <button id="patternC" class="toggle-btn active text-xs px-2.5 py-1.5 rounded-md" onclick="setPattern('C')">C: Single Search</button>
+        <button id="patternD" class="toggle-btn text-xs px-2.5 py-1.5 rounded-md" style="color: var(--text-muted);" onclick="setPattern('D')">D: Expand-to-Search</button>
+        <button id="patternE" class="toggle-btn text-xs px-2.5 py-1.5 rounded-md" style="color: var(--text-muted);" onclick="setPattern('E')">E: Combobox</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex h-[calc(100vh-65px)]">
+      <!-- Filter Sidebar -->
+      <aside id="filterSidebar" class="w-72 flex-shrink-0 border-r overflow-y-auto p-5 flex flex-col" style="border-color: var(--border-default); background-color: var(--bg-secondary);">
+
+        <!-- Active Filters (all patterns) -->
+        <div id="activeFilters" class="mb-4 hidden">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium uppercase tracking-wide" style="color: var(--text-muted);">Active Filters</span>
+            <button onclick="clearAllFilters()" class="text-xs" style="color: var(--accent-primary);">Clear all</button>
+          </div>
+          <div id="activeFilterChips" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Pattern E: Unified Combobox (at top) -->
+        <div id="comboboxContainer" class="mb-4 hidden">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <input type="text" id="comboboxInput" class="filter-search" style="padding-left: 36px;" placeholder="Add filter..." oninput="filterCombobox(this.value)" onfocus="showCombobox()">
+            <div id="comboboxDropdown" class="combobox-dropdown hidden"></div>
+          </div>
+        </div>
+
+        <!-- Filter Sections Container -->
+        <div id="filterSections" class="flex-1">
+          <!-- AUTHOR Section -->
+          <div class="filter-section">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Author</span>
+            </div>
+            <div id="authorSearchWrapper" class="relative mb-3">
+              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" class="filter-search" placeholder="Search authors..." oninput="filterSection('author', this.value)" id="authorSearchInput">
+              <div id="authorDropdown" class="search-dropdown hidden"></div>
+            </div>
+            <div id="authorList" class="space-y-1"></div>
+            <button id="authorShowMore" class="show-more-btn hidden" onclick="toggleExpand('author')">+ Show more</button>
+          </div>
+
+          <!-- VENUE Section -->
+          <div class="filter-section">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Venue</span>
+            </div>
+            <div id="venueSearchWrapper" class="relative mb-3">
+              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" class="filter-search" placeholder="Search venues..." oninput="filterSection('venue', this.value)" id="venueSearchInput">
+              <div id="venueDropdown" class="search-dropdown hidden"></div>
+            </div>
+            <div id="venueList" class="space-y-1"></div>
+            <button id="venueShowMore" class="show-more-btn hidden" onclick="toggleExpand('venue')">+ Show more</button>
+          </div>
+
+          <!-- TAGS Section -->
+          <div class="filter-section">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Tags</span>
+            </div>
+            <div id="tagsSearchWrapper" class="relative mb-3">
+              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" class="filter-search" placeholder="Search tags..." oninput="filterSection('tags', this.value)" id="tagsSearchInput">
+              <div id="tagsDropdown" class="search-dropdown hidden"></div>
+            </div>
+            <div id="tagsList" class="space-y-1"></div>
+            <button id="tagsShowMore" class="show-more-btn hidden" onclick="toggleExpand('tags')">+ Show more</button>
+          </div>
+        </div>
+
+        <!-- Pattern C: Single Global Search (at bottom) -->
+        <div id="globalSearchContainer" class="mt-4 pt-4 border-t hidden" style="border-color: var(--border-subtle);">
+          <div class="relative">
+            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="globalSearchInput" class="filter-search" placeholder="Filter all..." oninput="globalFilter(this.value)">
+            <div id="globalDropdown" class="search-dropdown hidden"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="p-5 border-b" style="border-color: var(--border-default);">
+          <div class="relative max-w-xl">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style="color: var(--text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" class="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-default); color: var(--text-primary);" placeholder="Search references...">
+          </div>
+        </div>
+        <div class="px-5 py-3 flex items-center justify-between border-b" style="border-color: var(--border-default);">
+          <span class="text-sm" style="color: var(--text-secondary);">Showing 24 references</span>
+          <select class="text-sm px-2 py-1 rounded" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-default); color: var(--text-secondary);">
+            <option>Date Added</option><option>Year</option><option>Title</option>
+          </select>
+        </div>
+        <table class="ref-table w-full">
+          <thead>
+            <tr style="background-color: var(--bg-secondary);">
+              <th class="w-8"></th><th>Title</th><th class="w-32">Authors</th><th class="w-16">Year</th><th class="w-24">Venue</th><th class="w-40">Tags</th>
+            </tr>
+          </thead>
+          <tbody id="referenceTable"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const authors = [
+      { name: 'Juliani, A.', count: 12 }, { name: 'Ross, K.', count: 8 }, { name: 'Zhong, H.', count: 7 },
+      { name: 'Ash, J.', count: 6 }, { name: 'Zhang, S.', count: 5 }, { name: 'Mao, H.', count: 4 },
+      { name: 'Lee, B.', count: 4 }, { name: 'Allen, J.', count: 3 }, { name: 'Chen, X.', count: 3 },
+      { name: 'Wang, Y.', count: 3 }, { name: 'Kim, S.', count: 2 }, { name: 'Liu, Z.', count: 2 },
+      { name: 'Brown, T.', count: 2 }, { name: 'Smith, A.', count: 1 }, { name: 'Davis, K.', count: 0 },
+    ];
+
+    const venues = [
+      { name: 'ICML', count: 12 }, { name: 'NeurIPS', count: 10 }, { name: 'ICLR', count: 8 },
+      { name: 'arXiv', count: 6 }, { name: 'CoRL', count: 4 }, { name: 'AAAI', count: 3 },
+      { name: 'IJCAI', count: 2 }, { name: 'CVPR', count: 2 }, { name: 'Nature', count: 0 },
+    ];
+
+    const tags = [
+      { name: 'deep-rl', count: 15 }, { name: 'on-policy', count: 12 }, { name: 'offline-rl', count: 9 },
+      { name: 'exploration', count: 8 }, { name: 'theory', count: 6 }, { name: 'policy-gradient', count: 5 },
+      { name: 'data-efficiency', count: 4 }, { name: 'transformer', count: 4 }, { name: 'multi-agent', count: 3 },
+      { name: 'model-based', count: 3 }, { name: 'meta-learning', count: 1 }, { name: 'safety', count: 0 },
+    ];
+
+    const references = [
+      { title: 'A Study of Plasticity Loss in On-Policy Deep RL', authors: 'Juliani, A., Ash, J.', year: 2024, venue: 'ICML', tags: ['plasticity', 'deep-rl'] },
+      { title: 'Robust On-Policy Sampling for Data-Efficient Policy Evaluation', authors: 'Zhong, H., et al.', year: 2022, venue: 'NeurIPS', tags: ['policy-evaluation', 'data-efficiency'] },
+      { title: 'On-Policy Deep RL for the Average-Reward Criterion', authors: 'Zhang, S., Ross, K.', year: 2021, venue: 'ICML', tags: ['policy-evaluation', 'deep-rl'] },
+      { title: 'Exploration in Deep Reinforcement Learning: A Survey', authors: 'Mao, H., et al.', year: 2023, venue: 'arXiv', tags: ['exploration', 'deep-rl'] },
+      { title: 'Offline RL: Tutorial, Review, and Perspectives', authors: 'Lee, B., Allen, J.', year: 2020, venue: 'NeurIPS', tags: ['offline-rl', 'tutorial'] },
+      { title: 'Decision Transformer: RL via Sequence Modeling', authors: 'Chen, X., et al.', year: 2021, venue: 'NeurIPS', tags: ['transformer', 'offline-rl'] },
+    ];
+
+    let currentPattern = 'C';
+    let selectedFilters = { authors: [], venues: [], tags: [] };
+    let expandedSections = { author: false, venue: false, tags: false };
+
+    function setPattern(pattern) {
+      currentPattern = pattern;
+      ['A', 'B', 'C', 'D', 'E'].forEach(p => {
+        const btn = document.getElementById('pattern' + p);
+        btn.classList.toggle('active', p === pattern);
+        btn.style.color = p === pattern ? '' : 'var(--text-muted)';
+      });
+      renderFilters();
+    }
+
+    function renderFilters() {
+      const showSearchInSection = currentPattern === 'A' || currentPattern === 'B';
+      const showListItems = currentPattern !== 'A' && currentPattern !== 'E';
+      const showGlobalSearch = currentPattern === 'C';
+      const showCombobox = currentPattern === 'E';
+
+      // Toggle visibility
+      document.getElementById('globalSearchContainer').classList.toggle('hidden', !showGlobalSearch);
+      document.getElementById('comboboxContainer').classList.toggle('hidden', !showCombobox);
+      document.getElementById('filterSections').classList.toggle('hidden', showCombobox);
+
+      // Section search boxes
+      ['author', 'venue', 'tags'].forEach(section => {
+        const wrapper = document.getElementById(section + 'SearchWrapper');
+        const showSearch = currentPattern === 'A' || currentPattern === 'B' ||
+                          (currentPattern === 'D' && expandedSections[section]);
+        wrapper.classList.toggle('hidden', !showSearch);
+      });
+
+      renderSection('author', authors, showListItems);
+      renderSection('venue', venues, showListItems);
+      renderSection('tags', tags, showListItems);
+      updateActiveFilters();
+    }
+
+    function renderSection(section, data, showList) {
+      const list = document.getElementById(section + 'List');
+      const showMore = document.getElementById(section + 'ShowMore');
+
+      if (!showList) {
+        list.classList.add('hidden');
+        showMore.classList.add('hidden');
+        return;
+      }
+
+      list.classList.remove('hidden');
+      const isExpanded = expandedSections[section];
+      const displayCount = isExpanded ? data.length : 5;
+      const displayItems = data.slice(0, displayCount);
+      const selected = section === 'author' ? selectedFilters.authors :
+                       section === 'venue' ? selectedFilters.venues : selectedFilters.tags;
+
+      list.innerHTML = displayItems.map(item => `
+        <label class="filter-item ${item.count === 0 ? 'disabled' : ''}">
+          <input type="checkbox" class="filter-checkbox"
+            ${selected.includes(item.name) ? 'checked' : ''}
+            ${item.count === 0 ? 'disabled' : ''}
+            onchange="toggleFilter('${section}', '${item.name}')">
+          <span class="flex-1 text-sm" style="color: ${item.count === 0 ? 'var(--text-disabled)' : 'var(--text-secondary)'};">${item.name}</span>
+          <span class="text-xs" style="color: ${item.count === 0 ? 'var(--text-disabled)' : 'var(--text-muted)'};">(${item.count})</span>
+        </label>
+      `).join('');
+
+      if (data.length > 5) {
+        showMore.classList.remove('hidden');
+        showMore.textContent = isExpanded ? '- Show less' : `+ Show ${data.length - 5} more`;
+      } else {
+        showMore.classList.add('hidden');
+      }
+    }
+
+    function toggleExpand(section) {
+      expandedSections[section] = !expandedSections[section];
+      renderFilters();
+    }
+
+    function filterSection(section, query) {
+      if (!query) {
+        document.getElementById(section + 'Dropdown').classList.add('hidden');
+        return;
+      }
+      const data = section === 'author' ? authors : section === 'venue' ? venues : tags;
+      const filtered = data.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+      const dropdown = document.getElementById(section + 'Dropdown');
+      const selected = section === 'author' ? selectedFilters.authors :
+                       section === 'venue' ? selectedFilters.venues : selectedFilters.tags;
+
+      dropdown.innerHTML = filtered.length === 0 ?
+        '<div class="p-3 text-sm" style="color: var(--text-muted);">No results</div>' :
+        filtered.map(item => `
+          <label class="filter-item ${item.count === 0 ? 'disabled' : ''}">
+            <input type="checkbox" class="filter-checkbox"
+              ${selected.includes(item.name) ? 'checked' : ''}
+              ${item.count === 0 ? 'disabled' : ''}
+              onchange="toggleFilter('${section}', '${item.name}')">
+            <span class="flex-1 text-sm" style="color: ${item.count === 0 ? 'var(--text-disabled)' : 'var(--text-secondary)'};">${item.name}</span>
+            <span class="text-xs" style="color: ${item.count === 0 ? 'var(--text-disabled)' : 'var(--text-muted)'};">(${item.count})</span>
+          </label>
+        `).join('');
+      dropdown.classList.remove('hidden');
+    }
+
+    function globalFilter(query) {
+      const dropdown = document.getElementById('globalDropdown');
+      if (!query) { dropdown.classList.add('hidden'); return; }
+
+      const results = [];
+      authors.filter(a => a.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3)
+        .forEach(a => results.push({ ...a, type: 'author' }));
+      venues.filter(v => v.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3)
+        .forEach(v => results.push({ ...v, type: 'venue' }));
+      tags.filter(t => t.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3)
+        .forEach(t => results.push({ ...t, type: 'tags' }));
+
+      if (results.length === 0) {
+        dropdown.innerHTML = '<div class="p-3 text-sm" style="color: var(--text-muted);">No results</div>';
+      } else {
+        dropdown.innerHTML = results.map(item => {
+          const selected = item.type === 'author' ? selectedFilters.authors :
+                          item.type === 'venue' ? selectedFilters.venues : selectedFilters.tags;
+          return `
+            <label class="filter-item ${item.count === 0 ? 'disabled' : ''}">
+              <input type="checkbox" class="filter-checkbox"
+                ${selected.includes(item.name) ? 'checked' : ''}
+                ${item.count === 0 ? 'disabled' : ''}
+                onchange="toggleFilter('${item.type}', '${item.name}')">
+              <span class="text-xs px-1.5 py-0.5 rounded mr-2" style="background-color: var(--bg-tertiary); color: var(--text-muted);">${item.type}</span>
+              <span class="flex-1 text-sm" style="color: var(--text-secondary);">${item.name}</span>
+              <span class="text-xs" style="color: var(--text-muted);">(${item.count})</span>
+            </label>
+          `;
+        }).join('');
+      }
+      dropdown.classList.remove('hidden');
+    }
+
+    function showCombobox() {
+      filterCombobox(document.getElementById('comboboxInput').value);
+    }
+
+    function filterCombobox(query) {
+      const dropdown = document.getElementById('comboboxDropdown');
+
+      const authorResults = authors.filter(a => !query || a.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4);
+      const venueResults = venues.filter(v => !query || v.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4);
+      const tagResults = tags.filter(t => !query || t.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4);
+
+      let html = '';
+
+      if (authorResults.length > 0) {
+        html += '<div class="combobox-category">Authors</div>';
+        html += authorResults.map(a => `
+          <label class="filter-item ${a.count === 0 ? 'disabled' : ''}">
+            <input type="checkbox" class="filter-checkbox"
+              ${selectedFilters.authors.includes(a.name) ? 'checked' : ''}
+              ${a.count === 0 ? 'disabled' : ''}
+              onchange="toggleFilter('author', '${a.name}')">
+            <span class="flex-1 text-sm" style="color: var(--text-secondary);">${a.name}</span>
+            <span class="text-xs" style="color: var(--text-muted);">(${a.count})</span>
+          </label>
+        `).join('');
+      }
+
+      if (venueResults.length > 0) {
+        html += '<div class="combobox-category">Venues</div>';
+        html += venueResults.map(v => `
+          <label class="filter-item ${v.count === 0 ? 'disabled' : ''}">
+            <input type="checkbox" class="filter-checkbox"
+              ${selectedFilters.venues.includes(v.name) ? 'checked' : ''}
+              ${v.count === 0 ? 'disabled' : ''}
+              onchange="toggleFilter('venue', '${v.name}')">
+            <span class="flex-1 text-sm" style="color: var(--text-secondary);">${v.name}</span>
+            <span class="text-xs" style="color: var(--text-muted);">(${v.count})</span>
+          </label>
+        `).join('');
+      }
+
+      if (tagResults.length > 0) {
+        html += '<div class="combobox-category">Tags</div>';
+        html += tagResults.map(t => `
+          <label class="filter-item ${t.count === 0 ? 'disabled' : ''}">
+            <input type="checkbox" class="filter-checkbox"
+              ${selectedFilters.tags.includes(t.name) ? 'checked' : ''}
+              ${t.count === 0 ? 'disabled' : ''}
+              onchange="toggleFilter('tags', '${t.name}')">
+            <span class="flex-1 text-sm" style="color: var(--text-secondary);">${t.name}</span>
+            <span class="text-xs" style="color: var(--text-muted);">(${t.count})</span>
+          </label>
+        `).join('');
+      }
+
+      dropdown.innerHTML = html || '<div class="p-3 text-sm" style="color: var(--text-muted);">No results</div>';
+      dropdown.classList.remove('hidden');
+    }
+
+    function toggleFilter(section, name) {
+      const arr = section === 'author' ? selectedFilters.authors :
+                  section === 'venue' ? selectedFilters.venues : selectedFilters.tags;
+      const idx = arr.indexOf(name);
+      if (idx > -1) arr.splice(idx, 1);
+      else arr.push(name);
+      updateActiveFilters();
+      renderFilters();
+    }
+
+    function updateActiveFilters() {
+      const container = document.getElementById('activeFilters');
+      const chips = document.getElementById('activeFilterChips');
+      const all = [
+        ...selectedFilters.authors.map(a => ({ type: 'author', value: a })),
+        ...selectedFilters.venues.map(v => ({ type: 'venue', value: v })),
+        ...selectedFilters.tags.map(t => ({ type: 'tags', value: t })),
+      ];
+
+      if (all.length === 0) { container.classList.add('hidden'); return; }
+      container.classList.remove('hidden');
+      chips.innerHTML = all.map(f => `
+        <span class="filter-chip">
+          ${f.value}
+          <button onclick="removeFilter('${f.type}', '${f.value}')">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </span>
+      `).join('');
+    }
+
+    function removeFilter(type, value) {
+      const arr = type === 'author' ? selectedFilters.authors :
+                  type === 'venue' ? selectedFilters.venues : selectedFilters.tags;
+      const idx = arr.indexOf(value);
+      if (idx > -1) arr.splice(idx, 1);
+      updateActiveFilters();
+      renderFilters();
+    }
+
+    function clearAllFilters() {
+      selectedFilters = { authors: [], venues: [], tags: [] };
+      updateActiveFilters();
+      renderFilters();
+    }
+
+    function renderReferences() {
+      document.getElementById('referenceTable').innerHTML = references.map(ref => `
+        <tr>
+          <td><input type="checkbox" class="filter-checkbox"></td>
+          <td style="color: var(--text-primary); font-weight: 500;">${ref.title}</td>
+          <td>${ref.authors}</td>
+          <td>${ref.year}</td>
+          <td>${ref.venue}</td>
+          <td>${ref.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { renderFilters(); renderReferences(); });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.relative') && !e.target.closest('#comboboxContainer')) {
+        document.querySelectorAll('.search-dropdown, .combobox-dropdown').forEach(d => d.classList.add('hidden'));
+      }
+    });
+  </script>
+</body>
+</html>

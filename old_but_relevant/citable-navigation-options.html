@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable Navigation Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Backgrounds */
+      --bg-primary: #080a10;
+      --bg-secondary: #0e1218;
+      --bg-tertiary: #161c24;
+      --bg-hover: #1e2630;
+      --bg-active: #252d38;
+
+      /* Text */
+      --text-primary: #e6ecf6;
+      --text-secondary: #a4b4c8;
+      --text-muted: #6d7a8c;
+
+      /* Accents */
+      --accent-cyan: #0ea5e9;
+      --accent-teal: #14b8a6;
+      --accent-violet: #a855f7;
+      --accent-green: #22c55e;
+      --accent-gold: #fbbf24;
+      --accent-red: #ef4444;
+
+      /* Borders */
+      --border-subtle: #1e2630;
+      --border-strong: #2a3441;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Header */
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 span { color: var(--accent-cyan); }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Controls */
+    .controls {
+      max-width: 1400px;
+      margin: 0 auto 24px;
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toggle-group, .option-tabs {
+      display: flex;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .toggle-btn, .option-tab {
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover, .option-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .toggle-btn.active { background: var(--accent-cyan); color: var(--bg-primary); }
+    .option-tab.active { background: var(--accent-violet); color: white; }
+
+    /* Main container */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .main-container { grid-template-columns: 1fr; }
+    }
+
+    /* Mockup frame */
+    .mockup-frame {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .mockup-header {
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mockup-title { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+    .option-name { font-size: 13px; font-weight: 600; color: var(--accent-cyan); }
+
+    /* App mockup */
+    .app-mockup {
+      display: flex;
+      height: 420px;
+      position: relative;
+    }
+
+    /* Activity bar */
+    .activity-bar {
+      width: 48px;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      gap: 4px;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    /* Citable Logo */
+    .logo-container {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      position: relative;
+    }
+
+    .logo-container:hover { background: var(--bg-hover); }
+    .logo-container.has-dropdown:hover { background: var(--bg-active); }
+
+    .citable-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--bg-primary);
+    }
+
+    /* Split logo (Option 6C) */
+    .logo-split {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .logo-split.visible { display: flex; }
+
+    .logo-split .logo-top {
+      width: 40px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .logo-split .logo-top:hover { background: var(--bg-hover); }
+
+    .logo-split .logo-bottom {
+      width: 40px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0 0 8px 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 10px;
+      transition: all 150ms ease;
+    }
+
+    .logo-split .logo-bottom:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 150ms ease;
+      font-size: 18px;
+    }
+
+    .activity-icon:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .activity-icon.nav-element:hover { color: var(--accent-cyan); }
+    .activity-spacer { flex: 1; }
+
+    /* Main area */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 40px;
+      gap: 4px;
+    }
+
+    /* Back button */
+    .back-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      white-space: nowrap;
+    }
+
+    .back-btn.visible { display: flex; }
+    .back-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .back-btn.nav-element:hover { color: var(--accent-cyan); }
+    .back-btn:active { transform: scale(0.97); }
+    .back-btn .icon { font-size: 14px; }
+
+    .tab-separator {
+      width: 1px;
+      height: 20px;
+      background: var(--border-subtle);
+      margin: 0 4px;
+      display: none;
+    }
+
+    .tab-separator.visible { display: block; }
+
+    /* File tabs */
+    .file-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-hover);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .file-tab:hover { background: var(--bg-active); }
+    .file-tab .close { color: var(--text-muted); font-size: 12px; }
+    .file-tab .close:hover { color: var(--text-primary); }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .toolbar-btn {
+      padding: 6px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 150ms ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+    }
+
+    .toolbar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .toolbar-btn.primary {
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+      padding: 6px 12px;
+      font-weight: 500;
+    }
+    .toolbar-btn.primary:hover { background: #38bdf8; }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--border-subtle);
+      margin: 0 4px;
+    }
+
+    .toolbar-spacer { flex: 1; }
+    .toolbar-text { color: var(--text-muted); font-size: 12px; padding: 0 4px; }
+
+    /* Content area */
+    .content-area { flex: 1; display: flex; }
+
+    /* Sidebar (editor only) */
+    .sidebar {
+      width: 180px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      display: none;
+      flex-direction: column;
+    }
+
+    .sidebar.visible { display: flex; }
+
+    .sidebar-header {
+      padding: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-content { padding: 12px; flex: 1; }
+
+    .file-tree-item {
+      padding: 6px 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-tree-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .file-tree-item.selected {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--accent-cyan);
+    }
+
+    /* Document content */
+    .document-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Comments sidebar */
+    .comments-sidebar {
+      width: 180px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-subtle);
+      padding: 12px;
+      display: none;
+    }
+
+    .comments-sidebar.visible { display: block; }
+
+    .comments-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    /* Dropdowns */
+    .dropdown {
+      position: absolute;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 4px;
+      min-width: 160px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 100;
+    }
+
+    .dropdown.visible { display: block; }
+
+    .dropdown-item {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 150ms ease;
+    }
+
+    .dropdown-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .dropdown-item.nav-element:hover { color: var(--accent-cyan); }
+    .dropdown-item.primary { color: var(--text-primary); font-weight: 500; }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 0;
+    }
+
+    .dropdown-label {
+      padding: 6px 12px;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Tooltip (Option 6D) */
+    .logo-tooltip {
+      position: absolute;
+      left: 52px;
+      top: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: none;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .logo-tooltip.visible { display: flex; align-items: center; gap: 6px; }
+    .logo-tooltip .crumb { cursor: pointer; transition: color 150ms ease; }
+    .logo-tooltip .crumb:hover { color: var(--accent-cyan); }
+    .logo-tooltip .sep { color: var(--text-muted); }
+
+    /* Right-click menu indicator */
+    .right-click-hint {
+      position: absolute;
+      left: 52px;
+      top: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      color: var(--text-muted);
+      display: none;
+      white-space: nowrap;
+    }
+
+    .right-click-hint.visible { display: block; }
+
+    /* Info panel */
+    .info-panel {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border-subtle);
+      height: fit-content;
+    }
+
+    .info-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-title .num {
+      min-width: 32px;
+      height: 24px;
+      background: var(--accent-violet);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 0 8px;
+    }
+
+    .info-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .info-section { margin-bottom: 16px; }
+
+    .info-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .info-list { list-style: none; }
+
+    .info-list li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 4px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .info-list li::before { content: "+"; color: var(--accent-green); font-weight: 600; }
+    .info-list.cons li::before { content: "−"; color: var(--accent-gold); }
+
+    .nav-feedback {
+      margin-top: 20px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nav-feedback-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .nav-feedback-target { font-size: 14px; color: var(--accent-cyan); font-weight: 500; }
+    .nav-feedback-target.empty { color: var(--text-muted); font-style: italic; font-weight: 400; }
+
+    .interaction-hint {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--accent-cyan);
+    }
+
+    .recommended-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1><span>Citable</span> Navigation Options</h1>
+    <p>Compare navigation approaches for Level 3 (PDF Reader / Editor) back to Level 2 (Library / Projects)</p>
+  </header>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>Current View</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-view="pdf">PDF Reader</button>
+        <button class="toggle-btn" data-view="editor">Editor</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Navigation Option</label>
+      <div class="option-tabs">
+        <button class="option-tab active" data-option="1">1</button>
+        <button class="option-tab" data-option="6A">6A</button>
+        <button class="option-tab" data-option="6B">6B</button>
+        <button class="option-tab" data-option="6C">6C</button>
+        <button class="option-tab" data-option="6D">6D</button>
+        <button class="option-tab" data-option="6E">6E</button>
+        <button class="option-tab" data-option="6F">6F</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="mockup-frame">
+      <div class="mockup-header">
+        <span class="mockup-title" id="view-title">PDF Reader</span>
+        <span class="option-name" id="option-title">Option 1: Simple Back Arrow</span>
+      </div>
+
+      <div class="app-mockup">
+        <!-- Activity Bar -->
+        <div class="activity-bar">
+          <!-- Regular Logo (Options 1, 6A, 6B, 6D, 6E, 6F) -->
+          <div class="logo-container" id="logo-regular" data-nav="logo">
+            <div class="citable-logo">C</div>
+          </div>
+
+          <!-- Split Logo (Option 6C) -->
+          <div class="logo-split" id="logo-split">
+            <div class="logo-top nav-element" data-nav="parent" title="Back to Library">
+              <div class="citable-logo" style="width: 24px; height: 24px; font-size: 12px;">C</div>
+            </div>
+            <div class="logo-bottom nav-element" data-nav="dropdown" title="More options">▾</div>
+          </div>
+
+          <div class="activity-icon" title="Search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div class="activity-icon" title="Files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+          </div>
+          <div class="activity-icon" title="References">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div class="activity-spacer"></div>
+          <div class="activity-icon" title="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Main Area -->
+        <div class="main-area">
+          <!-- Tab Bar -->
+          <div class="tab-bar">
+            <!-- Back Button (Option 1) -->
+            <button class="back-btn nav-element" id="back-arrow" data-nav="parent">
+              <span class="icon">←</span>
+            </button>
+            <div class="tab-separator" id="tab-sep"></div>
+
+            <!-- File Tabs -->
+            <div class="file-tab">
+              <span id="tab1-name">paper.pdf</span>
+              <span class="close">×</span>
+            </div>
+            <div class="file-tab">
+              <span id="tab2-name">notes.pdf</span>
+              <span class="close">×</span>
+            </div>
+          </div>
+
+          <!-- Toolbar - PDF Reader -->
+          <div class="toolbar" id="toolbar-pdf">
+            <button class="toolbar-btn" title="Zoom out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Zoom in">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Fit to page">⊡</button>
+            <div class="toolbar-sep"></div>
+            <button class="toolbar-btn" title="Previous page">‹</button>
+            <button class="toolbar-btn" title="Next page">›</button>
+            <span class="toolbar-text">1 / 50</span>
+            <div class="toolbar-spacer"></div>
+            <button class="toolbar-btn" title="Text select">Aa</button>
+            <button class="toolbar-btn" title="Highlight">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Settings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Toolbar - Editor -->
+          <div class="toolbar hidden" id="toolbar-editor">
+            <button class="toolbar-btn" title="Undo">←</button>
+            <button class="toolbar-btn" title="Redo">→</button>
+            <div class="toolbar-sep"></div>
+            <button class="toolbar-btn" title="Bold"><strong>B</strong></button>
+            <button class="toolbar-btn" title="Italic"><em>I</em></button>
+            <button class="toolbar-btn" title="Link">🔗</button>
+            <button class="toolbar-btn" title="Citation">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </button>
+            <button class="toolbar-btn" title="Table">⊞</button>
+            <div class="toolbar-spacer"></div>
+            <button class="toolbar-btn primary">Recompile ▾</button>
+            <div class="toolbar-sep"></div>
+            <button class="toolbar-btn" title="Comments">💬</button>
+          </div>
+
+          <!-- Content Area -->
+          <div class="content-area">
+            <!-- Sidebar (Editor) -->
+            <div class="sidebar" id="sidebar">
+              <div class="sidebar-header">FILE BROWSER</div>
+              <div class="sidebar-content">
+                <div class="file-tree-item selected"><span>▼</span><span>main.tex</span></div>
+                <div class="file-tree-item" style="padding-left: 24px;"><span>intro.tex</span></div>
+                <div class="file-tree-item" style="padding-left: 24px;"><span>methods.tex</span></div>
+              </div>
+            </div>
+
+            <!-- Document Content -->
+            <div class="document-content" id="doc-content">PDF CONTENT</div>
+
+            <!-- Comments Sidebar -->
+            <div class="comments-sidebar" id="comments">
+              <div class="comments-title">Comments</div>
+              <div style="color: var(--text-muted); font-size: 13px;">No comments yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dropdown: Option 6A (Parent First) -->
+        <div class="dropdown" id="dropdown-6a" style="left: 4px; top: 52px;">
+          <div class="dropdown-item primary nav-element" data-nav="parent">
+            <span>←</span>
+            <span id="dd6a-parent">Library</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item nav-element" data-nav="Home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            Home
+          </div>
+        </div>
+
+        <!-- Dropdown: Option 6C (Split Logo Bottom) -->
+        <div class="dropdown" id="dropdown-6c" style="left: 4px; top: 56px;">
+          <div class="dropdown-item nav-element" data-nav="Home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            Home
+          </div>
+          <div class="dropdown-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Settings
+          </div>
+        </div>
+
+        <!-- Dropdown: Option 6E (Workspace Switcher) -->
+        <div class="dropdown" id="dropdown-6e" style="left: 4px; top: 52px; min-width: 180px;">
+          <div class="dropdown-label">Navigate to</div>
+          <div class="dropdown-item nav-element" data-nav="parent">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <span id="dd6e-library">Library</span>
+          </div>
+          <div class="dropdown-item nav-element" id="dd6e-other" data-nav="other">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span id="dd6e-other-text">Projects</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item nav-element" data-nav="Home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            Home
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Settings
+          </div>
+        </div>
+
+        <!-- Dropdown: Option 6F (Right-Click) -->
+        <div class="dropdown" id="dropdown-6f" style="left: 4px; top: 52px;">
+          <div class="dropdown-item nav-element" data-nav="Home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            Home
+          </div>
+          <div class="dropdown-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Settings
+          </div>
+        </div>
+
+        <!-- Tooltip: Option 6D -->
+        <div class="logo-tooltip" id="tooltip-6d">
+          <span class="crumb nav-element" data-nav="Home">Home</span>
+          <span class="sep">›</span>
+          <span class="crumb nav-element" id="tooltip-parent" data-nav="parent">Library</span>
+          <span class="sep">›</span>
+          <span style="color: var(--text-muted);" id="tooltip-current">paper.pdf</span>
+        </div>
+
+        <!-- Right-click hint: Option 6F -->
+        <div class="right-click-hint" id="hint-6f">Right-click for menu</div>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+      <h2 class="info-title">
+        <span class="num" id="info-num">1</span>
+        <span id="info-name">Simple Back Arrow</span>
+      </h2>
+      <div id="recommended-container"></div>
+      <p class="info-description" id="info-desc">Description here.</p>
+
+      <div class="info-section">
+        <h3 class="info-section-title">Pros</h3>
+        <ul class="info-list" id="pros-list"></ul>
+      </div>
+
+      <div class="info-section">
+        <h3 class="info-section-title">Cons</h3>
+        <ul class="info-list cons" id="cons-list"></ul>
+      </div>
+
+      <div class="interaction-hint" id="interaction-hint"></div>
+
+      <div class="nav-feedback">
+        <div class="nav-feedback-label">Hover/Click Target</div>
+        <div class="nav-feedback-target empty" id="nav-target">Interact with navigation elements</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const optionData = {
+      '1': {
+        name: "Simple Back Arrow",
+        desc: "A simple ← arrow at the start of the tab bar. Maximum minimalism. Click to go back to parent level.",
+        pros: ["Maximum minimalism", "Familiar browser pattern", "Consistent across views", "Single click to parent"],
+        cons: ["Doesn't show destination", "Could be confused with undo", "No direct Home access"],
+        hint: "Click the ← arrow in the tab bar to go back.",
+        recommended: false
+      },
+      '6A': {
+        name: "Logo Dropdown: Parent First",
+        desc: "Click the Citable logo to reveal a dropdown. Parent level (Library/Projects) is the primary option, Home is secondary.",
+        pros: ["Parent is prominent", "Home still accessible", "Clean visual design", "Single location for navigation"],
+        cons: ["Requires 2 clicks to navigate", "Hidden until clicked", "Dropdown may feel slow"],
+        hint: "Click the Citable logo to see the dropdown menu.",
+        recommended: true
+      },
+      '6B': {
+        name: "Logo Click = Parent",
+        desc: "Clicking the Citable logo directly navigates to the parent level. No dropdown, no Home access from Level 3.",
+        pros: ["Single click to parent", "Maximum simplicity", "Like Overleaf pattern", "No hidden menus"],
+        cons: ["No direct Home access", "Must go Library → Home", "Less flexible"],
+        hint: "Click the Citable logo to go directly to Library/Projects.",
+        recommended: false
+      },
+      '6C': {
+        name: "Split Logo Button",
+        desc: "Logo is split: top part goes to parent, bottom chevron (▾) opens dropdown for Home and Settings.",
+        pros: ["Single click to parent", "Home still accessible via dropdown", "Clear visual affordance"],
+        cons: ["More complex visually", "Small click targets", "Unusual pattern"],
+        hint: "Click the logo (top) to go to parent. Click ▾ (bottom) for more options.",
+        recommended: false
+      },
+      '6D': {
+        name: "Logo + Tooltip Path",
+        desc: "Hover the logo to see a breadcrumb tooltip showing the full path. Click any crumb to navigate. Click logo = parent.",
+        pros: ["Shows full path on demand", "Click any level", "Clean when not hovering"],
+        cons: ["Requires hover (not mobile-friendly)", "Tooltip may feel slow", "Hidden functionality"],
+        hint: "Hover over the Citable logo to see the breadcrumb path.",
+        recommended: false
+      },
+      '6E': {
+        name: "Workspace Switcher",
+        desc: "Click logo for a full navigation menu showing all workspaces: Library, Projects, Home, and Settings. Notion-style.",
+        pros: ["Jump to any level", "Full navigation hub", "Notion pattern (familiar)", "Settings accessible"],
+        cons: ["Requires 2 clicks", "May be overkill for simple nav", "Hidden functionality"],
+        hint: "Click the Citable logo for the full navigation menu.",
+        recommended: false
+      },
+      '6F': {
+        name: "Logo: Click = Parent, Right-Click = Menu",
+        desc: "Left-click logo goes to parent. Right-click opens a menu with Home and Settings. Power-user friendly.",
+        pros: ["Single click to parent", "Power-user efficient", "Clean interface", "Full options available"],
+        cons: ["Right-click not discoverable", "Not accessible", "Users may not know"],
+        hint: "Left-click logo → Parent. Right-click logo → Menu.",
+        recommended: false
+      }
+    };
+
+    let currentView = 'pdf';
+    let currentOption = '1';
+
+    const viewBtns = document.querySelectorAll('.toggle-btn');
+    const optionBtns = document.querySelectorAll('.option-tab');
+
+    viewBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        updateView();
+      });
+    });
+
+    optionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        optionBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentOption = btn.dataset.option;
+        hideAllDropdowns();
+        updateView();
+      });
+    });
+
+    function hideAllDropdowns() {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('visible'));
+      document.getElementById('tooltip-6d').classList.remove('visible');
+      document.getElementById('hint-6f').classList.remove('visible');
+    }
+
+    function updateView() {
+      const isPdf = currentView === 'pdf';
+      const parentName = isPdf ? 'Library' : 'Projects';
+      const fileName = isPdf ? 'paper.pdf' : 'main.tex';
+      const data = optionData[currentOption];
+
+      // Update titles
+      document.getElementById('view-title').textContent = isPdf ? 'PDF Reader' : 'Editor';
+      document.getElementById('option-title').textContent = `Option ${currentOption}: ${data.name}`;
+
+      // Update info panel
+      document.getElementById('info-num').textContent = currentOption;
+      document.getElementById('info-name').textContent = data.name;
+      document.getElementById('info-desc').textContent = data.desc;
+      document.getElementById('pros-list').innerHTML = data.pros.map(p => `<li>${p}</li>`).join('');
+      document.getElementById('cons-list').innerHTML = data.cons.map(c => `<li>${c}</li>`).join('');
+      document.getElementById('interaction-hint').textContent = data.hint;
+      document.getElementById('recommended-container').innerHTML = data.recommended ? '<span class="recommended-badge">Recommended</span>' : '';
+
+      // Update view-specific elements
+      document.getElementById('sidebar').classList.toggle('visible', !isPdf);
+      document.getElementById('comments').classList.toggle('visible', isPdf);
+      document.getElementById('toolbar-pdf').classList.toggle('hidden', !isPdf);
+      document.getElementById('toolbar-editor').classList.toggle('hidden', isPdf);
+      document.getElementById('doc-content').textContent = isPdf ? 'PDF CONTENT' : 'CODE EDITOR';
+
+      // Update tab names
+      document.getElementById('tab1-name').textContent = isPdf ? 'paper.pdf' : 'main.tex';
+      document.getElementById('tab2-name').textContent = isPdf ? 'notes.pdf' : 'intro.tex';
+
+      // Update parent labels in dropdowns
+      document.getElementById('dd6a-parent').textContent = parentName;
+      document.getElementById('dd6e-library').textContent = parentName;
+      document.getElementById('dd6e-other-text').textContent = isPdf ? 'Projects' : 'Library';
+      document.getElementById('tooltip-parent').textContent = parentName;
+      document.getElementById('tooltip-current').textContent = fileName;
+
+      // Reset option-specific elements
+      document.getElementById('logo-regular').classList.remove('hidden', 'has-dropdown');
+      document.getElementById('logo-split').classList.remove('visible');
+      document.getElementById('back-arrow').classList.remove('visible');
+      document.getElementById('tab-sep').classList.remove('visible');
+
+      // Apply option-specific styling
+      switch(currentOption) {
+        case '1':
+          document.getElementById('back-arrow').classList.add('visible');
+          document.getElementById('tab-sep').classList.add('visible');
+          break;
+        case '6A':
+        case '6E':
+          document.getElementById('logo-regular').classList.add('has-dropdown');
+          break;
+        case '6B':
+        case '6D':
+        case '6F':
+          // Logo click behavior handled in event listeners
+          break;
+        case '6C':
+          document.getElementById('logo-regular').classList.add('hidden');
+          document.getElementById('logo-split').classList.add('visible');
+          break;
+      }
+    }
+
+    // Logo interactions
+    const logoRegular = document.getElementById('logo-regular');
+    const logoSplitTop = document.querySelector('.logo-top');
+    const logoSplitBottom = document.querySelector('.logo-bottom');
+
+    logoRegular.addEventListener('click', () => {
+      hideAllDropdowns();
+      if (currentOption === '6A') {
+        document.getElementById('dropdown-6a').classList.toggle('visible');
+      } else if (currentOption === '6E') {
+        document.getElementById('dropdown-6e').classList.toggle('visible');
+      } else if (currentOption === '6B' || currentOption === '6D') {
+        showNavFeedback('parent');
+      }
+    });
+
+    logoRegular.addEventListener('contextmenu', (e) => {
+      if (currentOption === '6F') {
+        e.preventDefault();
+        hideAllDropdowns();
+        document.getElementById('dropdown-6f').classList.toggle('visible');
+      }
+    });
+
+    logoRegular.addEventListener('mouseenter', () => {
+      if (currentOption === '6D') {
+        document.getElementById('tooltip-6d').classList.add('visible');
+      }
+      if (currentOption === '6F') {
+        document.getElementById('hint-6f').classList.add('visible');
+      }
+    });
+
+    logoRegular.addEventListener('mouseleave', () => {
+      if (currentOption === '6D') {
+        // Keep tooltip visible briefly
+        setTimeout(() => {
+          if (!document.getElementById('tooltip-6d').matches(':hover')) {
+            document.getElementById('tooltip-6d').classList.remove('visible');
+          }
+        }, 300);
+      }
+      if (currentOption === '6F') {
+        document.getElementById('hint-6f').classList.remove('visible');
+      }
+    });
+
+    document.getElementById('tooltip-6d').addEventListener('mouseleave', () => {
+      document.getElementById('tooltip-6d').classList.remove('visible');
+    });
+
+    logoSplitBottom.addEventListener('click', () => {
+      hideAllDropdowns();
+      document.getElementById('dropdown-6c').classList.toggle('visible');
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.logo-container') && !e.target.closest('.logo-split') && !e.target.closest('.dropdown')) {
+        hideAllDropdowns();
+      }
+    });
+
+    // Navigation feedback
+    const navTarget = document.getElementById('nav-target');
+
+    function showNavFeedback(type) {
+      const parentName = currentView === 'pdf' ? 'Library' : 'Projects';
+      if (type === 'Home') {
+        navTarget.textContent = '→ Navigate to Home Dashboard';
+      } else if (type === 'parent') {
+        navTarget.textContent = `→ Navigate to ${parentName}`;
+      } else if (type === 'projects') {
+        navTarget.textContent = '→ Navigate to Projects';
+      }
+      navTarget.classList.remove('empty');
+    }
+
+    function resetNavFeedback() {
+      navTarget.textContent = 'Interact with navigation elements';
+      navTarget.classList.add('empty');
+    }
+
+    document.querySelectorAll('.nav-element').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        const nav = el.dataset.nav;
+        if (nav === 'Home' || nav === 'parent' || nav === 'projects') {
+          showNavFeedback(nav);
+        } else if (nav === 'logo') {
+          if (currentOption === '6B' || currentOption === '6D' || currentOption === '6F') {
+            showNavFeedback('parent');
+          }
+        }
+      });
+
+      el.addEventListener('mouseleave', () => {
+        resetNavFeedback();
+      });
+
+      el.addEventListener('click', () => {
+        const nav = el.dataset.nav;
+        if (nav === 'Home' || nav === 'parent' || nav === 'projects') {
+          showNavFeedback(nav);
+          hideAllDropdowns();
+        }
+      });
+    });
+
+    // Initialize
+    updateView();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable PDF Reader - Navigation Patterns</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Citable Dark Theme - GitHub Dark inspired */
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --bg-hover: #30363d;
+      --border: #30363d;
+      --border-muted: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent: #58a6ff;
+      --accent-hover: #79c0ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --highlight-yellow: #f0e68c;
+      --highlight-red: #ff6b6b;
+      --highlight-green: #98d8aa;
+      --highlight-blue: #87ceeb;
+      --highlight-purple: #dda0dd;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    /* Pattern Selector */
+    .pattern-selector {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    .pattern-selector h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+
+    .pattern-btn {
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pattern-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+
+    .pattern-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .pattern-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 400px;
+    }
+
+    /* Main Container */
+    .main-container {
+      margin-top: 56px;
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+
+    /* Hide all patterns by default */
+    .pattern {
+      display: none;
+      height: 100%;
+    }
+
+    .pattern.active {
+      display: flex;
+    }
+
+    /* ===================== */
+    /* PATTERN A: Full-Screen Modal */
+    /* ===================== */
+    .pattern-a {
+      position: relative;
+    }
+
+    .pattern-a .library-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      opacity: 0.3;
+      filter: blur(2px);
+    }
+
+    .pattern-a .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pattern-a .modal-content {
+      width: 95%;
+      height: 95%;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===================== */
+    /* PATTERN B: Route-Based Full Page */
+    /* ===================== */
+    .pattern-b {
+      flex-direction: column;
+      background: var(--bg-secondary);
+    }
+
+    /* ===================== */
+    /* PATTERN C: Tab-Based (Zotero) */
+    /* ===================== */
+    .pattern-c {
+      flex-direction: column;
+      background: var(--bg-primary);
+    }
+
+    .tab-bar {
+      display: flex;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      gap: 2px;
+      align-items: flex-end;
+      height: 40px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 200px;
+    }
+
+    .tab.active {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--bg-secondary);
+      margin-bottom: -1px;
+    }
+
+    .tab .close-tab {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .tab .close-tab:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .tab-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ===================== */
+    /* PATTERN D: Split-Pane */
+    /* ===================== */
+    .pattern-d {
+      display: flex;
+    }
+
+    .split-left {
+      width: 350px;
+      min-width: 250px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .split-handle {
+      position: absolute;
+      right: -4px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      cursor: col-resize;
+      z-index: 10;
+    }
+
+    .split-handle:hover {
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    .split-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+    }
+
+    /* ===================== */
+    /* PATTERN E: Slide-Over Panel */
+    /* ===================== */
+    .pattern-e {
+      display: flex;
+      position: relative;
+    }
+
+    .pattern-e .library-main {
+      flex: 1;
+      display: flex;
+      transition: margin-right 0.3s ease;
+    }
+
+    .pattern-e .library-main.panel-open {
+      margin-right: 500px;
+    }
+
+    .slide-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 500px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .slide-panel.open {
+      transform: translateX(0);
+    }
+
+    /* ===================== */
+    /* Shared Components */
+    /* ===================== */
+
+    /* Activity Bar */
+    .activity-bar {
+      width: 48px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      gap: 4px;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .activity-icon:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .activity-icon.active {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+    }
+
+    .activity-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Filters Sidebar */
+    .filters-sidebar {
+      width: 200px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .filters-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .filter-section {
+      margin-bottom: 20px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .filter-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-primary);
+      padding: 4px 0;
+    }
+
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+    }
+
+    .checkbox.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Reference Table */
+    .reference-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      gap: 12px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toolbar-btn {
+      padding: 6px 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-btn.secondary {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .search-box {
+      margin-left: auto;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      width: 250px;
+    }
+
+    .reference-table {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .reference-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-muted);
+      cursor: pointer;
+    }
+
+    .reference-row:hover {
+      background: var(--bg-secondary);
+    }
+
+    .reference-row.selected {
+      background: var(--bg-tertiary);
+    }
+
+    .ref-title {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ref-authors {
+      width: 200px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ref-year {
+      width: 60px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .ref-tags {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      background: var(--bg-hover);
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .tag.colored {
+      background: rgba(88, 166, 255, 0.2);
+      color: var(--accent);
+    }
+
+    /* Details Pane */
+    .details-pane {
+      width: 300px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .details-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .details-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .details-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .details-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .details-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .details-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* PDF Reader Toolbar */
+    .reader-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--text-muted);
+    }
+
+    .reader-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+
+    .page-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .page-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .page-input {
+      width: 50px;
+      padding: 4px 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .page-total {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .zoom-display {
+      font-size: 13px;
+      color: var(--text-secondary);
+      width: 50px;
+      text-align: center;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 8px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .icon-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background: rgba(248, 81, 73, 0.2);
+      color: var(--danger);
+    }
+
+    /* PDF Content Area */
+    .pdf-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .pdf-viewer {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      overflow: auto;
+    }
+
+    .pdf-page {
+      width: 612px;
+      height: 792px;
+      background: white;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      padding: 48px;
+      color: #1a1a1a;
+      font-family: 'Times New Roman', serif;
+      position: relative;
+    }
+
+    .pdf-page h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .pdf-page p {
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: justify;
+      margin-bottom: 12px;
+    }
+
+    .pdf-highlight {
+      background: var(--highlight-yellow);
+      padding: 0 2px;
+    }
+
+    .pdf-highlight.red {
+      background: rgba(255, 107, 107, 0.4);
+    }
+
+    /* Annotation Sidebar */
+    .annotation-sidebar {
+      width: 280px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .annotation-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .annotation-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .annotation-count {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .annotation-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .annotation-item {
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .annotation-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .annotation-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .annotation-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .annotation-page {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Expand Button for Slide-Over */
+    .expand-btn {
+      padding: 8px 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+
+    /* Pattern Labels */
+    .pattern-label {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      padding: 8px 16px;
+      background: var(--accent);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      z-index: 100;
+    }
+
+    /* Icons (inline SVG) */
+    .icon {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pattern Selector -->
+  <div class="pattern-selector">
+    <h1>PDF Reader Patterns:</h1>
+    <button class="pattern-btn active" onclick="showPattern('a')">A: Modal (Current)</button>
+    <button class="pattern-btn" onclick="showPattern('b')">B: Route-Based</button>
+    <button class="pattern-btn" onclick="showPattern('c')">C: Tab-Based</button>
+    <button class="pattern-btn" onclick="showPattern('d')">D: Split-Pane</button>
+    <button class="pattern-btn" onclick="showPattern('e')">E: Slide-Over</button>
+    <div class="pattern-info" id="pattern-info">
+      Full-screen modal overlays the app. Close with X or Escape. No shareable URL.
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- ==================== -->
+    <!-- PATTERN A: Modal -->
+    <!-- ==================== -->
+    <div class="pattern pattern-a active" id="pattern-a">
+      <!-- Blurred Library Background -->
+      <div class="library-bg">
+        <div class="activity-bar">
+          <div class="activity-icon active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="filters-sidebar">
+          <div class="filters-title">FILTERS</div>
+        </div>
+        <div class="reference-area">
+          <div class="toolbar">
+            <button class="toolbar-btn">+ Add</button>
+          </div>
+        </div>
+        <div class="details-pane">
+          <div class="details-header">
+            <span class="details-title">DETAILS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Overlay -->
+      <div class="modal-overlay">
+        <div class="modal-content">
+          <!-- Reader Toolbar -->
+          <div class="reader-toolbar">
+            <div class="reader-title">A Study of Plasticity Loss in On-Policy DeepRL</div>
+
+            <div class="zoom-controls">
+              <button class="page-btn">−</button>
+              <span class="zoom-display">100%</span>
+              <button class="page-btn">+</button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="page-nav">
+              <button class="page-btn">‹</button>
+              <input type="text" class="page-input" value="8">
+              <span class="page-total">/ 19</span>
+              <button class="page-btn">›</button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <button class="icon-btn active" title="Toggle Annotations">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+            <button class="icon-btn" title="Download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button class="icon-btn" title="Open in new tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </button>
+
+            <div class="toolbar-divider"></div>
+
+            <button class="close-btn" title="Close (Esc)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- PDF Content -->
+          <div class="pdf-container">
+            <div class="pdf-viewer">
+              <div class="pdf-page">
+                <h2>6 Conclusion</h2>
+                <p>We propose a unified framework for classifying and evaluating memory in RL agents, grounded in neuroscience-inspired definitions of short- and long-term declarative memory. By introducing the concept of correlation horizon and formalizing memory-intensive environments, we enable precise evaluation of agent memory.</p>
+                <p>Our methodology reveals key architectural differences: transformers such as DTQN or DT rely mainly on short-term memory, while recurrent models like <span class="pdf-highlight">BC-LSTM demonstrate true long-term memory</span>.</p>
+                <p>Experiments on T-Maze, MiniGrid, and POPGym highlight the need for proper setup to avoid misleading conclusions. Overall, our framework clarifies how different memory mechanisms shape agent behavior.</p>
+                <p>Future work may extend it to other cognitive memory systems (e.g., working, episodic) and investigate whether new types emerge in complex RL tasks.</p>
+              </div>
+            </div>
+
+            <!-- Annotation Sidebar -->
+            <div class="annotation-sidebar">
+              <div class="annotation-header">
+                <span class="annotation-title">Annotations</span>
+                <span class="annotation-count">3</span>
+              </div>
+              <div class="annotation-list">
+                <div class="annotation-item">
+                  <span class="annotation-color" style="background: var(--highlight-yellow)"></span>
+                  <div class="annotation-text">"BC-LSTM demonstrate true long-term memory"</div>
+                  <div class="annotation-page">Page 8</div>
+                </div>
+                <div class="annotation-item">
+                  <span class="annotation-color" style="background: var(--highlight-red)"></span>
+                  <div class="annotation-text">"correlation horizon and formalizing memory-intensive environments"</div>
+                  <div class="annotation-page">Page 3</div>
+                </div>
+                <div class="annotation-item">
+                  <span class="annotation-color" style="background: var(--highlight-green)"></span>
+                  <div class="annotation-text">"transformers rely mainly on short-term memory"</div>
+                  <div class="annotation-page">Page 5</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== -->
+    <!-- PATTERN B: Route-Based -->
+    <!-- ==================== -->
+    <div class="pattern pattern-b" id="pattern-b">
+      <div class="pattern-label">URL: /library/reader/abc123</div>
+
+      <!-- Reader Toolbar with Back Button -->
+      <div class="reader-toolbar">
+        <button class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Library
+        </button>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="reader-title">A Study of Plasticity Loss in On-Policy DeepRL</div>
+
+        <div class="zoom-controls">
+          <button class="page-btn">−</button>
+          <span class="zoom-display">100%</span>
+          <button class="page-btn">+</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="page-nav">
+          <button class="page-btn">‹</button>
+          <input type="text" class="page-input" value="8">
+          <span class="page-total">/ 19</span>
+          <button class="page-btn">›</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="icon-btn active" title="Toggle Annotations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" title="Download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" title="Open in new tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- PDF Content -->
+      <div class="pdf-container">
+        <div class="pdf-viewer">
+          <div class="pdf-page">
+            <h2>6 Conclusion</h2>
+            <p>We propose a unified framework for classifying and evaluating memory in RL agents, grounded in neuroscience-inspired definitions of short- and long-term declarative memory. By introducing the concept of correlation horizon and formalizing memory-intensive environments, we enable precise evaluation of agent memory.</p>
+            <p>Our methodology reveals key architectural differences: transformers such as DTQN or DT rely mainly on short-term memory, while recurrent models like <span class="pdf-highlight">BC-LSTM demonstrate true long-term memory</span>.</p>
+            <p>Experiments on T-Maze, MiniGrid, and POPGym highlight the need for proper setup to avoid misleading conclusions. Overall, our framework clarifies how different memory mechanisms shape agent behavior.</p>
+            <p>Future work may extend it to other cognitive memory systems (e.g., working, episodic) and investigate whether new types emerge in complex RL tasks.</p>
+          </div>
+        </div>
+
+        <!-- Annotation Sidebar -->
+        <div class="annotation-sidebar">
+          <div class="annotation-header">
+            <span class="annotation-title">Annotations</span>
+            <span class="annotation-count">3</span>
+          </div>
+          <div class="annotation-list">
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-yellow)"></span>
+              <div class="annotation-text">"BC-LSTM demonstrate true long-term memory"</div>
+              <div class="annotation-page">Page 8</div>
+            </div>
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-red)"></span>
+              <div class="annotation-text">"correlation horizon and formalizing memory-intensive environments"</div>
+              <div class="annotation-page">Page 3</div>
+            </div>
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-green)"></span>
+              <div class="annotation-text">"transformers rely mainly on short-term memory"</div>
+              <div class="annotation-page">Page 5</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== -->
+    <!-- PATTERN C: Tab-Based -->
+    <!-- ==================== -->
+    <div class="pattern pattern-c" id="pattern-c">
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          My Library
+        </div>
+        <div class="tab active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Plasticity Loss in DeepRL</span>
+          <span class="close-tab">×</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">On-Policy Sampling...</span>
+          <span class="close-tab">×</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Deep RL for Average...</span>
+          <span class="close-tab">×</span>
+        </div>
+      </div>
+
+      <!-- Reader Toolbar -->
+      <div class="reader-toolbar">
+        <div class="reader-title">A Study of Plasticity Loss in On-Policy DeepRL</div>
+
+        <div class="zoom-controls">
+          <button class="page-btn">−</button>
+          <span class="zoom-display">100%</span>
+          <button class="page-btn">+</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="page-nav">
+          <button class="page-btn">‹</button>
+          <input type="text" class="page-input" value="8">
+          <span class="page-total">/ 19</span>
+          <button class="page-btn">›</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="icon-btn active" title="Toggle Annotations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" title="Download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" title="Open in new tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- PDF Content -->
+      <div class="pdf-container">
+        <div class="pdf-viewer">
+          <div class="pdf-page">
+            <h2>6 Conclusion</h2>
+            <p>We propose a unified framework for classifying and evaluating memory in RL agents, grounded in neuroscience-inspired definitions of short- and long-term declarative memory. By introducing the concept of correlation horizon and formalizing memory-intensive environments, we enable precise evaluation of agent memory.</p>
+            <p>Our methodology reveals key architectural differences: transformers such as DTQN or DT rely mainly on short-term memory, while recurrent models like <span class="pdf-highlight">BC-LSTM demonstrate true long-term memory</span>.</p>
+            <p>Experiments on T-Maze, MiniGrid, and POPGym highlight the need for proper setup to avoid misleading conclusions. Overall, our framework clarifies how different memory mechanisms shape agent behavior.</p>
+            <p>Future work may extend it to other cognitive memory systems (e.g., working, episodic) and investigate whether new types emerge in complex RL tasks.</p>
+          </div>
+        </div>
+
+        <!-- Annotation Sidebar -->
+        <div class="annotation-sidebar">
+          <div class="annotation-header">
+            <span class="annotation-title">Annotations</span>
+            <span class="annotation-count">3</span>
+          </div>
+          <div class="annotation-list">
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-yellow)"></span>
+              <div class="annotation-text">"BC-LSTM demonstrate true long-term memory"</div>
+              <div class="annotation-page">Page 8</div>
+            </div>
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-red)"></span>
+              <div class="annotation-text">"correlation horizon and formalizing memory-intensive environments"</div>
+              <div class="annotation-page">Page 3</div>
+            </div>
+            <div class="annotation-item">
+              <span class="annotation-color" style="background: var(--highlight-green)"></span>
+              <div class="annotation-text">"transformers rely mainly on short-term memory"</div>
+              <div class="annotation-page">Page 5</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== -->
+    <!-- PATTERN D: Split-Pane -->
+    <!-- ==================== -->
+    <div class="pattern pattern-d" id="pattern-d">
+      <!-- Left: Reference List -->
+      <div class="split-left">
+        <div class="toolbar" style="padding: 8px 12px;">
+          <button class="toolbar-btn" style="font-size: 12px; padding: 4px 10px;">+ Add</button>
+          <input type="text" class="search-box" placeholder="Search..." style="width: 120px; font-size: 12px;">
+        </div>
+        <div class="reference-table">
+          <div class="reference-row">
+            <div class="ref-title" style="font-size: 13px;">A Study of Plasticity Loss in On-Policy DeepRL</div>
+          </div>
+          <div class="reference-row selected">
+            <div class="ref-title" style="font-size: 13px; color: var(--accent);">A Study of Plasticity Loss in On-Policy DeepRL</div>
+          </div>
+          <div class="reference-row">
+            <div class="ref-title" style="font-size: 13px;">Robust On-Policy Sampling for Policy Evaluation</div>
+          </div>
+          <div class="reference-row">
+            <div class="ref-title" style="font-size: 13px;">On-Policy Deep RL for Average-Reward Criterion</div>
+          </div>
+          <div class="reference-row">
+            <div class="ref-title" style="font-size: 13px;">Memory-Augmented Reinforcement Learning</div>
+          </div>
+          <div class="reference-row">
+            <div class="ref-title" style="font-size: 13px;">Transformer Models for Sequential Decision Making</div>
+          </div>
+        </div>
+        <div class="split-handle"></div>
+      </div>
+
+      <!-- Right: PDF Reader -->
+      <div class="split-right">
+        <div class="reader-toolbar">
+          <div class="reader-title">A Study of Plasticity Loss in On-Policy DeepRL</div>
+
+          <div class="zoom-controls">
+            <button class="page-btn">−</button>
+            <span class="zoom-display">100%</span>
+            <button class="page-btn">+</button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <div class="page-nav">
+            <button class="page-btn">‹</button>
+            <input type="text" class="page-input" value="8">
+            <span class="page-total">/ 19</span>
+            <button class="page-btn">›</button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <button class="icon-btn active" title="Toggle Annotations">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button class="icon-btn" title="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+          <button class="icon-btn" title="Expand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- PDF Content -->
+        <div class="pdf-container">
+          <div class="pdf-viewer">
+            <div class="pdf-page" style="transform: scale(0.85); transform-origin: top center;">
+              <h2>6 Conclusion</h2>
+              <p>We propose a unified framework for classifying and evaluating memory in RL agents, grounded in neuroscience-inspired definitions of short- and long-term declarative memory. By introducing the concept of correlation horizon and formalizing memory-intensive environments, we enable precise evaluation of agent memory.</p>
+              <p>Our methodology reveals key architectural differences: transformers such as DTQN or DT rely mainly on short-term memory, while recurrent models like <span class="pdf-highlight">BC-LSTM demonstrate true long-term memory</span>.</p>
+              <p>Experiments on T-Maze, MiniGrid, and POPGym highlight the need for proper setup to avoid misleading conclusions.</p>
+            </div>
+          </div>
+
+          <!-- Annotation Sidebar -->
+          <div class="annotation-sidebar" style="width: 220px;">
+            <div class="annotation-header">
+              <span class="annotation-title">Annotations</span>
+              <span class="annotation-count">3</span>
+            </div>
+            <div class="annotation-list">
+              <div class="annotation-item">
+                <span class="annotation-color" style="background: var(--highlight-yellow)"></span>
+                <div class="annotation-text" style="font-size: 12px;">"BC-LSTM demonstrate true long-term memory"</div>
+                <div class="annotation-page">Page 8</div>
+              </div>
+              <div class="annotation-item">
+                <span class="annotation-color" style="background: var(--highlight-red)"></span>
+                <div class="annotation-text" style="font-size: 12px;">"correlation horizon..."</div>
+                <div class="annotation-page">Page 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== -->
+    <!-- PATTERN E: Slide-Over -->
+    <!-- ==================== -->
+    <div class="pattern pattern-e" id="pattern-e">
+      <!-- Main Library (pushed left when panel open) -->
+      <div class="library-main panel-open">
+        <div class="activity-bar">
+          <div class="activity-icon active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="filters-sidebar">
+          <div class="filters-title">FILTERS</div>
+          <div class="filter-section">
+            <div class="filter-label">YEAR RANGE</div>
+            <div style="height: 24px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 8px;"></div>
+          </div>
+          <div class="filter-section">
+            <div class="filter-label">VENUE</div>
+            <div class="filter-checkbox">
+              <div class="checkbox checked"></div>
+              <span>ICML</span>
+            </div>
+            <div class="filter-checkbox">
+              <div class="checkbox checked"></div>
+              <span>NeurIPS</span>
+            </div>
+            <div class="filter-checkbox">
+              <div class="checkbox"></div>
+              <span>ICLR</span>
+            </div>
+          </div>
+          <div class="filter-section">
+            <div class="filter-label">TAGS</div>
+            <div class="filter-checkbox">
+              <div class="checkbox"></div>
+              <span>deep-rl</span>
+            </div>
+            <div class="filter-checkbox">
+              <div class="checkbox"></div>
+              <span>on-policy</span>
+            </div>
+          </div>
+        </div>
+        <div class="reference-area">
+          <div class="toolbar">
+            <button class="toolbar-btn">+ Add</button>
+            <button class="toolbar-btn secondary">Import</button>
+            <button class="toolbar-btn secondary">Export</button>
+            <input type="text" class="search-box" placeholder="Search references...">
+          </div>
+          <div class="reference-table">
+            <div class="reference-row selected">
+              <div class="ref-title">A Study of Plasticity Loss in On-Policy DeepRL</div>
+              <div class="ref-authors">Julian, A., Ash, J.</div>
+              <div class="ref-year">2024</div>
+              <div class="ref-tags">
+                <span class="tag colored">policy-eval</span>
+                <span class="tag">deep-rl</span>
+              </div>
+            </div>
+            <div class="reference-row">
+              <div class="ref-title">Robust On-Policy Sampling for Policy Evaluation</div>
+              <div class="ref-authors">Zhang, H., et al.</div>
+              <div class="ref-year">2022</div>
+              <div class="ref-tags">
+                <span class="tag colored">policy-eval</span>
+              </div>
+            </div>
+            <div class="reference-row">
+              <div class="ref-title">On-Policy Deep RL for Average-Reward Criterion</div>
+              <div class="ref-authors">Zhang, S., Ross, K.</div>
+              <div class="ref-year">2021</div>
+              <div class="ref-tags">
+                <span class="tag colored">policy-eval</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide-Over Panel -->
+      <div class="slide-panel open">
+        <div class="reader-toolbar">
+          <div class="reader-title" style="flex: 1;">A Study of Plasticity Loss...</div>
+
+          <div class="page-nav">
+            <button class="page-btn">‹</button>
+            <span style="font-size: 12px; color: var(--text-secondary);">8 / 19</span>
+            <button class="page-btn">›</button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <button class="icon-btn" title="Expand to Full Screen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          </button>
+
+          <button class="close-btn" title="Close Panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- PDF Content (smaller) -->
+        <div class="pdf-container" style="flex-direction: column;">
+          <div class="pdf-viewer" style="flex: 1;">
+            <div class="pdf-page" style="transform: scale(0.65); transform-origin: top center; margin-top: 20px;">
+              <h2>6 Conclusion</h2>
+              <p>We propose a unified framework for classifying and evaluating memory in RL agents, grounded in neuroscience-inspired definitions of short- and long-term declarative memory.</p>
+              <p>Our methodology reveals key architectural differences: transformers such as DTQN or DT rely mainly on short-term memory, while recurrent models like <span class="pdf-highlight">BC-LSTM demonstrate true long-term memory</span>.</p>
+            </div>
+          </div>
+
+          <!-- Mini Annotation List -->
+          <div style="padding: 12px; border-top: 1px solid var(--border);">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">3 Annotations</div>
+            <div style="display: flex; gap: 8px;">
+              <span class="annotation-color" style="background: var(--highlight-yellow); width: 20px; height: 20px; border-radius: 4px;"></span>
+              <span class="annotation-color" style="background: var(--highlight-red); width: 20px; height: 20px; border-radius: 4px;"></span>
+              <span class="annotation-color" style="background: var(--highlight-green); width: 20px; height: 20px; border-radius: 4px;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const patterns = {
+      a: {
+        name: 'Full-Screen Modal (Current)',
+        info: 'Full-screen modal overlays the app. Close with X or Escape. No shareable URL, browser back doesn\'t work.'
+      },
+      b: {
+        name: 'Route-Based Full-Page',
+        info: 'URL changes to /library/reader/:id. Browser back works, shareable URLs. Recommended approach.'
+      },
+      c: {
+        name: 'Tab-Based (Zotero)',
+        info: 'Library is Tab 1, PDFs are tabs 2+. Multiple PDFs open. Keyboard: Cmd+1 (library), Cmd+2+ (PDFs).'
+      },
+      d: {
+        name: 'Split-Pane / Master-Detail',
+        info: 'Library always visible on left. Quick reference switching. Drag handle to resize. Less reading space.'
+      },
+      e: {
+        name: 'Slide-Over Panel (Gmail)',
+        info: 'PDF slides in from right. Library context preserved. Click "Expand" for full-screen. Best for quick peeks.'
+      }
+    };
+
+    function showPattern(id) {
+      // Update buttons
+      document.querySelectorAll('.pattern-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update patterns
+      document.querySelectorAll('.pattern').forEach(p => p.classList.remove('active'));
+      document.getElementById('pattern-' + id).classList.add('active');
+
+      // Update info
+      document.getElementById('pattern-info').textContent = patterns[id].info;
+    }
+  </script>
+</body>
+</html>

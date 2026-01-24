@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects Page - Layout Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       CSS VARIABLES (from design.md)
+       ============================================ */
+    :root {
+      /* Spacing (8px grid) */
+      --space-1: 0.25rem;   /* 4px */
+      --space-2: 0.5rem;    /* 8px */
+      --space-3: 0.75rem;   /* 12px */
+      --space-4: 1rem;      /* 16px */
+      --space-6: 1.5rem;    /* 24px */
+      --space-8: 2rem;      /* 32px */
+
+      /* Layout */
+      --activity-bar-width: 3.5rem;  /* 56px */
+      --height-header: 2.75rem;      /* 44px */
+      --height-row: 2.75rem;         /* 44px */
+      --height-button: 2rem;         /* 32px */
+
+      /* Icons */
+      --icon-activity: 1.75rem;      /* 28px */
+      --icon-small: 1rem;            /* 16px */
+
+      /* Colors - Dark Mode */
+      --bg-primary: #080a10;
+      --bg-secondary: #0e1218;
+      --bg-tertiary: #161c24;
+      --bg-hover: #1e2630;
+      --bg-zebra: #0a0d12;
+      --text-primary: #e6ecf6;
+      --text-secondary: #a4b4c8;
+      --text-muted: #6d7a8c;
+      --accent-primary: #0ea5e9;
+      --accent-secondary: #38bdf8;
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+      --selection: rgba(14, 165, 233, 0.22);
+      --shadow-soft: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Light Mode Override */
+    [data-theme="light"] {
+      --bg-primary: #f6f8fc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #dce5f0;
+      --bg-hover: #d0dcea;
+      --bg-zebra: #f0f4f8;
+      --text-primary: #121620;
+      --text-secondary: #384050;
+      --text-muted: #677383;
+      --accent-primary: #0178b5;
+      --accent-secondary: #0ea5e9;
+      --border-default: #e2e8f0;
+      --border-subtle: #edf2f7;
+      --selection: rgba(14, 165, 233, 0.15);
+      --shadow-soft: rgba(0, 0, 0, 0.1);
+    }
+
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      font-size: 0.875rem;
+      min-height: 100vh;
+    }
+
+    /* ============================================
+       TOP SELECTOR BAR
+       ============================================ */
+    .selector-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3.5rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-6);
+      z-index: 1000;
+      padding: 0 var(--space-4);
+    }
+
+    .selector-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .selector-group h2 {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: var(--space-2);
+    }
+
+    .selector-btn {
+      height: var(--height-button);
+      padding: 0 var(--space-3);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .selector-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .selector-btn.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .selector-divider {
+      width: 1px;
+      height: 1.5rem;
+      background: var(--border-default);
+    }
+
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .toggle-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 2.5rem;
+      height: 1.25rem;
+      background: var(--border-default);
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--accent-primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 1rem;
+      height: 1rem;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(1.25rem);
+    }
+
+    .toggle-state {
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+      min-width: 3rem;
+    }
+
+    /* ============================================
+       LAYOUT CONTAINER
+       ============================================ */
+    .layout-container {
+      display: none;
+      margin-top: 3.5rem;
+      min-height: calc(100vh - 3.5rem);
+    }
+
+    .layout-container.active {
+      display: flex;
+    }
+
+    /* ============================================
+       ACTIVITY BAR
+       ============================================ */
+    .activity-bar {
+      width: var(--activity-bar-width);
+      min-height: calc(100vh - 3.5rem);
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .logo-section {
+      height: var(--height-header);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .logo-section svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--accent-primary);
+    }
+
+    .activity-icons {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--space-4);
+      gap: var(--space-2);
+    }
+
+    .activity-icon {
+      width: 100%;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .activity-icon:hover {
+      color: var(--text-secondary);
+      background: var(--bg-hover);
+    }
+
+    .activity-icon.active {
+      color: var(--accent-primary);
+    }
+
+    .activity-icon.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 1.5rem;
+      background: var(--accent-primary);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .activity-icon svg {
+      width: var(--icon-activity);
+      height: var(--icon-activity);
+    }
+
+    .activity-bottom {
+      padding: var(--space-4) 0;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    /* ============================================
+       MAIN CONTENT
+       ============================================ */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       TOOLBAR
+       ============================================ */
+    .toolbar {
+      height: var(--height-header);
+      padding: 0 var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      background: transparent;
+      margin-top: calc(var(--height-header) + var(--space-2));  /* 52px - aligns with bibliography toolbar (skips tab bar row) */
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .toolbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    /* Primary Button */
+    .btn-primary {
+      height: var(--height-button);
+      padding: 0 var(--space-3);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: white;
+      background: var(--accent-primary);
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .btn-primary svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+    }
+
+    /* Search Input */
+    .search-container {
+      position: relative;
+      width: 16rem;
+    }
+
+    .search-container svg {
+      position: absolute;
+      left: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      width: 100%;
+      height: var(--height-button);
+      padding: 0 var(--space-3);
+      padding-left: 2.5rem;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 0.25rem;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+    }
+
+    /* ============================================
+       TABLE
+       ============================================ */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      padding: var(--space-4);
+    }
+
+    .projects-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-secondary);
+      border-radius: 0.375rem;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+
+    .projects-table th {
+      height: var(--height-row);
+      padding: 0 var(--space-3);
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .projects-table td {
+      height: var(--height-row);
+      padding: 0 var(--space-3);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .projects-table tbody tr {
+      transition: background 0.1s ease;
+    }
+
+    .projects-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .projects-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Column widths */
+    .col-name { width: auto; }
+    .col-owner { width: 8rem; }
+    .col-modified { width: 7rem; }
+    .col-actions { width: 3rem; text-align: right; }
+
+    /* Project title */
+    .project-title {
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-title svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    /* Kebab Button */
+    .kebab-btn {
+      width: 2rem;
+      height: 2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .kebab-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .kebab-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    /* ============================================
+       KEBAB VISIBILITY MODES
+       ============================================ */
+
+    /* Always visible (muted) */
+    [data-kebab="always"] .kebab-btn {
+      opacity: 1;
+      color: var(--border-default);
+    }
+
+    [data-kebab="always"] .projects-table tbody tr:hover .kebab-btn {
+      color: var(--text-muted);
+    }
+
+    /* Hover only */
+    [data-kebab="hover"] .kebab-btn {
+      opacity: 0;
+    }
+
+    [data-kebab="hover"] .projects-table tbody tr:hover .kebab-btn {
+      opacity: 1;
+    }
+
+    /* ============================================
+       LAYOUT: Flex Name Column
+       ============================================ */
+    /* Default - name column uses width: auto (flex) */
+
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8);
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: var(--space-4);
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .empty-description {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: var(--space-6);
+      max-width: 20rem;
+    }
+  </style>
+</head>
+<body data-kebab="always" data-theme="dark">
+  <!-- ============================================
+       TOP SELECTOR BAR
+       ============================================ -->
+  <div class="selector-bar">
+    <div class="toggle-container">
+      <span class="toggle-label">Kebab</span>
+      <div class="toggle-switch active" onclick="toggleKebab()" id="kebabToggle"></div>
+      <span class="toggle-state" id="kebabState">Always</span>
+    </div>
+
+    <div class="selector-divider"></div>
+
+    <div class="selector-group">
+      <h2>Theme</h2>
+      <button class="selector-btn active" onclick="setTheme('dark')">Dark</button>
+      <button class="selector-btn" onclick="setTheme('light')">Light</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MAIN LAYOUT
+       ============================================ -->
+  <div class="layout-container active">
+    <!-- Activity Bar -->
+    <div class="activity-bar">
+      <div class="logo-section">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+      </div>
+
+      <div class="activity-icons">
+        <!-- Library -->
+        <div class="activity-icon" title="Library">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+
+        <!-- Projects (Active) -->
+        <div class="activity-icon active" title="Projects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+          </svg>
+        </div>
+
+        <!-- Duplicates -->
+        <div class="activity-icon" title="Duplicates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </div>
+
+        <!-- Trash -->
+        <div class="activity-icon" title="Trash">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="activity-bottom">
+        <!-- Settings -->
+        <div class="activity-icon" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 4v16m8-8H4"/>
+            </svg>
+            New Project
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <div class="search-container">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" class="search-input" placeholder="Search projects...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="projects-table">
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-owner">Owner</th>
+              <th class="col-modified">Modified</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Deep Learning for Natural Language Processing
+              </td>
+              <td>You</td>
+              <td>Dec 15</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                PhD Thesis Draft - Chapter 3
+              </td>
+              <td>You</td>
+              <td>Dec 14</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                ICML 2025 Conference Submission
+              </td>
+              <td>Alex</td>
+              <td>Dec 10</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Grant Proposal - NSF
+              </td>
+              <td>You</td>
+              <td>Nov 28</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Literature Review - Transformer Architectures
+              </td>
+              <td>You</td>
+              <td>Nov 20</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Research Methods Course Notes
+              </td>
+              <td>Sarah</td>
+              <td>Nov 15</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Experiment Results - Batch Normalization Study
+              </td>
+              <td>You</td>
+              <td>Nov 8</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="project-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Workshop Presentation Slides
+              </td>
+              <td>You</td>
+              <td>Oct 30</td>
+              <td>
+                <button class="kebab-btn" title="More actions">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kebab toggle
+    function toggleKebab() {
+      const toggle = document.getElementById('kebabToggle');
+      const state = document.getElementById('kebabState');
+      const isAlways = toggle.classList.contains('active');
+
+      if (isAlways) {
+        toggle.classList.remove('active');
+        document.body.setAttribute('data-kebab', 'hover');
+        state.textContent = 'Hover';
+      } else {
+        toggle.classList.add('active');
+        document.body.setAttribute('data-kebab', 'always');
+        state.textContent = 'Always';
+      }
+    }
+
+    // Theme toggle
+    function setTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+
+      // Update button states
+      document.querySelectorAll('.selector-group .selector-btn').forEach((btn, i) => {
+        const themes = ['dark', 'light'];
+        btn.classList.toggle('active', themes[i] === theme);
+      });
+    }
+  </script>
+</body>
+</html>

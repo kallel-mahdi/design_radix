@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "./radix-colors.css";
+@import "./tokens.css";
+@import "./app.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark-theme *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ===========================================
+   SHADCN → RADIX COLOR MAPPING
+
+   Maps shadcn's semantic tokens to Radix colors.
+   Light theme uses sand/brown warm tones.
+   Dark theme uses sand-1 (#111110) for OLED comfort.
+   =========================================== */
+
+:root {
+  --radius: 0.625rem;
+
+  /* Core backgrounds */
+  --background: var(--sand-2);
+  --foreground: var(--mauve-12);
+
+  /* Card surfaces */
+  --card: var(--sand-1);
+  --card-foreground: var(--mauve-12);
+
+  /* Popover/dropdown surfaces */
+  --popover: var(--sand-1);
+  --popover-foreground: var(--mauve-12);
+
+  /* Primary action (uses biblio blue) */
+  --primary: var(--blue-9);
+  --primary-foreground: white;
+
+  /* Secondary/subtle actions */
+  --secondary: var(--sand-3);
+  --secondary-foreground: var(--mauve-12);
+
+  /* Muted/disabled states */
+  --muted: var(--sand-4);
+  --muted-foreground: var(--mauve-11);
+
+  /* Accent (hover states) */
+  --accent: var(--sand-4);
+  --accent-foreground: var(--mauve-12);
+
+  /* Destructive/error */
+  --destructive: var(--tomato-9);
+
+  /* Borders and inputs */
+  --border: var(--sand-6);
+  --input: var(--sand-6);
+  --ring: var(--blue-8);
+
+  /* Sidebar (matches main bg) */
+  --sidebar: var(--sand-2);
+  --sidebar-foreground: var(--mauve-12);
+  --sidebar-primary: var(--blue-9);
+  --sidebar-primary-foreground: white;
+  --sidebar-accent: var(--sand-4);
+  --sidebar-accent-foreground: var(--mauve-12);
+  --sidebar-border: var(--sand-6);
+  --sidebar-ring: var(--blue-8);
+}
+
+.dark-theme {
+  /* Core backgrounds - sand-1 is #111110, warm near-black */
+  --background: var(--sand-1);
+  --foreground: var(--mauve-12);
+
+  /* Card surfaces - slightly elevated */
+  --card: var(--sand-2);
+  --card-foreground: var(--mauve-12);
+
+  /* Popover/dropdown surfaces */
+  --popover: var(--sand-2);
+  --popover-foreground: var(--mauve-12);
+
+  /* Primary action */
+  --primary: var(--blue-9);
+  --primary-foreground: white;
+
+  /* Secondary/subtle actions */
+  --secondary: var(--sand-3);
+  --secondary-foreground: var(--mauve-12);
+
+  /* Muted/disabled states */
+  --muted: var(--sand-3);
+  --muted-foreground: var(--mauve-11);
+
+  /* Accent (hover states) */
+  --accent: var(--sand-3);
+  --accent-foreground: var(--mauve-12);
+
+  /* Destructive/error */
+  --destructive: var(--tomato-9);
+
+  /* Borders and inputs */
+  --border: var(--sand-6);
+  --input: var(--sand-5);
+  --ring: var(--blue-7);
+
+  /* Sidebar */
+  --sidebar: var(--sand-2);
+  --sidebar-foreground: var(--mauve-12);
+  --sidebar-primary: var(--blue-9);
+  --sidebar-primary-foreground: white;
+  --sidebar-accent: var(--sand-3);
+  --sidebar-accent-foreground: var(--mauve-12);
+  --sidebar-border: var(--sand-6);
+  --sidebar-ring: var(--blue-7);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

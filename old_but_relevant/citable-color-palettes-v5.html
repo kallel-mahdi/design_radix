@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citable Color Palette Redesign v4 — Research-Backed & Accessibility Verified</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Current Palette Variables - will be swapped by JS */
+            --bg-primary: #121218;
+            --bg-secondary: #1a1a22;
+            --bg-tertiary: #23232d;
+            --bg-hover: #2c2c38;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a8a8b8;
+            --text-muted: #6e6e7e;
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-success: #34d399;
+            --accent-warning: #fbbf24;
+            --accent-error: #f87171;
+            --border-default: #2e2e3a;
+            --border-subtle: #232330;
+            --selection: rgba(99, 102, 241, 0.25);
+            --code-bg: #0e0e14;
+            --logo-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #f97316 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Palette Selector Header */
+        .palette-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            backdrop-filter: blur(12px);
+        }
+
+        .palette-header h1 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--logo-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .logo-icon svg {
+            width: 18px;
+            height: 18px;
+            color: white;
+        }
+
+        .palette-tabs {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .palette-tab {
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid var(--border-default);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .palette-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .palette-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .palette-tab.creative {
+            border-color: var(--accent-warning);
+            color: var(--accent-warning);
+        }
+
+        .palette-tab.creative.active {
+            background: var(--accent-warning);
+            border-color: var(--accent-warning);
+            color: #1a1a1a;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: var(--bg-tertiary);
+            padding: 3px;
+            border-radius: 6px;
+        }
+
+        .mode-btn {
+            padding: 5px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mode-btn.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            gap: 0;
+            padding-top: 56px;
+            min-height: 100vh;
+        }
+
+        .editor-preview, .palette-info {
+            min-height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+
+        .editor-preview {
+            padding: 20px;
+            border-right: 1px solid var(--border-default);
+        }
+
+        .palette-info {
+            padding: 20px;
+            background: var(--bg-secondary);
+        }
+
+        /* Editor Preview */
+        .editor-container {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            height: calc(100vh - 96px);
+            display: flex;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+
+        /* Sidebar */
+        .editor-sidebar {
+            width: 200px;
+            background: var(--bg-tertiary);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo {
+            width: 26px;
+            height: 26px;
+            border-radius: 5px;
+            background: var(--logo-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav {
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-item svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .sidebar-section {
+            padding: 12px 8px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding: 0 8px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .file-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .file-item.active {
+            background: var(--selection);
+            color: var(--accent-primary);
+        }
+
+        .file-icon {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Main Editor */
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-default);
+            background: var(--bg-secondary);
+        }
+
+        .editor-tabs {
+            display: flex;
+            gap: 2px;
+        }
+
+        .editor-tab {
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .editor-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .editor-tab.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .action-btn.primary {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Paper Content */
+        .paper-content {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+            font-family: 'Source Serif 4', Georgia, serif;
+        }
+
+        .paper-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .paper-authors {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .paper-abstract {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-primary);
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .paper-abstract strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .paper-section {
+            margin-bottom: 24px;
+        }
+
+        .paper-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .paper-section p {
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 1.75;
+        }
+
+        .citation {
+            color: var(--accent-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s ease;
+        }
+
+        .citation:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        .paper-code {
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin-top: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .paper-code .keyword {
+            color: var(--accent-primary);
+        }
+
+        .paper-code .string {
+            color: var(--accent-success);
+        }
+
+        .paper-code .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ==========================================
+           CODE THEME / SYNTAX HIGHLIGHTING PREVIEW
+           ========================================== */
+
+        .code-theme-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-default);
+        }
+
+        .code-theme-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .code-theme-header svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .syntax-preview {
+            background: var(--syntax-bg, #040610);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-x: auto;
+            border: 1px solid var(--border-default);
+        }
+
+        .syntax-preview pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .syntax-line {
+            display: block;
+        }
+
+        .syn-keyword { color: var(--syn-keyword, #a855f7); }
+        .syn-string { color: var(--syn-string, #fdba74); }
+        .syn-comment { color: var(--syn-comment, #64748b); font-style: italic; }
+        .syn-attribute { color: var(--syn-attribute, #fbbf24); }
+        .syn-envname { color: var(--syn-envname, #5eead4); }
+        .syn-type { color: var(--syn-type, #f472b6); }
+        .syn-text { color: var(--syn-text, #e8e8f0); }
+
+        /* Token Swatches Grid */
+        .token-swatches {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .token-swatch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .token-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .token-info {
+            min-width: 0;
+        }
+
+        .token-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .token-hex {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Validation Results */
+        .validation-section {
+            margin-top: 16px;
+        }
+
+        .validation-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .validation-title svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .validation-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .validation-status.pass {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-success);
+        }
+
+        .validation-status.fail {
+            background: rgba(244, 114, 182, 0.15);
+            color: var(--accent-error);
+        }
+
+        .validation-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .validation-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .validation-row .label {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .validation-row .label .swatch-pair {
+            display: flex;
+            gap: 2px;
+        }
+
+        .validation-row .label .mini-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .validation-row .value {
+            font-family: 'IBM Plex Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .validation-row .value .check {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .validation-row .value .check.pass {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-success);
+        }
+
+        .validation-row .value .check.fail {
+            background: rgba(244, 114, 182, 0.2);
+            color: var(--accent-error);
+        }
+
+        .collapsible-section {
+            margin-top: 8px;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .collapsible-header:hover {
+            color: var(--text-secondary);
+        }
+
+        .collapsible-header svg {
+            width: 10px;
+            height: 10px;
+            transition: transform 0.2s;
+        }
+
+        .collapsible-header.expanded svg {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            padding-top: 6px;
+        }
+
+        .collapsible-content.show {
+            display: block;
+        }
+
+        /* Syntax Theme Selector */
+        .syntax-theme-selector {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .syntax-theme-tab {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .syntax-theme-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .syntax-theme-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .syntax-theme-info {
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .syntax-theme-info .theme-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .syntax-theme-info .theme-theory {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .syntax-theme-info .theme-desc {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* AI Panel */
+        .ai-panel {
+            width: 280px;
+            background: var(--bg-tertiary);
+            border-left: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .ai-header svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-primary);
+        }
+
+        .ai-chat {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ai-message {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .ai-message.user {
+            background: var(--accent-primary);
+            color: white;
+            align-self: flex-end;
+            max-width: 85%;
+        }
+
+        .ai-message.assistant {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+        }
+
+        .ai-message strong {
+            color: var(--accent-primary);
+        }
+
+        .ai-input-container {
+            padding: 12px;
+            border-top: 1px solid var(--border-default);
+        }
+
+        .ai-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .ai-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .ai-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* Palette Info Panel */
+        .color-theory-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: var(--selection);
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 10px;
+        }
+
+        .color-theory-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .palette-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .palette-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .palette-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .meta-tag {
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .meta-tag.creative {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--accent-warning);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .ui-demo {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .ui-demo-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .button-demo {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .demo-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: filter 0.15s ease;
+        }
+
+        .demo-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .demo-btn.primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .demo-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+        }
+
+        .demo-btn.success {
+            background: var(--accent-success);
+            color: #0f1f1a;
+        }
+
+        .demo-btn.warning {
+            background: var(--accent-warning);
+            color: #1f1a0f;
+        }
+
+        .demo-btn.error {
+            background: var(--accent-error);
+            color: white;
+        }
+
+        .text-samples {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .text-sample {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .text-sample.primary {
+            color: var(--text-primary);
+        }
+
+        .text-sample.secondary {
+            color: var(--text-secondary);
+        }
+
+        .text-sample.muted {
+            color: var(--text-muted);
+        }
+
+        .text-sample.accent {
+            color: var(--accent-primary);
+        }
+
+        /* Color Swatches */
+        .color-category {
+            margin-bottom: 20px;
+        }
+
+        .color-category-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .color-swatch {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .color-preview {
+            height: 40px;
+            width: 100%;
+        }
+
+        .color-name {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 6px 8px 2px;
+        }
+
+        .color-hex {
+            font-size: 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-muted);
+            padding: 0 8px 6px;
+        }
+
+        /* Contrast Badge */
+        .contrast-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .contrast-badge.aaa {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+        }
+
+        .contrast-badge.aa {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        .contrast-badge.fail {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
+        /* Accessibility Section */
+        .a11y-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .a11y-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .a11y-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .a11y-row:last-child {
+            border-bottom: none;
+        }
+
+        .a11y-label {
+            color: var(--text-secondary);
+        }
+
+        .a11y-value {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--selection);
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .ai-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .editor-preview {
+                border-right: none;
+                border-bottom: 1px solid var(--border-default);
+                max-height: 55vh;
+            }
+
+            .editor-sidebar {
+                width: 160px;
+            }
+
+            .palette-tabs {
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .palette-header {
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .palette-tabs {
+                order: 3;
+            }
+
+            .main-content {
+                padding-top: 120px;
+            }
+
+            .editor-sidebar {
+                display: none;
+            }
+        }
+
+        /* Research methodology callout */
+        .research-callout {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .research-callout.creative {
+            border-left-color: var(--accent-warning);
+        }
+
+        .research-callout-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .research-callout.creative .research-callout-title {
+            color: var(--accent-warning);
+        }
+
+        .research-callout p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .research-callout code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-primary);
+        }
+
+        /* Input fields preview */
+        .input-demo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            transition: border-color 0.15s ease;
+        }
+
+        .demo-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .demo-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--selection);
+        }
+
+        .demo-input.success {
+            border-color: var(--accent-success);
+        }
+
+        .demo-input.error {
+            border-color: var(--accent-error);
+        }
+
+        /* Status indicators */
+        .status-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.success {
+            background: var(--accent-success);
+        }
+
+        .status-dot.warning {
+            background: var(--accent-warning);
+        }
+
+        .status-dot.error {
+            background: var(--accent-error);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: 60-30-10 Rule Visualization
+           ═══════════════════════════════════════════════════════════════════════ */
+        .usage-rule-section {
+            margin-bottom: 16px;
+        }
+
+        .usage-bar {
+            display: flex;
+            height: 32px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-default);
+        }
+
+        .usage-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            transition: all 0.2s ease;
+        }
+
+        .usage-segment.primary {
+            flex: 6;
+        }
+
+        .usage-segment.secondary {
+            flex: 3;
+        }
+
+        .usage-segment.accent {
+            flex: 1;
+        }
+
+        .usage-caption {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: Dual-Mode Micro Preview Cards
+           ═══════════════════════════════════════════════════════════════════════ */
+        .dual-mode-section {
+            margin-bottom: 16px;
+        }
+
+        .dual-mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .mode-preview-card {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-default);
+        }
+
+        .mode-preview-header {
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .mode-preview-content {
+            padding: 10px;
+            min-height: 60px;
+        }
+
+        .mode-preview-button {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .mode-preview-text {
+            font-size: 10px;
+            margin-top: 6px;
+        }
+
+        .mode-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: Harmony Strip
+           ═══════════════════════════════════════════════════════════════════════ */
+        .harmony-strip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .harmony-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-hover);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .harmony-swatch.neutral {
+            border-style: dashed;
+        }
+
+        .harmony-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: Semantic Alert Stack
+           ═══════════════════════════════════════════════════════════════════════ */
+        .alert-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            border-left: 3px solid;
+        }
+
+        .alert-item.success {
+            border-left-color: var(--accent-success);
+        }
+
+        .alert-item.warning {
+            border-left-color: var(--accent-warning);
+        }
+
+        .alert-item.error {
+            border-left-color: var(--accent-error);
+        }
+
+        .alert-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .alert-icon.success {
+            background: var(--accent-success);
+            color: #000;
+        }
+
+        .alert-icon.warning {
+            background: var(--accent-warning);
+            color: #000;
+        }
+
+        .alert-icon.error {
+            background: var(--accent-error);
+            color: #fff;
+        }
+
+        .alert-icon svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .alert-message {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: Tab Swatches
+           ═══════════════════════════════════════════════════════════════════════ */
+        .palette-tab .tab-swatch {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════
+           NEW: Section Title
+           ═══════════════════════════════════════════════════════════════════════ */
+        .section-header {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-header svg {
+            width: 12px;
+            height: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header class="palette-header">
+        <h1>
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <path d="M8 7h8"/>
+                    <path d="M8 11h8"/>
+                    <path d="M8 15h4"/>
+                </svg>
+            </div>
+            Citable v4
+        </h1>
+        
+        <nav class="palette-tabs">
+            <button class="palette-tab active" data-palette="indigo-focus"><span class="tab-swatch" style="background: #6366f1;"></span>Indigo Focus</button>
+            <button class="palette-tab" data-palette="violet-brand"><span class="tab-swatch" style="background: #8b5cf6;"></span>Violet Brand</button>
+            <button class="palette-tab" data-palette="sapphire-scholar"><span class="tab-swatch" style="background: #3b82f6;"></span>Sapphire Scholar</button>
+            <button class="palette-tab" data-palette="teal-clarity"><span class="tab-swatch" style="background: #14b8a6;"></span>Teal Clarity</button>
+            <button class="palette-tab" data-palette="slate-minimal"><span class="tab-swatch" style="background: #3b82f6;"></span>Slate Minimal</button>
+            <button class="palette-tab" data-palette="sage-academic"><span class="tab-swatch" style="background: #22c55e;"></span>Sage Academic</button>
+            <button class="palette-tab" data-palette="amethyst-night"><span class="tab-swatch" style="background: #a855f7;"></span>Amethyst Night</button>
+            <button class="palette-tab creative" data-palette="aurora-research"><span class="tab-swatch" style="background: linear-gradient(135deg, #0ea5e9, #22c55e);"></span>✨ Aurora</button>
+            <button class="palette-tab creative" data-palette="midnight-coffee"><span class="tab-swatch" style="background: #c2956a;"></span>☕ Coffee</button>
+        </nav>
+        
+        <div class="header-controls">
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="dark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    Dark
+                </button>
+                <button class="mode-btn" data-mode="light">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="editor-preview">
+            <div class="editor-container">
+                <!-- Sidebar -->
+                <aside class="editor-sidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-logo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-title">Citable</span>
+                    </div>
+
+                    <nav class="sidebar-nav">
+                        <div class="nav-item active">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Editor
+                        </div>
+                        <div class="nav-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                            Library
+                        </div>
+                        <div class="nav-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            Search
+                        </div>
+                    </nav>
+
+                    <div class="sidebar-section">
+                        <div class="section-title">Recent Papers</div>
+                        <div class="file-item active">
+                            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            main.tex
+                        </div>
+                        <div class="file-item">
+                            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            references.bib
+                        </div>
+                        <div class="file-item">
+                            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            figures.tex
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Editor Area -->
+                <div class="editor-main">
+                    <div class="editor-toolbar">
+                        <div class="editor-tabs">
+                            <button class="editor-tab active">Write</button>
+                            <button class="editor-tab">Preview</button>
+                            <button class="editor-tab">Split</button>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="action-btn">Export PDF</button>
+                            <button class="action-btn primary">Compile</button>
+                        </div>
+                    </div>
+
+                    <div class="paper-content">
+                        <h1 class="paper-title">Attention Mechanisms in Neural Network Architectures for Scientific Literature Mining</h1>
+                        <p class="paper-authors">Sarah Chen¹*, Marcus Rivera², Elena Kowalski¹, James Thompson³</p>
+                        
+                        <div class="paper-abstract">
+                            <strong>Abstract:</strong> We present a comprehensive analysis of transformer-based attention mechanisms for extracting structured knowledge from scientific papers. Our approach combines multi-head self-attention with domain-specific pretraining, achieving state-of-the-art results on citation extraction and entity recognition benchmarks. We demonstrate that academic-focused language models significantly outperform general-purpose alternatives in specialized scientific tasks.
+                        </div>
+
+                        <div class="paper-section">
+                            <h2>1. Introduction</h2>
+                            <p>The exponential growth of scientific literature presents unprecedented challenges for knowledge synthesis and discovery <span class="citation">[1]</span>. Researchers increasingly rely on computational approaches to navigate the vast corpus of academic publications <span class="citation">[2, 3]</span>. Traditional keyword-based retrieval methods prove inadequate for capturing the nuanced semantic relationships inherent in scholarly discourse.</p>
+                        </div>
+
+                        <div class="paper-section">
+                            <h2>2. Methods</h2>
+                            <p>We implement a transformer architecture with domain-adaptive pretraining. The model processes tokenized scientific text through multiple self-attention layers:</p>
+                            <div class="paper-code"><span class="keyword">import</span> torch
+<span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModel
+
+<span class="comment"># Load domain-specific model</span>
+model = AutoModel.from_pretrained(<span class="string">"scientific-bert"</span>)
+outputs = model(input_ids, attention_mask=mask)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Assistant Panel -->
+                <aside class="ai-panel">
+                    <div class="ai-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a9 9 0 0 1 9 9c0 3.87-3.13 7-7 7h-1v3l-4-4 4-4v3h1c2.76 0 5-2.24 5-5a7 7 0 0 0-14 0c0 1.5.5 2.87 1.3 4"/>
+                            <circle cx="12" cy="11" r="1"/>
+                            <circle cx="9" cy="11" r="1"/>
+                            <circle cx="15" cy="11" r="1"/>
+                        </svg>
+                        AI Assistant
+                    </div>
+
+                    <div class="ai-chat">
+                        <div class="ai-message user">
+                            Find papers about BERT for scientific text mining
+                        </div>
+                        <div class="ai-message assistant">
+                            Found 3 highly relevant papers:
+                            <br><br>
+                            <strong>SciBERT</strong> (Beltagy et al., 2019) — trained on 1.14M papers from Semantic Scholar
+                            <br><br>
+                            <strong>PubMedBERT</strong> (Gu et al., 2021) — domain-specific pretraining on PubMed abstracts
+                        </div>
+                        <div class="ai-message user">
+                            Add the SciBERT citation to line 15
+                        </div>
+                        <div class="ai-message assistant">
+                            Done! I've added the citation to your bibliography and inserted [2] at line 15. The reference now appears in IEEE format.
+                        </div>
+                    </div>
+
+                    <div class="ai-input-container">
+                        <textarea class="ai-input" placeholder="Ask about your paper..." rows="2"></textarea>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="palette-info" id="palette-details">
+            <!-- Populated by JavaScript -->
+        </section>
+    </main>
+
+    <script>
+        /*
+         * CITABLE COLOR PALETTES v4 — Research-Backed & Accessibility Verified
+         * 
+         * ═══════════════════════════════════════════════════════════════════════
+         * RESEARCH FINDINGS SUMMARY
+         * ═══════════════════════════════════════════════════════════════════════
+         * 
+         * From extensive web research on color theory and UI design:
+         * 
+         * 1. COLOR HARMONY TYPES (Figma, IxDF, Toptal research)
+         *    - Analogous: 3 adjacent colors on wheel — harmonious, calm
+         *    - Complementary: Opposite colors — high contrast, vibrant
+         *    - Split-Complementary: Base + 2 colors adjacent to complement — balanced tension
+         *    - Triadic: 3 equidistant colors — dynamic, playful
+         *    - Monochromatic: Single hue variations — sophisticated, cohesive
+         * 
+         * 2. 60-30-10 RULE (NNGroup, LogRocket, FlowMapp research)
+         *    - 60% Dominant/Primary: Backgrounds, large areas (usually neutral)
+         *    - 30% Secondary: Navigation, cards, UI structure
+         *    - 10% Accent: CTAs, emphasis, focus states (vibrant colors)
+         * 
+         * 3. DARK MODE BEST PRACTICES (Material Design, Atmos, Toptal research)
+         *    - NEVER use pure black (#000000) — causes halation effect
+         *    - Recommended base: #121212 to #1E1E1E range
+         *    - Text should be off-white (#E0E0E0 to #F5F5F5), not pure white
+         *    - Desaturate accent colors ~20% compared to light mode
+         *    - Higher elevation = lighter surfaces
+         *    - ~47% of population has astigmatism — affected by high contrast
+         * 
+         * 4. WCAG ACCESSIBILITY REQUIREMENTS (WebAIM, MDN research)
+         *    - Level AA: 4.5:1 normal text, 3:1 large text (18pt+ or 14pt bold)
+         *    - Level AAA: 7:1 normal text, 4.5:1 large text
+         *    - Non-text UI components: 3:1 minimum
+         * 
+         * 5. COLOR PSYCHOLOGY FOR FOCUS (Columbia University, IxDF research)
+         *    - Blue: Proven to enhance focus, reduce stress, aid concentration
+         *    - Teal/Cyan: Promotes clarity, calm without drowsiness
+         *    - Green: Balance, reduces stress, eye-friendly for long sessions
+         *    - Purple/Violet: Creativity, innovation, sophistication
+         * 
+         * ═══════════════════════════════════════════════════════════════════════
+         * CONTRAST CALCULATION (WCAG 2.1 Formula)
+         * ═══════════════════════════════════════════════════════════════════════
+         */
+        
+        // WCAG Contrast Ratio Calculator
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(c => {
+                c = c / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        function getContrastRatio(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            if (!rgb1 || !rgb2) return 0;
+            
+            const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+            const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+            
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            
+            return ((lighter + 0.05) / (darker + 0.05)).toFixed(2);
+        }
+
+        function getContrastLevel(ratio) {
+            if (ratio >= 7) return { level: 'AAA', class: 'aaa' };
+            if (ratio >= 4.5) return { level: 'AA', class: 'aa' };
+            return { level: 'Fail', class: 'fail' };
+        }
+
+        // ==========================================
+        // DELTA E / CIEDE2000 - Color Distinguishability
+        // ==========================================
+
+        // Convert hex to LAB color space (via RGB → XYZ → LAB)
+        function hexToLab(hex) {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return null;
+
+            // RGB to XYZ (sRGB with D65 illuminant)
+            let r = rgb.r / 255;
+            let g = rgb.g / 255;
+            let b = rgb.b / 255;
+
+            // Apply gamma correction
+            r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+            g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+            b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+
+            r *= 100; g *= 100; b *= 100;
+
+            // RGB to XYZ
+            const x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375;
+            const y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750;
+            const z = r * 0.0193339 + g * 0.1191920 + b * 0.9503041;
+
+            // XYZ to LAB (D65 reference white)
+            const refX = 95.047, refY = 100.000, refZ = 108.883;
+            let labX = x / refX;
+            let labY = y / refY;
+            let labZ = z / refZ;
+
+            const epsilon = 0.008856;
+            const kappa = 903.3;
+
+            labX = labX > epsilon ? Math.cbrt(labX) : (kappa * labX + 16) / 116;
+            labY = labY > epsilon ? Math.cbrt(labY) : (kappa * labY + 16) / 116;
+            labZ = labZ > epsilon ? Math.cbrt(labZ) : (kappa * labZ + 16) / 116;
+
+            return {
+                L: 116 * labY - 16,
+                a: 500 * (labX - labY),
+                b: 200 * (labY - labZ)
+            };
+        }
+
+        // CIEDE2000 Color Difference Formula
+        // Returns ΔE value: <1 imperceptible, 1-2 close observation, 2-10 noticeable, >10 clearly different
+        function deltaE2000(lab1, lab2) {
+            if (!lab1 || !lab2) return 0;
+
+            const { L: L1, a: a1, b: b1 } = lab1;
+            const { L: L2, a: a2, b: b2 } = lab2;
+
+            const avgL = (L1 + L2) / 2;
+            const C1 = Math.sqrt(a1 * a1 + b1 * b1);
+            const C2 = Math.sqrt(a2 * a2 + b2 * b2);
+            const avgC = (C1 + C2) / 2;
+
+            const G = 0.5 * (1 - Math.sqrt(Math.pow(avgC, 7) / (Math.pow(avgC, 7) + Math.pow(25, 7))));
+
+            const a1p = a1 * (1 + G);
+            const a2p = a2 * (1 + G);
+
+            const C1p = Math.sqrt(a1p * a1p + b1 * b1);
+            const C2p = Math.sqrt(a2p * a2p + b2 * b2);
+            const avgCp = (C1p + C2p) / 2;
+
+            let h1p = Math.atan2(b1, a1p) * 180 / Math.PI;
+            if (h1p < 0) h1p += 360;
+            let h2p = Math.atan2(b2, a2p) * 180 / Math.PI;
+            if (h2p < 0) h2p += 360;
+
+            let avgHp;
+            if (Math.abs(h1p - h2p) > 180) {
+                avgHp = (h1p + h2p + 360) / 2;
+            } else {
+                avgHp = (h1p + h2p) / 2;
+            }
+
+            const T = 1 - 0.17 * Math.cos((avgHp - 30) * Math.PI / 180) +
+                      0.24 * Math.cos(2 * avgHp * Math.PI / 180) +
+                      0.32 * Math.cos((3 * avgHp + 6) * Math.PI / 180) -
+                      0.20 * Math.cos((4 * avgHp - 63) * Math.PI / 180);
+
+            let deltaHp = h2p - h1p;
+            if (Math.abs(deltaHp) > 180) {
+                if (h2p <= h1p) {
+                    deltaHp += 360;
+                } else {
+                    deltaHp -= 360;
+                }
+            }
+
+            const deltaLp = L2 - L1;
+            const deltaCp = C2p - C1p;
+            const deltaHpRad = 2 * Math.sqrt(C1p * C2p) * Math.sin(deltaHp * Math.PI / 360);
+
+            const SL = 1 + (0.015 * Math.pow(avgL - 50, 2)) / Math.sqrt(20 + Math.pow(avgL - 50, 2));
+            const SC = 1 + 0.045 * avgCp;
+            const SH = 1 + 0.015 * avgCp * T;
+
+            const deltaTheta = 30 * Math.exp(-Math.pow((avgHp - 275) / 25, 2));
+            const RC = 2 * Math.sqrt(Math.pow(avgCp, 7) / (Math.pow(avgCp, 7) + Math.pow(25, 7)));
+            const RT = -RC * Math.sin(2 * deltaTheta * Math.PI / 180);
+
+            const kL = 1, kC = 1, kH = 1;
+
+            const deltaE = Math.sqrt(
+                Math.pow(deltaLp / (kL * SL), 2) +
+                Math.pow(deltaCp / (kC * SC), 2) +
+                Math.pow(deltaHpRad / (kH * SH), 2) +
+                RT * (deltaCp / (kC * SC)) * (deltaHpRad / (kH * SH))
+            );
+
+            return deltaE;
+        }
+
+        // Validate syntax palette: checks WCAG contrast + ΔE distinguishability
+        function validateSyntaxPalette(colors, background) {
+            const results = {
+                contrast: [],
+                distinguishability: [],
+                allPass: true
+            };
+
+            // Check contrast vs background (WCAG 2.1 AA = 4.5:1)
+            colors.forEach(color => {
+                const ratio = parseFloat(getContrastRatio(color.hex, background));
+                const level = getContrastLevel(ratio);
+                const pass = ratio >= 4.5;
+                results.contrast.push({
+                    token: color.name,
+                    hex: color.hex,
+                    ratio: ratio,
+                    level: level.level,
+                    pass: pass
+                });
+                if (!pass) results.allPass = false;
+            });
+
+            // Check pairwise distinguishability (ΔE > 10 required)
+            for (let i = 0; i < colors.length; i++) {
+                for (let j = i + 1; j < colors.length; j++) {
+                    const lab1 = hexToLab(colors[i].hex);
+                    const lab2 = hexToLab(colors[j].hex);
+                    const de = deltaE2000(lab1, lab2);
+                    const pass = de > 10;
+                    results.distinguishability.push({
+                        pair: `${colors[i].name} ↔ ${colors[j].name}`,
+                        hex1: colors[i].hex,
+                        hex2: colors[j].hex,
+                        deltaE: de.toFixed(1),
+                        pass: pass
+                    });
+                    if (!pass) results.allPass = false;
+                }
+            }
+
+            return results;
+        }
+
+        // Aurora Syntax Theme Definition (separate from UI colors)
+        // Current syntax theme selection
+        let currentSyntaxTheme = 'twilight-orchid';
+
+        // All 3 Syntax Palettes for Aurora
+        const syntaxPalettes = {
+            'twilight-orchid': {
+                name: 'Twilight Orchid',
+                theory: 'Split-complementary centered on violet (280°) with warm accents',
+                description: 'Balanced, modern feel with purple-pink family and orange/yellow contrast',
+                inspiration: 'Material Theme Palenight + Catppuccin',
+                dark: {
+                    background: '#040610',
+                    colors: [
+                        { name: 'keyword', hex: '#c792ea', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#f78c6c', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#6b7280', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#fde68a', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#93c5fd', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#fca5a5', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                },
+                light: {
+                    background: '#eef2f8',
+                    colors: [
+                        { name: 'keyword', hex: '#7c3aed', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#c2410c', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#6b7280', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#92400e', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#1e40af', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#b91c1c', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                }
+            },
+            'boreal-frost': {
+                name: 'Boreal Frost',
+                theory: 'Muted nordic palette with desaturated tones (40-55% saturation)',
+                description: 'Calm, professional feel — inspired by Nordic design',
+                inspiration: 'Nord Theme + One Dark Pro',
+                dark: {
+                    background: '#040610',
+                    colors: [
+                        { name: 'keyword', hex: '#b48ead', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#a3be8c', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#6e7681', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#d08770', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#81a1c1', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#e5c07b', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                },
+                light: {
+                    background: '#eef2f8',
+                    colors: [
+                        { name: 'keyword', hex: '#9d4edd', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#16a34a', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#6b7280', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#9a3412', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#1e3a8a', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#a16207', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                }
+            },
+            'ember-glow': {
+                name: 'Ember Glow',
+                theory: 'Warm analogous (0-60°) with violet accent for maximum UI contrast',
+                description: 'Warm, distinctive — creates strong separation from cool UI',
+                inspiration: 'Monokai Pro + GitHub Dark Dimmed',
+                dark: {
+                    background: '#040610',
+                    colors: [
+                        { name: 'keyword', hex: '#a78bfa', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#fdba74', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#78716c', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#fcd34d', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#c4b5fd', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#fb923c', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                },
+                light: {
+                    background: '#eef2f8',
+                    colors: [
+                        { name: 'keyword', hex: '#6d28d9', tokens: ['keyword', 'literal', 'tagName'], usage: 'Commands (\\section, \\begin)' },
+                        { name: 'string', hex: '#c2410c', tokens: ['string'], usage: 'Math mode ($...$)' },
+                        { name: 'comment', hex: '#78716c', tokens: ['comment'], usage: 'Comments (%)' },
+                        { name: 'attribute', hex: '#a16207', tokens: ['attributeValue'], usage: 'Arguments {...}' },
+                        { name: 'envname', hex: '#5b21b6', tokens: ['attributeName', 'function'], usage: 'Environment names' },
+                        { name: 'type', hex: '#9a3412', tokens: ['typeName'], usage: 'Types' }
+                    ]
+                }
+            }
+        };
+
+        // For backward compatibility
+        const auroraSyntaxTheme = syntaxPalettes['twilight-orchid'];
+
+        const palettes = {
+            'indigo-focus': {
+                name: 'Indigo Focus',
+                description: 'Split-complementary harmony centered on indigo (240°). Emerald (160°) and amber (45°) provide balanced visual tension. Cool blue-gray neutrals create a native environment for the indigo accent.',
+                colorTheory: 'Split-Complementary',
+                harmony: 'Indigo 240° ↔ Emerald 160° + Amber 45°',
+                harmonySwatch: ['#6366f1', '#34d399', '#f59e0b', '#1e1e2e'],
+                bestFor: 'Deep work sessions, developers, late-night researchers',
+                tradeoffs: 'Familiar aesthetic — less distinctive but instantly comfortable',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Cool blue-gray (240° hue, low saturation)
+                    // bg-primary: HSL(240, 18%, 7%) - deep blue-black
+                    'bg-primary': '#0f1016',
+                    // bg-secondary: HSL(240, 15%, 11%) - elevation +1
+                    'bg-secondary': '#171920',
+                    // bg-tertiary: HSL(240, 12%, 15%) - elevation +2
+                    'bg-tertiary': '#21232c',
+                    // bg-hover: HSL(240, 10%, 20%) - interactive state
+                    'bg-hover': '#2c2e38',
+                    // Text: Off-white with blue tint (not pure white)
+                    'text-primary': '#e4e6f0',  // HSL(235, 30%, 92%)
+                    'text-secondary': '#a8aabe', // HSL(235, 15%, 70%)
+                    'text-muted': '#797b8f',     // HSL(235, 10%, 52%) - AA contrast
+                    // Accents: Indigo primary, slightly desaturated for dark mode
+                    'accent-primary': '#696cf1',   // HSL(239, 84%, 68%) - AA contrast
+                    'accent-secondary': '#818cf8', // HSL(239, 90%, 77%)
+                    'accent-success': '#34d399',   // HSL(160, 64%, 52%) - Emerald
+                    'accent-warning': '#f59e0b',   // HSL(38, 92%, 50%) - Amber
+                    'accent-error': '#ef4444',     // HSL(0, 84%, 60%)
+                    'border-default': '#2a2c3a',   // HSL(235, 15%, 20%)
+                    'border-subtle': '#1e2028',    // HSL(235, 12%, 14%)
+                    'selection': 'rgba(99, 102, 241, 0.22)',
+                    'code-bg': '#0a0b10',          // HSL(240, 20%, 5%)
+                    'logo-gradient': 'linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #34d399 100%)'
+                },
+                light: {
+                    // Neutrals: Clean off-white with subtle blue tint
+                    'bg-primary': '#f7f8fc',    // HSL(230, 40%, 98%)
+                    'bg-secondary': '#ffffff',   // Pure white for cards
+                    'bg-tertiary': '#eef0f7',   // HSL(230, 35%, 95%)
+                    'bg-hover': '#e4e6f0',      // HSL(230, 30%, 92%)
+                    // Text: Deep blue-gray (not pure black)
+                    'text-primary': '#1a1c2e',  // HSL(235, 28%, 14%)
+                    'text-secondary': '#4a4c66', // HSL(235, 16%, 35%)
+                    'text-muted': '#6c6f8c',    // HSL(235, 14%, 49%) - AA contrast
+                    // Accents: Slightly more saturated for light mode
+                    'accent-primary': '#4f46e5',   // HSL(243, 75%, 59%)
+                    'accent-secondary': '#6366f1', // HSL(239, 84%, 67%)
+                    'accent-success': '#059669',   // HSL(160, 94%, 30%)
+                    'accent-warning': '#d97706',   // HSL(32, 95%, 44%)
+                    'accent-error': '#dc2626',     // HSL(0, 74%, 50%)
+                    'border-default': '#dcdff0',   // HSL(232, 35%, 90%)
+                    'border-subtle': '#eceef7',    // HSL(232, 40%, 95%)
+                    'selection': 'rgba(79, 70, 229, 0.14)',
+                    'code-bg': '#f2f3fa',          // HSL(235, 45%, 96%)
+                    'logo-gradient': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #059669 100%)'
+                }
+            },
+            'violet-brand': {
+                name: 'Violet Brand',
+                description: 'Triadic harmony derived from Citable\'s logo gradient. Violet (270°) as the hero, with blue (210°) and coral (30°) as supporting accents. Subtle violet-tinted neutrals make the accent feel native.',
+                colorTheory: 'Triadic',
+                harmony: 'Violet 270° → Blue 210° → Coral 30°',
+                harmonySwatch: ['#8b5cf6', '#3b82f6', '#f97316', '#1c1820'],
+                bestFor: 'Brand consistency, marketing views, Citable power users',
+                tradeoffs: 'Coral warmth may not suit all productivity contexts',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Subtle violet tint (270° hue, very low saturation)
+                    'bg-primary': '#0d0c12',    // HSL(270, 20%, 6%)
+                    'bg-secondary': '#15131c',  // HSL(270, 18%, 9%)
+                    'bg-tertiary': '#1e1b26',   // HSL(270, 15%, 13%)
+                    'bg-hover': '#282430',      // HSL(270, 12%, 17%)
+                    // Text: Warm off-white with violet undertone
+                    'text-primary': '#ebe8f2',  // HSL(265, 30%, 93%)
+                    'text-secondary': '#b5b0c6', // HSL(265, 15%, 73%)
+                    'text-muted': '#7e7890',    // HSL(265, 10%, 52%) - AA contrast
+                    // Accents: Triadic - violet, blue, coral
+                    'accent-primary': '#8b5cf6',   // HSL(262, 90%, 66%) - Violet
+                    'accent-secondary': '#a78bfa', // HSL(262, 92%, 76%)
+                    'accent-success': '#2dd4bf',   // HSL(172, 66%, 50%) - Teal (blue side)
+                    'accent-warning': '#f97316',   // HSL(25, 95%, 53%) - Coral/Orange
+                    'accent-error': '#f472b6',     // HSL(330, 86%, 70%) - Pink
+                    'border-default': '#2c2836',   // HSL(265, 15%, 18%)
+                    'border-subtle': '#201c28',    // HSL(265, 18%, 13%)
+                    'selection': 'rgba(139, 92, 246, 0.22)',
+                    'code-bg': '#08070c',          // HSL(270, 25%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 45%, #f97316 100%)'
+                },
+                light: {
+                    // Neutrals: Soft violet-tinted off-white
+                    'bg-primary': '#faf8fd',    // HSL(270, 50%, 98%)
+                    'bg-secondary': '#ffffff',   // Pure white for cards
+                    'bg-tertiary': '#f4f1f9',   // HSL(270, 40%, 96%)
+                    'bg-hover': '#ebe6f3',      // HSL(270, 35%, 93%)
+                    // Text: Deep violet-gray
+                    'text-primary': '#1c1826',  // HSL(270, 22%, 12%)
+                    'text-secondary': '#504860', // HSL(265, 15%, 33%)
+                    'text-muted': '#776e86',    // HSL(265, 12%, 48%) - AA contrast
+                    // Accents: More saturated for light mode contrast
+                    'accent-primary': '#7c3aed',   // HSL(263, 83%, 58%)
+                    'accent-secondary': '#8b5cf6', // HSL(262, 90%, 66%)
+                    'accent-success': '#0d9488',   // HSL(174, 84%, 32%)
+                    'accent-warning': '#ea580c',   // HSL(21, 90%, 48%)
+                    'accent-error': '#db2777',     // HSL(330, 81%, 51%)
+                    'border-default': '#e4dff0',   // HSL(265, 35%, 91%)
+                    'border-subtle': '#f0ecf7',    // HSL(265, 40%, 95%)
+                    'selection': 'rgba(124, 58, 237, 0.12)',
+                    'code-bg': '#f6f3fa',          // HSL(265, 45%, 97%)
+                    'logo-gradient': 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 45%, #ea580c 100%)'
+                }
+            },
+            'sapphire-scholar': {
+                name: 'Sapphire Scholar',
+                description: 'Analogous harmony centered on sapphire blue (215°) with cyan (195°) and indigo (235°) neighbors. Warm ivory neutrals evoke academic tradition. Blue enhances focus — ideal for extended reading.',
+                colorTheory: 'Analogous',
+                harmony: 'Cyan 195° → Sapphire 215° → Indigo 235°',
+                harmonySwatch: ['#0ea5e9', '#3b82f6', '#6366f1', '#2a2520'],
+                bestFor: 'Humanities researchers, traditional academics, extended reading',
+                tradeoffs: 'Warmer feel may seem less "techy" to some users',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Warm chocolate-gray (30° hue, low saturation)
+                    'bg-primary': '#100f0d',    // HSL(35, 15%, 6%)
+                    'bg-secondary': '#1a1815',  // HSL(35, 12%, 9%)
+                    'bg-tertiary': '#24211d',   // HSL(35, 10%, 13%)
+                    'bg-hover': '#2e2a25',      // HSL(35, 8%, 16%)
+                    // Text: Warm cream/ivory off-white
+                    'text-primary': '#f2ede6',  // HSL(38, 35%, 93%)
+                    'text-secondary': '#c4bbb0', // HSL(35, 18%, 73%)
+                    'text-muted': '#827b71',    // HSL(35, 10%, 48%) - AA contrast
+                    // Accents: Analogous blues - cyan to indigo
+                    'accent-primary': '#3b82f6',   // HSL(217, 91%, 60%) - Sapphire
+                    'accent-secondary': '#60a5fa', // HSL(213, 94%, 68%)
+                    'accent-success': '#10b981',   // HSL(160, 84%, 39%) - Emerald
+                    'accent-warning': '#d4a24a',   // HSL(42, 60%, 56%) - Gold
+                    'accent-error': '#dc6b6b',     // HSL(0, 60%, 64%)
+                    'border-default': '#38342e',   // HSL(35, 12%, 20%)
+                    'border-subtle': '#28251f',    // HSL(35, 14%, 14%)
+                    'selection': 'rgba(59, 130, 246, 0.25)',
+                    'code-bg': '#0c0b09',          // HSL(35, 18%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #6366f1 100%)'
+                },
+                light: {
+                    // Neutrals: Warm ivory/parchment
+                    'bg-primary': '#faf8f5',    // HSL(40, 45%, 97%)
+                    'bg-secondary': '#fffffe',   // Near-white with warm tint
+                    'bg-tertiary': '#f4f1eb',   // HSL(40, 35%, 94%)
+                    'bg-hover': '#eae5dc',      // HSL(40, 30%, 90%)
+                    // Text: Warm dark brown-gray
+                    'text-primary': '#28241e',  // HSL(35, 20%, 14%)
+                    'text-secondary': '#5a5448', // HSL(40, 12%, 32%)
+                    'text-muted': '#777064',    // HSL(40, 10%, 43%) - AA contrast
+                    // Accents: Deeper blue for contrast on warm bg
+                    'accent-primary': '#2563eb',   // HSL(217, 83%, 53%)
+                    'accent-secondary': '#3b82f6', // HSL(217, 91%, 60%)
+                    'accent-success': '#059669',   // HSL(160, 94%, 30%)
+                    'accent-warning': '#b8923c',   // HSL(42, 52%, 48%)
+                    'accent-error': '#b84747',     // HSL(0, 48%, 50%)
+                    'border-default': '#e2ddd4',   // HSL(38, 25%, 86%)
+                    'border-subtle': '#f0ece4',    // HSL(38, 35%, 92%)
+                    'selection': 'rgba(37, 99, 235, 0.12)',
+                    'code-bg': '#f4f1eb',          // HSL(40, 35%, 94%)
+                    'logo-gradient': 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #4f46e5 100%)'
+                }
+            },
+            'teal-clarity': {
+                name: 'Teal Clarity',
+                description: 'Monochromatic harmony in the teal/cyan range (175-185°). Cyan promotes focus and mental clarity. Highest contrast ratios — ideal for accessibility-first users. Warm amber provides a single contrasting accent.',
+                colorTheory: 'Monochromatic',
+                harmony: 'Teal 175° → 180° → 185°',
+                harmonySwatch: ['#0d9488', '#14b8a6', '#2dd4bf', '#0c1416'],
+                bestFor: 'STEM researchers, data visualization, accessibility needs',
+                tradeoffs: 'Cool palette may feel clinical without warm accents',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Cool cyan-tinted near-blacks
+                    'bg-primary': '#0a1012',    // HSL(195, 25%, 5%)
+                    'bg-secondary': '#111a1e',  // HSL(195, 22%, 9%)
+                    'bg-tertiary': '#182428',   // HSL(195, 18%, 13%)
+                    'bg-hover': '#1f2e34',      // HSL(195, 15%, 16%)
+                    // Text: Cool off-white with cyan tint
+                    'text-primary': '#e2eef2',  // HSL(195, 40%, 92%)
+                    'text-secondary': '#9ebcc8', // HSL(195, 30%, 70%)
+                    'text-muted': '#688a96',    // HSL(195, 20%, 50%)
+                    // Accents: Monochromatic teals
+                    'accent-primary': '#14b8a6',   // HSL(174, 80%, 40%)
+                    'accent-secondary': '#2dd4bf', // HSL(170, 68%, 50%)
+                    'accent-success': '#0ea5e9',   // HSL(199, 89%, 48%) - Cyan (neighbor)
+                    'accent-warning': '#f59e0b',   // HSL(38, 92%, 50%) - Warm contrast
+                    'accent-error': '#f472b6',     // HSL(330, 86%, 70%) - Rose
+                    'border-default': '#243840',   // HSL(195, 25%, 20%)
+                    'border-subtle': '#1a2a30',    // HSL(195, 28%, 15%)
+                    'selection': 'rgba(20, 184, 166, 0.22)',
+                    'code-bg': '#060c0e',          // HSL(195, 30%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%)'
+                },
+                light: {
+                    // Neutrals: Very soft aqua-tinted off-whites
+                    'bg-primary': '#f5fafb',    // HSL(190, 50%, 97%)
+                    'bg-secondary': '#ffffff',   // Pure white for cards
+                    'bg-tertiary': '#eef5f7',   // HSL(190, 40%, 95%)
+                    'bg-hover': '#e2eef2',      // HSL(195, 35%, 92%)
+                    // Text: Deep cyan-gray
+                    'text-primary': '#0c2028',  // HSL(200, 55%, 10%)
+                    'text-secondary': '#365560', // HSL(195, 28%, 30%)
+                    'text-muted': '#57777e',    // HSL(190, 18%, 42%) - AA contrast
+                    // Accents: Deeper teal for contrast
+                    'accent-primary': '#0b7e74',   // HSL(174, 84%, 27%) - AA contrast
+                    'accent-secondary': '#14b8a6', // HSL(174, 80%, 40%)
+                    'accent-success': '#0284c7',   // HSL(200, 98%, 40%)
+                    'accent-warning': '#d97706',   // HSL(32, 95%, 44%)
+                    'accent-error': '#e11d48',     // HSL(345, 82%, 50%)
+                    'border-default': '#d0e4e8',   // HSL(190, 35%, 86%)
+                    'border-subtle': '#e6f2f5',    // HSL(190, 45%, 93%)
+                    'selection': 'rgba(13, 148, 136, 0.12)',
+                    'code-bg': '#eef5f7',          // HSL(190, 40%, 95%)
+                    'logo-gradient': 'linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%)'
+                }
+            },
+            'slate-minimal': {
+                name: 'Slate Minimal',
+                description: 'True neutral grayscale (near-zero saturation) with a single blue accent (217°). GitHub, Vercel, Linear inspired. Maximum content focus. Strictly follows 60-30-10 rule with clear lightness steps.',
+                colorTheory: 'Neutral + Single Accent',
+                harmony: 'Grayscale + Blue 217°',
+                harmonySwatch: ['#3b82f6', '#60a5fa', '#94a3b8', '#101012'],
+                bestFor: 'Minimalists, technical writers, distraction-free writing',
+                tradeoffs: 'May feel stark or utilitarian to some users',
+                isCreative: false,
+                dark: {
+                    // Neutrals: True gray with minimal tint, well-spaced lightness
+                    'bg-primary': '#0e0e10',    // L=6%
+                    'bg-secondary': '#161618',  // L=9%
+                    'bg-tertiary': '#1e1e22',   // L=13%
+                    'bg-hover': '#28282e',      // L=17%
+                    // Text: Neutral off-white (no tint)
+                    'text-primary': '#e6e6ea',  // L=91%
+                    'text-secondary': '#a4a4ac', // L=66%
+                    'text-muted': '#7a7a84',    // L=50% - AA contrast
+                    // Accents: Single blue accent
+                    'accent-primary': '#3b82f6',   // HSL(217, 91%, 60%)
+                    'accent-secondary': '#60a5fa', // HSL(213, 94%, 68%)
+                    'accent-success': '#22c55e',   // HSL(142, 71%, 45%)
+                    'accent-warning': '#eab308',   // HSL(48, 96%, 47%)
+                    'accent-error': '#ef4444',     // HSL(0, 84%, 60%)
+                    'border-default': '#26262c',   // L=16%
+                    'border-subtle': '#1c1c20',    // L=12%
+                    'selection': 'rgba(59, 130, 246, 0.22)',
+                    'code-bg': '#08080a',          // L=3%
+                    'logo-gradient': 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)'
+                },
+                light: {
+                    // Neutrals: Clean grayscale, well-spaced
+                    'bg-primary': '#f8f8fa',    // L=98%
+                    'bg-secondary': '#ffffff',   // L=100%
+                    'bg-tertiary': '#f0f0f4',   // L=95%
+                    'bg-hover': '#e6e6ec',      // L=91%
+                    // Text: Near-black neutral
+                    'text-primary': '#16161a',  // L=10%
+                    'text-secondary': '#4e4e56', // L=32%
+                    'text-muted': '#6f6f7a',    // L=46% - AA contrast
+                    // Accents: Slightly deeper blue for light mode
+                    'accent-primary': '#2563eb',   // HSL(217, 83%, 53%)
+                    'accent-secondary': '#3b82f6', // HSL(217, 91%, 60%)
+                    'accent-success': '#16a34a',   // HSL(142, 76%, 36%)
+                    'accent-warning': '#ca8a04',   // HSL(48, 96%, 40%)
+                    'accent-error': '#dc2626',     // HSL(0, 74%, 50%)
+                    'border-default': '#e2e2e8',   // L=90%
+                    'border-subtle': '#f0f0f4',    // L=95%
+                    'selection': 'rgba(37, 99, 235, 0.12)',
+                    'code-bg': '#f4f4f6',          // L=96%
+                    'logo-gradient': 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
+                }
+            },
+            'sage-academic': {
+                name: 'Sage Academic',
+                description: 'Analogous harmony in greens (125-155°). Sage as the hero with emerald and moss neighbors. Green promotes balance and reduces stress. Evokes scholarly tradition — a unique choice in the tech space.',
+                colorTheory: 'Analogous',
+                harmony: 'Emerald 145° → Sage 140° → Moss 130°',
+                harmonySwatch: ['#10b981', '#22c55e', '#84cc16', '#121410'],
+                bestFor: 'Light mode lovers, daytime users, print-focused workflows',
+                tradeoffs: 'Green accent less common in tech — may feel unfamiliar',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Subtle green-gray tint
+                    'bg-primary': '#0c0e0c',    // HSL(120, 12%, 6%)
+                    'bg-secondary': '#141816',  // HSL(130, 10%, 9%)
+                    'bg-tertiary': '#1c221c',   // HSL(120, 10%, 12%)
+                    'bg-hover': '#262e26',      // HSL(120, 8%, 16%)
+                    // Text: Warm off-white with green undertone
+                    'text-primary': '#e8efe6',  // HSL(110, 25%, 92%)
+                    'text-secondary': '#aebea8', // HSL(110, 15%, 70%)
+                    'text-muted': '#6e8066',    // HSL(110, 12%, 45%)
+                    // Accents: Analogous greens
+                    'accent-primary': '#22c55e',   // HSL(142, 71%, 45%) - Green
+                    'accent-secondary': '#4ade80', // HSL(142, 69%, 58%)
+                    'accent-success': '#10b981',   // HSL(160, 84%, 39%) - Emerald
+                    'accent-warning': '#eab308',   // HSL(48, 96%, 47%) - Amber
+                    'accent-error': '#ef4444',     // HSL(0, 84%, 60%) - Red
+                    'border-default': '#2a3628',   // HSL(110, 15%, 18%)
+                    'border-subtle': '#1e261c',    // HSL(110, 18%, 13%)
+                    'selection': 'rgba(34, 197, 94, 0.20)',
+                    'code-bg': '#080a08',          // HSL(120, 15%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #10b981 0%, #22c55e 50%, #4ade80 100%)'
+                },
+                light: {
+                    // Neutrals: Warm paper-like off-white with green undertones
+                    'bg-primary': '#f7faf6',    // HSL(110, 40%, 97%)
+                    'bg-secondary': '#fefffe',   // Near-white
+                    'bg-tertiary': '#f0f5ee',   // HSL(110, 35%, 95%)
+                    'bg-hover': '#e4ece0',      // HSL(110, 30%, 90%)
+                    // Text: Deep green-gray
+                    'text-primary': '#161e16',  // HSL(120, 18%, 10%)
+                    'text-secondary': '#445444', // HSL(120, 12%, 30%)
+                    'text-muted': '#667566',    // HSL(120, 8%, 43%) - AA contrast
+                    // Accents: Deeper green for light mode contrast
+                    'accent-primary': '#16a34a',   // HSL(142, 76%, 36%)
+                    'accent-secondary': '#22c55e', // HSL(142, 71%, 45%)
+                    'accent-success': '#059669',   // HSL(160, 94%, 30%)
+                    'accent-warning': '#d97706',   // HSL(32, 95%, 44%)
+                    'accent-error': '#dc2626',     // HSL(0, 74%, 50%)
+                    'border-default': '#d8e4d4',   // HSL(110, 28%, 86%)
+                    'border-subtle': '#ecf4ea',    // HSL(110, 40%, 94%)
+                    'selection': 'rgba(22, 163, 74, 0.12)',
+                    'code-bg': '#f0f5ee',          // HSL(110, 35%, 95%)
+                    'logo-gradient': 'linear-gradient(135deg, #059669 0%, #16a34a 50%, #22c55e 100%)'
+                }
+            },
+            'amethyst-night': {
+                name: 'Amethyst Night',
+                description: 'Bold complementary harmony: deep violet (270°) versus gold (45°). Deep violet-tinted blacks create dramatic contrast. For creative researchers who want a distinctive, memorable interface.',
+                colorTheory: 'Complementary',
+                harmony: 'Violet 270° ↔ Gold 45°',
+                harmonySwatch: ['#a855f7', '#c084fc', '#fbbf24', '#0a0810'],
+                bestFor: 'Night owls, creative researchers, thesis-at-2am energy',
+                tradeoffs: 'High drama may be intense for very long sessions',
+                isCreative: false,
+                dark: {
+                    // Neutrals: Deep violet-tinted near-blacks
+                    'bg-primary': '#08080e',    // HSL(270, 30%, 4%)
+                    'bg-secondary': '#0e0e16',  // HSL(270, 25%, 7%)
+                    'bg-tertiary': '#16161f',   // HSL(270, 18%, 10%)
+                    'bg-hover': '#1e1e2a',      // HSL(270, 15%, 14%)
+                    // Text: Ethereal violet-white
+                    'text-primary': '#f2f0fa',  // HSL(270, 50%, 96%)
+                    'text-secondary': '#b4acc8', // HSL(270, 20%, 73%)
+                    'text-muted': '#807593',    // HSL(270, 14%, 52%) - AA contrast
+                    // Accents: Complementary - amethyst + gold
+                    'accent-primary': '#a855f7',   // HSL(272, 91%, 65%) - Amethyst
+                    'accent-secondary': '#c084fc', // HSL(270, 95%, 75%)
+                    'accent-success': '#a3e635',   // HSL(82, 78%, 55%) - Lime (toward gold)
+                    'accent-warning': '#fbbf24',   // HSL(45, 96%, 56%) - Gold (complement)
+                    'accent-error': '#fb7185',     // HSL(350, 95%, 73%) - Rose
+                    'border-default': '#262438',   // HSL(270, 20%, 18%)
+                    'border-subtle': '#1a1826',    // HSL(270, 22%, 12%)
+                    'selection': 'rgba(168, 85, 247, 0.22)',
+                    'code-bg': '#040408',          // HSL(270, 35%, 2%)
+                    'logo-gradient': 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #fbbf24 100%)'
+                },
+                light: {
+                    // Neutrals: Soft violet-tinted whites
+                    'bg-primary': '#faf8fd',    // HSL(270, 50%, 98%)
+                    'bg-secondary': '#ffffff',   // Pure white
+                    'bg-tertiary': '#f5f2f9',   // HSL(270, 40%, 96%)
+                    'bg-hover': '#ece6f4',      // HSL(270, 40%, 93%)
+                    // Text: Deep violet-gray
+                    'text-primary': '#1a161f',  // HSL(270, 18%, 10%)
+                    'text-secondary': '#4c4458', // HSL(270, 14%, 31%)
+                    'text-muted': '#776f7f',    // HSL(270, 8%, 46%) - AA contrast
+                    // Accents: Deeper for light mode
+                    'accent-primary': '#9333ea',   // HSL(272, 81%, 56%)
+                    'accent-secondary': '#a855f7', // HSL(272, 91%, 65%)
+                    'accent-success': '#65a30d',   // HSL(82, 86%, 35%)
+                    'accent-warning': '#b8860b',   // HSL(42, 88%, 38%) - Darker gold
+                    'accent-error': '#e11d48',     // HSL(345, 82%, 50%)
+                    'border-default': '#e4def0',   // HSL(270, 35%, 90%)
+                    'border-subtle': '#f2eef8',    // HSL(270, 45%, 95%)
+                    'selection': 'rgba(147, 51, 234, 0.12)',
+                    'code-bg': '#f5f2f9',          // HSL(270, 40%, 96%)
+                    'logo-gradient': 'linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #b8860b 100%)'
+                }
+            },
+            // ═══════════════════════════════════════════════════════════════════════
+            // CREATIVE "OUT OF THE BOX" PALETTES
+            // ═══════════════════════════════════════════════════════════════════════
+            'aurora-research': {
+                name: '✨ Aurora Research',
+                description: 'Tetradic harmony inspired by the aurora borealis — cyan (195°), violet (270°), emerald (150°), and gold (45°). A magical workspace that stays functional through careful restraint.',
+                colorTheory: 'Tetradic (Rectangle)',
+                harmony: 'Cyan 195° + Violet 270° + Emerald 150° + Gold 45°',
+                harmonySwatch: ['#0ea5e9', '#a855f7', '#22c55e', '#fbbf24'],
+                bestFor: 'Creative researchers, astronomy/physics enthusiasts, those who work best when inspired',
+                tradeoffs: 'More colors to balance — requires restraint in application',
+                isCreative: true,
+                dark: {
+                    // Neutrals: Deep space blue-black
+                    'bg-primary': '#080a10',    // HSL(220, 35%, 5%)
+                    'bg-secondary': '#0e1218',  // HSL(220, 28%, 8%)
+                    'bg-tertiary': '#161c24',   // HSL(215, 22%, 11%)
+                    'bg-hover': '#1e2630',      // HSL(215, 18%, 15%)
+                    // Text: Cool starlight off-white
+                    'text-primary': '#e6ecf6',  // HSL(220, 45%, 93%)
+                    'text-secondary': '#a4b4c8', // HSL(215, 25%, 71%)
+                    'text-muted': '#8694a6',    // HSL(215, 15%, 59%) - AA contrast fix
+                    // Accents: Tetradic aurora colors
+                    'accent-primary': '#0ea5e9',   // HSL(199, 89%, 48%) - Sky blue
+                    'accent-secondary': '#38bdf8', // HSL(198, 93%, 60%)
+                    'accent-success': '#22c55e',   // HSL(142, 71%, 45%) - Aurora green
+                    'accent-warning': '#fbbf24',   // HSL(45, 96%, 56%) - Gold
+                    'accent-error': '#f472b6',     // HSL(330, 86%, 70%) - Rose/Pink
+                    'border-default': '#242e3c',   // HSL(215, 25%, 19%)
+                    'border-subtle': '#1a222c',    // HSL(215, 28%, 14%)
+                    'selection': 'rgba(14, 165, 233, 0.22)',
+                    'code-bg': '#040610',          // HSL(220, 60%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #a855f7 0%, #0ea5e9 35%, #22c55e 65%, #fbbf24 100%)'
+                },
+                light: {
+                    // Neutrals: Soft cool off-white
+                    'bg-primary': '#f6f8fc',    // HSL(220, 50%, 97%)
+                    'bg-secondary': '#ffffff',   // Pure white
+                    'bg-tertiary': '#eef2f8',   // HSL(220, 45%, 95%)
+                    'bg-hover': '#e2eaf4',      // HSL(215, 45%, 92%)
+                    // Text: Deep blue-gray
+                    'text-primary': '#121620',  // HSL(220, 28%, 10%)
+                    'text-secondary': '#384050', // HSL(220, 18%, 27%)
+                    'text-muted': '#5c6878',    // HSL(215, 14%, 42%) - AA contrast fix
+                    // Accents: Deeper tetradic for light mode
+                    'accent-primary': '#0178b5',   // HSL(200, 98%, 36%) - AA contrast
+                    'accent-secondary': '#0369a1', // HSL(201, 96%, 32%) - AA contrast fix
+                    'accent-success': '#15803d',   // HSL(142, 72%, 29%) - AA contrast fix
+                    'accent-warning': '#b45309',   // HSL(28, 92%, 37%) - AA contrast fix
+                    'accent-error': '#db2777',     // HSL(330, 81%, 51%)
+                    'border-default': '#d8e2f0',   // HSL(215, 40%, 89%)
+                    'border-subtle': '#ecf0f8',    // HSL(220, 45%, 95%)
+                    'selection': 'rgba(2, 132, 199, 0.14)',
+                    'code-bg': '#eef2f8',          // HSL(220, 45%, 95%)
+                    'logo-gradient': 'linear-gradient(135deg, #9333ea 0%, #0284c7 35%, #16a34a 65%, #d97706 100%)'
+                }
+            },
+            'midnight-coffee': {
+                name: '☕ Midnight Coffee',
+                description: 'Split-complementary warmth: espresso brown (25°), midnight blue (220°), and amber (40°). Evokes late-night café writing sessions. For academics who romanticize the thesis-writing struggle.',
+                colorTheory: 'Split-Complementary (Warm)',
+                harmony: 'Espresso 25° → Midnight 220° + Amber 40°',
+                harmonySwatch: ['#c2956a', '#3b5998', '#f59e0b', '#14120e'],
+                bestFor: 'Night writers, humanities PhD students, cozy productivity vibes',
+                tradeoffs: 'Very warm — may not suit those preferring clinical/tech aesthetics',
+                isCreative: true,
+                dark: {
+                    // Neutrals: Warm espresso browns
+                    'bg-primary': '#100e0c',    // HSL(30, 20%, 5%)
+                    'bg-secondary': '#181512',  // HSL(30, 16%, 8%)
+                    'bg-tertiary': '#221e18',   // HSL(30, 18%, 11%)
+                    'bg-hover': '#2c261e',      // HSL(30, 22%, 15%)
+                    // Text: Warm cream
+                    'text-primary': '#f2ece4',  // HSL(35, 40%, 92%)
+                    'text-secondary': '#c6bcae', // HSL(35, 20%, 73%)
+                    'text-muted': '#84796b',    // HSL(35, 14%, 47%) - AA contrast
+                    // Accents: Warm copper + lamplight
+                    'accent-primary': '#c2956a',   // HSL(30, 40%, 59%) - Copper
+                    'accent-secondary': '#d4a87a', // HSL(32, 50%, 65%)
+                    'accent-success': '#6b9a6b',   // HSL(120, 18%, 51%) - Muted sage
+                    'accent-warning': '#e8a840',   // HSL(40, 80%, 58%) - Lamplight gold
+                    'accent-error': '#c87878',     // HSL(0, 40%, 63%) - Dusty rose
+                    'border-default': '#36302a',   // HSL(28, 14%, 19%)
+                    'border-subtle': '#26221c',    // HSL(28, 18%, 13%)
+                    'selection': 'rgba(194, 149, 106, 0.22)',
+                    'code-bg': '#0a0908',          // HSL(30, 25%, 4%)
+                    'logo-gradient': 'linear-gradient(135deg, #8a6d50 0%, #c2956a 45%, #3b5998 100%)'
+                },
+                light: {
+                    // Neutrals: Warm parchment cream
+                    'bg-primary': '#faf7f4',    // HSL(30, 45%, 97%)
+                    'bg-secondary': '#fffefb',   // Warm white
+                    'bg-tertiary': '#f4f0ea',   // HSL(35, 35%, 94%)
+                    'bg-hover': '#eae4da',      // HSL(35, 35%, 90%)
+                    // Text: Deep brown
+                    'text-primary': '#28221c',  // HSL(30, 22%, 14%)
+                    'text-secondary': '#584e42', // HSL(30, 16%, 31%)
+                    'text-muted': '#7a6f60',    // HSL(30, 14%, 43%) - AA contrast
+                    // Accents: Deeper warm tones
+                    'accent-primary': '#96684a',   // HSL(24, 35%, 44%)
+                    'accent-secondary': '#b07850', // HSL(24, 40%, 50%)
+                    'accent-success': '#4a7a4a',   // HSL(120, 25%, 39%)
+                    'accent-warning': '#b87820',   // HSL(38, 72%, 42%)
+                    'accent-error': '#a85050',     // HSL(0, 38%, 49%)
+                    'border-default': '#e4dcd0',   // HSL(35, 30%, 86%)
+                    'border-subtle': '#f0ebe4',    // HSL(35, 35%, 92%)
+                    'selection': 'rgba(150, 104, 74, 0.14)',
+                    'code-bg': '#f4f0ea',          // HSL(35, 35%, 94%)
+                    'logo-gradient': 'linear-gradient(135deg, #6b5040 0%, #96684a 45%, #2d4a7a 100%)'
+                }
+            }
+        };
+
+        let currentPalette = 'indigo-focus';
+        let currentMode = 'dark';
+
+        function applyPalette(paletteName, mode) {
+            const colors = palettes[paletteName][mode];
+            const root = document.documentElement;
+
+            Object.entries(colors).forEach(([key, value]) => {
+                root.style.setProperty(`--${key}`, value);
+            });
+
+            // Apply syntax theme CSS variables for Aurora palette
+            if (paletteName === 'aurora-research') {
+                const syntaxTheme = auroraSyntaxTheme[mode];
+                root.style.setProperty('--syntax-bg', syntaxTheme.background);
+                root.style.setProperty('--syn-keyword', syntaxTheme.colors.find(c => c.name === 'keyword').hex);
+                root.style.setProperty('--syn-string', syntaxTheme.colors.find(c => c.name === 'string').hex);
+                root.style.setProperty('--syn-comment', syntaxTheme.colors.find(c => c.name === 'comment').hex);
+                root.style.setProperty('--syn-attribute', syntaxTheme.colors.find(c => c.name === 'attribute').hex);
+                root.style.setProperty('--syn-envname', syntaxTheme.colors.find(c => c.name === 'envname').hex);
+                root.style.setProperty('--syn-type', syntaxTheme.colors.find(c => c.name === 'type').hex);
+                root.style.setProperty('--syn-text', mode === 'dark' ? '#e8e8f0' : '#1a1a2e');
+            }
+        }
+
+        function calculatePaletteContrasts(paletteName, mode) {
+            const colors = palettes[paletteName][mode];
+            const bg = colors['bg-primary'];
+            
+            return {
+                textPrimary: getContrastRatio(colors['text-primary'], bg),
+                textSecondary: getContrastRatio(colors['text-secondary'], bg),
+                textMuted: getContrastRatio(colors['text-muted'], bg),
+                accentPrimary: getContrastRatio(colors['accent-primary'], bg)
+            };
+        }
+
+        function updatePaletteInfo(paletteName) {
+            const palette = palettes[paletteName];
+            const colors = palette[currentMode];
+            const contrasts = calculatePaletteContrasts(paletteName, currentMode);
+            
+            const textPrimaryLevel = getContrastLevel(contrasts.textPrimary);
+            const textSecondaryLevel = getContrastLevel(contrasts.textSecondary);
+            const textMutedLevel = getContrastLevel(contrasts.textMuted);
+            const accentPrimaryLevel = getContrastLevel(contrasts.accentPrimary);
+            
+            const creativeClass = palette.isCreative ? 'creative' : '';
+            
+            const html = `
+                <div class="research-callout ${creativeClass}">
+                    <div class="research-callout-title">${palette.isCreative ? '✨ Creative Palette' : '🔬 Color Theory Applied'}</div>
+                    <p>This palette uses a <strong>${palette.colorTheory}</strong> harmony${palette.isCreative ? ', pushing creative boundaries while maintaining WCAG compliance' : ' with the 60-30-10 rule: backgrounds dominate (60%), UI elements support (30%), accents highlight (10%)'}. Contrast ratios are calculated live below — switch modes to see both variants validated in real-time.</p>
+                </div>
+
+                <div class="color-theory-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="4"/>
+                        <line x1="12" y1="2" x2="12" y2="6"/>
+                        <line x1="12" y1="18" x2="12" y2="22"/>
+                    </svg>
+                    ${palette.harmony}
+                </div>
+                <h2 class="palette-title">${palette.name}</h2>
+                <p class="palette-description">${palette.description}</p>
+                
+                <div class="palette-meta">
+                    <span class="meta-tag ${palette.isCreative ? 'creative' : ''}">Best for: ${palette.bestFor}</span>
+                </div>
+
+                <!-- Harmony Strip -->
+                <div class="harmony-strip">
+                    ${palette.harmonySwatch ? palette.harmonySwatch.map((color, i) =>
+                        `<div class="harmony-swatch${i === palette.harmonySwatch.length - 1 ? ' neutral' : ''}" style="background: ${color};" title="${color}"></div>`
+                    ).join('') : ''}
+                    <span class="harmony-label">${palette.colorTheory}</span>
+                </div>
+
+                <div class="a11y-section">
+                    <div class="a11y-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        WCAG Contrast Ratios (Calculated Live)
+                    </div>
+                    <div class="a11y-row">
+                        <span class="a11y-label">text-primary on bg-primary</span>
+                        <span class="a11y-value">${contrasts.textPrimary}:1 <span class="contrast-badge ${textPrimaryLevel.class}">${textPrimaryLevel.level}</span></span>
+                    </div>
+                    <div class="a11y-row">
+                        <span class="a11y-label">text-secondary on bg-primary</span>
+                        <span class="a11y-value">${contrasts.textSecondary}:1 <span class="contrast-badge ${textSecondaryLevel.class}">${textSecondaryLevel.level}</span></span>
+                    </div>
+                    <div class="a11y-row">
+                        <span class="a11y-label">text-muted on bg-primary</span>
+                        <span class="a11y-value">${contrasts.textMuted}:1 <span class="contrast-badge ${textMutedLevel.class}">${textMutedLevel.level}</span></span>
+                    </div>
+                    <div class="a11y-row">
+                        <span class="a11y-label">accent-primary on bg-primary</span>
+                        <span class="a11y-value">${contrasts.accentPrimary}:1 <span class="contrast-badge ${accentPrimaryLevel.class}">${accentPrimaryLevel.level}</span></span>
+                    </div>
+                </div>
+
+                <div class="ui-demo">
+                    <div class="ui-demo-title">Interactive Elements</div>
+                    <div class="button-demo">
+                        <button class="demo-btn primary">Primary</button>
+                        <button class="demo-btn secondary">Secondary</button>
+                        <button class="demo-btn success">Success</button>
+                        <button class="demo-btn warning">Warning</button>
+                        <button class="demo-btn error">Error</button>
+                    </div>
+                    <div class="text-samples">
+                        <p class="text-sample primary">Primary text — main content, headings, body copy</p>
+                        <p class="text-sample secondary">Secondary text — labels, descriptions, metadata</p>
+                        <p class="text-sample muted">Muted text — placeholders, hints, disabled states</p>
+                        <p class="text-sample accent">Accent text — links, emphasis, interactive elements</p>
+                    </div>
+                    <div class="input-demo">
+                        <input type="text" class="demo-input" placeholder="Default input field">
+                        <input type="text" class="demo-input success" value="Validated successfully">
+                        <input type="text" class="demo-input error" value="Error in this field">
+                    </div>
+                    <div class="status-row">
+                        <div class="status-indicator"><span class="status-dot success"></span>Online</div>
+                        <div class="status-indicator"><span class="status-dot warning"></span>Syncing</div>
+                        <div class="status-indicator"><span class="status-dot error"></span>Error</div>
+                    </div>
+
+                    <!-- Alert Stack -->
+                    <div class="alert-stack">
+                        <div class="alert-item success">
+                            <div class="alert-icon success">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Reference saved</div>
+                                <div class="alert-message">Added to your library</div>
+                            </div>
+                        </div>
+                        <div class="alert-item warning">
+                            <div class="alert-icon warning">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 9v4M12 17h.01"></path>
+                                </svg>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Duplicate detected</div>
+                                <div class="alert-message">Review suggested matches</div>
+                            </div>
+                        </div>
+                        <div class="alert-item error">
+                            <div class="alert-icon error">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Import failed</div>
+                                <div class="alert-message">Invalid file format</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 60-30-10 Usage Bar -->
+                <div class="usage-rule-section">
+                    <div class="section-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        60-30-10 Distribution
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-segment primary" style="background: ${colors['bg-primary']}; color: ${colors['text-muted']};">60%</div>
+                        <div class="usage-segment secondary" style="background: ${colors['bg-secondary']}; color: ${colors['text-muted']};">30%</div>
+                        <div class="usage-segment accent" style="background: ${colors['accent-primary']}; color: white;">10%</div>
+                    </div>
+                    <p class="usage-caption">Backgrounds dominate, structure supports, accents highlight</p>
+                </div>
+
+                <!-- Dual Mode Preview -->
+                <div class="dual-mode-section">
+                    <div class="section-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                        </svg>
+                        Dual Mode Preview
+                    </div>
+                    <div class="dual-mode-grid">
+                        <div class="mode-preview-card" style="background: ${palette.dark['bg-primary']}; border-color: ${palette.dark['border-default']};">
+                            <div class="mode-preview-header" style="background: ${palette.dark['bg-secondary']}; color: ${palette.dark['text-secondary']};">
+                                <span>Preview</span>
+                                <span class="mode-label" style="background: ${palette.dark['bg-tertiary']}; color: ${palette.dark['text-muted']};">Dark</span>
+                            </div>
+                            <div class="mode-preview-content">
+                                <span class="mode-preview-button" style="background: ${palette.dark['accent-primary']}; color: white;">Button</span>
+                                <p class="mode-preview-text" style="color: ${palette.dark['text-primary']};">Primary text</p>
+                                <p class="mode-preview-text" style="color: ${palette.dark['text-secondary']};">Secondary text</p>
+                            </div>
+                        </div>
+                        <div class="mode-preview-card" style="background: ${palette.light['bg-primary']}; border-color: ${palette.light['border-default']};">
+                            <div class="mode-preview-header" style="background: ${palette.light['bg-secondary']}; color: ${palette.light['text-secondary']};">
+                                <span>Preview</span>
+                                <span class="mode-label" style="background: ${palette.light['bg-tertiary']}; color: ${palette.light['text-muted']};">Light</span>
+                            </div>
+                            <div class="mode-preview-content">
+                                <span class="mode-preview-button" style="background: ${palette.light['accent-primary']}; color: white;">Button</span>
+                                <p class="mode-preview-text" style="color: ${palette.light['text-primary']};">Primary text</p>
+                                <p class="mode-preview-text" style="color: ${palette.light['text-secondary']};">Secondary text</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <div class="color-category-title">
+                        <span style="color: var(--accent-primary);">■</span> Backgrounds (60%)
+                    </div>
+                    <div class="color-grid">
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['bg-primary']}"></div>
+                            <div class="color-name">bg-primary</div>
+                            <div class="color-hex">${colors['bg-primary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['bg-secondary']}"></div>
+                            <div class="color-name">bg-secondary</div>
+                            <div class="color-hex">${colors['bg-secondary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['bg-tertiary']}"></div>
+                            <div class="color-name">bg-tertiary</div>
+                            <div class="color-hex">${colors['bg-tertiary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['bg-hover']}"></div>
+                            <div class="color-name">bg-hover</div>
+                            <div class="color-hex">${colors['bg-hover']}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <div class="color-category-title">
+                        <span style="color: var(--text-primary);">■</span> Text (30%)
+                    </div>
+                    <div class="color-grid">
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['text-primary']}"></div>
+                            <div class="color-name">text-primary</div>
+                            <div class="color-hex">${colors['text-primary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['text-secondary']}"></div>
+                            <div class="color-name">text-secondary</div>
+                            <div class="color-hex">${colors['text-secondary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['text-muted']}"></div>
+                            <div class="color-name">text-muted</div>
+                            <div class="color-hex">${colors['text-muted']}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <div class="color-category-title">
+                        <span style="color: var(--accent-primary);">■</span> Accents (10%)
+                    </div>
+                    <div class="color-grid">
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['accent-primary']}"></div>
+                            <div class="color-name">accent-primary</div>
+                            <div class="color-hex">${colors['accent-primary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['accent-secondary']}"></div>
+                            <div class="color-name">accent-secondary</div>
+                            <div class="color-hex">${colors['accent-secondary']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['accent-success']}"></div>
+                            <div class="color-name">accent-success</div>
+                            <div class="color-hex">${colors['accent-success']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['accent-warning']}"></div>
+                            <div class="color-name">accent-warning</div>
+                            <div class="color-hex">${colors['accent-warning']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['accent-error']}"></div>
+                            <div class="color-name">accent-error</div>
+                            <div class="color-hex">${colors['accent-error']}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <div class="color-category-title">Borders & Special</div>
+                    <div class="color-grid">
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['border-default']}"></div>
+                            <div class="color-name">border-default</div>
+                            <div class="color-hex">${colors['border-default']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['border-subtle']}"></div>
+                            <div class="color-name">border-subtle</div>
+                            <div class="color-hex">${colors['border-subtle']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['code-bg']}"></div>
+                            <div class="color-name">code-bg</div>
+                            <div class="color-hex">${colors['code-bg']}</div>
+                        </div>
+                        <div class="color-swatch">
+                            <div class="color-preview" style="background: ${colors['selection']}"></div>
+                            <div class="color-name">selection</div>
+                            <div class="color-hex">${colors['selection'].substring(0, 20)}...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-demo">
+                    <div class="ui-demo-title">Tradeoffs & Considerations</div>
+                    <p class="text-sample secondary">${palette.tradeoffs}</p>
+                </div>
+
+                ${currentPalette === 'aurora-research' ? generateCodeThemeSection() : ''}
+            `;
+
+            document.getElementById('palette-details').innerHTML = html;
+
+            // Setup collapsible sections if Code Theme was rendered
+            if (currentPalette === 'aurora-research') {
+                setupCollapsibleSections();
+            }
+        }
+
+        // Generate Code Theme section (Aurora only)
+        function generateCodeThemeSection() {
+            const palette = syntaxPalettes[currentSyntaxTheme];
+            const theme = currentMode === 'dark' ? palette.dark : palette.light;
+            const validation = validateSyntaxPalette(theme.colors, theme.background);
+
+            // Build syntax theme selector tabs
+            const themeTabsHtml = Object.keys(syntaxPalettes).map(key => {
+                const p = syntaxPalettes[key];
+                const isActive = key === currentSyntaxTheme ? ' active' : '';
+                return '<button class="syntax-theme-tab' + isActive + '" data-syntax-theme="' + key + '">' + p.name + '</button>';
+            }).join('');
+
+            // Build token swatches HTML
+            const tokenSwatchesHtml = theme.colors.map(c =>
+                '<div class="token-swatch">' +
+                    '<div class="token-color" style="background: ' + c.hex + ';"></div>' +
+                    '<div class="token-info">' +
+                        '<div class="token-name">' + c.name + '</div>' +
+                        '<div class="token-hex">' + c.hex + '</div>' +
+                    '</div>' +
+                '</div>'
+            ).join('');
+
+            // Build contrast validation rows
+            const contrastRowsHtml = validation.contrast.map(c =>
+                '<div class="validation-row">' +
+                    '<span class="label">' +
+                        '<span class="mini-swatch" style="background: ' + c.hex + ';"></span>' +
+                        c.token +
+                    '</span>' +
+                    '<span class="value">' +
+                        c.ratio + ':1 (' + c.level + ')' +
+                        '<span class="check ' + (c.pass ? 'pass' : 'fail') + '">' + (c.pass ? '✓' : '✗') + '</span>' +
+                    '</span>' +
+                '</div>'
+            ).join('');
+
+            // Build distinguishability validation rows
+            const deltaRowsHtml = validation.distinguishability.map(d =>
+                '<div class="validation-row">' +
+                    '<span class="label">' +
+                        '<span class="swatch-pair">' +
+                            '<span class="mini-swatch" style="background: ' + d.hex1 + ';"></span>' +
+                            '<span class="mini-swatch" style="background: ' + d.hex2 + ';"></span>' +
+                        '</span>' +
+                        d.pair +
+                    '</span>' +
+                    '<span class="value">' +
+                        'ΔE ' + d.deltaE +
+                        '<span class="check ' + (d.pass ? 'pass' : 'fail') + '">' + (d.pass ? '✓' : '✗') + '</span>' +
+                    '</span>' +
+                '</div>'
+            ).join('');
+
+            const contrastPassCount = validation.contrast.filter(c => c.pass).length;
+            const deltaPassCount = validation.distinguishability.filter(d => d.pass).length;
+
+            // Get colors for inline styles
+            const keywordColor = theme.colors.find(c => c.name === 'keyword').hex;
+            const stringColor = theme.colors.find(c => c.name === 'string').hex;
+            const commentColor = theme.colors.find(c => c.name === 'comment').hex;
+            const attributeColor = theme.colors.find(c => c.name === 'attribute').hex;
+            const envnameColor = theme.colors.find(c => c.name === 'envname').hex;
+            const textColor = currentMode === 'dark' ? '#e8e8f0' : '#1a1a2e';
+
+            return '<div class="code-theme-section">' +
+                '<div class="code-theme-header">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<polyline points="16 18 22 12 16 6"></polyline>' +
+                        '<polyline points="8 6 2 12 8 18"></polyline>' +
+                    '</svg>' +
+                    'LaTeX Syntax Theme' +
+                '</div>' +
+
+                '<!-- Syntax Theme Selector -->' +
+                '<div class="syntax-theme-selector">' + themeTabsHtml + '</div>' +
+
+                '<!-- Theme Info -->' +
+                '<div class="syntax-theme-info">' +
+                    '<div class="theme-name">' + palette.name + '</div>' +
+                    '<div class="theme-theory">' + palette.theory + '</div>' +
+                    '<div class="theme-desc">' + palette.description + ' — Inspired by ' + palette.inspiration + '</div>' +
+                '</div>' +
+
+                '<!-- LaTeX Code Preview -->' +
+                '<div class="syntax-preview" style="background: ' + theme.background + ';">' +
+                    '<pre>' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\documentclass</span>{<span style="color:' + attributeColor + '">article</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + commentColor + ';font-style:italic">% Research paper on machine learning</span></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\usepackage</span>{<span style="color:' + attributeColor + '">amsmath</span>}</span>\n' +
+'<span class="syntax-line"></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\begin</span>{<span style="color:' + envnameColor + '">document</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\title</span>{<span style="color:' + attributeColor + '">Neural Network Optimization</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\author</span>{<span style="color:' + attributeColor + '">Jane Smith</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\maketitle</span></span>\n' +
+'<span class="syntax-line"></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\section</span>{<span style="color:' + attributeColor + '">Introduction</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + textColor + '">The loss function is defined as:</span></span>\n' +
+'<span class="syntax-line"><span style="color:' + stringColor + '">$L(\\theta) = \\frac{1}{n}\\sum_{i=1}^{n}(y_i - f(x_i))^2$</span></span>\n' +
+'<span class="syntax-line"></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\begin</span>{<span style="color:' + envnameColor + '">equation</span>}</span>\n' +
+'<span class="syntax-line"><span style="color:' + stringColor + '">    \\nabla L = -2X^T(y - X\\beta)</span></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\end</span>{<span style="color:' + envnameColor + '">equation</span>}</span>\n' +
+'<span class="syntax-line"></span>\n' +
+'<span class="syntax-line"><span style="color:' + keywordColor + '">\\end</span>{<span style="color:' + envnameColor + '">document</span>}</span>' +
+                    '</pre>' +
+                '</div>' +
+
+                '<!-- Token Swatches -->' +
+                '<div class="token-swatches">' + tokenSwatchesHtml + '</div>' +
+
+                '<!-- Validation Results -->' +
+                '<div class="validation-section">' +
+                    '<div class="validation-title">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M9 12l2 2 4-4"/>' +
+                            '<circle cx="12" cy="12" r="10"/>' +
+                        '</svg>' +
+                        'Palette Validation' +
+                        '<span class="validation-status ' + (validation.allPass ? 'pass' : 'fail') + '">' +
+                            (validation.allPass ? '✓ All Checks Pass' : '✗ Issues Found') +
+                        '</span>' +
+                    '</div>' +
+
+                    '<!-- Contrast Checks -->' +
+                    '<div class="collapsible-section">' +
+                        '<div class="collapsible-header" data-section="contrast">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                                '<polyline points="9 18 15 12 9 6"></polyline>' +
+                            '</svg>' +
+                            'WCAG Contrast (vs background) — ' + contrastPassCount + '/' + validation.contrast.length + ' pass' +
+                        '</div>' +
+                        '<div class="collapsible-content" data-section="contrast">' +
+                            '<div class="validation-grid">' + contrastRowsHtml + '</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<!-- Distinguishability Checks -->' +
+                    '<div class="collapsible-section">' +
+                        '<div class="collapsible-header" data-section="delta">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                                '<polyline points="9 18 15 12 9 6"></polyline>' +
+                            '</svg>' +
+                            'Color Distinguishability (ΔE > 10) — ' + deltaPassCount + '/' + validation.distinguishability.length + ' pass' +
+                        '</div>' +
+                        '<div class="collapsible-content" data-section="delta">' +
+                            '<div class="validation-grid">' + deltaRowsHtml + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        // Setup collapsible sections and syntax theme tabs
+        function setupCollapsibleSections() {
+            // Collapsible sections
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    const content = document.querySelector('.collapsible-content[data-section="' + section + '"]');
+                    this.classList.toggle('expanded');
+                    content.classList.toggle('show');
+                });
+            });
+
+            // Syntax theme tabs
+            document.querySelectorAll('.syntax-theme-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    currentSyntaxTheme = this.dataset.syntaxTheme;
+                    updatePaletteInfo(currentPalette);
+                });
+            });
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.palette-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.palette-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentPalette = tab.dataset.palette;
+                applyPalette(currentPalette, currentMode);
+                updatePaletteInfo(currentPalette);
+            });
+        });
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                applyPalette(currentPalette, currentMode);
+                updatePaletteInfo(currentPalette);
+            });
+        });
+
+        // Initialize
+        applyPalette(currentPalette, currentMode);
+        updatePaletteInfo(currentPalette);
+    </script>
+</body>
+</html>

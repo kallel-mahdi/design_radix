@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable Home Page - Design Options</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       AURORA RESEARCH PALETTE
+       From design.md & bibliography-layouts-corrected.html
+       ============================================ */
+    :root {
+      font-size: 16px;
+
+      /* Spacing (8pt grid) */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+
+      /* Dark Mode Colors (Default) */
+      --bg-primary: #080a10;
+      --bg-secondary: #0e1218;
+      --bg-tertiary: #161c24;
+      --bg-hover: #1e2630;
+
+      --text-primary: #e6ecf6;
+      --text-secondary: #a4b4c8;
+      --text-muted: #6d7a8c;
+
+      --accent-primary: #0ea5e9;
+      --accent-secondary: #38bdf8;
+      --accent-success: #22c55e;
+      --accent-warning: #fbbf24;
+      --accent-error: #f472b6;
+
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+
+      --selection: rgba(14, 165, 233, 0.22);
+      --shadow-soft: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Light Mode Colors */
+    [data-theme="light"] {
+      --bg-primary: #f6f8fc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #dce5f0;
+      --bg-hover: #d0dcea;
+
+      --text-primary: #121620;
+      --text-secondary: #384050;
+      --text-muted: #677383;
+
+      --accent-primary: #0178b5;
+      --accent-secondary: #0ea5e9;
+      --accent-success: #16a34a;
+      --accent-warning: #d97706;
+      --accent-error: #db2777;
+
+      --border-default: #d8e2f0;
+      --border-subtle: #ecf0f8;
+
+      --selection: rgba(2, 132, 199, 0.14);
+      --shadow-soft: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* ============================================
+       CONTROL PANEL
+       ============================================ */
+    .control-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-6);
+      z-index: 1000;
+      padding: 0 var(--space-6);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .control-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .toggle-group {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-radius: 0.5rem;
+      padding: 0.1875rem;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .toggle-btn.active {
+      background: var(--bg-secondary);
+      color: var(--accent-primary);
+      box-shadow: 0 1px 3px var(--shadow-soft);
+    }
+
+    /* ============================================
+       MOCKUP CONTAINER
+       ============================================ */
+    .page-container {
+      margin-top: 3.5rem;
+      min-height: calc(100vh - 3.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8);
+    }
+
+    .mockup-wrapper {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .mockup-frame {
+      background: var(--bg-primary);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-default);
+      overflow: hidden;
+      box-shadow: 0 8px 32px var(--shadow-soft);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Hide inactive states */
+    .mockup-frame .filled-state,
+    .mockup-frame .empty-state { display: none; }
+
+    .mockup-frame[data-state="empty"] .empty-state { display: block; }
+    .mockup-frame[data-state="filled"] .filled-state { display: block; }
+
+
+    /* ============================================
+       SHARED HEADER
+       ============================================ */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4) var(--space-6);
+      background: var(--bg-primary);
+      transition: background 0.3s ease;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .logo-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg {
+      width: 1rem;
+      height: 1rem;
+      color: white;
+    }
+
+    .user-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* ============================================
+       SHARED COMPONENTS
+       ============================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-3);
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-radius: 2rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--accent-primary);
+      margin-bottom: var(--space-4);
+    }
+
+    [data-theme="light"] .badge {
+      background: rgba(1, 120, 181, 0.08);
+      border-color: rgba(1, 120, 181, 0.15);
+    }
+
+    .badge svg {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+      letter-spacing: -0.01em;
+    }
+
+    .hero-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      max-width: 32rem;
+      margin: 0 auto var(--space-4);
+    }
+
+    .hero-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-subtle);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+      padding: var(--space-4) var(--space-6) var(--space-6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .card-header > div:last-child {
+      padding-top: 0.125rem; /* Align text baseline with icon center */
+    }
+
+    .card-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-icon.bibliography {
+      color: var(--accent-primary);
+    }
+
+    .card-icon.manuscripts {
+      color: var(--accent-success);
+    }
+
+    .card-icon svg {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .card-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+      margin: var(--space-3) 0;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-3);
+    }
+
+    .section-label::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+    }
+
+    .manuscripts .section-label::before {
+      background: var(--accent-success);
+    }
+
+    /* List Items */
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .list-item:hover {
+      opacity: 0.8;
+    }
+
+    .list-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .list-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .list-title {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .list-meta {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .list-time {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Empty State */
+    .empty-zone {
+      padding: var(--space-6) var(--space-4);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 180px;
+      justify-content: center;
+    }
+
+    .empty-icon {
+      width: 3rem;
+      height: 3rem;
+      margin-bottom: var(--space-3);
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .empty-desc {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--accent-primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .btn-primary.green {
+      background: var(--accent-success);
+    }
+
+    .btn-primary.green:hover {
+      background: #16a34a;
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-5);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border: 1px solid var(--border-default);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .btn-outline {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    [data-theme="light"] .btn-outline:hover {
+      background: rgba(1, 120, 181, 0.06);
+    }
+
+    .text-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      transition: all 0.15s ease;
+    }
+
+    .text-link:hover {
+      background: rgba(14, 165, 233, 0.18);
+      border-color: rgba(14, 165, 233, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .text-link.green {
+      color: var(--accent-success);
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+
+    .text-link.green:hover {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    [data-theme="light"] .text-link {
+      background: rgba(1, 120, 181, 0.08);
+      border-color: rgba(1, 120, 181, 0.2);
+    }
+
+    [data-theme="light"] .text-link:hover {
+      background: rgba(1, 120, 181, 0.14);
+      border-color: rgba(1, 120, 181, 0.35);
+    }
+
+    [data-theme="light"] .text-link.green {
+      background: rgba(22, 163, 74, 0.08);
+      border-color: rgba(22, 163, 74, 0.2);
+    }
+
+    [data-theme="light"] .text-link.green:hover {
+      background: rgba(22, 163, 74, 0.14);
+      border-color: rgba(22, 163, 74, 0.35);
+    }
+
+    .text-link svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* ============================================
+       HERO SECTION (No Box - Gradient Line Separator)
+       ============================================ */
+    .hero-section {
+      padding: var(--space-6) var(--space-6) var(--space-5);
+      text-align: center;
+      position: relative;
+    }
+
+    /* Gradient line separator below hero */
+    .hero-divider {
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--border-default) 15%,
+        var(--accent-primary) 50%,
+        var(--border-default) 85%,
+        transparent 100%);
+      margin: 0 var(--space-6) var(--space-4);
+      opacity: 0.6;
+    }
+
+    /* ============================================
+       PRODUCT CARDS
+       ============================================ */
+    .product-card {
+      background: var(--bg-secondary);
+      border-radius: 0.75rem;
+      padding: var(--space-5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
+                  0 0 0 1px rgba(255, 255, 255, 0.03);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+      border: 2px solid transparent;
+    }
+
+    [data-theme="light"] .product-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06),
+                  0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    .product-card.bibliography {
+      border-left-color: var(--accent-primary);
+    }
+
+    .product-card.manuscripts {
+      border-left-color: var(--accent-success);
+    }
+
+    /* Animated border using pseudo-elements */
+    .product-card::before,
+    .product-card::after {
+      content: '';
+      position: absolute;
+      border-radius: 0.75rem;
+      pointer-events: none;
+    }
+
+    /* Top border - travels from left to right */
+    .product-card::before {
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      height: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.8s ease;
+    }
+
+    /* Bottom + right borders */
+    .product-card::after {
+      bottom: -2px;
+      left: -2px;
+      right: -2px;
+      top: -2px;
+      border: 2px solid transparent;
+      border-left: none;
+      border-radius: 0.75rem;
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 0.8s ease;
+    }
+
+    .product-card.bibliography::before {
+      background: var(--accent-primary);
+    }
+
+    .product-card.bibliography::after {
+      border-color: var(--accent-primary);
+    }
+
+    .product-card.manuscripts::before {
+      background: var(--accent-success);
+    }
+
+    .product-card.manuscripts::after {
+      border-color: var(--accent-success);
+    }
+
+    /* Hover: animate borders */
+    .product-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .product-card:hover::after {
+      clip-path: inset(0 0 0 0);
+    }
+
+    /* Hover shadow effects */
+    .product-card.bibliography:hover {
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.15),
+                  0 0 0 1px rgba(14, 165, 233, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .product-card.manuscripts:hover {
+      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15),
+                  0 0 0 1px rgba(34, 197, 94, 0.1);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .product-card.bibliography:hover {
+      box-shadow: 0 4px 16px rgba(1, 120, 181, 0.12),
+                  0 0 0 1px rgba(1, 120, 181, 0.08);
+    }
+
+    [data-theme="light"] .product-card.manuscripts:hover {
+      box-shadow: 0 4px 16px rgba(22, 163, 74, 0.12),
+                  0 0 0 1px rgba(22, 163, 74, 0.08);
+    }
+
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filled-state,
+    .empty-state {
+      flex: 1;
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mockup-frame {
+      animation: fadeIn 0.4s ease;
+    }
+
+    .list-item {
+      animation: fadeIn 0.3s ease backwards;
+    }
+
+    .list-item:nth-child(1) { animation-delay: 0.1s; }
+    .list-item:nth-child(2) { animation-delay: 0.15s; }
+    .list-item:nth-child(3) { animation-delay: 0.2s; }
+
+    /* ============================================
+       SCROLLBAR
+       ============================================ */
+    ::-webkit-scrollbar {
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 0.25rem;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-group">
+      <span class="control-label">Theme</span>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setTheme('dark')">Dark</button>
+        <button class="toggle-btn" onclick="setTheme('light')">Light</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <span class="control-label">State</span>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setStateView('empty')">Empty</button>
+        <button class="toggle-btn" onclick="setStateView('filled')">Filled</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-container">
+    <div class="mockup-wrapper">
+
+      <div class="mockup-frame" data-state="empty">
+          <!-- Header -->
+          <div class="app-header">
+            <div class="logo">
+              <div class="logo-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              CITABLE
+            </div>
+            <div class="user-avatar">M</div>
+          </div>
+
+          <!-- Hero Section -->
+          <div class="hero-section">
+            <h1 class="hero-title">Your Research Hub</h1>
+            <p class="hero-subtitle">Organize references. Write papers. Cite seamlessly.</p>
+          </div>
+
+          <div class="hero-divider"></div>
+
+          <!-- Cards -->
+          <div class="cards-container">
+            <!-- Bibliography Card -->
+            <div class="product-card bibliography">
+              <div class="card-header">
+                <div class="card-icon bibliography">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="card-title">Library</div>
+                  <div class="card-desc">Manage your references</div>
+                </div>
+              </div>
+              <div class="section-divider"></div>
+              <div class="card-content">
+                <div class="empty-state">
+                  <div class="empty-zone">
+                    <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15" />
+                    </svg>
+                    <div class="empty-title">No papers yet</div>
+                    <button class="btn-primary">Import PDF or DOI</button>
+                  </div>
+                </div>
+                <div class="filled-state">
+                  <div class="section-label">Recently Read</div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <div class="list-content"><div class="list-title">Attention is all you need</div><div class="list-meta">Vaswani et al.</div></div>
+                    <div class="list-time">2d ago</div>
+                  </div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <div class="list-content"><div class="list-title">Deep Residual Learning</div><div class="list-meta">He et al.</div></div>
+                    <div class="list-time">3d ago</div>
+                  </div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <div class="list-content"><div class="list-title">BERT: Pre-training</div><div class="list-meta">Devlin et al.</div></div>
+                    <div class="list-time">5d ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Manuscripts Card -->
+            <div class="product-card manuscripts">
+              <div class="card-header">
+                <div class="card-icon manuscripts">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="card-title">Projects</div>
+                  <div class="card-desc">Draft your papers</div>
+                </div>
+              </div>
+              <div class="section-divider"></div>
+              <div class="card-content">
+                <div class="empty-state">
+                  <div class="empty-zone">
+                    <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="empty-title">No projects yet</div>
+                    <button class="btn-primary green">Create Project</button>
+                  </div>
+                </div>
+                <div class="filled-state">
+                  <div class="section-label">Recently Modified</div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    <div class="list-content"><div class="list-title">Climate change impact study</div><div class="list-meta">Cheung et al.</div></div>
+                    <div class="list-time">1d ago</div>
+                  </div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    <div class="list-content"><div class="list-title">ML Survey 2024</div><div class="list-meta">Zhang et al.</div></div>
+                    <div class="list-time">2d ago</div>
+                  </div>
+                  <div class="list-item">
+                    <svg class="list-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    <div class="list-content"><div class="list-title">Methods Paper Draft</div><div class="list-meta">Smith et al.</div></div>
+                    <div class="list-time">4d ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+  </div>
+
+  <script>
+    let currentTheme = 'dark';
+    let currentState = 'empty';
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.body.setAttribute('data-theme', theme);
+
+      // Update buttons
+      const themeButtons = document.querySelectorAll('.control-group:first-child .toggle-btn');
+      themeButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === theme);
+      });
+    }
+
+    function setStateView(state) {
+      currentState = state;
+
+      // Update buttons
+      const stateButtons = document.querySelectorAll('.control-group:nth-child(2) .toggle-btn');
+      stateButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === state);
+      });
+
+      // Update mockup frame
+      document.querySelector('.mockup-frame').setAttribute('data-state', currentState);
+    }
+  </script>
+</body>
+</html>

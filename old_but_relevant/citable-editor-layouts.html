@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable Editor - Visual Styling Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       AURORA RESEARCH PALETTE - DARK MODE
+       Tetradic: Cyan + Violet + Emerald + Gold
+       60-30-10 Rule Applied
+       ============================================ */
+    :root {
+      /* Backgrounds (60% - Neutrals) */
+      --bg-primary: #080a10;
+      --bg-secondary: #0e1218;
+      --bg-tertiary: #161c24;
+      --bg-hover: #1e2630;
+
+      /* Text */
+      --text-primary: #e6ecf6;
+      --text-secondary: #a4b4c8;
+      --text-muted: #6d7a8c;
+
+      /* Accents - Tetradic (40% total, distributed) */
+      --accent-primary: #0ea5e9;      /* Cyan - 25% - Interactive */
+      --accent-secondary: #38bdf8;
+      --accent-success: #22c55e;      /* Emerald - 8% - Success states */
+      --accent-warning: #fbbf24;      /* Gold - 5% - Warnings */
+      --accent-error: #f472b6;
+      --accent-violet: #a855f7;       /* Violet - 2% - Logo only */
+
+      /* Borders */
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+
+      /* Special */
+      --selection: rgba(14, 165, 233, 0.22);
+      --code-bg: #040610;
+      --shadow-soft: rgba(0, 0, 0, 0.4);
+      --logo-gradient: linear-gradient(135deg, #a855f7 0%, #0ea5e9 35%, #22c55e 65%, #fbbf24 100%);
+
+      /* Syntax highlighting - Violet for keywords (Cyan reserved for UI) */
+      --syntax-keyword: #a855f7;
+      --syntax-string: #22c55e;
+      --syntax-comment: #6d7a8c;
+      --syntax-function: #38bdf8;
+      --syntax-number: #fbbf24;
+    }
+
+    /* Light mode overrides */
+    [data-theme="light"] {
+      --bg-primary: #f6f8fc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #dce5f0;
+      --bg-hover: #d0dcea;
+
+      --text-primary: #121620;
+      --text-secondary: #384050;
+      --text-muted: #677383;
+
+      --accent-primary: #0178b5;
+      --accent-secondary: #0ea5e9;
+      --accent-success: #16a34a;
+      --accent-warning: #d97706;
+      --accent-error: #db2777;
+      --accent-violet: #9333ea;
+
+      --border-default: #d8e2f0;
+      --border-subtle: #ecf0f8;
+
+      --selection: rgba(2, 132, 199, 0.14);
+      --code-bg: #eef2f8;
+      --shadow-soft: rgba(0, 0, 0, 0.08);
+      --logo-gradient: linear-gradient(135deg, #9333ea 0%, #0284c7 35%, #16a34a 65%, #d97706 100%);
+
+      /* Syntax highlighting - Violet for keywords (Cyan reserved for UI) */
+      --syntax-keyword: #9333ea;
+      --syntax-string: #16a34a;
+      --syntax-comment: #677383;
+      --syntax-function: #0178b5;
+      --syntax-number: #d97706;
+    }
+
+    /* ============================================
+       BASE STYLES
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ============================================
+       HEADER / CONTROLS
+       ============================================ */
+    .showcase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .showcase-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .showcase-title h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .showcase-title .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--selection);
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toggle-group {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    .toggle-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .toggle-btn.active {
+      background: var(--bg-secondary);
+      color: var(--accent-primary);
+      box-shadow: 0 1px 3px var(--shadow-soft);
+    }
+
+    /* ============================================
+       EDITOR CONTAINER (Main layout)
+       ============================================ */
+    .editor-container {
+      display: flex;
+      height: calc(100vh - 49px);
+      overflow: hidden;
+    }
+
+    /* ============================================
+       ACTIVITY BAR (Left icons)
+       ============================================ */
+    .activity-bar {
+      width: 3.5rem;  /* 56px */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 4px;
+      flex-shrink: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .activity-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .activity-icon:hover {
+      color: var(--text-secondary);
+    }
+
+    .activity-icon.active {
+      color: var(--accent-primary);
+    }
+
+    .activity-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .activity-spacer {
+      flex: 1;
+    }
+
+    /* ============================================
+       SIDEBAR (File browser + outline)
+       ============================================ */
+    .sidebar {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .sidebar-action {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-action:hover {
+      color: var(--text-secondary);
+      background: var(--bg-hover);
+    }
+
+    .sidebar-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .file-tree {
+      padding: 0 8px 12px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .file-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .file-item.active {
+      background: var(--selection);
+      color: var(--accent-primary);
+    }
+
+    .file-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .outline-section {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .outline-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px 6px 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .outline-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* ============================================
+       EDITOR AREA
+       ============================================ */
+    .editor-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background-color 0.3s ease;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      gap: 16px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .toolbar-btn:hover {
+      color: var(--text-secondary);
+      background: var(--bg-hover);
+    }
+
+    .toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-subtle);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-dot.saved {
+      background: var(--accent-success);
+    }
+
+    .status-dot.unsaved {
+      background: var(--accent-warning);
+    }
+
+    .editor-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .line-numbers {
+      padding: 16px 12px;
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .code-area {
+      flex: 1;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+
+    .code-line {
+      white-space: pre;
+    }
+
+    /* Syntax highlighting */
+    .keyword { color: var(--syntax-keyword); }
+    .string { color: var(--syntax-string); }
+    .comment { color: var(--syntax-comment); font-style: italic; }
+    .function { color: var(--syntax-function); }
+    .number { color: var(--syntax-number); }
+    .bracket { color: var(--text-secondary); }
+
+    /* ============================================
+       STYLE A: BORDERLESS
+       Pure background shifts, no borders
+       ============================================ */
+    [data-style="borderless"] .activity-bar {
+      background: var(--bg-tertiary);
+      border: none;
+    }
+
+    [data-style="borderless"] .activity-icon {
+      border-radius: 8px;
+    }
+
+    [data-style="borderless"] .activity-icon:hover {
+      background: var(--bg-hover);
+    }
+
+    [data-style="borderless"] .activity-icon.active {
+      background: var(--selection);
+    }
+
+    [data-style="borderless"] .sidebar {
+      background: var(--bg-secondary);
+      border: none;
+    }
+
+    [data-style="borderless"] .sidebar-section {
+      border: none;
+    }
+
+    [data-style="borderless"] .editor-main {
+      background: var(--bg-primary);
+    }
+
+    [data-style="borderless"] .editor-toolbar {
+      background: var(--bg-primary);
+      border: none;
+    }
+
+    [data-style="borderless"] .outline-item::before {
+      display: none;
+    }
+
+    /* ============================================
+       STYLE B: SOFT DEPTH
+       Subtle shadows + minimal 1px dividers
+       ============================================ */
+    [data-style="soft-depth"] .activity-bar {
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    [data-style="soft-depth"] .activity-icon {
+      border-radius: 8px;
+    }
+
+    [data-style="soft-depth"] .activity-icon:hover {
+      background: var(--bg-hover);
+    }
+
+    [data-style="soft-depth"] .activity-icon.active {
+      background: var(--selection);
+    }
+
+    [data-style="soft-depth"] .sidebar {
+      background: var(--bg-secondary);
+      box-shadow: inset -8px 0 12px -8px var(--shadow-soft);
+    }
+
+    [data-style="soft-depth"] .sidebar-section + .sidebar-section {
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    [data-style="soft-depth"] .editor-main {
+      background: var(--bg-primary);
+    }
+
+    [data-style="soft-depth"] .editor-toolbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    [data-style="soft-depth"] .outline-item::before {
+      display: none;
+    }
+
+    /* ============================================
+       STYLE C: REFINED
+       Toned down original - minimal lines
+       ============================================ */
+    [data-style="refined"] .activity-bar {
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+    }
+
+    [data-style="refined"] .activity-icon {
+      border-radius: 8px;
+    }
+
+    [data-style="refined"] .activity-icon:hover {
+      background: var(--bg-hover);
+    }
+
+    [data-style="refined"] .activity-icon.active {
+      background: var(--selection);
+    }
+
+    [data-style="refined"] .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-default);
+    }
+
+    [data-style="refined"] .sidebar-section + .sidebar-section {
+      border-top: 1px solid var(--border-default);
+    }
+
+    [data-style="refined"] .editor-main {
+      background: var(--bg-primary);
+    }
+
+    [data-style="refined"] .editor-toolbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    [data-style="refined"] .outline-item::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--bg-hover);
+      border-radius: 1px;
+    }
+
+    /* ============================================
+       LOGO (Uses violet from tetradic)
+       ============================================ */
+    .logo {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+    }
+
+    .logo svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .logo path {
+      stroke: url(#logoGradient);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Info panel */
+    .info-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      max-width: 320px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px var(--shadow-soft);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .info-panel h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .info-panel p {
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .info-panel .color-sample {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .color-dot {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .color-dot span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .color-dot .cyan { background: var(--accent-primary); }
+    .color-dot .emerald { background: var(--accent-success); }
+    .color-dot .gold { background: var(--accent-warning); }
+    .color-dot .violet { background: var(--accent-violet); }
+
+    .close-info {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .close-info:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body data-theme="dark" data-style="borderless">
+  <!-- SVG Definitions for logo gradient -->
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#a855f7"/>
+        <stop offset="35%" stop-color="#0ea5e9"/>
+        <stop offset="65%" stop-color="#22c55e"/>
+        <stop offset="100%" stop-color="#fbbf24"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- Header with controls -->
+  <header class="showcase-header">
+    <div class="showcase-title">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 6L12 2L20 6V18L12 22L4 18V6Z" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M4 6L12 10L20 6" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 10V22" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Citable Editor</h1>
+      <span class="badge">Visual Styling Showcase</span>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Theme</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-theme-btn="dark" onclick="setTheme('dark')">Dark</button>
+          <button class="toggle-btn" data-theme-btn="light" onclick="setTheme('light')">Light</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Style</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-style-btn="borderless" onclick="setStyle('borderless')">A: Borderless</button>
+          <button class="toggle-btn" data-style-btn="soft-depth" onclick="setStyle('soft-depth')">B: Soft Depth</button>
+          <button class="toggle-btn" data-style-btn="refined" onclick="setStyle('refined')">C: Refined</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main editor layout -->
+  <div class="editor-container">
+    <!-- Activity Bar -->
+    <div class="activity-bar">
+      <div class="activity-icon active" title="File Browser">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+      </div>
+      <div class="activity-icon" title="Search">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <div class="activity-icon" title="Structure">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <div class="activity-icon" title="Bibliography">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </div>
+      <div class="activity-icon" title="Collaborate">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+      <div class="activity-icon" title="History">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="activity-spacer"></div>
+      <div class="activity-icon" title="Settings">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">
+          <span>File Browser</span>
+          <div class="sidebar-actions">
+            <div class="sidebar-action" title="New File">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <div class="sidebar-action" title="New Folder">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div class="sidebar-action" title="Upload">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="file-tree">
+          <div class="file-item active">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Main.tex</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section outline-section">
+        <div class="sidebar-header">
+          <span>File Outline</span>
+        </div>
+        <div class="file-tree">
+          <div class="outline-item">
+            <span>Introduction</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor Main Area -->
+    <div class="editor-main">
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <button class="toolbar-btn" title="Undo">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+          </button>
+          <button class="toolbar-btn" title="Redo">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+            </svg>
+          </button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="Bold">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
+            </svg>
+          </button>
+          <button class="toolbar-btn" title="Italic">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 4h4m-2 0v16m-4 0h4" transform="skewX(-10)" />
+            </svg>
+          </button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="Insert Image">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button class="toolbar-btn" title="Insert Table">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button class="toolbar-btn" title="Insert Citation">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <div class="toolbar-status">
+            <span class="status-dot saved"></span>
+            <span>Saved</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-content">
+        <div class="line-numbers">
+          <div>1</div>
+          <div>2</div>
+          <div>3</div>
+          <div>4</div>
+          <div>5</div>
+          <div>6</div>
+          <div>7</div>
+          <div>8</div>
+          <div>9</div>
+          <div>10</div>
+          <div>11</div>
+          <div>12</div>
+          <div>13</div>
+          <div>14</div>
+        </div>
+        <div class="code-area">
+          <div class="code-line"><span class="keyword">\documentclass</span><span class="bracket">{</span><span class="string">article</span><span class="bracket">}</span></div>
+          <div class="code-line"><span class="keyword">\usepackage</span><span class="bracket">{</span><span class="string">graphicx</span><span class="bracket">}</span> <span class="comment">% Required for inserting images</span></div>
+          <div class="code-line"></div>
+          <div class="code-line"><span class="keyword">\title</span><span class="bracket">{</span>Lorem ipsum<span class="bracket">}</span></div>
+          <div class="code-line"><span class="keyword">\author</span><span class="bracket">{</span>Loremipsum<span class="bracket">}</span></div>
+          <div class="code-line"><span class="keyword">\date</span><span class="bracket">{</span>August 2025<span class="bracket">}</span></div>
+          <div class="code-line"></div>
+          <div class="code-line"><span class="keyword">\begin</span><span class="bracket">{</span><span class="string">document</span><span class="bracket">}</span></div>
+          <div class="code-line"></div>
+          <div class="code-line"><span class="keyword">\maketitle</span></div>
+          <div class="code-line"></div>
+          <div class="code-line"><span class="keyword">\section</span><span class="bracket">{</span>Introduction<span class="bracket">}</span></div>
+          <div class="code-line"></div>
+          <div class="code-line"><span class="keyword">\end</span><span class="bracket">{</span><span class="string">document</span><span class="bracket">}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info panel -->
+  <div class="info-panel" id="infoPanel">
+    <button class="close-info" onclick="closeInfo()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <h3>Aurora Tetradic Palette</h3>
+    <p>60% neutrals, 25% cyan (interactive), 8% emerald (success), 5% gold (warning), 2% violet (brand).</p>
+    <p><strong>Current style:</strong> <span id="styleDesc">Borderless - No borders, pure background shifts</span></p>
+    <div class="color-sample">
+      <div class="color-dot"><span class="cyan"></span>Cyan</div>
+      <div class="color-dot"><span class="emerald"></span>Emerald</div>
+      <div class="color-dot"><span class="gold"></span>Gold</div>
+      <div class="color-dot"><span class="violet"></span>Violet</div>
+    </div>
+  </div>
+
+  <script>
+    const styleDescriptions = {
+      'borderless': 'Borderless - No borders, pure background shifts',
+      'soft-depth': 'Soft Depth - Subtle shadows + minimal dividers',
+      'refined': 'Refined - Toned down original with subtle lines'
+    };
+
+    function setTheme(theme) {
+      document.body.dataset.theme = theme;
+      document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeBtn === theme);
+      });
+    }
+
+    function setStyle(style) {
+      document.body.dataset.style = style;
+      document.querySelectorAll('[data-style-btn]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.styleBtn === style);
+      });
+      document.getElementById('styleDesc').textContent = styleDescriptions[style];
+    }
+
+    function closeInfo() {
+      document.getElementById('infoPanel').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

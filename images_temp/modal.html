@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modal - Aurora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #080a10;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    /* Modal Backdrop (simulated) */
+    .modal-backdrop {
+      position: relative;
+      background: rgba(8, 10, 16, 0.8);
+      padding: 40px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    /* Modal Container */
+    .modal {
+      width: 480px;
+      background: #0e1218;
+      border-radius: 12px;
+      border: 1px solid #242e3c;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    /* Modal Header */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #242e3c;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e6ecf6;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6d7a8c;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .close-btn:hover {
+      color: #e6ecf6;
+      background: #1e2630;
+    }
+
+    /* Modal Body */
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #a4b4c8;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #e6ecf6;
+      background: #161c24;
+      border: 1px solid #242e3c;
+      border-radius: 6px;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0ea5e9;
+    }
+
+    .form-input::placeholder {
+      color: #6d7a8c;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #e6ecf6;
+      background: #161c24;
+      border: 1px solid #242e3c;
+      border-radius: 6px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236d7a8c'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+    }
+
+    /* Toggle/Switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #1a222c;
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e6ecf6;
+      margin-bottom: 2px;
+    }
+
+    .toggle-description {
+      font-size: 12px;
+      color: #6d7a8c;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #242e3c;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle.active {
+      background: #0ea5e9;
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: #e6ecf6;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle.active .toggle-knob {
+      transform: translateX(20px);
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid #242e3c;
+      background: #0a0e14;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary {
+      color: #a4b4c8;
+      background: transparent;
+      border: 1px solid #242e3c;
+    }
+
+    .btn-secondary:hover {
+      color: #e6ecf6;
+      background: #1e2630;
+    }
+
+    .btn-primary {
+      color: #e6ecf6;
+      background: #0ea5e9;
+      border: 1px solid #0ea5e9;
+    }
+
+    .btn-primary:hover {
+      background: #0284c7;
+      border-color: #0284c7;
+    }
+
+    .btn-danger {
+      color: #e6ecf6;
+      background: #dc2626;
+      border: 1px solid #dc2626;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+
+    /* Showcase layout */
+    .showcase {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .showcase-item {
+      position: relative;
+    }
+
+    .showcase-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #a855f7;
+      background: rgba(168, 85, 247, 0.15);
+      padding: 4px 8px;
+      border-radius: 4px;
+      z-index: 10;
+    }
+
+    /* Divider in modal */
+    .section-divider {
+      height: 1px;
+      background: #1a222c;
+      margin: 16px 0;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6d7a8c;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase">
+    <!-- Settings Modal -->
+    <div class="showcase-item">
+      <span class="showcase-label">Settings Modal</span>
+      <div class="modal-backdrop">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">General Settings</h2>
+            <button class="close-btn">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" class="form-input" value="Research Library" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Default Citation Style</label>
+              <select class="form-select">
+                <option>APA 7th Edition</option>
+                <option>MLA 9th Edition</option>
+                <option>Chicago 17th</option>
+                <option>IEEE</option>
+              </select>
+            </div>
+
+            <div class="section-divider"></div>
+            <div class="section-title">Preferences</div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Auto-fetch metadata</div>
+                <div class="toggle-description">Automatically retrieve metadata when importing</div>
+              </div>
+              <div class="toggle active">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Duplicate detection</div>
+                <div class="toggle-description">Warn when adding potential duplicates</div>
+              </div>
+              <div class="toggle active">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Dark mode</div>
+                <div class="toggle-description">Use dark theme throughout the app</div>
+              </div>
+              <div class="toggle active">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="showcase-item">
+      <span class="showcase-label">Confirmation Modal</span>
+      <div class="modal-backdrop">
+        <div class="modal" style="width: 400px;">
+          <div class="modal-header">
+            <h2 class="modal-title">Delete Reference?</h2>
+            <button class="close-btn">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size: 14px; color: #a4b4c8; line-height: 1.6;">
+              Are you sure you want to delete <strong style="color: #e6ecf6;">"Attention Is All You Need"</strong>?
+              This action will move the reference to trash.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Reference Modal -->
+    <div class="showcase-item">
+      <span class="showcase-label">Add Reference Modal</span>
+      <div class="modal-backdrop">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">Add Reference</h2>
+            <button class="close-btn">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">DOI or URL</label>
+              <input type="text" class="form-input" placeholder="10.1234/example or https://..." />
+            </div>
+
+            <div style="text-align: center; padding: 20px 0; color: #6d7a8c; font-size: 13px;">
+              — or —
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload PDF</label>
+              <div style="border: 2px dashed #242e3c; border-radius: 8px; padding: 24px; text-align: center;">
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#6d7a8c" style="margin: 0 auto 8px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p style="font-size: 14px; color: #a4b4c8;">Drop PDF here or <span style="color: #0ea5e9; cursor: pointer;">browse</span></p>
+                <p style="font-size: 12px; color: #6d7a8c; margin-top: 4px;">PDF up to 50MB</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-primary">Add Reference</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
