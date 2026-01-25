@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "./radix-colors.css";
-@import "./tokens.css";
+@import "./shared-tokens.css";
 @import "./app.css";
 @import "tw-animate-css";
 
@@ -12,24 +12,36 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Core surfaces - map to semantic tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
+  /* Primary action - maps to biblio (module accent) */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+
+  /* Secondary/muted - map to semantic tokens */
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
+  /* Destructive/error */
   --color-destructive: var(--destructive);
+
+  /* Borders and inputs */
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Sidebar */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -38,117 +50,146 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Module colors - Bibliography (Blue) */
+  --color-biblio: var(--biblio);
+  --color-biblio-strong: var(--biblio-strong);
+  --color-biblio-tint: var(--biblio-tint);
+  --color-biblio-light: var(--biblio-light);
+
+  /* Module colors - Manuscripts (Teal/Green) */
+  --color-manu: var(--manu);
+  --color-manu-strong: var(--manu-strong);
+  --color-manu-tint: var(--manu-tint);
+  --color-manu-light: var(--manu-light);
+
+  /* Module colors - Discover (Violet) */
+  --color-discover: var(--discover);
+  --color-discover-strong: var(--discover-strong);
+  --color-discover-tint: var(--discover-tint);
+  --color-discover-light: var(--discover-light);
+
+  /* Module colors - Planner (Neutral) */
+  --color-planner: var(--planner);
+
+  /* Tag badge colors */
+  --color-tag-cyan-bg: var(--tag-cyan-bg);
+  --color-tag-cyan-text: var(--tag-cyan-text);
+  --color-tag-violet-bg: var(--tag-violet-bg);
+  --color-tag-violet-text: var(--tag-violet-text);
+  --color-tag-emerald-bg: var(--tag-emerald-bg);
+  --color-tag-emerald-text: var(--tag-emerald-text);
+  --color-tag-amber-bg: var(--tag-amber-bg);
+  --color-tag-amber-text: var(--tag-amber-text);
+
+  /* SVG illustration fills */
+  --color-mauve-a3: var(--mauve-a3);
 }
 
 /* ===========================================
-   SHADCN → RADIX COLOR MAPPING
+   SHADCN TOKEN BRIDGE
 
-   Maps shadcn's semantic tokens to Radix colors.
-   Light theme uses sand/brown warm tones.
-   Dark theme uses sand-1 (#111110) for OLED comfort.
+   Maps shadcn's semantic tokens to our design system.
+   These tokens reference shared-tokens.css values.
    =========================================== */
 
 :root {
   --radius: 0.625rem;
 
-  /* Core backgrounds */
-  --background: var(--sand-2);
-  --foreground: var(--mauve-12);
+  /* Core backgrounds - use semantic tokens */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
 
   /* Card surfaces */
-  --card: var(--sand-1);
-  --card-foreground: var(--mauve-12);
+  --card: var(--bg-secondary);
+  --card-foreground: var(--text-primary);
 
   /* Popover/dropdown surfaces */
-  --popover: var(--sand-1);
-  --popover-foreground: var(--mauve-12);
+  --popover: var(--bg-secondary);
+  --popover-foreground: var(--text-primary);
 
-  /* Primary action (uses biblio blue) */
-  --primary: var(--blue-9);
-  --primary-foreground: white;
+  /* Primary action - USE BIBLIO for module-specific accent */
+  --primary: var(--biblio);
+  --primary-foreground: var(--text-on-accent);
 
   /* Secondary/subtle actions */
-  --secondary: var(--sand-3);
-  --secondary-foreground: var(--mauve-12);
+  --secondary: var(--bg-tertiary);
+  --secondary-foreground: var(--text-primary);
 
   /* Muted/disabled states */
-  --muted: var(--sand-4);
-  --muted-foreground: var(--mauve-11);
+  --muted: var(--bg-hover);
+  --muted-foreground: var(--text-muted);
 
   /* Accent (hover states) */
-  --accent: var(--sand-4);
-  --accent-foreground: var(--mauve-12);
+  --accent: var(--bg-hover);
+  --accent-foreground: var(--text-primary);
 
   /* Destructive/error */
-  --destructive: var(--tomato-9);
+  --destructive: var(--error);
 
   /* Borders and inputs */
-  --border: var(--sand-6);
-  --input: var(--sand-6);
-  --ring: var(--blue-8);
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--biblio-border);
 
-  /* Sidebar (matches main bg) */
-  --sidebar: var(--sand-2);
-  --sidebar-foreground: var(--mauve-12);
-  --sidebar-primary: var(--blue-9);
-  --sidebar-primary-foreground: white;
-  --sidebar-accent: var(--sand-4);
-  --sidebar-accent-foreground: var(--mauve-12);
-  --sidebar-border: var(--sand-6);
-  --sidebar-ring: var(--blue-8);
+  /* Sidebar */
+  --sidebar: var(--bg-secondary);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--biblio);
+  --sidebar-primary-foreground: var(--text-on-accent);
+  --sidebar-accent: var(--bg-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--biblio-border);
 }
 
 .dark-theme {
-  /* Core backgrounds - sand-1 is #111110, warm near-black */
-  --background: var(--sand-1);
-  --foreground: var(--mauve-12);
+  /* Dark mode uses same semantic tokens - they auto-switch */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
 
-  /* Card surfaces - slightly elevated */
-  --card: var(--sand-2);
-  --card-foreground: var(--mauve-12);
+  --card: var(--bg-secondary);
+  --card-foreground: var(--text-primary);
 
-  /* Popover/dropdown surfaces */
-  --popover: var(--sand-2);
-  --popover-foreground: var(--mauve-12);
+  --popover: var(--bg-secondary);
+  --popover-foreground: var(--text-primary);
 
-  /* Primary action */
-  --primary: var(--blue-9);
-  --primary-foreground: white;
+  --primary: var(--biblio);
+  --primary-foreground: var(--text-on-accent);
 
-  /* Secondary/subtle actions */
-  --secondary: var(--sand-3);
-  --secondary-foreground: var(--mauve-12);
+  --secondary: var(--bg-tertiary);
+  --secondary-foreground: var(--text-primary);
 
-  /* Muted/disabled states */
-  --muted: var(--sand-3);
-  --muted-foreground: var(--mauve-11);
+  --muted: var(--bg-tertiary);
+  --muted-foreground: var(--text-muted);
 
-  /* Accent (hover states) */
-  --accent: var(--sand-3);
-  --accent-foreground: var(--mauve-12);
+  --accent: var(--bg-tertiary);
+  --accent-foreground: var(--text-primary);
 
-  /* Destructive/error */
-  --destructive: var(--tomato-9);
+  --destructive: var(--error);
 
-  /* Borders and inputs */
-  --border: var(--sand-6);
-  --input: var(--sand-5);
-  --ring: var(--blue-7);
+  --border: var(--border-default);
+  --input: var(--border-subtle);
+  --ring: var(--biblio-border);
 
-  /* Sidebar */
-  --sidebar: var(--sand-2);
-  --sidebar-foreground: var(--mauve-12);
-  --sidebar-primary: var(--blue-9);
-  --sidebar-primary-foreground: white;
-  --sidebar-accent: var(--sand-3);
-  --sidebar-accent-foreground: var(--mauve-12);
-  --sidebar-border: var(--sand-6);
-  --sidebar-ring: var(--blue-7);
+  --sidebar: var(--bg-secondary);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--biblio);
+  --sidebar-primary-foreground: var(--text-on-accent);
+  --sidebar-accent: var(--bg-tertiary);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--biblio-border);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
   }
   body {
     @apply bg-background text-foreground;

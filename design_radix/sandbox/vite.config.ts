@@ -13,5 +13,16 @@ export default defineConfig({
   server: {
     port: 5176,
     strictPort: true,
+    watch: {
+      // Ignore other project directories to reduce file watchers
+      ignored: [
+        "**/node_modules/**",
+        "**/frontend-v2/**",
+        "**/frontend-v2 copy/**",
+        "**/landing-page/**",
+        "**/backend/**",
+        "**/.git/**",
+      ],
+    },
   },
 });

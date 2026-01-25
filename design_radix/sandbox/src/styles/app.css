@@ -16,7 +16,7 @@ body {
 }
 
 .app {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -130,7 +130,7 @@ body {
   width: 2rem;
   height: 2rem;
   background: linear-gradient(135deg, var(--biblio) 0%, var(--manu) 100%);
-  color: white;
+  color: var(--text-on-accent);
   font-size: 0.8125rem;
   font-weight: 600;
 }
@@ -140,7 +140,15 @@ body {
    ============================================ */
 .pageShell {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.pageShell--full {
+  height: 100vh;
 }
 
 /* ============================================
@@ -195,7 +203,7 @@ body {
 }
 
 .iconButton:hover {
-  background: var(--bg-hover);
+  background: var(--bg-hover-subtle);
   color: var(--text-primary);
 }
 
@@ -220,6 +228,6 @@ body {
 }
 
 .segmented button[data-active="true"] {
-  background: var(--bg-hover);
+  background: var(--bg-hover-subtle);
   color: var(--text-primary);
 }

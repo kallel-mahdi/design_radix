@@ -62,7 +62,7 @@ export const DropdownMenuSeparator = forwardRef<
       style={{
         height: "1px",
         margin: "0.25rem",
-        background: "var(--border-subtle)",
+        background: "var(--border-default)",
         ...style
       }}
       {...rest}

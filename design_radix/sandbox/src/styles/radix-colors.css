@@ -25,11 +25,29 @@
 @import "@radix-ui/colors/blue-alpha.css";
 @import "@radix-ui/colors/blue-dark-alpha.css";
 
-/* Green scale - Manuscripts module */
+/* Sky scale - Better match for desaturated steel blue (~205° hue) */
+@import "@radix-ui/colors/sky.css";
+@import "@radix-ui/colors/sky-dark.css";
+@import "@radix-ui/colors/sky-alpha.css";
+@import "@radix-ui/colors/sky-dark-alpha.css";
+
+/* Teal scale - Manuscripts module (hue ~163, closer to original design) */
+@import "@radix-ui/colors/teal.css";
+@import "@radix-ui/colors/teal-dark.css";
+@import "@radix-ui/colors/teal-alpha.css";
+@import "@radix-ui/colors/teal-dark-alpha.css";
+
+/* Green scale - Success states */
 @import "@radix-ui/colors/green.css";
 @import "@radix-ui/colors/green-dark.css";
 @import "@radix-ui/colors/green-alpha.css";
 @import "@radix-ui/colors/green-dark-alpha.css";
+
+/* Cyan scale - Tags */
+@import "@radix-ui/colors/cyan.css";
+@import "@radix-ui/colors/cyan-dark.css";
+@import "@radix-ui/colors/cyan-alpha.css";
+@import "@radix-ui/colors/cyan-dark-alpha.css";
 
 /* Purple scale - Discover module */
 @import "@radix-ui/colors/purple.css";

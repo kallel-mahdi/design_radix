@@ -61,15 +61,15 @@ const tasks: Task[] = [
 // ============================================
 function SearchBar() {
   return (
-    <div className="mx-auto mb-8 max-w-[560px]">
-      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-2.5 shadow-sm transition-colors focus-within:border-[var(--manu)] focus-within:shadow-md">
-        <Search className="h-[18px] w-[18px] shrink-0 text-[var(--manu)]" />
+    <div className="mx-auto mb-8 max-w-lg">
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-2.5 shadow-sm transition-colors focus-within:border-manu focus-within:shadow-md">
+        <Search className="size-5 shrink-0 text-manu" />
         <Input
           type="text"
           placeholder="Search papers, manuscripts, tasks..."
           className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
         />
-        <kbd className="rounded bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+        <kbd className="rounded bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
           ⌘K
         </kbd>
       </div>
@@ -78,17 +78,17 @@ function SearchBar() {
 }
 
 function RecentCard({ item }: { item: RecentItem }) {
-  const dotColor = item.module === "biblio" ? "bg-[var(--biblio)]" : "bg-[var(--manu)]";
+  const dotColor = item.module === "biblio" ? "bg-biblio" : "bg-manu";
 
   return (
-    <Card className="min-w-[140px] max-w-[220px] flex-1 cursor-pointer rounded-xl border-border p-3.5 transition-all hover:-translate-y-0.5 hover:border-[var(--manu)] hover:shadow-lg">
+    <Card className="min-w-36 max-w-56 flex-1 cursor-pointer rounded-xl border-border p-3.5 transition-all hover:-translate-y-0.5 hover:border-manu hover:shadow-lg">
       <div className="mb-1 flex items-center gap-2.5">
-        <div className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
-        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+        <div className={`size-2 shrink-0 rounded-full ${dotColor}`} />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
           {item.title}
         </span>
       </div>
-      <div className="pl-[18px] text-[11px] text-muted-foreground">{item.time}</div>
+      <div className="pl-5 text-xs text-muted-foreground">{item.time}</div>
     </Card>
   );
 }
@@ -97,10 +97,10 @@ function RecentStrip() {
   return (
     <section className="mb-8">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Recent
         </span>
-        <button className="text-xs font-medium text-[var(--manu)] hover:underline">
+        <button className="text-xs font-medium text-manu hover:underline">
           View all
         </button>
       </div>
@@ -123,14 +123,14 @@ function BiblioIllustration() {
   return (
     <svg className="h-[60px] w-[72px] shrink-0" viewBox="0 0 100 80" fill="none">
       {/* Stack hints (corner edges behind) */}
-      <rect className="stroke-[var(--biblio-strong)] dark:stroke-[var(--biblio)]" x="24" y="4" width="48" height="64" rx="3" strokeWidth="1.5" opacity="0.25" />
-      <rect className="stroke-[var(--biblio-strong)] dark:stroke-[var(--biblio)]" x="20" y="8" width="48" height="64" rx="3" strokeWidth="1.5" opacity="0.4" />
+      <rect className="stroke-biblio-strong dark:stroke-biblio" x="24" y="4" width="48" height="64" rx="3" strokeWidth="1.5" opacity="0.25" />
+      <rect className="stroke-biblio-strong dark:stroke-biblio" x="20" y="8" width="48" height="64" rx="3" strokeWidth="1.5" opacity="0.4" />
       {/* Main paper */}
-      <rect className="fill-white stroke-[var(--biblio-strong)] dark:fill-[var(--mauve-a3)] dark:stroke-[var(--biblio)]" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
-      <path className="stroke-[var(--biblio-strong)] opacity-35 dark:stroke-[var(--biblio)]" d="M26 28h28M26 38h24M26 48h20M26 58h26" strokeWidth="2.5" strokeLinecap="round" />
+      <rect className="fill-[var(--paper-fill)] stroke-biblio-strong dark:stroke-biblio" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
+      <path className="stroke-biblio-strong opacity-35 dark:stroke-biblio" d="M26 28h28M26 38h24M26 48h20M26 58h26" strokeWidth="2.5" strokeLinecap="round" />
       {/* Checkmark badge */}
-      <circle className="fill-[var(--biblio-strong)] opacity-15 dark:fill-[var(--biblio)]" cx="78" cy="40" r="14" />
-      <path className="stroke-[var(--biblio-strong)] dark:stroke-[var(--biblio)]" d="M72 40l4 4 8-8" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle className="fill-biblio-strong opacity-15 dark:fill-biblio" cx="78" cy="40" r="14" />
+      <path className="stroke-biblio-strong dark:stroke-biblio" d="M72 40l4 4 8-8" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -139,15 +139,15 @@ function ManuIllustration() {
   return (
     <svg className="h-[60px] w-[72px] shrink-0" viewBox="0 0 100 80" fill="none">
       {/* Main paper */}
-      <rect className="fill-white stroke-[var(--manu-strong)] dark:fill-[var(--mauve-a3)] dark:stroke-[var(--manu)]" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
-      <path className="stroke-[var(--manu-strong)] opacity-35 dark:stroke-[var(--manu)]" d="M26 28h28M26 38h24M26 48h20" strokeWidth="2.5" strokeLinecap="round" />
+      <rect className="fill-[var(--paper-fill)] stroke-manu-strong dark:stroke-manu" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
+      <path className="stroke-manu-strong opacity-35 dark:stroke-manu" d="M26 28h28M26 38h24M26 48h20" strokeWidth="2.5" strokeLinecap="round" />
       {/* CITE button */}
-      <rect className="fill-[var(--manu-strong)] dark:fill-[var(--manu)]" x="26" y="56" width="22" height="10" rx="5" />
-      <text x="30" y="64" fill="white" fontSize="6" fontWeight="bold" fontFamily="Inter, sans-serif">CITE</text>
+      <rect className="fill-manu-strong dark:fill-manu" x="26" y="56" width="22" height="10" rx="5" />
+      <text x="30" y="64" fill="var(--text-on-accent)" fontSize="6" fontWeight="bold" fontFamily="Inter, sans-serif">CITE</text>
       {/* Pen */}
       <g transform="translate(68, 8) rotate(20)">
-        <rect className="fill-white stroke-[var(--manu-strong)] dark:fill-[var(--mauve-a3)] dark:stroke-[var(--manu)]" x="0" y="0" width="6" height="36" rx="3" strokeWidth="1.5" />
-        <path className="fill-[var(--manu-strong)] dark:fill-[var(--manu)]" d="M0 30 L3 40 L6 30" />
+        <rect className="fill-[var(--paper-fill)] stroke-manu-strong dark:stroke-manu" x="0" y="0" width="6" height="36" rx="3" strokeWidth="1.5" />
+        <path className="fill-manu-strong dark:fill-manu" d="M0 30 L3 40 L6 30" />
       </g>
     </svg>
   );
@@ -157,14 +157,14 @@ function DiscoverIllustration() {
   return (
     <svg className="h-[60px] w-[72px] shrink-0" viewBox="0 0 100 80" fill="none">
       {/* Main paper */}
-      <rect className="fill-white stroke-[var(--discover-strong)] dark:fill-[var(--mauve-a3)] dark:stroke-[var(--discover)]" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
-      <path className="stroke-[var(--discover-strong)] opacity-35 dark:stroke-[var(--discover)]" d="M26 28h28M26 38h24M26 48h20M26 58h26" strokeWidth="2.5" strokeLinecap="round" />
+      <rect className="fill-[var(--paper-fill)] stroke-discover-strong dark:stroke-discover" x="16" y="12" width="48" height="64" rx="3" strokeWidth="2" />
+      <path className="stroke-discover-strong opacity-35 dark:stroke-discover" d="M26 28h28M26 38h24M26 48h20M26 58h26" strokeWidth="2.5" strokeLinecap="round" />
       {/* Magnifying glass */}
-      <circle className="fill-[var(--discover-strong)] opacity-15 dark:fill-[var(--discover)]" cx="78" cy="40" r="14" />
-      <circle className="fill-white stroke-[var(--discover-strong)] dark:fill-[var(--mauve-a3)] dark:stroke-[var(--discover)]" cx="78" cy="40" r="11" strokeWidth="2" />
-      <path className="stroke-[var(--discover-strong)] dark:stroke-[var(--discover)]" d="M86 48l6 6" strokeWidth="2.5" strokeLinecap="round" />
+      <circle className="fill-discover-strong opacity-15 dark:fill-discover" cx="78" cy="40" r="14" />
+      <circle className="fill-[var(--paper-fill)] stroke-discover-strong dark:stroke-discover" cx="78" cy="40" r="11" strokeWidth="2" />
+      <path className="stroke-discover-strong dark:stroke-discover" d="M86 48l6 6" strokeWidth="2.5" strokeLinecap="round" />
       {/* Focus lines inside magnifier */}
-      <path className="stroke-[var(--discover-strong)] opacity-50 dark:stroke-[var(--discover)]" d="M71 37h14M71 43h10" strokeWidth="1.5" strokeLinecap="round" />
+      <path className="stroke-discover-strong opacity-50 dark:stroke-discover" d="M71 37h14M71 43h10" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -174,11 +174,13 @@ function ModuleCard({
   subtitle,
   module,
   illustration,
+  onClick,
 }: {
   title: string;
   subtitle: string;
   module: ModuleType;
   illustration: React.ReactNode;
+  onClick?: () => void;
 }) {
   const gradientStyle = {
     biblio: { background: "linear-gradient(135deg, var(--biblio-tint) 0%, var(--biblio-light) 100%)" },
@@ -187,23 +189,26 @@ function ModuleCard({
   }[module];
 
   const titleColor = {
-    biblio: "text-[var(--biblio-strong)]",
-    manu: "text-[var(--manu-strong)]",
-    discover: "text-[var(--discover-strong)]",
+    biblio: "text-biblio-strong",
+    manu: "text-manu-strong",
+    discover: "text-discover-strong",
   }[module];
 
   return (
-    <Card className="flex-1 cursor-pointer overflow-hidden rounded-[20px] border-border p-0 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl">
+    <Card
+      className="flex-1 cursor-pointer overflow-hidden rounded-2xl border-border p-0 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl"
+      onClick={onClick}
+    >
       <div
-        className="flex h-full items-center gap-[18px] px-7 py-6"
+        className="flex h-full items-center gap-5 px-6 py-5"
         style={gradientStyle}
       >
         <div className="min-w-0 flex-1">
-          <h3 className={`m-0 text-[17px] font-bold ${titleColor}`}>{title}</h3>
-          <p className="m-0 text-[13px] text-secondary-foreground">{subtitle}</p>
+          <h3 className={`m-0 text-lg font-bold ${titleColor}`}>{title}</h3>
+          <p className="m-0 text-sm text-secondary-foreground">{subtitle}</p>
         </div>
         {illustration}
-        <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100" />
+        <ChevronRight className="size-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100" />
       </div>
     </Card>
   );
@@ -211,13 +216,13 @@ function ModuleCard({
 
 function Mention({ text, module }: { text: string; module: ModuleType }) {
   const colors = {
-    biblio: "bg-[var(--biblio-tint)] text-[var(--biblio-strong)]",
-    manu: "bg-[var(--manu-tint)] text-[var(--manu-strong)]",
-    discover: "bg-[var(--discover-tint)] text-[var(--discover-strong)]",
+    biblio: "bg-biblio-tint text-biblio-strong",
+    manu: "bg-manu-tint text-manu-strong",
+    discover: "bg-discover-tint text-discover-strong",
   }[module];
 
   return (
-    <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${colors}`}>
+    <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${colors}`}>
       {text}
     </span>
   );
@@ -228,9 +233,9 @@ function TaskItem({ task }: { task: Task }) {
     <div className="group flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted">
       <Checkbox
         checked={task.completed}
-        className="mt-0.5 border-muted-foreground data-[state=checked]:border-[var(--biblio)] data-[state=checked]:bg-[var(--biblio)]"
+        className="mt-0.5 border-muted-foreground data-[state=checked]:border-biblio data-[state=checked]:bg-biblio"
       />
-      <span className={`text-[13px] leading-[1.45] ${task.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
+      <span className={`text-sm leading-normal ${task.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
         {task.text}
         {task.mentions?.map((mention, i) => (
           <span key={i}>
@@ -245,12 +250,12 @@ function TaskItem({ task }: { task: Task }) {
 
 function PlannerCard() {
   return (
-    <Card className="flex h-full flex-col rounded-[20px] border-border shadow-sm">
+    <Card className="flex h-full flex-col rounded-2xl border-border shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-6 pb-4 pt-5">
         <div>
           <h3 className="m-0 text-sm font-semibold text-foreground">Research Planner</h3>
-          <p className="m-0 text-[11px] text-muted-foreground">4 tasks remaining</p>
+          <p className="m-0 text-xs text-muted-foreground">4 tasks remaining</p>
         </div>
       </div>
 
@@ -263,12 +268,12 @@ function PlannerCard() {
         </div>
 
         {/* Add task input */}
-        <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-transparent bg-muted px-3 py-2.5 transition-all focus-within:border-[var(--planner)] focus-within:bg-card">
-          <Plus className="h-4 w-4 text-muted-foreground" />
+        <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-transparent bg-muted px-3 py-2.5 transition-all focus-within:border-planner focus-within:bg-card">
+          <Plus className="size-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Add task... use @ to link"
-            className="flex-1 border-0 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+            className="flex-1 border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
@@ -279,14 +284,18 @@ function PlannerCard() {
 // ============================================
 // MAIN COMPONENT
 // ============================================
-export function HomePage() {
+interface HomePageProps {
+  onNavigate?: (screen: "home" | "bibliography" | "editor") => void;
+}
+
+export function HomePage({ onNavigate }: HomePageProps) {
   const greeting = useGreeting("Mahdi");
 
   return (
-    <div className="mx-auto max-w-[1080px] px-8 py-10">
+    <div className="mx-auto max-w-5xl px-8 py-10">
       {/* Greeting Header */}
       <div className="mb-6 text-center">
-        <h1 className="m-0 text-[28px] font-bold tracking-tight">{greeting}</h1>
+        <h1 className="m-0 text-3xl font-bold tracking-tight">{greeting}</h1>
         <p className="m-0 text-sm text-secondary-foreground">Pick up where you left off</p>
       </div>
 
@@ -305,12 +314,14 @@ export function HomePage() {
             subtitle="127 papers organized"
             module="biblio"
             illustration={<BiblioIllustration />}
+            onClick={() => onNavigate?.("bibliography")}
           />
           <ModuleCard
             title="Manuscripts"
             subtitle="8 active projects"
             module="manu"
             illustration={<ManuIllustration />}
+            onClick={() => onNavigate?.("editor")}
           />
           <ModuleCard
             title="Discover"

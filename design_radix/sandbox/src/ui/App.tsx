@@ -38,66 +38,70 @@ export function App() {
     return "discover";
   }, [screen]);
 
+  const showNavbar = screen !== "bibliography" && screen !== "editor";
+
   return (
     <div className="app" data-module={moduleAttr}>
-      {/* Navbar matching original mockup */}
-      <nav className="navbar">
-        <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setScreen("home"); }}>
-          <div className="logoIcon" />
-          <span>Citable</span>
-        </a>
+      {/* Navbar - hidden on bibliography page */}
+      {showNavbar && (
+        <nav className="navbar">
+          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setScreen("home"); }}>
+            <div className="logoIcon" />
+            <span>Citable</span>
+          </a>
 
-        <div className="navActions">
-          {/* Theme toggle with sun/moon icons */}
-          <button
-            className="iconBtn themeToggle"
-            type="button"
-            aria-label="Toggle theme"
-            onClick={() => {
-              const next = theme === "dark" ? "light" : "dark";
-              setTheme(next);
-              applyTheme(next);
-            }}
-          >
-            <Sun className="iconSun" />
-            <Moon className="iconMoon" />
-          </button>
+          <div className="navActions">
+            {/* Theme toggle with sun/moon icons */}
+            <button
+              className="iconBtn themeToggle"
+              type="button"
+              aria-label="Toggle theme"
+              onClick={() => {
+                const next = theme === "dark" ? "light" : "dark";
+                setTheme(next);
+                applyTheme(next);
+              }}
+            >
+              <Sun className="iconSun" />
+              <Moon className="iconMoon" />
+            </button>
 
-          {/* Notifications */}
-          <button className="iconBtn" type="button" aria-label="Notifications">
-            <Bell />
-          </button>
+            {/* Notifications */}
+            <button className="iconBtn" type="button" aria-label="Notifications">
+              <Bell />
+            </button>
 
-          {/* Avatar with dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="avatarBtn" type="button" aria-label="Account menu">
-                <Avatar className="avatar">
-                  <AvatarFallback>M</AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setScreen("home")}>Home</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setScreen("bibliography")}>Bibliography</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setScreen("editor")}>Editor</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={() => {
-                  const next = theme === "dark" ? "light" : "dark";
-                  setTheme(next);
-                  applyTheme(next);
-                }}
-              >
-                Toggle theme
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </nav>
+            {/* Avatar with dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="avatarBtn" type="button" aria-label="Account menu">
+                  <Avatar className="avatar">
+                    <AvatarFallback>M</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setScreen("home")}>Home</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setScreen("bibliography")}>Bibliography</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setScreen("editor")}>Editor</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    const next = theme === "dark" ? "light" : "dark";
+                    setTheme(next);
+                    applyTheme(next);
+                  }}
+                >
+                  Toggle theme
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </nav>
+      )}
 
-      <main className="pageShell">
-        {screen === "home" ? <HomePage /> : null}
+      <main className={showNavbar ? "pageShell" : "pageShell pageShell--full"}>
+        {screen === "home" ? <HomePage onNavigate={setScreen} /> : null}
         {screen === "bibliography" ? <BibliographyPage /> : null}
         {screen === "editor" ? <EditorPage /> : null}
       </main>
