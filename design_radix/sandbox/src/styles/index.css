@@ -192,6 +192,38 @@
     height: 100%;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ===========================================
+   CENTER-EXPANDING UNDERLINE FOR LINE VARIANT TABS
+   Expands from center outward on hover/active
+   =========================================== */
+[data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"]::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  right: 50%;
+  height: 2px;
+  background: var(--text-primary);
+  transition: left var(--transition-slow), right var(--transition-slow),
+              background var(--transition-slow), opacity var(--transition-slow);
+  opacity: 0;
+}
+
+[data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"]:hover::after {
+  left: 0;
+  right: 0;
+  opacity: 0.5;
+}
+
+[data-slot="tabs-list"][data-variant="line"] [data-slot="tabs-trigger"][data-state="active"]::after {
+  left: 0;
+  right: 0;
+  opacity: 1;
+  background: var(--accent, var(--biblio));
 }

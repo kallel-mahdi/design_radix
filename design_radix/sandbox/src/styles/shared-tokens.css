@@ -1,0 +1,270 @@
+/* ============================================
+   SEMANTIC TOKENS — Design System
+   Maps Radix color steps to semantic tokens
+
+   Reference (Radix color steps):
+   - Steps 1-2: App/component backgrounds
+   - Steps 3-5: Component states (normal/hover/active)
+   - Steps 6-8: Borders (subtle/default/strong)
+   - Steps 9-10: Solid fills (normal/hover)
+   - Steps 11-12: Text (low/high contrast)
+   ============================================ */
+
+:root {
+  /* ============================================
+     SPACING SCALE (Tailwind 4-based, REM)
+     Standard: 0.25rem = 1 unit = 4px
+     ============================================ */
+
+  /* Layout spacing */
+  --spacing-page-x: 2rem;        /* px-8 - page horizontal padding */
+  --spacing-page-y: 2.5rem;      /* py-10 - page vertical padding */
+  --spacing-section: 1.5rem;     /* gap-6 - between major sections */
+  --spacing-group: 1rem;         /* gap-4 - between related items */
+  --spacing-element: 0.5rem;     /* gap-2 - between form fields */
+  --spacing-inline: 0.25rem;     /* gap-1 - inline elements */
+
+  /* Component heights (consistent header row) */
+  --height-header: 2.75rem;      /* h-11 (44px) - section headers */
+  --height-navbar: 3.5rem;       /* h-14 (56px) - app navbar */
+  --height-input: 2.25rem;       /* h-9 (36px) - inputs, default buttons */
+  --height-input-sm: 2rem;       /* h-8 (32px) - small inputs/buttons */
+  --height-table-row: 2.5rem;    /* h-10 (40px) - table rows */
+
+  /* Width constraints */
+  --width-sidebar: 14rem;        /* w-56 (224px) - navigation sidebar */
+  --width-activity-bar: 3.5rem;  /* w-14 (56px) - icon sidebar */
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+
+  /* Transitions */
+  --transition-slow: 0.2s ease;
+
+  /* Backgrounds - Sand scale (steps 1-2) */
+  --bg-primary: var(--sand-2);
+  --bg-secondary: var(--sand-1);
+  --bg-tertiary: var(--sand-3);
+  --bg-hover-subtle: var(--sand-3);
+  --bg-hover: var(--sand-4);
+  --bg-active: var(--sand-5);
+  --bg-canvas: var(--sand-1);
+
+  /* Text - Sand scale (steps 11-12 only) */
+  --text-primary: var(--sand-12);
+  --text-secondary: var(--sand-11);
+  --text-muted: var(--sand-a11);
+  --text-on-accent: var(--sand-1);
+
+  /* Borders - Sand scale (steps 6-8) */
+  --border-subtle: var(--sand-6);
+  --border-default: var(--sand-7);
+  --border-strong: var(--sand-8);
+
+  /* Module: Bibliography (Blue) */
+  --biblio: var(--blue-9);            /* solid fill */
+  --biblio-hover: var(--blue-10);
+  --biblio-strong: var(--blue-11);    /* text on neutral or dark */
+  --biblio-text: var(--blue-11);
+  --biblio-tint: var(--blue-3);       /* subtle background */
+  --biblio-light: var(--blue-4);
+  --biblio-border: var(--blue-7);
+  --biblio-foreground: white;
+
+  /* Module: Manuscripts (Jade default, Green with .use-green) */
+  --manu: var(--jade-9);
+  --manu-hover: var(--jade-10);
+  --manu-strong: var(--jade-11);
+  --manu-text: var(--jade-11);
+  --manu-tint: var(--jade-3);
+  --manu-light: var(--jade-4);
+  --manu-border: var(--jade-7);
+  --manu-foreground: white;
+  --manu-a3: var(--jade-a3);
+  --manu-a4: var(--jade-a4);
+
+  /* Module: Discover (Iris - violet) */
+  --discover: var(--iris-9);
+  --discover-hover: var(--iris-10);
+  --discover-strong: var(--iris-11);
+  --discover-text: var(--iris-11);
+  --discover-tint: var(--iris-3);
+  --discover-light: var(--iris-4);
+  --discover-border: var(--iris-7);
+  --discover-foreground: white;
+
+  /* Planner: Neutral (Gray - pure neutral) */
+  --planner: var(--gray-9);
+  --planner-hover: var(--gray-10);
+  --planner-strong: var(--gray-11);
+  --planner-text: var(--gray-11);
+  --planner-tint: var(--gray-3);
+  --planner-light: var(--gray-4);
+  --planner-border: var(--gray-7);
+
+  /* Semantic: Success */
+  --success: var(--green-9);
+  --success-text: var(--green-11);
+  --success-tint: var(--green-a3);
+
+  /* Semantic: Warning */
+  --warning: var(--amber-9);
+  --warning-text: var(--amber-11);
+  --warning-tint: var(--amber-a3);
+
+  /* Semantic: Error */
+  --error: var(--tomato-9);
+  --error-text: var(--tomato-11);
+  --error-tint: var(--tomato-a3);
+
+  /* Tag tokens */
+  --tag-cyan-bg: var(--cyan-a3);
+  --tag-cyan-text: var(--cyan-11);
+  --tag-violet-bg: var(--iris-a3);
+  --tag-violet-text: var(--iris-11);
+  --tag-emerald-bg: var(--jade-a3);
+  --tag-emerald-text: var(--jade-11);
+  --tag-amber-bg: var(--amber-a3);
+  --tag-amber-text: var(--amber-11);
+
+  /* Illustration paper fill */
+  --paper-fill: var(--bg-canvas);
+
+  /* Overlay (dialogs/sheets) */
+  --overlay: var(--mauve-a8);
+
+  /* Shadows */
+  --shadow-soft: 0 2px 8px var(--mauve-a6);
+  --shadow-medium: 0 6px 16px var(--mauve-a7);
+  --shadow-strong: 0 10px 24px var(--mauve-a8);
+
+  /* Card surface */
+  --card-bg: var(--bg-secondary);
+}
+
+/* ============================================
+   DARK THEME OVERRIDES
+   Radix colors auto-switch in dark mode, but we
+   need to adjust some blended colors
+   ============================================ */
+.dark-theme {
+  /* Backgrounds */
+  --bg-primary: var(--sand-1);
+  --bg-secondary: var(--sand-2);
+  --bg-tertiary: var(--sand-3);
+  --bg-hover-subtle: var(--bg-tertiary);
+  --bg-hover: var(--sand-4);
+  --bg-active: var(--sand-5);
+  --bg-canvas: var(--sand-1);
+
+  /* Text - Sand for warmth */
+  --text-primary: var(--sand-12);
+  --text-secondary: var(--sand-11);
+  --text-muted: var(--sand-a11);
+  --text-on-accent: var(--sand-12);
+
+  /* Borders */
+  --border-subtle: var(--sand-6);
+  --border-default: var(--sand-7);
+  --border-strong: var(--sand-8);
+
+  /* Module colors - Bibliography (Blue) */
+  --biblio: var(--blue-9);
+  --biblio-hover: var(--blue-10);
+  --biblio-strong: var(--blue-11);
+  --biblio-text: var(--blue-11);
+  --biblio-tint: var(--blue-a3);
+  --biblio-light: var(--blue-a4);
+  --biblio-border: var(--blue-7);
+  --biblio-foreground: white;
+
+  /* Module colors - Manuscripts (Jade) */
+  --manu: var(--jade-9);
+  --manu-hover: var(--jade-10);
+  --manu-strong: var(--jade-11);
+  --manu-text: var(--jade-11);
+  --manu-tint: var(--jade-a3);
+  --manu-light: var(--jade-a4);
+  --manu-border: var(--jade-7);
+  --manu-foreground: white;
+  --manu-a3: var(--jade-a3);
+  --manu-a4: var(--jade-a4);
+
+  /* Module colors - Discover (Iris) */
+  --discover: var(--iris-9);
+  --discover-hover: var(--iris-10);
+  --discover-strong: var(--iris-11);
+  --discover-text: var(--iris-11);
+  --discover-tint: var(--iris-a3);
+  --discover-light: var(--iris-a4);
+  --discover-border: var(--iris-7);
+  --discover-foreground: white;
+
+  /* Planner: Neutral (Gray - pure neutral) */
+  --planner: var(--gray-9);
+  --planner-hover: var(--gray-10);
+  --planner-strong: var(--gray-11);
+  --planner-text: var(--gray-11);
+  --planner-tint: var(--gray-a3);
+  --planner-light: var(--gray-a4);
+  --planner-border: var(--gray-7);
+
+  /* Shadows - darker in dark mode */
+  --shadow-soft: 0 2px 8px var(--mauve-a8);
+  --shadow-medium: 0 6px 16px var(--mauve-a9);
+  --shadow-strong: 0 10px 24px var(--mauve-a10);
+
+  /* Card surface */
+  --card-bg: var(--sand-2);
+
+  /* Illustration paper fill */
+  --paper-fill: var(--mauve-a3);
+
+}
+
+/* ============================================
+   MODULE-SPECIFIC ACCENT ALIASES
+   ============================================ */
+[data-module="bibliography"] {
+  --accent: var(--biblio);
+  --accent-hover: var(--biblio-hover);
+  --accent-strong: var(--biblio-strong);
+  --accent-text: var(--biblio-text);
+  --accent-tint: var(--biblio-tint);
+  --accent-light: var(--biblio-light);
+  --accent-border: var(--biblio-border);
+  --accent-foreground: var(--biblio-foreground);
+  --accent-a3: var(--blue-a3);
+  --accent-a4: var(--blue-a4);
+  --selection: var(--blue-a4);
+}
+
+[data-module="manuscripts"] {
+  --accent: var(--manu);
+  --accent-hover: var(--manu-hover);
+  --accent-strong: var(--manu-strong);
+  --accent-text: var(--manu-text);
+  --accent-tint: var(--manu-tint);
+  --accent-light: var(--manu-light);
+  --accent-border: var(--manu-border);
+  --accent-foreground: var(--manu-foreground);
+  --accent-a3: var(--manu-a3);
+  --accent-a4: var(--manu-a4);
+  --selection: var(--manu-a4);
+}
+
+[data-module="discover"] {
+  --accent: var(--discover);
+  --accent-hover: var(--discover-hover);
+  --accent-strong: var(--discover-strong);
+  --accent-text: var(--discover-text);
+  --accent-tint: var(--discover-tint);
+  --accent-light: var(--discover-light);
+  --accent-border: var(--discover-border);
+  --accent-foreground: var(--discover-foreground);
+  --accent-a3: var(--iris-a3);
+  --accent-a4: var(--iris-a4);
+  --selection: var(--iris-a4);
+}
