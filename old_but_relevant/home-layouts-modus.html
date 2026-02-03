@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citable Home - Modus Themes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           MODUS THEMES - WCAG AAA Accessible
+           https://protesilaos.com/emacs/modus-themes
+
+           4 Variants:
+           - modus-operandi: Light (pure white)
+           - modus-operandi-tinted: Light (warm ochre)
+           - modus-vivendi: Dark (TRUE BLACK #000000)
+           - modus-vivendi-tinted: Dark (night sky blue)
+           ============================================ */
+
+        /* ============================================
+           MODUS OPERANDI (Light - Pure White)
+           Default theme
+           ============================================ */
+        :root,
+        [data-theme="operandi"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #ffffff;
+            --bg-canvas: #f2f2f2;
+            --bg-hover: #c4c4c4;
+            --bg-inactive: #e0e0e0;
+
+            --text-primary: #000000;
+            --text-secondary: #595959;
+            --text-muted: #595959;
+
+            --border-default: #9f9f9f;
+            --border-subtle: #c4c4c4;
+
+            /* Module colors mapped to Modus Operandi accents */
+            /* Biblio → Cyan (research/reading) */
+            --biblio: #005e8b;
+            --biblio-strong: #005e8b;
+            --biblio-tint: #bfe8ff;
+            --biblio-light: #8fd4ff;
+
+            /* Manu → Blue (writing/editing) */
+            --manu: #0031a9;
+            --manu-strong: #0031a9;
+            --manu-tint: #d0e6ff;
+            --manu-light: #a0c8ff;
+
+            /* Planner → Red (tasks/urgency) */
+            --planner: #a60000;
+            --planner-strong: #a60000;
+            --planner-tint: #ffe0e0;
+            --planner-light: #ffb0b0;
+
+            /* Discover → Magenta (exploration/discovery) */
+            --discover: #721045;
+            --discover-strong: #721045;
+            --discover-tint: #ffe0f0;
+            --discover-light: #ffb0d8;
+
+            --card-bg: #ffffff;
+            --warm-shadow: rgba(0, 0, 0, 0.12);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============================================
+           MODUS OPERANDI TINTED (Light - Warm Ochre)
+           Earthly tones, easier on eyes
+           ============================================ */
+        [data-theme="operandi-tinted"] {
+            --bg-primary: #fbf7f0;
+            --bg-secondary: #fbf7f0;
+            --bg-canvas: #efe9dd;
+            --bg-hover: #c9b9b0;
+            --bg-inactive: #dfd5cf;
+
+            --text-primary: #000000;
+            --text-secondary: #595959;
+            --text-muted: #595959;
+
+            --border-default: #9f9690;
+            --border-subtle: #c9b9b0;
+
+            /* Slightly warmer tints for the ochre theme */
+            --biblio: #005e8b;
+            --biblio-strong: #005e8b;
+            --biblio-tint: #c8e6f0;
+            --biblio-light: #a0d4e8;
+
+            --manu: #0031a9;
+            --manu-strong: #0031a9;
+            --manu-tint: #d8e4f0;
+            --manu-light: #b0c8e8;
+
+            --planner: #a60000;
+            --planner-strong: #a60000;
+            --planner-tint: #f5dcd8;
+            --planner-light: #e8b8b0;
+
+            --discover: #721045;
+            --discover-strong: #721045;
+            --discover-tint: #f0d8e4;
+            --discover-light: #e0b8d0;
+
+            --card-bg: #fbf7f0;
+            --warm-shadow: rgba(80, 60, 40, 0.12);
+        }
+
+        /* ============================================
+           MODUS VIVENDI (Dark - TRUE BLACK #000000)
+           OLED-optimized, highest contrast
+           ============================================ */
+        [data-theme="vivendi"] {
+            --bg-primary: #000000;
+            --bg-secondary: #000000;
+            --bg-canvas: #1e1e1e;
+            --bg-hover: #535353;
+            --bg-inactive: #303030;
+
+            --text-primary: #ffffff;
+            --text-secondary: #989898;
+            --text-muted: #989898;
+
+            --border-default: #646464;
+            --border-subtle: #535353;
+
+            /* Modus Vivendi bright accents for dark bg */
+            --biblio: #00d3d0;
+            --biblio-strong: #00d3d0;
+            --biblio-tint: rgba(0, 211, 208, 0.15);
+            --biblio-light: rgba(0, 211, 208, 0.25);
+
+            --manu: #2fafff;
+            --manu-strong: #2fafff;
+            --manu-tint: rgba(47, 175, 255, 0.15);
+            --manu-light: rgba(47, 175, 255, 0.25);
+
+            --planner: #ff5f59;
+            --planner-strong: #ff5f59;
+            --planner-tint: rgba(255, 95, 89, 0.15);
+            --planner-light: rgba(255, 95, 89, 0.25);
+
+            --discover: #feacd0;
+            --discover-strong: #feacd0;
+            --discover-tint: rgba(254, 172, 208, 0.15);
+            --discover-light: rgba(254, 172, 208, 0.25);
+
+            --card-bg: #1e1e1e;
+            --warm-shadow: rgba(0, 0, 0, 0.6);
+        }
+
+        /* ============================================
+           MODUS VIVENDI TINTED (Dark - Night Sky Blue)
+           Softer dark with blue undertones
+           ============================================ */
+        [data-theme="vivendi-tinted"] {
+            --bg-primary: #0d0e1c;
+            --bg-secondary: #0d0e1c;
+            --bg-canvas: #1d2235;
+            --bg-hover: #4a4f69;
+            --bg-inactive: #2b3045;
+
+            --text-primary: #ffffff;
+            --text-secondary: #989898;
+            --text-muted: #989898;
+
+            --border-default: #61647a;
+            --border-subtle: #4a4f69;
+
+            /* Slightly cooler tints for night sky */
+            --biblio: #4ae2f0;
+            --biblio-strong: #4ae2f0;
+            --biblio-tint: rgba(74, 226, 240, 0.18);
+            --biblio-light: rgba(74, 226, 240, 0.28);
+
+            --manu: #79a8ff;
+            --manu-strong: #79a8ff;
+            --manu-tint: rgba(121, 168, 255, 0.18);
+            --manu-light: rgba(121, 168, 255, 0.28);
+
+            --planner: #ff7f86;
+            --planner-strong: #ff7f86;
+            --planner-tint: rgba(255, 127, 134, 0.18);
+            --planner-light: rgba(255, 127, 134, 0.28);
+
+            --discover: #b6a0ff;
+            --discover-strong: #b6a0ff;
+            --discover-tint: rgba(182, 160, 255, 0.18);
+            --discover-light: rgba(182, 160, 255, 0.28);
+
+            --card-bg: #1d2235;
+            --warm-shadow: rgba(0, 0, 20, 0.5);
+        }
+
+        /* Dark theme detection for illustrations */
+        [data-theme="vivendi"] .paper-fill,
+        [data-theme="vivendi-tinted"] .paper-fill {
+            fill: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-default);
+            padding: 0 32px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Light theme navbar backgrounds */
+        [data-theme="operandi"] .navbar,
+        :root:not([data-theme^="vivendi"]) .navbar {
+            background: rgba(255, 255, 255, 0.92);
+        }
+        [data-theme="operandi-tinted"] .navbar {
+            background: rgba(251, 247, 240, 0.92);
+        }
+        /* Dark theme navbar backgrounds */
+        [data-theme="vivendi"] .navbar {
+            background: rgba(30, 30, 30, 0.92);
+        }
+        [data-theme="vivendi-tinted"] .navbar {
+            background: rgba(29, 34, 53, 0.92);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--biblio) 0%, var(--manu) 50%, var(--planner) 100%);
+            border-radius: 7px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            transition: opacity 0.2s, transform 0.3s;
+        }
+        .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg); }
+        .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg); }
+        [data-theme^="vivendi"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg); }
+        [data-theme^="vivendi"] .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg); }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--biblio) 0%, var(--manu) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 40px 32px 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Greeting */
+        .greeting-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .greeting-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 4px 0;
+        }
+
+        .greeting-header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            max-width: 560px;
+            margin: 0 auto 32px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 12px -4px var(--warm-shadow);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--manu);
+            box-shadow: 0 2px 20px -4px var(--warm-shadow);
+        }
+
+        .search-bar svg { color: var(--manu); flex-shrink: 0; }
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-shortcut {
+            background: var(--bg-canvas);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           RECENT STRIP
+           ============================================ */
+        .recent-strip {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .section-more {
+            font-size: 12px;
+            color: var(--manu);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .section-more:hover { text-decoration: underline; }
+
+        .recent-cards {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .recent-cards::-webkit-scrollbar { display: none; }
+
+        .recent-card {
+            flex: 1 1 0;
+            min-width: 140px;
+            max-width: 220px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .recent-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -8px var(--warm-shadow);
+            border-color: var(--manu);
+        }
+
+        .recent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        /* Recent Style: Icon (default) */
+        .recent-card-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .recent-card-icon.biblio { background: var(--biblio-tint); }
+        .recent-card-icon.manu { background: var(--manu-tint); }
+
+        .recent-card-icon svg {
+            width: 12px;
+            height: 12px;
+        }
+        .recent-card-icon.biblio svg { color: var(--biblio-strong); }
+        .recent-card-icon.manu svg { color: var(--manu-strong); }
+
+        /* Recent Style: Dot */
+        [data-recent="dot"] .recent-card-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        [data-recent="dot"] .recent-card-icon.biblio { background: var(--biblio); }
+        [data-recent="dot"] .recent-card-icon.manu { background: var(--manu); }
+        [data-recent="dot"] .recent-card-icon svg { display: none; }
+
+        .recent-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recent-card-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding-left: 34px;
+        }
+
+        [data-recent="dot"] .recent-card-time {
+            padding-left: 18px;
+        }
+
+        /* ============================================
+           BENTO GRID - 4 Modules
+           ============================================ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 3fr 2fr; /* 60:40 ratio - modules dominant */
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .module-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .module-stack .card {
+            flex: 1;
+        }
+
+        /* ============================================
+           CARDS
+           ============================================ */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px -2px var(--warm-shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -8px var(--warm-shadow);
+        }
+
+        /* Module Card - Navigation tile */
+        .module-card {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .module-card .module-header {
+            flex: 1;
+        }
+
+        .module-header {
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+        }
+
+        .module-header.biblio { background: linear-gradient(135deg, var(--biblio-tint) 0%, var(--biblio-light) 100%); }
+        .module-header.manu { background: linear-gradient(135deg, var(--manu-tint) 0%, var(--manu-light) 100%); }
+        .module-header.discover { background: linear-gradient(135deg, var(--discover-tint) 0%, var(--discover-light) 100%); }
+
+        .module-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .module-icon.biblio { background: var(--biblio); }
+        .module-icon.manu { background: var(--manu); }
+        .module-icon.discover { background: var(--discover); }
+
+        .module-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .module-info { flex: 1; min-width: 0; }
+
+        .module-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+        }
+        .module-title.biblio { color: var(--biblio-strong); }
+        .module-title.manu { color: var(--manu-strong); }
+        .module-title.discover { color: var(--discover-strong); }
+
+        .module-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .module-arrow {
+            color: var(--text-muted);
+            opacity: 0;
+            transform: translateX(-4px);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .module-card:hover .module-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Module Illustrations */
+        .module-illustration {
+            width: 72px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .illustration-biblio .stroke { stroke: var(--biblio-strong); }
+        .illustration-biblio .fill { fill: var(--biblio-strong); }
+        .illustration-biblio .light { stroke: var(--biblio-strong); opacity: 0.35; }
+
+        .illustration-manu .stroke { stroke: var(--manu-strong); }
+        .illustration-manu .fill { fill: var(--manu-strong); }
+        .illustration-manu .light { stroke: var(--manu-strong); opacity: 0.35; }
+
+        .illustration-discover .stroke { stroke: var(--discover-strong); }
+        .illustration-discover .fill { fill: var(--discover-strong); }
+        .illustration-discover .light { stroke: var(--discover-strong); opacity: 0.35; }
+
+        .paper-fill { fill: white; }
+        [data-theme="operandi-tinted"] .paper-fill { fill: #fbf7f0; }
+        [data-theme^="vivendi"] .paper-fill { fill: rgba(255, 255, 255, 0.08); }
+
+        /* Dark mode illustrations - use softer colors */
+        [data-theme^="vivendi"] .illustration-biblio .stroke { stroke: var(--biblio); }
+        [data-theme^="vivendi"] .illustration-biblio .fill { fill: var(--biblio); }
+        [data-theme^="vivendi"] .illustration-biblio .light { stroke: var(--biblio); opacity: 0.35; }
+
+        [data-theme^="vivendi"] .illustration-manu .stroke { stroke: var(--manu); }
+        [data-theme^="vivendi"] .illustration-manu .fill { fill: var(--manu); }
+        [data-theme^="vivendi"] .illustration-manu .light { stroke: var(--manu); opacity: 0.35; }
+
+        [data-theme^="vivendi"] .illustration-discover .stroke { stroke: var(--discover); }
+        [data-theme^="vivendi"] .illustration-discover .fill { fill: var(--discover); }
+        [data-theme^="vivendi"] .illustration-discover .light { stroke: var(--discover); opacity: 0.35; }
+
+        /* ============================================
+           PLANNER CARD - Full height
+           ============================================ */
+        .planner-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .planner-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, var(--planner-tint) 0%, var(--planner-light) 100%);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .planner-title-group { flex: 1; }
+
+        .planner-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--planner-strong);
+            margin: 0 0 2px 0;
+            transition: color 0.3s;
+        }
+
+        .planner-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .planner-illustration {
+            width: 56px;
+            height: 48px;
+            flex-shrink: 0;
+            transition: opacity 0.3s;
+        }
+
+        .illustration-planner .stroke { stroke: var(--planner-strong); transition: stroke 0.3s; }
+        .illustration-planner .fill { fill: var(--planner-strong); transition: fill 0.3s; }
+        .illustration-planner .light { stroke: var(--planner-strong); opacity: 0.35; transition: stroke 0.3s; }
+
+        [data-theme^="vivendi"] .illustration-planner .stroke { stroke: var(--planner); }
+        [data-theme^="vivendi"] .illustration-planner .fill { fill: var(--planner); }
+        [data-theme^="vivendi"] .illustration-planner .light { stroke: var(--planner); opacity: 0.35; }
+
+        /* ============================================
+           PLANNER STYLE VARIANTS
+           ============================================ */
+
+        /* Style 1: Rose (default) - already defined above */
+
+        /* Style 2: Neutral - like Recent cards */
+        [data-planner="neutral"] .planner-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border-default);
+        }
+        [data-planner="neutral"] .planner-title {
+            color: var(--text-primary);
+        }
+        [data-planner="neutral"] .planner-illustration {
+            opacity: 0.5;
+        }
+        [data-planner="neutral"] .illustration-planner .stroke,
+        [data-planner="neutral"] .illustration-planner .fill,
+        [data-planner="neutral"] .illustration-planner .light {
+            stroke: var(--text-muted);
+        }
+        [data-planner="neutral"] .illustration-planner .fill {
+            fill: var(--text-muted);
+        }
+
+        /* Style 3: Minimal - neutral with rose left accent */
+        [data-planner="minimal"] .planner-card {
+            border-left: 3px solid var(--planner);
+        }
+        [data-planner="minimal"] .planner-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border-default);
+        }
+        [data-planner="minimal"] .planner-title {
+            color: var(--text-primary);
+        }
+        [data-planner="minimal"] .planner-illustration {
+            display: none;
+        }
+
+        /* Style 4: Ghost - very subtle, no header distinction */
+        [data-planner="ghost"] .planner-header {
+            background: transparent;
+            padding-bottom: 16px;
+        }
+        [data-planner="ghost"] .planner-title {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        [data-planner="ghost"] .planner-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        [data-planner="ghost"] .planner-illustration {
+            display: none;
+        }
+        [data-planner="ghost"] .task-section {
+            padding-top: 0;
+        }
+
+        .style-btn {
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .style-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .style-btn.active {
+            background: var(--manu);
+            color: white;
+        }
+
+        /* Theme selector styles are inline in HTML */
+
+        /* Task Section */
+        .task-section {
+            flex: 1;
+            padding: 16px 20px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .task-item:hover { background: var(--bg-canvas); }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.2s;
+        }
+
+        .task-item:hover .checkbox { border-color: var(--planner); }
+
+        .task-text {
+            font-size: 13px;
+            line-height: 1.45;
+            color: var(--text-primary);
+        }
+
+        .mention {
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .mention.biblio { background: var(--biblio-tint); color: var(--biblio-strong); }
+        .mention.manu { background: var(--manu-tint); color: var(--manu-strong); }
+
+        .task-item.completed .checkbox {
+            background: var(--biblio);
+            border-color: var(--biblio);
+        }
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--bg-canvas);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .task-input-wrapper:focus-within {
+            background: var(--bg-secondary);
+            border-color: var(--planner);
+        }
+
+        .plus-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .task-input-wrapper input::placeholder { color: var(--text-muted); }
+
+        /* ============================================
+           WCAG CONTRAST CHECKER PANEL
+           ============================================ */
+        .wcag-panel {
+            position: fixed;
+            top: 70px;
+            left: 24px;
+            width: 320px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px -8px var(--warm-shadow);
+            z-index: 200;
+            font-size: 12px;
+        }
+
+        .wcag-panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+        }
+
+        .wcag-panel-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .wcag-panel-theme {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--bg-canvas);
+            color: var(--text-secondary);
+        }
+
+        .wcag-panel-body {
+            padding: 12px 16px;
+        }
+
+        .wcag-section {
+            margin-bottom: 16px;
+        }
+
+        .wcag-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .wcag-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .wcag-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: var(--bg-canvas);
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .wcag-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .wcag-swatch {
+            width: 32px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            flex-shrink: 0;
+            border: 1px solid var(--border-default);
+        }
+
+        .wcag-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .wcag-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wcag-colors {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .wcag-ratio {
+            font-weight: 700;
+            font-size: 13px;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .wcag-badges {
+            display: flex;
+            gap: 4px;
+        }
+
+        .wcag-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .wcag-badge.pass {
+            background: #059669;
+            color: white;
+        }
+
+        .wcag-badge.fail {
+            background: #dc2626;
+            color: white;
+        }
+
+        .wcag-toggle-btn {
+            position: fixed;
+            top: 70px;
+            left: 24px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 199;
+            box-shadow: 0 2px 8px -2px var(--warm-shadow);
+        }
+
+        .wcag-toggle-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .wcag-panel.hidden {
+            display: none;
+        }
+
+        .wcag-panel.hidden + .wcag-toggle-btn {
+            display: block;
+        }
+
+        .wcag-panel:not(.hidden) + .wcag-toggle-btn {
+            display: none;
+        }
+
+        .wcag-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .wcag-close-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <div class="logo-icon"></div>
+            <span>Citable</span>
+        </a>
+        <div class="nav-actions">
+            <button class="icon-btn theme-toggle" title="Toggle theme" onclick="toggleTheme()">
+                <svg class="icon-sun" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg class="icon-moon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" title="Notifications">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+            </button>
+            <div class="avatar">M</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="greeting-header">
+            <h1 id="greeting">Good afternoon, Mahdi</h1>
+            <p>Pick up where you left off</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" placeholder="Search papers, manuscripts, tasks...">
+            <span class="search-shortcut">&#x2318;K</span>
+        </div>
+
+        <!-- Recent Strip -->
+        <div class="recent-strip">
+            <div class="section-header">
+                <span class="section-title">Recent</span>
+                <span class="section-more">View all</span>
+            </div>
+            <div class="recent-cards">
+                <div class="recent-card">
+                    <div class="recent-card-header">
+                        <div class="recent-card-icon manu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div class="recent-card-title">NeurIPS_Draft_v3.tex</div>
+                    </div>
+                    <div class="recent-card-time">10 min ago</div>
+                </div>
+                <div class="recent-card">
+                    <div class="recent-card-header">
+                        <div class="recent-card-icon biblio">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="recent-card-title">Attention Is All You Need</div>
+                    </div>
+                    <div class="recent-card-time">2 hours ago</div>
+                </div>
+                <div class="recent-card">
+                    <div class="recent-card-header">
+                        <div class="recent-card-icon manu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div class="recent-card-title">Thesis_Chapter_01</div>
+                    </div>
+                    <div class="recent-card-time">Yesterday</div>
+                </div>
+                <div class="recent-card">
+                    <div class="recent-card-header">
+                        <div class="recent-card-icon biblio">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="recent-card-title">Transformer Architectures</div>
+                    </div>
+                    <div class="recent-card-time">2 days ago</div>
+                </div>
+                <div class="recent-card">
+                    <div class="recent-card-header">
+                        <div class="recent-card-icon biblio">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="recent-card-title">Visual RAG Methods</div>
+                    </div>
+                    <div class="recent-card-time">3 days ago</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="bento-grid">
+            <!-- Left: Module Stack -->
+            <div class="module-stack">
+                <!-- Bibliography -->
+                <div class="card module-card">
+                    <div class="module-header biblio">
+                        <div class="module-info">
+                            <h3 class="module-title biblio">Bibliography</h3>
+                            <p class="module-subtitle">127 papers organized</p>
+                        </div>
+                        <svg class="module-illustration illustration-biblio" viewBox="0 0 100 80" fill="none">
+                            <!-- Stack hints (corner edges behind) -->
+                            <rect class="stroke" x="24" y="4" width="48" height="64" rx="3" stroke-width="1.5" opacity="0.25"/>
+                            <rect class="stroke" x="20" y="8" width="48" height="64" rx="3" stroke-width="1.5" opacity="0.4"/>
+                            <!-- Main paper -->
+                            <rect class="stroke paper-fill" x="16" y="12" width="48" height="64" rx="3" stroke-width="2"/>
+                            <path class="light" d="M26 28h28M26 38h24M26 48h20M26 58h26" stroke-width="2.5" stroke-linecap="round"/>
+                            <!-- Checkmark badge -->
+                            <circle class="fill" cx="78" cy="40" r="14" opacity="0.15"/>
+                            <path class="stroke" d="M72 40l4 4 8-8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Manuscripts -->
+                <div class="card module-card">
+                    <div class="module-header manu">
+                        <div class="module-info">
+                            <h3 class="module-title manu">Manuscripts</h3>
+                            <p class="module-subtitle">8 active projects</p>
+                        </div>
+                        <svg class="module-illustration illustration-manu" viewBox="0 0 100 80" fill="none">
+                            <!-- Main paper -->
+                            <rect class="stroke paper-fill" x="16" y="12" width="48" height="64" rx="3" stroke-width="2"/>
+                            <path class="light" d="M26 28h28M26 38h24M26 48h20" stroke-width="2.5" stroke-linecap="round"/>
+                            <!-- CITE button -->
+                            <rect class="fill" x="26" y="56" width="22" height="10" rx="5"/>
+                            <text x="30" y="64" fill="white" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
+                            <!-- Pen -->
+                            <g transform="translate(68, 8) rotate(20)">
+                                <rect class="stroke paper-fill" x="0" y="0" width="6" height="36" rx="3" stroke-width="1.5"/>
+                                <path class="fill" d="M0 30 L3 40 L6 30" />
+                            </g>
+                        </svg>
+                        <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Discover -->
+                <div class="card module-card">
+                    <div class="module-header discover">
+                        <div class="module-info">
+                            <h3 class="module-title discover">Discover</h3>
+                            <p class="module-subtitle">Explore new research</p>
+                        </div>
+                        <svg class="module-illustration illustration-discover" viewBox="0 0 100 80" fill="none">
+                            <!-- Main paper -->
+                            <rect class="stroke paper-fill" x="16" y="12" width="48" height="64" rx="3" stroke-width="2"/>
+                            <path class="light" d="M26 28h28M26 38h24M26 48h20M26 58h26" stroke-width="2.5" stroke-linecap="round"/>
+                            <!-- Magnifying glass -->
+                            <circle class="fill" cx="78" cy="40" r="14" opacity="0.15"/>
+                            <circle class="stroke paper-fill" cx="78" cy="40" r="11" stroke-width="2"/>
+                            <path class="stroke" d="M86 48l6 6" stroke-width="2.5" stroke-linecap="round"/>
+                            <!-- Focus lines inside magnifier -->
+                            <path class="stroke" d="M71 37h14M71 43h10" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                        </svg>
+                        <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Planner -->
+            <div class="card planner-card">
+                <div class="planner-header">
+                    <div class="planner-title-group">
+                        <h3 class="planner-title">Research Planner</h3>
+                        <p class="planner-subtitle">4 tasks remaining</p>
+                    </div>
+                    <svg class="planner-illustration illustration-planner" viewBox="0 0 100 80" fill="none">
+                        <rect class="stroke paper-fill" x="20" y="10" width="52" height="56" rx="5" stroke-width="2"/>
+                        <circle class="stroke paper-fill" cx="34" cy="26" r="5" stroke-width="1.5"/>
+                        <path class="stroke" d="M31.5 26l1.5 1.5 3-3" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path class="light" d="M44 24h22" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle class="stroke paper-fill" cx="34" cy="40" r="5" stroke-width="1.5"/>
+                        <path class="light" d="M44 38h18" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle class="stroke paper-fill" cx="34" cy="54" r="5" stroke-width="1.5"/>
+                        <path class="light" d="M44 52h20" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="task-section">
+                    <div class="task-list">
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Finish reading <span class="mention biblio">@Attention_is_all</span></span>
+                        </div>
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Rewrite intro in <span class="mention manu">@NeurIPS_Draft</span></span>
+                        </div>
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Add citations to <span class="mention manu">@Thesis_01</span></span>
+                        </div>
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Review related work section</span>
+                        </div>
+                        <div class="task-item completed">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Export bib for <span class="mention manu">@ICML_Sub</span></span>
+                        </div>
+                    </div>
+                    <div class="task-input-wrapper">
+                        <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        <input type="text" placeholder="Add task... use @ to link">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modus Theme Selector -->
+    <div class="theme-selector" style="position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 100;">
+        <div class="theme-group" style="background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 10px; padding: 8px; box-shadow: 0 4px 20px -4px var(--warm-shadow);">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; padding: 0 4px;">Modus Theme</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <button class="style-btn active" data-modus="operandi">Operandi (Light)</button>
+                <button class="style-btn" data-modus="operandi-tinted">Operandi Tinted</button>
+                <button class="style-btn" data-modus="vivendi">Vivendi (Dark #000)</button>
+                <button class="style-btn" data-modus="vivendi-tinted">Vivendi Tinted</button>
+            </div>
+        </div>
+        <div class="theme-group" style="background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 10px; padding: 6px; box-shadow: 0 4px 20px -4px var(--warm-shadow);">
+            <div style="display: flex; gap: 4px;">
+                <button class="style-btn active" data-recent="icon">Icon</button>
+                <button class="style-btn" data-recent="dot">Dot</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WCAG Contrast Checker Panel -->
+    <div class="wcag-panel" id="wcagPanel">
+        <div class="wcag-panel-header">
+            <span class="wcag-panel-title">WCAG Contrast Checker</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="wcag-panel-theme" id="wcagThemeLabel">Light</span>
+                <button class="wcag-close-btn" onclick="toggleWcagPanel()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="wcag-panel-body" id="wcagResults">
+            <!-- Results populated by JS -->
+        </div>
+    </div>
+    <button class="wcag-toggle-btn" onclick="toggleWcagPanel()">WCAG Checker</button>
+
+    <script>
+        // ============================================
+        // WCAG CONTRAST RATIO CALCULATOR
+        // Based on WCAG 2.1 specification
+        // https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html
+        // ============================================
+
+        function hexToRgb(hex) {
+            // Handle shorthand (#abc -> #aabbcc)
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Calculate relative luminance per WCAG 2.1
+        // https://www.w3.org/WAI/GL/wiki/Relative_luminance
+        function luminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(v => {
+                v /= 255;
+                return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        // Calculate contrast ratio per WCAG 2.1
+        // https://www.w3.org/WAI/GL/wiki/Contrast_ratio
+        function contrastRatio(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            const lum1 = luminance(rgb1.r, rgb1.g, rgb1.b);
+            const lum2 = luminance(rgb2.r, rgb2.g, rgb2.b);
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        // Get computed CSS variable value as hex
+        function getCssVar(varName) {
+            const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            // Handle rgba() values - extract just for display, use solid approximation
+            if (value.startsWith('rgba')) {
+                return null; // Skip rgba for contrast calc
+            }
+            return value;
+        }
+
+        // Get background color, resolving CSS vars
+        function getBackgroundHex(varName) {
+            const value = getCssVar(varName);
+            if (!value) return null;
+            // If it's already a hex, return it
+            if (value.startsWith('#')) return value;
+            // If it's rgb(), convert to hex
+            const rgbMatch = value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (rgbMatch) {
+                return rgbToHex(parseInt(rgbMatch[1]), parseInt(rgbMatch[2]), parseInt(rgbMatch[3]));
+            }
+            return null;
+        }
+
+        function updateWcagPanel() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'operandi';
+            const themeLabels = {
+                'operandi': 'Operandi (Light)',
+                'operandi-tinted': 'Operandi Tinted',
+                'vivendi': 'Vivendi (Dark)',
+                'vivendi-tinted': 'Vivendi Tinted'
+            };
+            document.getElementById('wcagThemeLabel').textContent = themeLabels[theme] || theme;
+
+            // Define all color combinations to test
+            const tests = [
+                // Text on backgrounds
+                { section: 'Text Colors', items: [
+                    { label: 'Primary on bg-primary', fg: '--text-primary', bg: '--bg-primary' },
+                    { label: 'Secondary on bg-primary', fg: '--text-secondary', bg: '--bg-primary' },
+                    { label: 'Muted on bg-primary', fg: '--text-muted', bg: '--bg-primary' },
+                    { label: 'Primary on bg-secondary', fg: '--text-primary', bg: '--bg-secondary' },
+                    { label: 'Muted on bg-secondary', fg: '--text-muted', bg: '--bg-secondary' },
+                    { label: 'Muted on bg-canvas', fg: '--text-muted', bg: '--bg-canvas' },
+                ]},
+                // Module accent colors
+                { section: 'Accent Colors', items: [
+                    { label: 'Biblio on bg-primary', fg: '--biblio', bg: '--bg-primary' },
+                    { label: 'Biblio-strong on tint', fg: '--biblio-strong', bg: '--biblio-tint', tintBg: '--bg-primary' },
+                    { label: 'Manu on bg-primary', fg: '--manu', bg: '--bg-primary' },
+                    { label: 'Manu-strong on tint', fg: '--manu-strong', bg: '--manu-tint', tintBg: '--bg-primary' },
+                    { label: 'Planner on bg-primary', fg: '--planner', bg: '--bg-primary' },
+                    { label: 'Planner-strong on tint', fg: '--planner-strong', bg: '--planner-tint', tintBg: '--bg-primary' },
+                    { label: 'Discover on bg-primary', fg: '--discover', bg: '--bg-primary' },
+                    { label: 'Discover-strong on tint', fg: '--discover-strong', bg: '--discover-tint', tintBg: '--bg-primary' },
+                ]}
+            ];
+
+            let html = '';
+
+            for (const section of tests) {
+                html += `<div class="wcag-section">
+                    <div class="wcag-section-title">${section.section}</div>`;
+
+                for (const test of section.items) {
+                    const fgHex = getBackgroundHex(test.fg);
+                    let bgHex = getBackgroundHex(test.bg);
+
+                    // For tint backgrounds (rgba), we need to composite on the underlying bg
+                    if (!bgHex && test.tintBg) {
+                        bgHex = getBackgroundHex(test.tintBg);
+                    }
+
+                    if (!fgHex || !bgHex) {
+                        // Skip if we can't get solid colors (rgba backgrounds)
+                        html += `<div class="wcag-row">
+                            <div class="wcag-swatch" style="background: var(${test.bg}); color: var(${test.fg});">Aa</div>
+                            <div class="wcag-info">
+                                <div class="wcag-label">${test.label}</div>
+                                <div class="wcag-colors">rgba (approx)</div>
+                            </div>
+                            <div class="wcag-ratio" style="color: var(--text-muted);">—</div>
+                            <div class="wcag-badges">
+                                <span class="wcag-badge" style="background: var(--text-muted);">N/A</span>
+                            </div>
+                        </div>`;
+                        continue;
+                    }
+
+                    const ratio = contrastRatio(fgHex, bgHex);
+                    const passAA = ratio >= 4.5;
+                    const passAALarge = ratio >= 3;
+                    const passAAA = ratio >= 7;
+
+                    html += `<div class="wcag-row">
+                        <div class="wcag-swatch" style="background: ${bgHex}; color: ${fgHex};">Aa</div>
+                        <div class="wcag-info">
+                            <div class="wcag-label">${test.label}</div>
+                            <div class="wcag-colors">${fgHex} / ${bgHex}</div>
+                        </div>
+                        <div class="wcag-ratio" style="color: ${passAA ? '#059669' : '#dc2626'};">${ratio.toFixed(2)}</div>
+                        <div class="wcag-badges">
+                            <span class="wcag-badge ${passAA ? 'pass' : 'fail'}">AA</span>
+                            <span class="wcag-badge ${passAAA ? 'pass' : 'fail'}">AAA</span>
+                        </div>
+                    </div>`;
+                }
+
+                html += '</div>';
+            }
+
+            // Add legend
+            html += `<div class="wcag-section">
+                <div class="wcag-section-title">Requirements</div>
+                <div style="font-size: 10px; color: var(--text-secondary); line-height: 1.5;">
+                    <strong>AA Normal text:</strong> 4.5:1<br>
+                    <strong>AA Large text:</strong> 3:1 (18pt+ or 14pt bold)<br>
+                    <strong>AAA Normal text:</strong> 7:1
+                </div>
+            </div>`;
+
+            document.getElementById('wcagResults').innerHTML = html;
+        }
+
+        function toggleWcagPanel() {
+            const panel = document.getElementById('wcagPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                updateWcagPanel();
+            }
+        }
+
+        // Initial update on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWcagPanel();
+        });
+
+        function setModusTheme(theme) {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('modusTheme', theme);
+
+            // Update button states
+            document.querySelectorAll('[data-modus]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.modus === theme);
+            });
+
+            // Update WCAG panel if visible
+            if (!document.getElementById('wcagPanel').classList.contains('hidden')) {
+                setTimeout(updateWcagPanel, 50);
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme') || 'operandi';
+            // Cycle: operandi -> vivendi -> operandi-tinted -> vivendi-tinted -> operandi
+            const cycle = ['operandi', 'vivendi', 'operandi-tinted', 'vivendi-tinted'];
+            const idx = cycle.indexOf(current);
+            const next = cycle[(idx + 1) % cycle.length];
+            setModusTheme(next);
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('modusTheme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                document.querySelectorAll('[data-modus]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.modus === saved);
+                });
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'vivendi');
+                document.querySelectorAll('[data-modus]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.modus === 'vivendi');
+                });
+            }
+        })();
+
+        (function updateGreeting() {
+            const hour = new Date().getHours();
+            const el = document.getElementById('greeting');
+            let greeting = "Good evening";
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 17) greeting = "Good afternoon";
+            el.textContent = greeting + ", Mahdi";
+        })();
+
+        // Modus theme toggle
+        document.querySelectorAll('[data-modus]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setModusTheme(btn.dataset.modus);
+            });
+        });
+
+        // Recent style toggle
+        (function initRecentStyle() {
+            const saved = localStorage.getItem('recentStyle');
+            if (saved) {
+                document.documentElement.setAttribute('data-recent', saved);
+                document.querySelectorAll('[data-recent]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.recent === saved);
+                });
+            }
+        })();
+
+        document.querySelectorAll('[data-recent]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const style = btn.dataset.recent;
+                if (style === 'icon') {
+                    document.documentElement.removeAttribute('data-recent');
+                    localStorage.removeItem('recentStyle');
+                } else {
+                    document.documentElement.setAttribute('data-recent', style);
+                    localStorage.setItem('recentStyle', style);
+                }
+                document.querySelectorAll('[data-recent]').forEach(b => {
+                    b.classList.toggle('active', b.dataset.recent === style);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amber Comparison Mini</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-muted: #94a3b8;
+      --border-subtle: #e2e8f0;
+
+      --editor: #14b8a6;
+      --biblio: #3b82f6;
+      --todo: #f43f5e;
+      --discover: #f59e0b;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #080a10;
+      --bg-secondary: #161b21;
+      --bg-tertiary: #1a222c;
+      --bg-hover: #242e3c;
+      --text-primary: #e8e8f0;
+      --text-muted: #6e6e7e;
+      --border-subtle: #1a222c;
+
+      --editor: #2dd4bf;
+      --biblio: #60a5fa;
+      --todo: #fb7185;
+      --discover: #fbbf24;
+    }
+
+    [data-amber="amber"] {
+      --discover: #f59e0b;
+    }
+    [data-amber="orange-amber"] {
+      --discover: #d97706;
+    }
+    [data-amber="golden"] {
+      --discover: #b45309;
+    }
+
+    [data-theme="dark"][data-amber="amber"] {
+      --discover: #fbbf24;
+    }
+    [data-theme="dark"][data-amber="orange-amber"] {
+      --discover: #fdba74;
+    }
+    [data-theme="dark"][data-amber="golden"] {
+      --discover: #fcd34d;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .panel {
+      width: min(680px, 100%);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .btn {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .btn.active {
+      border-color: var(--discover);
+      box-shadow: inset 0 0 0 1px var(--discover);
+    }
+
+    .activity {
+      display: flex;
+      height: 56px;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 6px 10px;
+    }
+
+    .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: var(--text-primary);
+      background: transparent;
+    }
+
+    .icon.editor { background: color-mix(in srgb, var(--editor) 18%, transparent); color: var(--editor); }
+    .icon.biblio { background: color-mix(in srgb, var(--biblio) 18%, transparent); color: var(--biblio); }
+    .icon.todo { background: color-mix(in srgb, var(--todo) 18%, transparent); color: var(--todo); }
+    .icon.discover { background: color-mix(in srgb, var(--discover) 18%, transparent); color: var(--discover); }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .swatch {
+      height: 10px;
+      border-radius: 999px;
+    }
+    .s-editor { background: var(--editor); }
+    .s-biblio { background: var(--biblio); }
+    .s-todo { background: var(--todo); }
+    .s-discover { background: var(--discover); }
+  </style>
+</head>
+<body data-theme="light" data-amber="amber">
+  <div class="panel">
+    <div class="controls">
+      <span class="label">Amber</span>
+      <button class="btn active" data-amber="amber">Amber</button>
+      <button class="btn" data-amber="orange-amber">Orange‑Amber</button>
+      <button class="btn" data-amber="golden">Golden</button>
+      <span class="label" style="margin-left:12px;">Theme</span>
+      <button class="btn active" data-theme="light">Light</button>
+      <button class="btn" data-theme="dark">Dark</button>
+    </div>
+
+    <div class="activity">
+      <div class="icon editor">E</div>
+      <div class="icon biblio">B</div>
+      <div class="icon todo">T</div>
+      <div class="icon discover">D</div>
+    </div>
+
+    <div class="swatches">
+      <div class="swatch s-editor"></div>
+      <div class="swatch s-biblio"></div>
+      <div class="swatch s-todo"></div>
+      <div class="swatch s-discover"></div>
+    </div>
+  </div>
+
+  <script>
+    const root = document.body;
+    document.querySelectorAll('[data-amber]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.dataset.amber) return;
+        root.dataset.amber = btn.dataset.amber;
+        document.querySelectorAll('[data-amber]').forEach(b => b.classList.toggle('active', b.dataset.amber === root.dataset.amber));
+      });
+    });
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.dataset.theme) return;
+        root.dataset.theme = btn.dataset.theme;
+        document.querySelectorAll('[data-theme]').forEach(b => b.classList.toggle('active', b.dataset.theme === root.dataset.theme));
+      });
+    });
+  </script>
+</body>
+</html>

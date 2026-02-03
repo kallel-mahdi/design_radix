@@ -1,0 +1,1177 @@
+/* ============================================
+   DIFF STYLE TOGGLE BAR
+   ============================================ */
+.diff-toggle-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  margin-left: var(--space-4);
+  border-left: 1px solid var(--border-default);
+}
+
+.diff-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.diff-btn {
+  height: var(--height-button);
+  padding: 0 var(--space-3);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.diff-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.diff-btn.active {
+  background: var(--accent-violet);
+  border-color: var(--accent-violet);
+  color: white;
+}
+
+/* ============================================
+   QUICK ACTION TRIGGER (Ctrl+K Button)
+   ============================================ */
+.quick-action-trigger {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px var(--shadow-soft);
+}
+
+.quick-action-trigger:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.quick-action-trigger svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.quick-action-trigger kbd {
+  font-family: inherit;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.25rem;
+  background: var(--bg-primary);
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+}
+
+.quick-action-trigger:hover kbd {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* ============================================
+   SELECTION HIGHLIGHT
+   ============================================ */
+.code-selected {
+  background: var(--selection);
+  border-radius: 0.125rem;
+}
+
+/* ============================================
+   DIFF VISUALIZATION - COMMON STYLES
+   ============================================ */
+.diff-container {
+  margin: var(--space-2) 0;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.diff-old {
+  background: rgba(244, 114, 182, 0.15);
+  color: var(--accent-error);
+}
+
+.diff-new {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--accent-success);
+}
+
+.diff-old-text {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.diff-new-text {
+  font-weight: 500;
+}
+
+/* Word-level highlights */
+.word-removed {
+  background: rgba(244, 114, 182, 0.25);
+  text-decoration: line-through;
+  border-radius: 0.125rem;
+  padding: 0 0.125rem;
+  color: var(--accent-error);
+  opacity: 0.7;
+}
+
+.word-added {
+  background: rgba(34, 197, 94, 0.25);
+  border-radius: 0.125rem;
+  padding: 0 0.125rem;
+  color: var(--accent-success);
+  font-weight: 500;
+}
+
+/* Surgical edit: old→new inline wrapper */
+.word-change {
+  display: inline;
+  position: relative;
+}
+
+.word-change .word-removed {
+  margin-right: 0.125rem;
+}
+
+.word-change .word-added {
+  margin-left: 0.125rem;
+}
+
+/* ============================================
+   STYLE 1: VIEW ZONE (Below Original)
+   ============================================ */
+.diff-view-zone-container {
+  margin: var(--space-2) 0;
+}
+
+.diff-view-zone {
+  border-left: 3px solid var(--accent-success);
+  background: var(--bg-secondary);
+  margin-left: 3rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* Section labels for old/new in View Zone */
+.vz-section-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.diff-view-zone-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.diff-view-zone-header svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--accent-violet);
+}
+
+.diff-view-zone-content {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* ============================================
+   OPTION 3: INLINE INTERLEAVED
+   ============================================ */
+.diff-inline {
+  display: inline;
+}
+
+.diff-inline-old {
+  background: rgba(244, 114, 182, 0.2);
+  text-decoration: line-through;
+  color: var(--accent-error);
+  opacity: 0.8;
+}
+
+.diff-inline-new {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--accent-success);
+  margin-left: var(--space-1);
+}
+
+/* ============================================
+   OPTION 4: SPLIT VIEW ZONE
+   ============================================ */
+.diff-split-zone {
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  margin-left: 3rem;
+  overflow: hidden;
+}
+
+.diff-split-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-default);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.diff-split-header svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--accent-violet);
+}
+
+.diff-split-old-section {
+  padding: var(--space-2) var(--space-3);
+  background: rgba(244, 114, 182, 0.08);
+  border-bottom: 1px dashed var(--border-default);
+}
+
+.diff-split-new-section {
+  padding: var(--space-2) var(--space-3);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.diff-split-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.diff-split-label.old {
+  color: var(--accent-error);
+}
+
+.diff-split-label.new {
+  color: var(--accent-success);
+}
+
+.diff-split-content {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* ============================================
+   OPTION 5: HYBRID LINE + WORD
+   ============================================ */
+.diff-hybrid {
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-violet);
+  padding: var(--space-2) var(--space-3);
+  margin-left: 3rem;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+.diff-hybrid-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+/* ============================================
+   ACCEPT/REJECT ACTION BAR
+   ============================================ */
+.diff-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.diff-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-action-btn svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.diff-action-btn.accept {
+  background: var(--accent-success);
+  color: white;
+}
+
+.diff-action-btn.accept:hover {
+  background: #16a34a;
+}
+
+.diff-action-btn.reject {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+.diff-action-btn.reject:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.diff-action-btn.edit {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.diff-action-btn.edit:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.diff-actions-spacer {
+  flex: 1;
+}
+
+.diff-shortcut {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  margin-left: var(--space-1);
+}
+
+/* ============================================
+   AI INDICATOR
+   ============================================ */
+.ai-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.625rem;
+  color: var(--accent-violet);
+  font-weight: 500;
+}
+
+.ai-indicator svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* ============================================
+   DIFF STYLE DESCRIPTIONS
+   ============================================ */
+.diff-style-info {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: 0 4px 16px var(--shadow-soft);
+  z-index: 100;
+}
+
+.diff-style-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.diff-style-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+/* ============================================
+   PROMPT INPUT (for quick action)
+   ============================================ */
+.quick-action-prompt {
+  position: absolute;
+  left: 3rem;
+  right: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-primary);
+  border-radius: 0.5rem;
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-shadow: 0 4px 16px var(--shadow-soft);
+  z-index: 20;
+}
+
+.quick-action-prompt input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.quick-action-prompt input::placeholder {
+  color: var(--text-muted);
+}
+
+.quick-action-prompt-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--accent-violet);
+}
+
+.quick-action-prompt-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 0.375rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-action-prompt-submit:hover {
+  background: var(--accent-secondary);
+}
+
+.quick-action-prompt-submit svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ============================================
+   GENERATING STATE
+   ============================================ */
+.generating-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-violet);
+  margin-left: 3rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.generating-indicator .spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-violet);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   LINE GUTTER INDICATORS
+   ============================================ */
+.line-gutter-added {
+  position: relative;
+}
+
+.line-gutter-added::before {
+  content: '+';
+  position: absolute;
+  left: -1.5rem;
+  color: var(--accent-success);
+  font-weight: bold;
+}
+
+.line-gutter-removed {
+  position: relative;
+}
+
+.line-gutter-removed::before {
+  content: '-';
+  position: absolute;
+  left: -1.5rem;
+  color: var(--accent-error);
+  font-weight: bold;
+}
+
+/* ============================================
+   CONTENT TYPE TOGGLE BAR
+   ============================================ */
+.content-toggle-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  margin-left: var(--space-4);
+  border-left: 1px solid var(--border-default);
+}
+
+.content-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.content-btn {
+  height: var(--height-button);
+  padding: 0 var(--space-3);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.content-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.content-btn.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+/* ============================================
+   MOVED/REORDERED VISUAL INDICATOR
+   ============================================ */
+.word-moved {
+  background: rgba(168, 85, 247, 0.25);
+  border-radius: 0.125rem;
+  padding: 0 0.125rem;
+  color: var(--accent-violet);
+  font-style: italic;
+}
+
+.move-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-size: 0.625rem;
+  color: var(--accent-violet);
+  vertical-align: super;
+}
+
+.move-indicator svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.diff-line-moved {
+  background: rgba(168, 85, 247, 0.1);
+  border-left: 3px solid var(--accent-violet);
+  padding-left: 0.5rem;
+}
+
+.diff-line-moved::before {
+  content: '↕';
+  position: absolute;
+  left: -1.5rem;
+  color: var(--accent-violet);
+  font-size: 0.75rem;
+}
+
+/* ============================================
+   STYLE 5: GOOGLE DOCS
+   ============================================ */
+.diff-gdocs {
+  display: flex;
+  gap: var(--space-4);
+  margin-left: 3rem;
+  position: relative;
+}
+
+.diff-gdocs-content {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: 0.375rem;
+}
+
+/* Google Docs style additions (green underline) */
+.gdocs-added {
+  color: #137333;
+  text-decoration: underline;
+  text-decoration-color: #137333;
+  background: rgba(19, 115, 51, 0.1);
+}
+
+[data-theme="dark"] .gdocs-added {
+  color: #34d399;
+  text-decoration-color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+}
+
+/* Google Docs style deletions (red strikethrough) */
+.gdocs-deleted {
+  color: #c5221f;
+  text-decoration: line-through;
+  text-decoration-color: #c5221f;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .gdocs-deleted {
+  color: #f87171;
+  text-decoration-color: #f87171;
+}
+
+/* Google Docs style moved (purple with indicator) */
+.gdocs-moved {
+  color: #8e24aa;
+  background: rgba(142, 36, 170, 0.1);
+  border-bottom: 2px dotted #8e24aa;
+}
+
+[data-theme="dark"] .gdocs-moved {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.15);
+  border-bottom-color: #c084fc;
+}
+
+/* Margin comment box */
+.diff-gdocs-margin-comment {
+  width: 220px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: var(--space-3);
+  box-shadow: 0 2px 8px var(--shadow-soft);
+  flex-shrink: 0;
+}
+
+.diff-gdocs-margin-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.diff-gdocs-avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--accent-violet);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.diff-gdocs-author {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.diff-gdocs-time {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.diff-gdocs-margin-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-2);
+}
+
+.diff-gdocs-margin-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.diff-gdocs-margin-actions .diff-action-btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 0.625rem;
+  padding: var(--space-1) var(--space-2);
+}
+
+/* ============================================
+   STYLE 6: CURSOR CHUNKS
+   ============================================ */
+.diff-cursor {
+  margin-left: 3rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.diff-cursor-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-default);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.diff-cursor-header svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--accent-violet);
+}
+
+.diff-cursor-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.diff-cursor-header-actions .diff-action-btn {
+  font-size: 0.625rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.diff-cursor-hunks {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+/* Red block for deletions */
+.cursor-hunk-removed {
+  background: rgba(244, 114, 182, 0.15);
+  border-left: 4px solid var(--accent-error);
+  padding: var(--space-2) var(--space-3);
+  position: relative;
+}
+
+.cursor-hunk-removed::before {
+  content: '-';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--accent-error);
+  font-weight: bold;
+}
+
+.cursor-hunk-removed .hunk-line {
+  color: var(--accent-error);
+  text-decoration: line-through;
+  opacity: 0.8;
+  padding-left: 1rem;
+}
+
+/* Green block for additions */
+.cursor-hunk-added {
+  background: rgba(34, 197, 94, 0.15);
+  border-left: 4px solid var(--accent-success);
+  padding: var(--space-2) var(--space-3);
+  position: relative;
+}
+
+.cursor-hunk-added::before {
+  content: '+';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--accent-success);
+  font-weight: bold;
+}
+
+.cursor-hunk-added .hunk-line {
+  color: var(--accent-success);
+  padding-left: 1rem;
+}
+
+/* Purple/blue block for moved content */
+.cursor-hunk-moved {
+  background: rgba(168, 85, 247, 0.15);
+  border-left: 4px solid var(--accent-violet);
+  padding: var(--space-2) var(--space-3);
+  position: relative;
+}
+
+.cursor-hunk-moved::before {
+  content: '↕';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--accent-violet);
+  font-weight: bold;
+}
+
+.cursor-hunk-moved .hunk-line {
+  color: var(--accent-violet);
+  font-style: italic;
+  padding-left: 1rem;
+}
+
+/* Unchanged context lines */
+.cursor-hunk-context {
+  background: transparent;
+  padding: var(--space-1) var(--space-3);
+  color: var(--text-muted);
+  border-left: 4px solid transparent;
+}
+
+.cursor-hunk-context .hunk-line {
+  padding-left: 1rem;
+}
+
+/* Per-hunk action buttons */
+.cursor-hunk-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding-left: 1rem;
+}
+
+.cursor-hunk-btn {
+  font-size: 0.5625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cursor-hunk-btn.accept {
+  background: var(--accent-success);
+  color: white;
+}
+
+.cursor-hunk-btn.reject {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+.cursor-hunk-btn:hover {
+  opacity: 0.8;
+}
+
+.cursor-hunk-btn svg {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+/* ============================================
+   CHANGE SUMMARY LINE
+   ============================================ */
+.change-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: 3rem;
+  margin-bottom: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-tertiary);
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-violet);
+}
+
+.change-summary-icon {
+  display: flex;
+  align-items: center;
+}
+
+.change-summary-icon svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--accent-violet);
+}
+
+.change-summary-text {
+  font-weight: 500;
+}
+
+/* ============================================
+   STYLE 7: GHOST TEXT
+   ============================================ */
+.diff-ghost-container {
+  margin: var(--space-2) 0;
+}
+
+.diff-ghost {
+  margin-left: 3rem;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: 0.375rem;
+  border: 1px dashed var(--border-default);
+}
+
+.diff-ghost-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+/* Ghost text - the suggested replacement shown as faint text */
+.ghost-text {
+  color: var(--accent-success);
+  opacity: 0.5;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 0.125rem;
+  padding: 0 0.125rem;
+  font-style: italic;
+}
+
+/* Original text being replaced - shown with cursor */
+.ghost-original {
+  position: relative;
+  border-right: 2px solid var(--accent-primary);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { border-color: var(--accent-primary); }
+  51%, 100% { border-color: transparent; }
+}
+
+.diff-ghost-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.ghost-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 0.25rem;
+  font-family: inherit;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 0.25rem;
+}
+
+/* ============================================
+   STYLE 8: DRAFT PREVIEW
+   ============================================ */
+.diff-draft-container {
+  margin: var(--space-2) 0;
+}
+
+.diff-draft {
+  margin-left: 3rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.diff-draft-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-default);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.diff-draft-header svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--accent-violet);
+}
+
+.diff-draft-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-draft-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.diff-draft-toggle svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.diff-draft-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+
+.diff-draft-preview {
+  padding: var(--space-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.diff-draft-comparison {
+  padding: var(--space-3);
+  background: var(--bg-primary);
+  border-top: 1px dashed var(--border-default);
+}
+
+.diff-draft-comparison .comparison-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.diff-draft-comparison .comparison-old {
+  padding: var(--space-2);
+  background: rgba(244, 114, 182, 0.1);
+  border-radius: 0.25rem;
+  margin-bottom: var(--space-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  color: var(--accent-error);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.diff-draft-comparison .comparison-new {
+  padding: var(--space-2);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 0.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  color: var(--accent-success);
+}
+
+.diff-draft .diff-actions {
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-2) var(--space-3);
+  margin-top: 0;
+}
+
+/* ============================================
+   UNDO TOAST
+   ============================================ */
+.undo-toast {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-success);
+  color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px var(--shadow-soft);
+  font-size: 0.875rem;
+  z-index: 1000;
+  animation: slideUp 0.2s ease;
+}
+
+.undo-toast-text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.undo-toast-text svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.undo-toast-btn {
+  padding: var(--space-1) var(--space-2);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 0.25rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.undo-toast-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   HIDDEN UTILITY
+   ============================================ */
+.hidden {
+  display: none !important;
+}

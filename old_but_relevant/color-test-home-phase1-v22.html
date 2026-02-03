@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1 v2: Palette Comparison - Citable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           BRAND PB NEUTRAL RAMP (from ChatGPT/Brand Guidelines)
+           ============================================ */
+        :root {
+            /* Light mode surfaces */
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #F1F5F9;
+            --bg-hover: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-default: #E2E8F0;
+            --border-subtle: rgba(226, 232, 240, 0.5);
+
+            /* Card backgrounds */
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --warm-shadow: rgba(15, 23, 42, 0.08);
+
+            /* UI */
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Module colors are set dynamically via JS based on selected palette */
+            /* Default fallbacks (Palette A - Light mode) */
+            --module-biblio: #10B981;
+            --module-biblio-strong: #047857;
+            --module-biblio-container: #ECFDF5;
+
+            --module-manu: #0EA5E9;
+            --module-manu-strong: #0369A1;
+            --module-manu-container: #E0F2FE;
+
+            --module-planner: #6366F1;
+            --module-planner-strong: #4338CA;
+            --module-planner-container: #EEF2FF;
+
+            --module-discover: #A855F7;
+            --module-discover-strong: #7C3AED;
+            --module-discover-container: #FAF5FF;
+
+            /* Global semantic (consistent across modules) */
+            --semantic-success: #10B981;
+            --semantic-warning: #F59E0B;
+            --semantic-error: #EF4444;
+        }
+
+        /* Dark mode - Brand PB ramp (only background/text, module colors via JS) */
+        [data-theme="dark"] {
+            --bg-primary: #080A10;      /* PB1 */
+            --bg-secondary: #161B21;    /* PB2 */
+            --bg-tertiary: #1A222C;     /* PB3 */
+            --bg-hover: #242E3C;        /* PB4 */
+            --text-primary: #E8E8F0;
+            --text-secondary: #A8A8B8;
+            --text-muted: #6E6E7E;
+            --border-default: #242E3C;  /* PB4 */
+            --border-subtle: #1A222C;   /* PB3 */
+            --card-bg: rgba(22, 27, 33, 0.95);
+            --warm-shadow: rgba(0, 0, 0, 0.4);
+
+            --semantic-success: #34D399;
+            --semantic-warning: #FBBF24;
+            --semantic-error: #F87171;
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Subtle noise texture */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ============================================
+           CONTROL PANEL
+           ============================================ */
+        .control-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 340px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-default);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .control-panel.collapsed {
+            transform: translateX(-300px);
+        }
+
+        .panel-toggle {
+            position: absolute;
+            right: -40px;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: background 0.2s ease;
+        }
+
+        .panel-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .panel-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 4px 0;
+        }
+
+        .panel-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .panel-badge {
+            display: inline-block;
+            background: var(--module-planner-container);
+            color: var(--module-planner-strong);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        /* Segmented Control */
+        .segmented-control {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .segment-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px var(--warm-shadow);
+        }
+
+        /* Toggle Switches */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .toggle-sublabel {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border-default);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--module-planner);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Module Color Grid */
+        .module-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .module-card {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .module-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .module-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .module-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .module-colors {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        .color-chip {
+            flex: 1;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 600;
+        }
+
+        .module-hex {
+            font-size: 9px;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--text-muted);
+        }
+
+        .module-contrast {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .contrast-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .contrast-badge.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+
+        .contrast-badge.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: #DC2626;
+        }
+
+        [data-theme="dark"] .contrast-badge.pass {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+        }
+
+        [data-theme="dark"] .contrast-badge.fail {
+            background: rgba(248, 113, 113, 0.15);
+            color: #F87171;
+        }
+
+        /* Palette Selector */
+        .palette-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .palette-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 8px 10px;
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .palette-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .palette-btn.active {
+            border-color: var(--module-manu);
+            background: var(--module-manu-container);
+        }
+
+        .palette-preview {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .palette-preview span {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        .palette-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .palette-name {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1px;
+        }
+
+        .palette-desc {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        /* Changes List */
+        .changes-list {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .changes-list div {
+            margin-bottom: 6px;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .changes-list div::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 7px;
+            width: 4px;
+            height: 4px;
+            background: var(--module-planner);
+            border-radius: 50%;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            margin-left: 340px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .control-panel.collapsed + .main-content {
+            margin-left: 40px;
+        }
+
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-default);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg,
+                var(--module-biblio) 0%,
+                var(--module-manu) 33%,
+                var(--module-planner) 66%,
+                var(--module-discover) 100%);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--module-biblio) 0%, var(--module-planner) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 40px 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .greeting-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .greeting-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+        }
+
+        .greeting-header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 15px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px -4px var(--warm-shadow);
+            transition: var(--transition);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--module-manu);
+        }
+
+        .search-bar svg {
+            color: var(--module-manu);
+            flex-shrink: 0;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .search-bar input::placeholder { color: var(--text-muted); }
+
+        .search-shortcut {
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           BENTO GRID - 4 Products
+           ============================================ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 36px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 2px 12px -2px var(--warm-shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px -12px var(--warm-shadow);
+        }
+
+        /* Card Header */
+        .card-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            min-height: 88px;
+            transition: background 0.3s ease;
+        }
+
+        .card-header.biblio { background: var(--module-biblio-container); }
+        .card-header.manu { background: var(--module-manu-container); }
+        .card-header.planner { background: var(--module-planner-container); }
+        .card-header.discover { background: var(--module-discover-container); }
+
+        .card-title-group { flex: 1; }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+
+        /* Accent title mode */
+        [data-title-mode="accent"] .card-title.biblio { color: var(--module-biblio-strong); }
+        [data-title-mode="accent"] .card-title.manu { color: var(--module-manu-strong); }
+        [data-title-mode="accent"] .card-title.planner { color: var(--module-planner-strong); }
+        [data-title-mode="accent"] .card-title.discover { color: var(--module-discover-strong); }
+
+        /* Neutral title mode */
+        [data-title-mode="neutral"] .card-title { color: var(--text-primary); }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px 0 0 0;
+        }
+
+        .card-illustration {
+            width: 72px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        /* SVG illustration colors */
+        .illustration-biblio .stroke { stroke: var(--module-biblio); }
+        .illustration-biblio .fill { fill: var(--module-biblio); }
+        .illustration-biblio .light { stroke: var(--module-biblio); opacity: 0.3; }
+
+        .illustration-manu .stroke { stroke: var(--module-manu); }
+        .illustration-manu .fill { fill: var(--module-manu); }
+        .illustration-manu .light { stroke: var(--module-manu); opacity: 0.3; }
+
+        .illustration-planner .stroke { stroke: var(--module-planner); }
+        .illustration-planner .fill { fill: var(--module-planner); }
+        .illustration-planner .light { stroke: var(--module-planner); opacity: 0.3; }
+
+        .illustration-discover .stroke { stroke: var(--module-discover); }
+        .illustration-discover .fill { fill: var(--module-discover); }
+        .illustration-discover .light { stroke: var(--module-discover); opacity: 0.3; }
+
+        .paper-fill { fill: white; }
+        [data-theme="dark"] .paper-fill { fill: rgba(255, 255, 255, 0.06); }
+
+        /* Recent Items */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            padding: 14px 20px 6px;
+        }
+
+        .recent-list { padding: 0 12px 14px; }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .recent-item:hover { background: var(--bg-tertiary); }
+
+        .item-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.biblio { background: var(--module-biblio); }
+        .dot.manu { background: var(--module-manu); }
+        .dot.planner { background: var(--module-planner); }
+        .dot.discover { background: var(--module-discover); }
+
+        .time { font-size: 11px; color: var(--text-muted); }
+
+        /* Task items */
+        .task-section { padding: 16px 20px 20px; }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover { background: var(--bg-tertiary); }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 5px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:hover .checkbox { border-color: var(--module-planner); }
+
+        .task-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .mention {
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .mention.biblio {
+            background: var(--module-biblio-container);
+            color: var(--module-biblio-strong);
+        }
+
+        .mention.manu {
+            background: var(--module-manu-container);
+            color: var(--module-manu-strong);
+        }
+
+        .task-item.completed .checkbox {
+            background: var(--semantic-success);
+            border-color: var(--semantic-success);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .task-input-wrapper:focus-within {
+            background: var(--bg-secondary);
+            border-color: var(--module-planner);
+        }
+
+        .plus-icon {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .task-input-wrapper input::placeholder { color: var(--text-muted); }
+
+        /* Discover card */
+        .discover-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 16px 20px 20px;
+        }
+
+        .discover-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .discover-chip:hover { background: var(--bg-hover); }
+
+        .discover-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--module-discover-container);
+            color: var(--module-discover);
+        }
+    </style>
+</head>
+<body data-title-mode="accent">
+    <!-- Control Panel -->
+    <div class="control-panel" id="controlPanel">
+        <button class="panel-toggle" onclick="togglePanel()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+
+        <div class="panel-header">
+            <h2 class="panel-title">Palette Explorer</h2>
+            <p class="panel-subtitle">8 research-inspired palettes</p>
+            <span class="panel-badge" id="paletteBadge">1: Cool Cluster</span>
+        </div>
+
+        <!-- Palette Selector -->
+        <div class="control-section">
+            <div class="section-title">Color Palette (8 options)</div>
+            <div class="palette-selector" id="paletteSelector">
+                <button class="palette-btn active" data-palette="1" onclick="setPalette('1')">
+                    <div class="palette-preview">
+                        <span style="background: #10B981"></span>
+                        <span style="background: #0EA5E9"></span>
+                        <span style="background: #6366F1"></span>
+                        <span style="background: #A855F7"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">1: Cool Cluster</div>
+                        <div class="palette-desc">Original baseline</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="2" onclick="setPalette('2')">
+                    <div class="palette-preview">
+                        <span style="background: #0D9488"></span>
+                        <span style="background: #3B82F6"></span>
+                        <span style="background: #F59E0B"></span>
+                        <span style="background: #A855F7"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">2: Catppuccin</div>
+                        <div class="palette-desc">Soft pastels, cozy</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="3" onclick="setPalette('3')">
+                    <div class="palette-preview">
+                        <span style="background: #22C55E"></span>
+                        <span style="background: #3B82F6"></span>
+                        <span style="background: #EAB308"></span>
+                        <span style="background: #EF4444"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">3: Google Primary</div>
+                        <div class="palette-desc">Bold primaries</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="4" onclick="setPalette('4')">
+                    <div class="palette-preview">
+                        <span style="background: #84CC16"></span>
+                        <span style="background: #6366F1"></span>
+                        <span style="background: #F97316"></span>
+                        <span style="background: #14B8A6"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">4: Linear Style</div>
+                        <div class="palette-desc">Indigo + warm accents</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="5" onclick="setPalette('5')">
+                    <div class="palette-preview">
+                        <span style="background: #059669"></span>
+                        <span style="background: #0284C7"></span>
+                        <span style="background: #F43F5E"></span>
+                        <span style="background: #CA8A04"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">5: Nature Organic</div>
+                        <div class="palette-desc">Forest, ocean, sunset</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="6" onclick="setPalette('6')">
+                    <div class="palette-preview">
+                        <span style="background: #14B8A6"></span>
+                        <span style="background: #2563EB"></span>
+                        <span style="background: #EC4899"></span>
+                        <span style="background: #8B5CF6"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">6: Vercel Tech</div>
+                        <div class="palette-desc">Modern tech aesthetic</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="7" onclick="setPalette('7')">
+                    <div class="palette-preview">
+                        <span style="background: #0F766E"></span>
+                        <span style="background: #1E40AF"></span>
+                        <span style="background: #BE123C"></span>
+                        <span style="background: #B45309"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">7: Academic Scholar</div>
+                        <div class="palette-desc">Deep professional</div>
+                    </div>
+                </button>
+                <button class="palette-btn" data-palette="8" onclick="setPalette('8')">
+                    <div class="palette-preview">
+                        <span style="background: #14B8A6"></span>
+                        <span style="background: #3B82F6"></span>
+                        <span style="background: #F43F5E"></span>
+                        <span style="background: #F59E0B"></span>
+                    </div>
+                    <div class="palette-info">
+                        <div class="palette-name">8: Split Complement</div>
+                        <div class="palette-desc">Blue + coral/amber</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="control-section">
+            <div class="section-title">Theme</div>
+            <div class="segmented-control">
+                <button class="segment-btn active" data-theme="light" onclick="setTheme('light')">Light</button>
+                <button class="segment-btn" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+            </div>
+        </div>
+
+        <!-- Title Mode Toggle -->
+        <div class="control-section">
+            <div class="section-title">Title Color Mode</div>
+            <div class="toggle-row">
+                <div>
+                    <div class="toggle-label">Accent Titles</div>
+                    <div class="toggle-sublabel">Colored titles on cards</div>
+                </div>
+                <div class="toggle-switch active" id="titleModeToggle" onclick="toggleTitleMode()"></div>
+            </div>
+        </div>
+
+        <!-- Module Colors -->
+        <div class="control-section">
+            <div class="section-title">Module Identity Colors</div>
+            <div class="module-grid" id="moduleGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Palette Info -->
+        <div class="control-section">
+            <div class="section-title">Palette Inspirations</div>
+            <div class="changes-list">
+                <div><strong>1: Cool Cluster</strong> - Original baseline (clustered blue family)</div>
+                <div><strong>2: Catppuccin</strong> - Popular pastel theme (catppuccin.com)</div>
+                <div><strong>3: Google Primary</strong> - Bold tetradic (Workspace icons)</div>
+                <div><strong>4: Linear Style</strong> - Indigo base + warm (linear.app)</div>
+                <div><strong>5: Nature Organic</strong> - Brand guidelines earth tones</div>
+                <div><strong>6: Vercel Tech</strong> - Modern tech (Geist system)</div>
+                <div><strong>7: Academic Scholar</strong> - Deep professional (Zotero-inspired)</div>
+                <div><strong>8: Split Complement</strong> - Color theory: blue base</div>
+            </div>
+        </div>
+
+        <!-- Research Sources -->
+        <div class="control-section">
+            <div class="section-title">Research Sources</div>
+            <div class="changes-list" style="font-size: 10px;">
+                <div>catppuccin.com/palette</div>
+                <div>linear.app/brand</div>
+                <div>vercel.com/geist/colors</div>
+                <div>atlassian.design/foundations/color</div>
+                <div>tailwindcss.com/docs/colors</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <div class="logo-icon"></div>
+                <span>Citable</span>
+            </a>
+            <div class="nav-actions">
+                <button class="icon-btn" title="Notifications">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                </button>
+                <div class="avatar">M</div>
+            </div>
+        </nav>
+
+        <!-- Container -->
+        <div class="container">
+            <div class="greeting-header">
+                <h1 id="greeting">Good afternoon, Mahdi</h1>
+                <p>Pick up where you left off</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" placeholder="Search your research, papers, and manuscripts...">
+                <span class="search-shortcut">&#x2318;K</span>
+            </div>
+
+            <!-- Bento Grid - 4 Products -->
+            <div class="bento-grid">
+                <!-- Bibliography Card -->
+                <div class="card">
+                    <div class="card-header biblio">
+                        <div class="card-title-group">
+                            <h3 class="card-title biblio">Bibliography</h3>
+                            <p class="card-subtitle">Organize and discover research papers</p>
+                        </div>
+                        <svg class="card-illustration illustration-biblio" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="8" y="8" width="38" height="52" rx="3" stroke-width="2"/>
+                            <rect class="stroke paper-fill" x="16" y="14" width="38" height="52" rx="3" stroke-width="2"/>
+                            <rect class="stroke paper-fill" x="24" y="20" width="38" height="52" rx="3" stroke-width="2"/>
+                            <path class="light" d="M32 34h22M32 42h18M32 50h14" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle class="fill" cx="76" cy="38" r="16" opacity="0.15"/>
+                            <path class="stroke" d="M70 38l4 4 8-8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="full-content">
+                        <span class="section-label">Recent Papers</span>
+                        <div class="recent-list">
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Attention Is All You Need</span></div>
+                                <span class="time">2h ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Transformer Architectures</span></div>
+                                <span class="time">Yesterday</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Visual RAG Methods</span></div>
+                                <span class="time">3d ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manuscripts Card -->
+                <div class="card">
+                    <div class="card-header manu">
+                        <div class="card-title-group">
+                            <h3 class="card-title manu">Manuscripts</h3>
+                            <p class="card-subtitle">Write with AI assistance in LaTeX</p>
+                        </div>
+                        <svg class="card-illustration illustration-manu" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="18" y="6" width="52" height="68" rx="3" stroke-width="2"/>
+                            <path class="light" d="M28 22h24M28 32h32M28 42h26" stroke-width="3" stroke-linecap="round"/>
+                            <path class="light" d="M28 56h28M28 64h20" stroke-width="3" stroke-linecap="round"/>
+                            <rect class="fill" x="52" y="38" width="24" height="11" rx="5.5"/>
+                            <text x="56" y="47" fill="white" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
+                            <g transform="translate(70, 12) rotate(12)">
+                                <rect class="stroke paper-fill" x="0" y="0" width="6" height="40" rx="3" stroke-width="1.5"/>
+                                <path class="fill" d="M0 32 L3 42 L6 32" />
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="full-content">
+                        <span class="section-label">Active Projects</span>
+                        <div class="recent-list">
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot manu"></span><span>NeurIPS_Draft_Final.tex</span></div>
+                                <span class="time">10m ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot manu"></span><span>Thesis_Chapter_01</span></div>
+                                <span class="time">4h ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot manu"></span><span>ICML_Submission_v2</span></div>
+                                <span class="time">2d ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Planner Card -->
+                <div class="card">
+                    <div class="card-header planner">
+                        <div class="card-title-group">
+                            <h3 class="card-title planner">Research Planner</h3>
+                            <p class="card-subtitle">Track your research tasks</p>
+                        </div>
+                        <svg class="card-illustration illustration-planner" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="15" y="6" width="62" height="68" rx="6" stroke-width="2"/>
+                            <circle class="stroke paper-fill" cx="32" cy="24" r="7" stroke-width="1.5"/>
+                            <path class="stroke" d="M29 24l2 2 4-4" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path class="light" d="M46 22h24" stroke-width="3" stroke-linecap="round"/>
+                            <circle class="stroke paper-fill" cx="32" cy="44" r="7" stroke-width="1.5"/>
+                            <path class="light" d="M46 42h20" stroke-width="3" stroke-linecap="round"/>
+                            <circle class="stroke paper-fill" cx="32" cy="64" r="7" stroke-width="1.5"/>
+                            <path class="light" d="M46 62h22" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="task-section">
+                        <div class="task-list">
+                            <div class="task-item">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Finish reading <span class="mention biblio">@Attention_is_all</span></span>
+                            </div>
+                            <div class="task-item">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Rewrite intro in <span class="mention manu">@NeurIPS_Draft</span></span>
+                            </div>
+                            <div class="task-item completed">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Export bib for <span class="mention manu">@ICML_Sub</span></span>
+                            </div>
+                        </div>
+                        <div class="task-input-wrapper">
+                            <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            <input type="text" placeholder="Add task... use @ to link">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discover Card -->
+                <div class="card">
+                    <div class="card-header discover">
+                        <div class="card-title-group">
+                            <h3 class="card-title discover">Discover</h3>
+                            <p class="card-subtitle">Explore new research and trends</p>
+                        </div>
+                        <svg class="card-illustration illustration-discover" viewBox="0 0 100 80" fill="none">
+                            <circle class="stroke paper-fill" cx="50" cy="40" r="28" stroke-width="2"/>
+                            <circle class="fill" cx="50" cy="40" r="6" opacity="0.3"/>
+                            <path class="stroke" d="M50 18v6M50 56v6M72 40h-6M34 40h-6" stroke-width="2" stroke-linecap="round"/>
+                            <path class="light" d="M65 25l-4 4M39 51l-4 4M65 55l-4-4M39 29l-4-4" stroke-width="2" stroke-linecap="round"/>
+                            <path class="stroke" d="M50 40l12-8" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="discover-grid">
+                        <div class="discover-chip">
+                            <div class="discover-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                                </svg>
+                            </div>
+                            <span>Trending Topics</span>
+                        </div>
+                        <div class="discover-chip">
+                            <div class="discover-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <span>Recommendations</span>
+                        </div>
+                        <div class="discover-chip">
+                            <div class="discover-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                            </div>
+                            <span>New This Week</span>
+                        </div>
+                        <div class="discover-chip">
+                            <div class="discover-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                                </svg>
+                            </div>
+                            <span>Following</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // PALETTE DEFINITIONS (WCAG-compliant pairs)
+        // Research-inspired from: Linear, Catppuccin, Vercel, Google, Atlassian
+        // ============================================
+        const palettes = {
+            // PALETTE 1: Original Cool (baseline for comparison)
+            // Problem: Cyan, Indigo, Purple cluster in blue family
+            1: {
+                name: 'Cool Cluster',
+                description: 'Original - all cool tones',
+                inspiration: 'Baseline',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#10B981', strong: '#047857', container: '#ECFDF5' },
+                        dark: { accent: '#34D399', strong: '#34D399', container: 'rgba(52, 211, 153, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#0EA5E9', strong: '#0369A1', container: '#E0F2FE' },
+                        dark: { accent: '#38BDF8', strong: '#38BDF8', container: 'rgba(56, 189, 248, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#6366F1', strong: '#4338CA', container: '#EEF2FF' },
+                        dark: { accent: '#818CF8', strong: '#818CF8', container: 'rgba(129, 140, 248, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#A855F7', strong: '#7C3AED', container: '#FAF5FF' },
+                        dark: { accent: '#C084FC', strong: '#C084FC', container: 'rgba(192, 132, 252, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 2: Catppuccin-Inspired Pastel
+            // Popular dark mode palette - soft, eye-friendly pastels
+            // Teal + Blue + Peach + Mauve
+            2: {
+                name: 'Catppuccin Pastel',
+                description: 'Soft pastels, cozy dark mode',
+                inspiration: 'catppuccin.com',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#0D9488', strong: '#115E59', container: '#CCFBF1' },
+                        dark: { accent: '#94E2D5', strong: '#94E2D5', container: 'rgba(148, 226, 213, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#3B82F6', strong: '#1D4ED8', container: '#DBEAFE' },
+                        dark: { accent: '#89B4FA', strong: '#89B4FA', container: 'rgba(137, 180, 250, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#F59E0B', strong: '#B45309', container: '#FEF3C7' },
+                        dark: { accent: '#FAB387', strong: '#FAB387', container: 'rgba(250, 179, 135, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#A855F7', strong: '#7C3AED', container: '#FAF5FF' },
+                        dark: { accent: '#CBA6F7', strong: '#CBA6F7', container: 'rgba(203, 166, 247, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 3: Google-Inspired Primary
+            // Bold, distinctive colors that don't compete
+            // Green + Blue + Yellow + Red (classic tetradic)
+            3: {
+                name: 'Google Primary',
+                description: 'Bold, distinctive primaries',
+                inspiration: 'Google Workspace',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#22C55E', strong: '#15803D', container: '#DCFCE7' },
+                        dark: { accent: '#4ADE80', strong: '#4ADE80', container: 'rgba(74, 222, 128, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#3B82F6', strong: '#1D4ED8', container: '#DBEAFE' },
+                        dark: { accent: '#60A5FA', strong: '#60A5FA', container: 'rgba(96, 165, 250, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#EAB308', strong: '#A16207', container: '#FEF9C3' },
+                        dark: { accent: '#FACC15', strong: '#FACC15', container: 'rgba(250, 204, 21, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#EF4444', strong: '#B91C1C', container: '#FEE2E2' },
+                        dark: { accent: '#F87171', strong: '#F87171', container: 'rgba(248, 113, 113, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 4: Linear + Warm Accent
+            // Linear's indigo base + warm orange for energy
+            // Sage + Indigo + Orange + Teal
+            4: {
+                name: 'Linear Style',
+                description: 'Indigo base + warm accents',
+                inspiration: 'linear.app',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#84CC16', strong: '#4D7C0F', container: '#ECFCCB' },
+                        dark: { accent: '#A3E635', strong: '#A3E635', container: 'rgba(163, 230, 53, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#6366F1', strong: '#4338CA', container: '#EEF2FF' },
+                        dark: { accent: '#818CF8', strong: '#818CF8', container: 'rgba(129, 140, 248, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#F97316', strong: '#C2410C', container: '#FFEDD5' },
+                        dark: { accent: '#FB923C', strong: '#FB923C', container: 'rgba(251, 146, 60, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#14B8A6', strong: '#0F766E', container: '#CCFBF1' },
+                        dark: { accent: '#2DD4BF', strong: '#2DD4BF', container: 'rgba(45, 212, 191, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 5: Nature Organic
+            // Earth-inspired: Forest + Ocean + Sunset + Gold
+            // Calming, academic feel
+            5: {
+                name: 'Nature Organic',
+                description: 'Earth tones - forest, ocean, sunset',
+                inspiration: 'Brand Guidelines',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#059669', strong: '#047857', container: '#D1FAE5' },
+                        dark: { accent: '#34D399', strong: '#34D399', container: 'rgba(52, 211, 153, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#0284C7', strong: '#075985', container: '#E0F2FE' },
+                        dark: { accent: '#38BDF8', strong: '#38BDF8', container: 'rgba(56, 189, 248, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#F43F5E', strong: '#BE123C', container: '#FFE4E6' },
+                        dark: { accent: '#FB7185', strong: '#FB7185', container: 'rgba(251, 113, 133, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#CA8A04', strong: '#A16207', container: '#FEF9C3' },
+                        dark: { accent: '#FACC15', strong: '#FACC15', container: 'rgba(250, 204, 21, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 6: Vercel Modern Tech
+            // Clean, modern tech aesthetic
+            // Teal + Blue + Pink + Purple
+            6: {
+                name: 'Vercel Tech',
+                description: 'Modern tech aesthetic',
+                inspiration: 'vercel.com/geist',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#14B8A6', strong: '#0F766E', container: '#CCFBF1' },
+                        dark: { accent: '#2DD4BF', strong: '#2DD4BF', container: 'rgba(45, 212, 191, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#2563EB', strong: '#1D4ED8', container: '#DBEAFE' },
+                        dark: { accent: '#3B82F6', strong: '#3B82F6', container: 'rgba(59, 130, 246, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#EC4899', strong: '#BE185D', container: '#FCE7F3' },
+                        dark: { accent: '#F472B6', strong: '#F472B6', container: 'rgba(244, 114, 182, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#8B5CF6', strong: '#6D28D9', container: '#EDE9FE' },
+                        dark: { accent: '#A78BFA', strong: '#A78BFA', container: 'rgba(167, 139, 250, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 7: Academic Scholarly
+            // Deep, serious tones for professional feel
+            // Navy + Teal + Burgundy + Bronze
+            7: {
+                name: 'Academic Scholar',
+                description: 'Deep, professional tones',
+                inspiration: 'Zotero/Mendeley',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#0F766E', strong: '#115E59', container: '#CCFBF1' },
+                        dark: { accent: '#5EEAD4', strong: '#5EEAD4', container: 'rgba(94, 234, 212, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#1E40AF', strong: '#1E3A8A', container: '#DBEAFE' },
+                        dark: { accent: '#60A5FA', strong: '#60A5FA', container: 'rgba(96, 165, 250, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#BE123C', strong: '#9F1239', container: '#FFE4E6' },
+                        dark: { accent: '#FB7185', strong: '#FB7185', container: 'rgba(251, 113, 133, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#B45309', strong: '#92400E', container: '#FEF3C7' },
+                        dark: { accent: '#FBBF24', strong: '#FBBF24', container: 'rgba(251, 191, 36, 0.12)' }
+                    }
+                }
+            },
+
+            // PALETTE 8: Split Complementary
+            // Blue base with split complements (coral + amber) + teal anchor
+            8: {
+                name: 'Split Complement',
+                description: 'Blue + coral/amber split',
+                inspiration: 'Color Theory',
+                modules: {
+                    biblio: {
+                        name: 'Bibliography',
+                        light: { accent: '#14B8A6', strong: '#0F766E', container: '#CCFBF1' },
+                        dark: { accent: '#2DD4BF', strong: '#2DD4BF', container: 'rgba(45, 212, 191, 0.12)' }
+                    },
+                    manu: {
+                        name: 'Manuscripts',
+                        light: { accent: '#3B82F6', strong: '#1D4ED8', container: '#DBEAFE' },
+                        dark: { accent: '#60A5FA', strong: '#60A5FA', container: 'rgba(96, 165, 250, 0.12)' }
+                    },
+                    planner: {
+                        name: 'Planner',
+                        light: { accent: '#F43F5E', strong: '#BE123C', container: '#FFE4E6' },
+                        dark: { accent: '#FB7185', strong: '#FB7185', container: 'rgba(251, 113, 133, 0.12)' }
+                    },
+                    discover: {
+                        name: 'Discover',
+                        light: { accent: '#F59E0B', strong: '#B45309', container: '#FEF3C7' },
+                        dark: { accent: '#FBBF24', strong: '#FBBF24', container: 'rgba(251, 191, 36, 0.12)' }
+                    }
+                }
+            }
+        };
+
+        // State
+        let currentTheme = 'light';
+        let titleMode = 'accent';
+        let currentPalette = '1';
+
+        // Get current modules based on selected palette
+        function getModules() {
+            return palettes[currentPalette].modules;
+        }
+
+        // ============================================
+        // WCAG CONTRAST
+        // ============================================
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(c => {
+                c = c / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        function getContrastRatio(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+            const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        // ============================================
+        // PALETTE SELECTION
+        // ============================================
+        function setPalette(paletteKey) {
+            currentPalette = paletteKey;
+
+            // Update palette buttons
+            document.querySelectorAll('.palette-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.palette === paletteKey);
+            });
+
+            // Update badge
+            const palette = palettes[paletteKey];
+            document.getElementById('paletteBadge').textContent = `Palette ${paletteKey}: ${palette.name}`;
+
+            // Apply palette colors
+            applyPaletteColors();
+            updateModuleGrid();
+        }
+
+        function applyPaletteColors() {
+            const modules = getModules();
+            const isDark = currentTheme === 'dark';
+            const root = document.documentElement;
+
+            // Update CSS variables for each module
+            Object.entries(modules).forEach(([key, mod]) => {
+                const colors = isDark ? mod.dark : mod.light;
+                root.style.setProperty(`--module-${key}`, colors.accent);
+                root.style.setProperty(`--module-${key}-strong`, colors.strong);
+                root.style.setProperty(`--module-${key}-container`, colors.container);
+            });
+        }
+
+        // ============================================
+        // THEME
+        // ============================================
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelectorAll('.segment-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+            applyPaletteColors();
+            updateModuleGrid();
+        }
+
+        // ============================================
+        // TITLE MODE
+        // ============================================
+        function toggleTitleMode() {
+            const toggle = document.getElementById('titleModeToggle');
+            toggle.classList.toggle('active');
+            titleMode = toggle.classList.contains('active') ? 'accent' : 'neutral';
+            document.body.setAttribute('data-title-mode', titleMode);
+        }
+
+        // ============================================
+        // MODULE GRID
+        // ============================================
+        function updateModuleGrid() {
+            const container = document.getElementById('moduleGrid');
+            const modules = getModules();
+            const isDark = currentTheme === 'dark';
+            const bgColor = isDark ? '#161B21' : '#FFFFFF';
+
+            let html = '';
+            Object.entries(modules).forEach(([key, mod]) => {
+                const colors = isDark ? mod.dark : mod.light;
+                const ratio = getContrastRatio(colors.strong, bgColor);
+                const passes = ratio >= 4.5;
+
+                html += `
+                    <div class="module-card">
+                        <div class="module-card-header">
+                            <div class="module-dot" style="background: ${colors.accent}"></div>
+                            <span class="module-name">${mod.name}</span>
+                        </div>
+                        <div class="module-colors">
+                            <div class="color-chip" style="background: ${colors.accent}; color: white;">Fill</div>
+                            <div class="color-chip" style="background: ${colors.container}; color: ${colors.strong};">Text</div>
+                        </div>
+                        <div class="module-hex">Strong: ${colors.strong}</div>
+                        <div class="module-contrast">
+                            <span class="contrast-badge ${passes ? 'pass' : 'fail'}">${ratio.toFixed(1)}:1 ${passes ? 'AA' : 'Fail'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // PANEL TOGGLE
+        // ============================================
+        function togglePanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.classList.toggle('collapsed');
+            const toggleBtn = panel.querySelector('.panel-toggle svg');
+            if (panel.classList.contains('collapsed')) {
+                toggleBtn.innerHTML = '<path d="M9 18l6-6-6-6"/>';
+            } else {
+                toggleBtn.innerHTML = '<path d="M15 18l-6-6 6-6"/>';
+            }
+        }
+
+        // ============================================
+        // GREETING
+        // ============================================
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const el = document.getElementById('greeting');
+            let greeting = "Good evening";
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 17) greeting = "Good afternoon";
+            el.textContent = greeting + ", Mahdi";
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            // Apply initial palette colors
+            applyPaletteColors();
+
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            }
+
+            updateModuleGrid();
+            updateGreeting();
+        }
+
+        init();
+    </script>
+</body>
+</html>

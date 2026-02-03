@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1: Product Identity Colors - Citable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS CUSTOM PROPERTIES - Color System
+           ============================================ */
+        :root {
+            /* Base colors - Light mode */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --bg-empty: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-default: rgba(226, 232, 240, 0.8);
+            --border-subtle: rgba(226, 232, 240, 0.5);
+
+            /* Product accent colors - will be set by JS */
+            --accent-biblio: #4f46e5;
+            --accent-manu: #059669;
+            --accent-planner: #0284c7;
+
+            /* Product tints - will be calculated */
+            --biblio-tint: #eef2ff;
+            --biblio-light: #e0e7ff;
+            --manu-tint: #ecfdf5;
+            --manu-light: #d1fae5;
+            --planner-tint: #f0f9ff;
+            --planner-light: #e0f2fe;
+
+            /* UI */
+            --card-bg: rgba(255,255,255,0.9);
+            --warm-shadow: rgba(15, 23, 42, 0.08);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark mode */
+        [data-theme="dark"] {
+            --bg-primary: #121218;
+            --bg-secondary: #1a1a22;
+            --bg-canvas: #23232d;
+            --bg-hover: #2c2c38;
+            --bg-empty: #1e1e28;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a8a8b8;
+            --text-muted: #6e6e7e;
+            --border-default: #2e2e3a;
+            --border-subtle: #232330;
+            --card-bg: rgba(26, 26, 34, 0.95);
+            --warm-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Noise texture */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ============================================
+           CONTROL PANEL
+           ============================================ */
+        .control-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-default);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .control-panel.collapsed {
+            transform: translateX(-280px);
+        }
+
+        .panel-toggle {
+            position: absolute;
+            right: -40px;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: background 0.2s ease;
+        }
+
+        .panel-toggle:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .panel-header {
+            margin-bottom: 24px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 4px 0;
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* Theme Toggle */
+        .theme-switcher {
+            display: flex;
+            background: var(--bg-canvas);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px var(--warm-shadow);
+        }
+
+        /* Scheme Toggle */
+        .scheme-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scheme-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border-default);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .scheme-option:hover {
+            border-color: var(--text-muted);
+        }
+
+        .scheme-option.active {
+            border-color: #0284c7;
+            background: rgba(2, 132, 199, 0.05);
+        }
+
+        .scheme-radio {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .scheme-option.active .scheme-radio {
+            border-color: #0284c7;
+        }
+
+        .scheme-option.active .scheme-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #0284c7;
+            border-radius: 50%;
+        }
+
+        .scheme-info {
+            flex: 1;
+        }
+
+        .scheme-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .scheme-colors {
+            display: flex;
+            gap: 6px;
+        }
+
+        .scheme-color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .scheme-color-label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Color Variations */
+        .color-group {
+            margin-bottom: 16px;
+        }
+
+        .color-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .color-group-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .color-group-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .color-group-product {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: var(--bg-canvas);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .color-option:hover {
+            background: var(--bg-hover);
+        }
+
+        .color-option.active {
+            border-color: currentColor;
+            background: var(--bg-secondary);
+        }
+
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .color-details {
+            min-width: 0;
+        }
+
+        .color-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .color-hex {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        /* Current Selection Display */
+        .current-selection {
+            background: var(--bg-canvas);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .selection-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .selection-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .selection-row:last-child {
+            border-bottom: none;
+        }
+
+        .selection-product {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            width: 80px;
+        }
+
+        .selection-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .selection-hex {
+            font-size: 11px;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--text-primary);
+        }
+
+        /* WCAG Contrast Panel */
+        .contrast-panel {
+            background: var(--bg-canvas);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 16px;
+        }
+
+        .contrast-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .contrast-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .contrast-legend {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .contrast-table {
+            width: 100%;
+            font-size: 11px;
+        }
+
+        .contrast-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 50px 36px;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 8px;
+        }
+
+        .contrast-row:last-child {
+            border-bottom: none;
+        }
+
+        .contrast-row.header {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .contrast-product {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .contrast-context {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .contrast-ratio {
+            font-family: 'SF Mono', Monaco, monospace;
+            text-align: right;
+        }
+
+        .contrast-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .contrast-badge.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+
+        .contrast-badge.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: #DC2626;
+        }
+
+        .contrast-badge.warn {
+            background: rgba(245, 158, 11, 0.15);
+            color: #D97706;
+        }
+
+        [data-theme="dark"] .contrast-badge.pass {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+        }
+
+        [data-theme="dark"] .contrast-badge.fail {
+            background: rgba(248, 113, 113, 0.15);
+            color: #F87171;
+        }
+
+        [data-theme="dark"] .contrast-badge.warn {
+            background: rgba(251, 191, 36, 0.15);
+            color: #FBBF24;
+        }
+
+        .contrast-summary {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-default);
+        }
+
+        .summary-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .summary-count {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           MAIN CONTENT (shifted right)
+           ============================================ */
+        .main-content {
+            margin-left: 320px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .control-panel.collapsed + .main-content {
+            margin-left: 40px;
+        }
+
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-default);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        :root:not([data-theme="dark"]) .navbar {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--accent-biblio) 0%, var(--accent-planner) 50%, var(--accent-manu) 100%);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-biblio) 0%, var(--accent-planner) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 40px 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Greeting */
+        .greeting-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .greeting-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+        }
+
+        .greeting-header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 15px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px -4px var(--warm-shadow);
+            transition: var(--transition);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-planner);
+        }
+
+        .search-bar svg { color: var(--accent-planner); flex-shrink: 0; transition: color 0.3s ease; }
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-shortcut {
+            background: var(--bg-canvas);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           BENTO GRID
+           ============================================ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-top: 36px;
+        }
+
+        .workspace-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 2px 12px -2px var(--warm-shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px -12px var(--warm-shadow);
+        }
+
+        /* Card Header */
+        .card-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            min-height: 88px;
+            transition: background 0.3s ease;
+        }
+
+        .card-header.biblio {
+            background: linear-gradient(135deg, var(--biblio-tint) 0%, var(--biblio-light) 100%);
+        }
+
+        .card-header.manu {
+            background: linear-gradient(135deg, var(--manu-tint) 0%, var(--manu-light) 100%);
+        }
+
+        .card-header.planner {
+            background: linear-gradient(135deg, var(--planner-tint) 0%, var(--planner-light) 100%);
+        }
+
+        .card-title-group { flex: 1; }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+
+        .card-title.biblio { color: var(--accent-biblio); }
+        .card-title.manu { color: var(--accent-manu); }
+        .card-title.planner { color: var(--accent-planner); }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px 0 0 0;
+        }
+
+        .card-illustration {
+            width: 72px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        /* SVG Styles */
+        .illustration-biblio .stroke { stroke: var(--accent-biblio); transition: stroke 0.3s ease; }
+        .illustration-biblio .fill { fill: var(--accent-biblio); transition: fill 0.3s ease; }
+        .illustration-biblio .light { stroke: var(--accent-biblio); opacity: 0.3; transition: stroke 0.3s ease; }
+        .illustration-manu .stroke { stroke: var(--accent-manu); transition: stroke 0.3s ease; }
+        .illustration-manu .fill { fill: var(--accent-manu); transition: fill 0.3s ease; }
+        .illustration-manu .light { stroke: var(--accent-manu); opacity: 0.3; transition: stroke 0.3s ease; }
+        .illustration-planner .stroke { stroke: var(--accent-planner); transition: stroke 0.3s ease; }
+        .illustration-planner .fill { fill: var(--accent-planner); transition: fill 0.3s ease; }
+        .illustration-planner .light { stroke: var(--accent-planner); opacity: 0.3; transition: stroke 0.3s ease; }
+
+        .paper-fill { fill: white; }
+        [data-theme="dark"] .paper-fill { fill: rgba(255, 255, 255, 0.06); }
+
+        /* Recent Items */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            padding: 14px 20px 6px;
+        }
+
+        .recent-list { padding: 0 12px 14px; }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .recent-item:hover { background: var(--bg-canvas); }
+
+        .item-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .dot.biblio { background: var(--accent-biblio); }
+        .dot.manu { background: var(--accent-manu); }
+        .time { font-size: 11px; color: var(--text-muted); }
+
+        /* ============================================
+           TASK CARD
+           ============================================ */
+        .task-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-section {
+            flex: 1;
+            padding: 16px 20px 20px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover { background: var(--bg-canvas); }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 5px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:hover .checkbox { border-color: var(--accent-planner); }
+
+        .task-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .mention {
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .mention.biblio { background: var(--biblio-tint); color: var(--accent-biblio); }
+        .mention.manu { background: var(--manu-tint); color: var(--accent-manu); }
+
+        .task-item.completed .checkbox {
+            background: var(--accent-manu);
+            border-color: var(--accent-manu);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--bg-canvas);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .task-input-wrapper:focus-within {
+            background: var(--bg-secondary);
+            border-color: var(--accent-planner);
+        }
+
+        .plus-icon {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .task-input-wrapper input::placeholder { color: var(--text-muted); }
+
+        /* Empty buttons */
+        .empty-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+        }
+
+        .empty-btn.biblio { background: var(--accent-biblio); }
+        .empty-btn.manu { background: var(--accent-manu); }
+        .empty-btn.planner { background: var(--accent-planner); }
+    </style>
+</head>
+<body>
+    <!-- Control Panel -->
+    <div class="control-panel" id="controlPanel">
+        <button class="panel-toggle" onclick="togglePanel()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+
+        <div class="panel-header">
+            <h2 class="panel-title">Phase 1: Product Colors</h2>
+            <p class="panel-subtitle">Test color-to-product assignments</p>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="control-section">
+            <div class="section-title">Theme</div>
+            <div class="theme-switcher">
+                <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">Light</button>
+                <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+            </div>
+        </div>
+
+        <!-- Scheme Toggle -->
+        <div class="control-section">
+            <div class="section-title">Color Scheme</div>
+            <div class="scheme-toggle">
+                <div class="scheme-option active" data-scheme="A" onclick="setScheme('A')">
+                    <div class="scheme-radio"></div>
+                    <div class="scheme-info">
+                        <div class="scheme-name">Scheme A (Current)</div>
+                        <div class="scheme-colors">
+                            <div class="scheme-color-dot" style="background: #4f46e5;" title="Bibliography: Indigo"></div>
+                            <div class="scheme-color-dot" style="background: #059669;" title="Manuscripts: Green"></div>
+                            <div class="scheme-color-dot" style="background: #0284c7;" title="Planner: Cyan"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="scheme-option" data-scheme="B" onclick="setScheme('B')">
+                    <div class="scheme-radio"></div>
+                    <div class="scheme-info">
+                        <div class="scheme-name">Scheme B (Proposed)</div>
+                        <div class="scheme-colors">
+                            <div class="scheme-color-dot" style="background: #10B981;" title="Bibliography: Green"></div>
+                            <div class="scheme-color-dot" style="background: #0EA5E9;" title="Manuscripts: Cyan"></div>
+                            <div class="scheme-color-dot" style="background: #F59E0B;" title="Planner: Orange"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Variations -->
+        <div class="control-section" id="colorVariations">
+            <!-- Will be populated by JS based on selected scheme -->
+        </div>
+
+        <!-- Current Selection -->
+        <div class="control-section">
+            <div class="current-selection">
+                <div class="selection-title">Current Selection</div>
+                <div class="selection-row">
+                    <span class="selection-product">Bibliography</span>
+                    <div class="selection-swatch" id="selectionBiblio"></div>
+                    <span class="selection-hex" id="hexBiblio">#4f46e5</span>
+                </div>
+                <div class="selection-row">
+                    <span class="selection-product">Manuscripts</span>
+                    <div class="selection-swatch" id="selectionManu"></div>
+                    <span class="selection-hex" id="hexManu">#059669</span>
+                </div>
+                <div class="selection-row">
+                    <span class="selection-product">Planner</span>
+                    <div class="selection-swatch" id="selectionPlanner"></div>
+                    <span class="selection-hex" id="hexPlanner">#0284c7</span>
+                </div>
+            </div>
+
+            <!-- WCAG Contrast Check -->
+            <div class="contrast-panel">
+                <div class="contrast-header">
+                    <span class="contrast-title">WCAG AA Contrast</span>
+                    <div class="contrast-legend">
+                        <span class="legend-item"><span class="contrast-badge pass">AA</span> 4.5:1+</span>
+                        <span class="legend-item"><span class="contrast-badge warn">AA-L</span> 3:1+</span>
+                    </div>
+                </div>
+                <div class="contrast-table" id="contrastTable">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="contrast-summary" id="contrastSummary">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <div class="logo-icon"></div>
+                <span>Citable</span>
+            </a>
+            <div class="nav-actions">
+                <button class="icon-btn" title="Notifications">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                </button>
+                <div class="avatar">M</div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container">
+            <div class="greeting-header">
+                <h1 id="greeting">Good afternoon, Mahdi</h1>
+                <p>Pick up where you left off</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" placeholder="Search your research, papers, and manuscripts...">
+                <span class="search-shortcut">&#x2318;K</span>
+            </div>
+
+            <!-- Bento Grid -->
+            <div class="bento-grid">
+                <!-- Left Column -->
+                <div class="workspace-stack">
+                    <!-- Bibliography Card -->
+                    <div class="card">
+                        <div class="card-header biblio">
+                            <div class="card-title-group">
+                                <h3 class="card-title biblio">Bibliography</h3>
+                                <p class="card-subtitle">Organize and discover research papers</p>
+                            </div>
+                            <svg class="card-illustration illustration-biblio" viewBox="0 0 100 80" fill="none">
+                                <rect class="stroke paper-fill" x="8" y="8" width="38" height="52" rx="3" stroke-width="2"/>
+                                <rect class="stroke paper-fill" x="16" y="14" width="38" height="52" rx="3" stroke-width="2"/>
+                                <rect class="stroke paper-fill" x="24" y="20" width="38" height="52" rx="3" stroke-width="2"/>
+                                <path class="light" d="M32 34h22M32 42h18M32 50h14" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle class="fill" cx="76" cy="38" r="16" opacity="0.15"/>
+                                <path class="stroke" d="M70 38l4 4 8-8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="full-content">
+                            <span class="section-label">Recent Papers</span>
+                            <div class="recent-list">
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot biblio"></span><span>Attention Is All You Need</span></div>
+                                    <span class="time">2h ago</span>
+                                </div>
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot biblio"></span><span>Transformer Architectures</span></div>
+                                    <span class="time">Yesterday</span>
+                                </div>
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot biblio"></span><span>Visual RAG Methods for Documents</span></div>
+                                    <span class="time">3d ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manuscripts Card -->
+                    <div class="card">
+                        <div class="card-header manu">
+                            <div class="card-title-group">
+                                <h3 class="card-title manu">Manuscripts</h3>
+                                <p class="card-subtitle">Write with AI assistance in LaTeX</p>
+                            </div>
+                            <svg class="card-illustration illustration-manu" viewBox="0 0 100 80" fill="none">
+                                <rect class="stroke paper-fill" x="18" y="6" width="52" height="68" rx="3" stroke-width="2"/>
+                                <path class="light" d="M28 22h24M28 32h32M28 42h26" stroke-width="3" stroke-linecap="round"/>
+                                <path class="light" d="M28 56h28M28 64h20" stroke-width="3" stroke-linecap="round"/>
+                                <rect class="fill" x="52" y="38" width="24" height="11" rx="5.5"/>
+                                <text x="56" y="47" fill="white" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
+                                <g transform="translate(70, 12) rotate(12)">
+                                    <rect class="stroke paper-fill" x="0" y="0" width="6" height="40" rx="3" stroke-width="1.5"/>
+                                    <path class="fill" d="M0 32 L3 42 L6 32" />
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="full-content">
+                            <span class="section-label">Active Projects</span>
+                            <div class="recent-list">
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot manu"></span><span>NeurIPS_Draft_Final.tex</span></div>
+                                    <span class="time">10m ago</span>
+                                </div>
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot manu"></span><span>Thesis_Chapter_01</span></div>
+                                    <span class="time">4h ago</span>
+                                </div>
+                                <div class="recent-item">
+                                    <div class="item-name"><span class="dot manu"></span><span>ICML_Submission_v2</span></div>
+                                    <span class="time">2d ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Task Card -->
+                <div class="card task-card">
+                    <div class="card-header planner">
+                        <div class="card-title-group">
+                            <h3 class="card-title planner">Research Planner</h3>
+                            <p class="card-subtitle">Track your research tasks</p>
+                        </div>
+                        <svg class="card-illustration illustration-planner" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="15" y="6" width="62" height="68" rx="6" stroke-width="2"/>
+                            <circle class="stroke paper-fill" cx="32" cy="24" r="7" stroke-width="1.5"/>
+                            <path class="stroke" d="M29 24l2 2 4-4" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path class="light" d="M46 22h24" stroke-width="3" stroke-linecap="round"/>
+                            <circle class="stroke paper-fill" cx="32" cy="44" r="7" stroke-width="1.5"/>
+                            <path class="light" d="M46 42h20" stroke-width="3" stroke-linecap="round"/>
+                            <circle class="stroke paper-fill" cx="32" cy="64" r="7" stroke-width="1.5"/>
+                            <path class="light" d="M46 62h22" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="task-section">
+                        <div class="task-list">
+                            <div class="task-item">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Finish reading <span class="mention biblio">@Attention_is_all</span></span>
+                            </div>
+                            <div class="task-item">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Rewrite intro in <span class="mention manu">@NeurIPS_Draft</span></span>
+                            </div>
+                            <div class="task-item">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Add citations to <span class="mention manu">@Thesis_01</span></span>
+                            </div>
+                            <div class="task-item completed">
+                                <div class="checkbox"></div>
+                                <span class="task-text">Export bib for <span class="mention manu">@ICML_Sub</span></span>
+                            </div>
+                        </div>
+                        <div class="task-input-wrapper">
+                            <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            <input type="text" placeholder="Add task... use @ to link">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // COLOR DEFINITIONS
+        // ============================================
+        const colorOptions = {
+            green: [
+                { id: 'A', name: 'Emerald', light: '#10B981', dark: '#34D399', desc: 'Modern, vibrant' },
+                { id: 'B', name: 'Green-500', light: '#22C55E', dark: '#4ADE80', desc: 'Balanced, friendly' },
+                { id: 'C', name: 'Teal-green', light: '#059669', dark: '#34D399', desc: 'Sophisticated, calm' },
+                { id: 'D', name: 'Forest', light: '#16A34A', dark: '#22C55E', desc: 'Deep, serious' }
+            ],
+            orange: [
+                { id: 'A', name: 'Amber', light: '#F59E0B', dark: '#FBBF24', desc: 'Warm, golden' },
+                { id: 'B', name: 'Soft orange', light: '#FB923C', dark: '#FDBA74', desc: 'Friendly, energetic' },
+                { id: 'C', name: 'Tangerine', light: '#F97316', dark: '#FB923C', desc: 'Punchy, vibrant' },
+                { id: 'D', name: 'Deep orange', light: '#EA580C', dark: '#F97316', desc: 'Bold, urgent' }
+            ],
+            cyan: [
+                { id: 'A', name: 'Sky-500', light: '#0EA5E9', dark: '#38BDF8', desc: 'Bright, active' },
+                { id: 'B', name: 'Cyan-500', light: '#06B6D4', dark: '#22D3EE', desc: 'More green-tinted' },
+                { id: 'C', name: 'Sky-600', light: '#0284C7', dark: '#38BDF8', desc: 'Deeper, professional' }
+            ],
+            indigo: [
+                { id: 'A', name: 'Vibrant', light: '#4F46E5', dark: '#818CF8', desc: 'Current indigo' },
+                { id: 'B', name: 'Lighter', light: '#6366F1', dark: '#A5B4FC', desc: 'Softer' },
+                { id: 'C', name: 'Deep', light: '#4338CA', dark: '#6366F1', desc: 'More serious' }
+            ]
+        };
+
+        // Scheme definitions
+        const schemes = {
+            A: {
+                biblio: { colorFamily: 'indigo', variation: 'A' },
+                manu: { colorFamily: 'green', variation: 'C' },
+                planner: { colorFamily: 'cyan', variation: 'C' }
+            },
+            B: {
+                biblio: { colorFamily: 'green', variation: 'A' },
+                manu: { colorFamily: 'cyan', variation: 'A' },
+                planner: { colorFamily: 'orange', variation: 'A' }
+            }
+        };
+
+        // State
+        let currentTheme = 'light';
+        let currentScheme = 'A';
+        let currentVariations = {
+            biblio: 'A',
+            manu: 'C',
+            planner: 'C'
+        };
+
+        // ============================================
+        // THEME FUNCTIONS
+        // ============================================
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+            applyColors();
+        }
+
+        // ============================================
+        // SCHEME FUNCTIONS
+        // ============================================
+        function setScheme(scheme) {
+            currentScheme = scheme;
+            document.querySelectorAll('.scheme-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.scheme === scheme);
+            });
+
+            // Reset variations to defaults for scheme
+            const schemeDef = schemes[scheme];
+            currentVariations = {
+                biblio: schemeDef.biblio.variation,
+                manu: schemeDef.manu.variation,
+                planner: schemeDef.planner.variation
+            };
+
+            renderColorVariations();
+            applyColors();
+        }
+
+        // ============================================
+        // COLOR VARIATION FUNCTIONS
+        // ============================================
+        function renderColorVariations() {
+            const container = document.getElementById('colorVariations');
+            const schemeDef = schemes[currentScheme];
+
+            const products = [
+                { key: 'biblio', name: 'Bibliography', family: schemeDef.biblio.colorFamily },
+                { key: 'manu', name: 'Manuscripts', family: schemeDef.manu.colorFamily },
+                { key: 'planner', name: 'Planner', family: schemeDef.planner.colorFamily }
+            ];
+
+            let html = '<div class="section-title">Color Variations</div>';
+
+            products.forEach(product => {
+                const options = colorOptions[product.family];
+                const currentColor = getColor(product.family, currentVariations[product.key]);
+
+                html += `
+                    <div class="color-group">
+                        <div class="color-group-header">
+                            <div class="color-group-dot" style="background: ${currentTheme === 'dark' ? currentColor.dark : currentColor.light}"></div>
+                            <span class="color-group-name">${capitalize(product.family)}</span>
+                            <span class="color-group-product">${product.name}</span>
+                        </div>
+                        <div class="color-options">
+                `;
+
+                options.forEach(opt => {
+                    const isActive = currentVariations[product.key] === opt.id;
+                    const displayColor = currentTheme === 'dark' ? opt.dark : opt.light;
+                    html += `
+                        <div class="color-option ${isActive ? 'active' : ''}"
+                             style="color: ${displayColor}"
+                             onclick="setVariation('${product.key}', '${product.family}', '${opt.id}')">
+                            <div class="color-swatch" style="background: ${displayColor}"></div>
+                            <div class="color-details">
+                                <div class="color-label">${opt.name}</div>
+                                <div class="color-hex">${currentTheme === 'dark' ? opt.dark : opt.light}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setVariation(product, family, variationId) {
+            currentVariations[product] = variationId;
+            renderColorVariations();
+            applyColors();
+        }
+
+        // ============================================
+        // APPLY COLORS
+        // ============================================
+        function getColor(family, variationId) {
+            return colorOptions[family].find(c => c.id === variationId);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getTint(hex, opacity) {
+            const rgb = hexToRgb(hex);
+            return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+        }
+
+        // ============================================
+        // WCAG CONTRAST CALCULATIONS
+        // ============================================
+        function getLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(c => {
+                c = c / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        function getContrastRatio(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+            const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        function getContrastBadge(ratio, isLargeText = false) {
+            const threshold = isLargeText ? 3 : 4.5;
+            if (ratio >= 4.5) {
+                return '<span class="contrast-badge pass">AA</span>';
+            } else if (ratio >= 3) {
+                return '<span class="contrast-badge warn">AA-L</span>';
+            } else {
+                return '<span class="contrast-badge fail">Fail</span>';
+            }
+        }
+
+        function updateContrastTable() {
+            const schemeDef = schemes[currentScheme];
+            const isDark = currentTheme === 'dark';
+
+            // Background colors
+            const bgWhite = isDark ? '#1a1a22' : '#ffffff';
+            const bgPrimary = isDark ? '#121218' : '#f8fafc';
+
+            // Get current accent colors
+            const biblioColor = getColor(schemeDef.biblio.colorFamily, currentVariations.biblio);
+            const manuColor = getColor(schemeDef.manu.colorFamily, currentVariations.manu);
+            const plannerColor = getColor(schemeDef.planner.colorFamily, currentVariations.planner);
+
+            const biblioHex = isDark ? biblioColor.dark : biblioColor.light;
+            const manuHex = isDark ? manuColor.dark : manuColor.light;
+            const plannerHex = isDark ? plannerColor.dark : plannerColor.light;
+
+            const checks = [
+                { product: 'Bibliography', context: 'Title on card', fg: biblioHex, bg: bgWhite, isLarge: true },
+                { product: 'Bibliography', context: 'White on button', fg: '#ffffff', bg: biblioColor.light, isLarge: false },
+                { product: 'Manuscripts', context: 'Title on card', fg: manuHex, bg: bgWhite, isLarge: true },
+                { product: 'Manuscripts', context: 'White on button', fg: '#ffffff', bg: manuColor.light, isLarge: false },
+                { product: 'Planner', context: 'Title on card', fg: plannerHex, bg: bgWhite, isLarge: true },
+                { product: 'Planner', context: 'White on button', fg: '#ffffff', bg: plannerColor.light, isLarge: false },
+            ];
+
+            let passCount = 0;
+            let warnCount = 0;
+            let failCount = 0;
+
+            let html = `
+                <div class="contrast-row header">
+                    <span>Product</span>
+                    <span>Context</span>
+                    <span>Ratio</span>
+                    <span>Grade</span>
+                </div>
+            `;
+
+            checks.forEach(check => {
+                const ratio = getContrastRatio(check.fg, check.bg);
+                const badge = getContrastBadge(ratio, check.isLarge);
+
+                if (ratio >= 4.5) passCount++;
+                else if (ratio >= 3) warnCount++;
+                else failCount++;
+
+                html += `
+                    <div class="contrast-row">
+                        <span class="contrast-product">${check.product}</span>
+                        <span class="contrast-context">${check.context}</span>
+                        <span class="contrast-ratio">${ratio.toFixed(1)}:1</span>
+                        <span>${badge}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('contrastTable').innerHTML = html;
+
+            // Update summary
+            const summaryHtml = `
+                <div class="summary-stat">
+                    <span class="summary-count" style="color: #059669">${passCount}</span>
+                    <span class="summary-label">Pass</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-count" style="color: #D97706">${warnCount}</span>
+                    <span class="summary-label">Large only</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-count" style="color: #DC2626">${failCount}</span>
+                    <span class="summary-label">Fail</span>
+                </div>
+            `;
+            document.getElementById('contrastSummary').innerHTML = summaryHtml;
+        }
+
+        function applyColors() {
+            const schemeDef = schemes[currentScheme];
+            const root = document.documentElement;
+            const isDark = currentTheme === 'dark';
+
+            // Get current colors
+            const biblioColor = getColor(schemeDef.biblio.colorFamily, currentVariations.biblio);
+            const manuColor = getColor(schemeDef.manu.colorFamily, currentVariations.manu);
+            const plannerColor = getColor(schemeDef.planner.colorFamily, currentVariations.planner);
+
+            const biblioHex = isDark ? biblioColor.dark : biblioColor.light;
+            const manuHex = isDark ? manuColor.dark : manuColor.light;
+            const plannerHex = isDark ? plannerColor.dark : plannerColor.light;
+
+            // Set CSS variables
+            root.style.setProperty('--accent-biblio', biblioHex);
+            root.style.setProperty('--accent-manu', manuHex);
+            root.style.setProperty('--accent-planner', plannerHex);
+
+            // Set tints
+            if (isDark) {
+                root.style.setProperty('--biblio-tint', getTint(biblioHex, 0.12));
+                root.style.setProperty('--biblio-light', getTint(biblioHex, 0.18));
+                root.style.setProperty('--manu-tint', getTint(manuHex, 0.12));
+                root.style.setProperty('--manu-light', getTint(manuHex, 0.18));
+                root.style.setProperty('--planner-tint', getTint(plannerHex, 0.12));
+                root.style.setProperty('--planner-light', getTint(plannerHex, 0.18));
+            } else {
+                // Light mode tints - use lighter versions
+                root.style.setProperty('--biblio-tint', getTint(biblioHex, 0.08));
+                root.style.setProperty('--biblio-light', getTint(biblioHex, 0.15));
+                root.style.setProperty('--manu-tint', getTint(manuHex, 0.08));
+                root.style.setProperty('--manu-light', getTint(manuHex, 0.15));
+                root.style.setProperty('--planner-tint', getTint(plannerHex, 0.08));
+                root.style.setProperty('--planner-light', getTint(plannerHex, 0.15));
+            }
+
+            // Update selection display
+            document.getElementById('selectionBiblio').style.background = biblioHex;
+            document.getElementById('selectionManu').style.background = manuHex;
+            document.getElementById('selectionPlanner').style.background = plannerHex;
+            document.getElementById('hexBiblio').textContent = biblioHex;
+            document.getElementById('hexManu').textContent = manuHex;
+            document.getElementById('hexPlanner').textContent = plannerHex;
+
+            // Update contrast table
+            updateContrastTable();
+        }
+
+        // ============================================
+        // PANEL TOGGLE
+        // ============================================
+        function togglePanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.classList.toggle('collapsed');
+            const toggleBtn = panel.querySelector('.panel-toggle svg');
+            if (panel.classList.contains('collapsed')) {
+                toggleBtn.innerHTML = '<path d="M9 18l6-6-6-6"/>';
+            } else {
+                toggleBtn.innerHTML = '<path d="M15 18l-6-6 6-6"/>';
+            }
+        }
+
+        // ============================================
+        // UTILITY
+        // ============================================
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const el = document.getElementById('greeting');
+            let greeting = "Good evening";
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 17) greeting = "Good afternoon";
+            el.textContent = greeting + ", Mahdi";
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('colorTestTheme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            }
+
+            renderColorVariations();
+            applyColors();
+            updateGreeting();
+        }
+
+        init();
+    </script>
+</body>
+</html>

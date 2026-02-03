@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Options Comparison - Bibliography Section</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       BASE VARIABLES - SHARED
+       ============================================ */
+    :root {
+      font-size: 16px;
+
+      /* Spacing */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+
+      /* Heights */
+      --height-header: 2.75rem;
+      --height-toolbar: 2.75rem;
+      --height-tab: 2.75rem;
+      --height-row: 2.75rem;
+      --height-button: 2rem;
+      --height-icon-touch: 2.75rem;
+
+      /* Icons */
+      --icon-activity: 1.75rem;
+      --icon-small: 1rem;
+      --icon-logo: 1.375rem;
+
+      /* Widths */
+      --activity-bar-width: 3.5rem;
+      --sidebar-width: 16rem;
+
+      /* Default palette fallback: Ocean (light) */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-hover: #e2e8f0;
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      --border-default: #e2e8f0;
+      --border-subtle: #f1f5f9;
+
+      --accent-primary: #059669;
+      --accent-secondary: #2563eb;
+      --accent-tertiary: #f59e0b;
+
+      --accent-primary-soft: rgba(5, 150, 105, 0.12);
+      --accent-secondary-soft: rgba(37, 99, 235, 0.12);
+      --accent-tertiary-soft: rgba(245, 158, 11, 0.12);
+
+      --accent-light: var(--accent-primary-soft);
+      --selection: var(--accent-primary-soft);
+
+      --shadow-soft: rgba(0, 0, 0, 0.08);
+
+      /* Radii */
+      --radius-card: 0.5rem;
+      --radius-button: 0.5rem;
+      --radius-input: 0.375rem;
+      --radius-tag: 0.375rem;
+      --radius-icon: 0.625rem;
+
+      /* Section color (uses tertiary accent) */
+      --section-color: #f59e0b;
+      --section-color-light: rgba(245, 158, 11, 0.12);
+      --section-color-medium: rgba(245, 158, 11, 0.18);
+    }
+
+    /* ============================================
+       COMBOS (background + 3 module colors)
+       Each combo has light/dark surfaces and module accents
+       ============================================ */
+    [data-combo="A"][data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-default: #e2e8f0;
+      --border-subtle: #f1f5f9;
+
+      --module-editor: #0f766e;
+      --module-biblio: #1e40af;
+      --module-todo: #be123c;
+      --module-discover: #b45309;
+      --module-editor-soft: rgba(15, 118, 110, 0.12);
+      --module-biblio-soft: rgba(30, 64, 175, 0.12);
+      --module-todo-soft: rgba(190, 18, 60, 0.12);
+      --module-discover-soft: rgba(180, 83, 9, 0.12);
+    }
+
+    [data-combo="A"][data-theme="dark"] {
+      --bg-primary: #080a10;
+      --bg-secondary: #161b21;
+      --bg-tertiary: #1a222c;
+      --bg-hover: #242e3c;
+      --text-primary: #e8e8f0;
+      --text-secondary: #a8a8b8;
+      --text-muted: #6e6e7e;
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+
+      --module-editor: #5eead4;
+      --module-biblio: #60a5fa;
+      --module-todo: #fb7185;
+      --module-discover: #fbbf24;
+      --module-editor-soft: rgba(94, 234, 212, 0.18);
+      --module-biblio-soft: rgba(96, 165, 250, 0.18);
+      --module-todo-soft: rgba(251, 113, 133, 0.18);
+      --module-discover-soft: rgba(251, 191, 36, 0.18);
+
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    [data-combo="B"][data-theme="light"] {
+      --bg-primary: #fafaf9;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f5f5f4;
+      --bg-hover: #e7e5e4;
+      --text-primary: #1c1917;
+      --text-secondary: #57534e;
+      --text-muted: #a8a29e;
+      --border-default: #e7e5e4;
+      --border-subtle: #f5f5f4;
+
+      --module-editor: #14b8a6;
+      --module-biblio: #2563eb;
+      --module-todo: #ec4899;
+      --module-discover: #8b5cf6;
+      --module-editor-soft: rgba(20, 184, 166, 0.12);
+      --module-biblio-soft: rgba(37, 99, 235, 0.12);
+      --module-todo-soft: rgba(236, 72, 153, 0.12);
+      --module-discover-soft: rgba(139, 92, 246, 0.12);
+    }
+
+    [data-combo="B"][data-theme="dark"] {
+      --bg-primary: #0c0a09;
+      --bg-secondary: #1c1917;
+      --bg-tertiary: #292524;
+      --bg-hover: #44403c;
+      --text-primary: #f5f5f4;
+      --text-secondary: #d6d3d1;
+      --text-muted: #a8a29e;
+      --border-default: #292524;
+      --border-subtle: #44403c;
+
+      --module-editor: #2dd4bf;
+      --module-biblio: #3b82f6;
+      --module-todo: #f472b6;
+      --module-discover: #a78bfa;
+      --module-editor-soft: rgba(45, 212, 191, 0.18);
+      --module-biblio-soft: rgba(59, 130, 246, 0.18);
+      --module-todo-soft: rgba(244, 114, 182, 0.18);
+      --module-discover-soft: rgba(167, 139, 250, 0.18);
+
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    [data-combo="C"][data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-default: #e2e8f0;
+      --border-subtle: #f1f5f9;
+
+      --module-editor: #14b8a6;
+      --module-biblio: #3b82f6;
+      --module-todo: #f43f5e;
+      --module-discover: #d97706;
+      --module-editor-soft: rgba(20, 184, 166, 0.12);
+      --module-biblio-soft: rgba(59, 130, 246, 0.12);
+      --module-todo-soft: rgba(244, 63, 94, 0.12);
+      --module-discover-soft: rgba(217, 119, 6, 0.12);
+    }
+
+    [data-combo="C"][data-theme="dark"] {
+      --bg-primary: #080a10;
+      --bg-secondary: #161b21;
+      --bg-tertiary: #1a222c;
+      --bg-hover: #242e3c;
+      --text-primary: #e8e8f0;
+      --text-secondary: #a8a8b8;
+      --text-muted: #6e6e7e;
+      --border-default: #242e3c;
+      --border-subtle: #1a222c;
+
+      --module-editor: #2dd4bf;
+      --module-biblio: #60a5fa;
+      --module-todo: #fb7185;
+      --module-discover: #fdba74;
+      --module-editor-soft: rgba(45, 212, 191, 0.18);
+      --module-biblio-soft: rgba(96, 165, 250, 0.18);
+      --module-todo-soft: rgba(251, 113, 133, 0.18);
+      --module-discover-soft: rgba(253, 186, 116, 0.18);
+
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    /* ============================================
+       COMBO D: SCHOLARLY WARMTH
+       Warm cream backgrounds, muted harmonized accents
+       Designed for long reading sessions & eye comfort
+       TRUE BLACK dark mode for OLED
+       ============================================ */
+    
+    /* D - MUTED (default, most eye-friendly) */
+    [data-combo="D"][data-theme="light"][data-mood="muted"],
+    [data-combo="D"][data-theme="light"]:not([data-mood]) {
+      --bg-primary: #FAF8F5;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F2EFEA;
+      --bg-hover: #E8E4DD;
+      --text-primary: #2C2825;
+      --text-secondary: #6B635B;
+      --text-muted: #9A9189;
+      --border-default: #D9D4CB;
+      --border-subtle: #E8E4DD;
+      /* CORRECTED: ~30-35% saturation, darker for white text compliance */
+      --module-editor: #3A7A68;
+      --module-biblio: #4A6A82;
+      --module-todo: #7A5A88;
+      --module-discover: #7A5A88;
+      --module-editor-soft: rgba(58, 122, 104, 0.12);
+      --module-biblio-soft: rgba(74, 106, 130, 0.12);
+      --module-todo-soft: rgba(122, 90, 136, 0.12);
+      --module-discover-soft: rgba(122, 90, 136, 0.12);
+      --shadow-soft: rgba(44, 40, 37, 0.08);
+    }
+
+    /* D - BALANCED (slightly happier, still comfortable) */
+    [data-combo="D"][data-theme="light"][data-mood="balanced"] {
+      --bg-primary: #FAF8F5;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F2EFEA;
+      --bg-hover: #E8E4DD;
+      --text-primary: #2C2825;
+      --text-secondary: #6B635B;
+      --text-muted: #9A9189;
+      --border-default: #D9D4CB;
+      --border-subtle: #E8E4DD;
+      /* CORRECTED: ~40-45% saturation, darker for white text compliance */
+      --module-editor: #2A8268;
+      --module-biblio: #3A6D90;
+      --module-todo: #7E5098;
+      --module-discover: #7E5098;
+      --module-editor-soft: rgba(42, 130, 104, 0.12);
+      --module-biblio-soft: rgba(58, 109, 144, 0.12);
+      --module-todo-soft: rgba(126, 80, 152, 0.12);
+      --module-discover-soft: rgba(126, 80, 152, 0.12);
+      --shadow-soft: rgba(44, 40, 37, 0.08);
+    }
+
+    /* D - VIBRANT (happy but still warm, good for shorter sessions) */
+    [data-combo="D"][data-theme="light"][data-mood="vibrant"] {
+      --bg-primary: #FAF8F5;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F2EFEA;
+      --bg-hover: #E8E4DD;
+      --text-primary: #2C2825;
+      --text-secondary: #6B635B;
+      --text-muted: #9A9189;
+      --border-default: #D9D4CB;
+      --border-subtle: #E8E4DD;
+      /* CORRECTED: ~50-55% saturation, darker for white text compliance */
+      --module-editor: #188060;
+      --module-biblio: #2E6E98;
+      --module-todo: #8048A8;
+      --module-discover: #8048A8;
+      --module-editor-soft: rgba(24, 128, 96, 0.14);
+      --module-biblio-soft: rgba(46, 110, 152, 0.14);
+      --module-todo-soft: rgba(128, 72, 168, 0.14);
+      --module-discover-soft: rgba(128, 72, 168, 0.14);
+      --shadow-soft: rgba(44, 40, 37, 0.08);
+    }
+
+    /* D DARK - MUTED */
+    [data-combo="D"][data-theme="dark"][data-mood="muted"],
+    [data-combo="D"][data-theme="dark"]:not([data-mood]) {
+      --bg-primary: #000000;
+      --bg-secondary: #171614;
+      --bg-tertiary: #0D0D0C;
+      --bg-hover: #1E1D1A;
+      --text-primary: #E8E4DF;
+      --text-secondary: #9A958D;
+      --text-muted: #5C5850;
+      --border-default: #2D2B27;
+      --border-subtle: #1F1E1B;
+      --module-editor: #6BB8A2;
+      --module-biblio: #7BA3C2;
+      --module-todo: #AD8FBD;
+      --module-discover: #AD8FBD;
+      --module-editor-soft: rgba(107, 184, 162, 0.18);
+      --module-biblio-soft: rgba(123, 163, 194, 0.18);
+      --module-todo-soft: rgba(173, 143, 189, 0.18);
+      --module-discover-soft: rgba(173, 143, 189, 0.18);
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    /* D DARK - BALANCED */
+    [data-combo="D"][data-theme="dark"][data-mood="balanced"] {
+      --bg-primary: #000000;
+      --bg-secondary: #171614;
+      --bg-tertiary: #0D0D0C;
+      --bg-hover: #1E1D1A;
+      --text-primary: #E8E4DF;
+      --text-secondary: #9A958D;
+      --text-muted: #5C5850;
+      --border-default: #2D2B27;
+      --border-subtle: #1F1E1B;
+      --module-editor: #4DCBA8;
+      --module-biblio: #5A9FD4;
+      --module-todo: #BC8BD0;
+      --module-discover: #BC8BD0;
+      --module-editor-soft: rgba(77, 203, 168, 0.18);
+      --module-biblio-soft: rgba(90, 159, 212, 0.18);
+      --module-todo-soft: rgba(188, 139, 208, 0.18);
+      --module-discover-soft: rgba(188, 139, 208, 0.18);
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    /* D DARK - VIBRANT */
+    [data-combo="D"][data-theme="dark"][data-mood="vibrant"] {
+      --bg-primary: #000000;
+      --bg-secondary: #171614;
+      --bg-tertiary: #0D0D0C;
+      --bg-hover: #1E1D1A;
+      --text-primary: #E8E4DF;
+      --text-secondary: #9A958D;
+      --text-muted: #5C5850;
+      --border-default: #2D2B27;
+      --border-subtle: #1F1E1B;
+      --module-editor: #2DD4A8;
+      --module-biblio: #47A3E0;
+      --module-todo: #C97DE0;
+      --module-discover: #C97DE0;
+      --module-editor-soft: rgba(45, 212, 168, 0.20);
+      --module-biblio-soft: rgba(71, 163, 224, 0.20);
+      --module-todo-soft: rgba(201, 125, 224, 0.20);
+      --module-discover-soft: rgba(201, 125, 224, 0.20);
+      --shadow-soft: rgba(0, 0, 0, 0.45);
+    }
+
+    /* Active module mapping */
+    [data-module="editor"] {
+      --accent-primary: var(--module-editor);
+      --accent-secondary: var(--module-editor);
+      --accent-tertiary: var(--module-editor);
+      --accent-primary-soft: var(--module-editor-soft);
+      --accent-secondary-soft: var(--module-editor-soft);
+      --accent-tertiary-soft: var(--module-editor-soft);
+      --accent-light: var(--module-editor-soft);
+      --selection: var(--module-editor-soft);
+      --section-color: var(--module-editor);
+      --section-color-light: var(--module-editor-soft);
+      --section-color-medium: var(--module-editor-soft);
+    }
+
+    [data-module="biblio"] {
+      --accent-primary: var(--module-biblio);
+      --accent-secondary: var(--module-biblio);
+      --accent-tertiary: var(--module-biblio);
+      --accent-primary-soft: var(--module-biblio-soft);
+      --accent-secondary-soft: var(--module-biblio-soft);
+      --accent-tertiary-soft: var(--module-biblio-soft);
+      --accent-light: var(--module-biblio-soft);
+      --selection: var(--module-biblio-soft);
+      --section-color: var(--module-biblio);
+      --section-color-light: var(--module-biblio-soft);
+      --section-color-medium: var(--module-biblio-soft);
+    }
+
+    [data-module="discover"] {
+      --accent-primary: var(--module-discover);
+      --accent-secondary: var(--module-discover);
+      --accent-tertiary: var(--module-discover);
+      --accent-primary-soft: var(--module-discover-soft);
+      --accent-secondary-soft: var(--module-discover-soft);
+      --accent-tertiary-soft: var(--module-discover-soft);
+      --accent-light: var(--module-discover-soft);
+      --selection: var(--module-discover-soft);
+      --section-color: var(--module-discover);
+      --section-color-light: var(--module-discover-soft);
+      --section-color-medium: var(--module-discover-soft);
+    }
+
+    [data-module="todo"] {
+      --accent-primary: var(--module-todo);
+      --accent-secondary: var(--module-todo);
+      --accent-tertiary: var(--module-todo);
+      --accent-primary-soft: var(--module-todo-soft);
+      --accent-secondary-soft: var(--module-todo-soft);
+      --accent-tertiary-soft: var(--module-todo-soft);
+      --accent-light: var(--module-todo-soft);
+      --selection: var(--module-todo-soft);
+      --section-color: var(--module-todo);
+      --section-color-light: var(--module-todo-soft);
+      --section-color-medium: var(--module-todo-soft);
+    }
+
+    /* ============================================
+       OPTION A: DISTINCT COLORS (Primary Accent)
+       ============================================ */
+    [data-color-option="A"] {
+      --accent-light: var(--accent-primary-soft);
+      --selection: var(--accent-primary-soft);
+      --section-color: var(--accent-primary);
+      --section-color-light: var(--accent-primary-soft);
+      --section-color-medium: var(--accent-primary-soft);
+    }
+
+    /* ============================================
+       OPTION B: UNIFIED (Blue Throughout)
+       Already default - no changes needed
+       ============================================ */
+    [data-color-option="B"] {
+      --accent-primary: var(--module-biblio);
+      --accent-secondary: var(--module-biblio);
+      --accent-tertiary: var(--module-biblio);
+      --accent-primary-soft: var(--module-biblio-soft);
+      --accent-secondary-soft: var(--module-biblio-soft);
+      --accent-tertiary-soft: var(--module-biblio-soft);
+      --accent-light: var(--module-biblio-soft);
+      --selection: var(--module-biblio-soft);
+      --section-color: var(--module-biblio);
+      --section-color-light: var(--module-biblio-soft);
+      --section-color-medium: var(--module-biblio-soft);
+    }
+
+    /* ============================================
+       OPTION C: COLORFUL HOME + UNIFIED WORKSPACE
+       Same as B (blue accent), home page would be colorful
+       ============================================ */
+
+    /* ============================================
+       OPTION D: UNIFIED + SUBTLE INDICATOR
+       Blue accent + green indicator stripe
+       ============================================ */
+    [data-color-option="D"] .sidebar-header::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--section-color);
+    }
+
+    [data-color-option="D"] .sidebar-header {
+      position: relative;
+    }
+
+    [data-color-option="D"] .activity-icon.active {
+      color: var(--section-color);
+    }
+
+    [data-color-option="D"] .app-option.active {
+      color: var(--section-color);
+      background: var(--section-color-light);
+    }
+
+    /* ============================================
+       OPTION E: USER CUSTOMIZABLE
+       (Just shows the picker concept, uses purple as example)
+       ============================================ */
+    [data-color-option="E"] {
+      --accent-light: var(--accent-primary-soft);
+      --selection: var(--accent-primary-soft);
+      --section-color: var(--accent-primary);
+      --section-color-light: var(--accent-primary-soft);
+      --section-color-medium: var(--accent-primary-soft);
+    }
+
+    /* ============================================
+       OPTION F: TINTED BACKGROUNDS
+       Blue accent + subtle green-tinted backgrounds
+       ============================================ */
+    [data-color-option="F"] {
+      --bg-primary: #f4f9f7;
+      --bg-secondary: #f9fcfb;
+      --bg-tertiary: #e6f0ed;
+      --bg-hover: #d4e5df;
+    }
+
+    [data-color-option="F"] .activity-bar {
+      background: linear-gradient(180deg, var(--bg-tertiary) 0%, #dceee8 100%);
+    }
+
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      padding-top: var(--panel-offset, 4.5rem);
+    }
+
+    /* ============================================
+       CONTROL PANEL
+       ============================================ */
+    .control-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: auto;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: var(--space-4) var(--space-6);
+      z-index: 1000;
+      box-shadow: 0 2px 8px var(--shadow-soft);
+      gap: var(--space-2);
+    }
+
+    .control-panel h1 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .options-row {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .option-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-button);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .option-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .option-btn.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .option-label {
+      font-weight: 600;
+    }
+
+    .option-desc {
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    /* Color swatch in button */
+    .color-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .swatch-green { background: #059669; }
+    .swatch-blue { background: #0284c7; }
+    .swatch-purple { background: #7c3aed; }
+    .swatch-tinted { background: linear-gradient(135deg, #0284c7 50%, #d4e5df 50%); }
+
+    .control-label {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .control-note {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      margin-top: var(--space-2);
+    }
+
+    .palette-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-button);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .palette-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .palette-btn.active {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      box-shadow: inset 0 0 0 1px var(--accent-primary);
+    }
+
+    .control-inline {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .palette-swatch {
+      width: 28px;
+      height: 10px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .swatch-combo-a {
+      background: linear-gradient(90deg, #0f766e 0 25%, #1e40af 25% 50%, #be123c 50% 75%, #b45309 75% 100%);
+    }
+
+    .swatch-combo-b {
+      background: linear-gradient(90deg, #14b8a6 0 25%, #2563eb 25% 50%, #ec4899 50% 75%, #8b5cf6 75% 100%);
+    }
+
+    .swatch-combo-c {
+      background: linear-gradient(90deg, #14b8a6 0 25%, #3b82f6 25% 50%, #f43f5e 50% 75%, #f59e0b 75% 100%);
+    }
+
+    .swatch-combo-d {
+      background: linear-gradient(90deg, #3A7A68 0 33%, #4A6A82 33% 66%, #7A5A88 66% 100%);
+    }
+
+    /* ============================================
+       MAIN CONTAINER
+       ============================================ */
+    .app-container {
+      margin-top: 0;
+      height: calc(100vh - var(--panel-offset, 4.5rem));
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       ACTIVITY BAR
+       ============================================ */
+    .activity-bar {
+      width: var(--activity-bar-width);
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-section {
+      width: 100%;
+      height: var(--height-header);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+    }
+
+    .logo-section:hover {
+      background: var(--bg-hover);
+    }
+
+    .logo-icon {
+      width: var(--height-icon-touch);
+      height: var(--height-icon-touch);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      border-radius: var(--radius-icon);
+    }
+
+    .logo-icon svg {
+      width: var(--icon-logo);
+      height: var(--icon-logo);
+    }
+
+    .activity-icons {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-4) 0;
+      gap: var(--space-2);
+    }
+
+    .activity-icon {
+      width: var(--height-icon-touch);
+      height: var(--height-icon-touch);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-icon);
+      transition: all 0.15s ease;
+    }
+
+    .activity-icon:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .activity-icon.active {
+      background: var(--selection);
+      color: var(--accent-primary);
+    }
+
+    .activity-icon svg {
+      width: var(--icon-activity);
+      height: var(--icon-activity);
+    }
+
+    .activity-spacer {
+      flex: 1;
+      min-height: var(--space-4);
+    }
+
+    /* ============================================
+       SIDEBAR
+       ============================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      box-shadow: inset -8px 0 12px -8px var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      height: var(--height-header);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-title {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: var(--space-1);
+    }
+
+    .sidebar-action {
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-input);
+    }
+
+    .sidebar-action:hover {
+      color: var(--text-secondary);
+      background: var(--bg-hover);
+    }
+
+    .sidebar-action svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-top: var(--space-2);
+    }
+
+    .collection-section {
+      padding: 0 var(--space-3);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .section-header svg {
+      width: 0.875rem;
+      height: 0.875rem;
+      transform: rotate(90deg);
+    }
+
+    .collection-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.375rem var(--space-2);
+      padding-left: var(--space-6);
+      min-height: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-input);
+    }
+
+    .collection-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .collection-item.active {
+      background: var(--selection);
+      color: var(--accent-primary);
+    }
+
+    .collection-item.nested {
+      padding-left: calc(var(--space-6) + var(--space-3));
+    }
+
+    .collection-item svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+      flex-shrink: 0;
+    }
+
+    .add-collection {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.375rem var(--space-2);
+      padding-left: var(--space-6);
+      min-height: 2rem;
+      font-size: 0.875rem;
+      color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    .add-collection:hover {
+      text-decoration: underline;
+    }
+
+    .add-collection svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+    }
+
+    /* ============================================
+       MAIN CONTENT
+       ============================================ */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .tab-bar {
+      height: var(--height-tab);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: stretch;
+      padding: 0 var(--space-4);
+      gap: var(--space-4);
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0 var(--space-2);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab:hover {
+      color: var(--text-secondary);
+      border-bottom-color: var(--border-default);
+    }
+
+    .tab.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+
+    .tab svg {
+      width: var(--icon-small);
+      height: var(--icon-small);
+    }
+
+    .toolbar {
+      height: var(--height-toolbar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      margin-top: var(--space-2);
+      margin-bottom: var(--space-2);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .btn {
+      height: var(--height-button);
+      padding: 0 var(--space-4);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border-radius: var(--radius-button);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-wrapper svg {
+      position: absolute;
+      left: 0.625rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: var(--icon-small);
+      height: var(--icon-small);
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      width: 10rem;
+      height: var(--height-button);
+      padding: 0 var(--space-3);
+      padding-left: var(--space-8);
+      font-size: 0.75rem;
+      background: var(--bg-tertiary);
+      border: none;
+      border-radius: var(--radius-input);
+      color: var(--text-primary);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* ============================================
+       REFERENCE TABLE
+       ============================================ */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      padding: 0 var(--space-4);
+    }
+
+    .reference-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow-soft);
+    }
+
+    .reference-table th {
+      height: var(--height-row);
+      padding: 0 var(--space-3);
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg-hover);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .reference-table td {
+      height: var(--height-row);
+      padding: 0 var(--space-3);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 1px;
+    }
+
+    .reference-table tbody tr {
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .reference-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .reference-table tbody tr.selected {
+      background: var(--selection);
+      box-shadow: inset 0 0 0 1px var(--accent-primary);
+    }
+
+    .reference-table .title-cell {
+      color: var(--text-primary);
+    }
+
+    .tag-group {
+      display: flex;
+      gap: var(--space-1);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 1.25rem;
+      padding: 0 var(--space-2);
+      font-size: 0.6875rem;
+      border-radius: var(--radius-tag);
+    }
+
+    .tag-cyan {
+      background: var(--accent-secondary-soft);
+      color: var(--accent-secondary);
+    }
+
+    .tag-violet {
+      background: var(--accent-tertiary-soft);
+      color: var(--accent-tertiary);
+    }
+
+    .tag-emerald {
+      background: var(--accent-primary-soft);
+      color: var(--accent-primary);
+    }
+
+    .file-link {
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .file-link:hover {
+      color: var(--accent-primary);
+    }
+
+    .doi-link {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .col-title { width: 40%; min-width: 12.5rem; }
+    .col-authors { width: 20%; min-width: 7.5rem; }
+    .col-year { width: 4rem; }
+    .col-tags { width: 20%; min-width: 7.5rem; }
+    .col-files { width: 3.75rem; text-align: center; }
+
+    /* ============================================
+       INFO PANEL
+       ============================================ */
+    .info-panel {
+      position: fixed;
+      bottom: var(--space-5);
+      right: var(--space-5);
+      max-width: 320px;
+      padding: var(--space-4);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      box-shadow: 0 4px 20px var(--shadow-soft);
+      font-size: 0.8125rem;
+      z-index: 100;
+    }
+
+    .info-panel h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--accent-primary);
+    }
+
+    .info-panel p {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-3);
+      line-height: 1.5;
+    }
+
+    .info-panel ul {
+      padding-left: var(--space-4);
+      color: var(--text-secondary);
+    }
+
+    .info-panel li {
+      margin-bottom: var(--space-1);
+    }
+
+    .info-panel strong {
+      color: var(--text-primary);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 0.25rem;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
+</head>
+<body data-combo="A" data-module="biblio" data-theme="light">
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <h1>Color Options + Palette Comparison - Bibliography Section</h1>
+    <div class="control-inline">
+      <div class="control-group">
+        <div class="control-label">Combos</div>
+        <button class="palette-btn active" data-combo="A" onclick="setCombo('A')">
+          <span class="palette-swatch swatch-combo-a"></span>
+          <span class="option-label">A: Scholar</span>
+        </button>
+        <button class="palette-btn" data-combo="B" onclick="setCombo('B')">
+          <span class="palette-swatch swatch-combo-b"></span>
+          <span class="option-label">B: Vercel</span>
+        </button>
+        <button class="palette-btn" data-combo="C" onclick="setCombo('C')">
+          <span class="palette-swatch swatch-combo-c"></span>
+          <span class="option-label">C: Split</span>
+        </button>
+        <button class="palette-btn" data-combo="D" onclick="setCombo('D')">
+          <span class="palette-swatch swatch-combo-d"></span>
+          <span class="option-label">D: Scholarly</span>
+        </button>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Module</div>
+        <button class="palette-btn" data-module="editor" onclick="setModule('editor')">Editor</button>
+        <button class="palette-btn active" data-module="biblio" onclick="setModule('biblio')">Bibliography</button>
+        <button class="palette-btn" data-module="todo" onclick="setModule('todo')">Todo</button>
+        <button class="palette-btn" data-module="discover" onclick="setModule('discover')">Discovery</button>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Theme</div>
+        <button class="palette-btn active" data-theme="light" onclick="setTheme('light')">Light</button>
+        <button class="palette-btn" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+      </div>
+
+      <div class="control-group" id="moodGroup" style="display: none;">
+        <div class="control-label">Mood (D only)</div>
+        <button class="palette-btn active" data-mood="muted" onclick="setMood('muted')">😌 Muted</button>
+        <button class="palette-btn" data-mood="balanced" onclick="setMood('balanced')">🙂 Balanced</button>
+        <button class="palette-btn" data-mood="vibrant" onclick="setMood('vibrant')">😊 Vibrant</button>
+      </div>
+    </div>
+
+    <div class="control-note" id="paletteStatus">Combo: A · Module: Bibliography · Theme: Light</div>
+  </div>
+
+  <!-- Main App Container -->
+  <div class="app-container">
+    <!-- Activity Bar -->
+    <div class="activity-bar">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="activity-icons">
+        <div class="activity-icon active" title="Library">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div class="activity-icon" title="Search">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <div class="activity-icon" title="Tags">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+        </div>
+        <div class="activity-spacer"></div>
+        <div class="activity-icon" title="Settings">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Library</span>
+        <div class="sidebar-actions">
+          <div class="sidebar-action" title="New Collection">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <div class="sidebar-action" title="Edit">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="collection-section">
+          <div class="section-header">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+            <span>My Library</span>
+          </div>
+
+          <div class="collection-item active">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <span>Offline RL</span>
+          </div>
+
+          <div class="collection-item nested">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <span>On-Policy Methods</span>
+          </div>
+
+          <div class="collection-item">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <span>Exploration</span>
+          </div>
+
+          <div class="collection-item">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <span>To Read</span>
+          </div>
+
+          <div class="add-collection">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add Collection</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="tab-bar">
+        <div class="tab active">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>All References</span>
+        </div>
+        <div class="tab">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Recent</span>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add
+          </button>
+          <button class="btn btn-secondary">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import
+          </button>
+          <button class="btn btn-secondary">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <div class="search-wrapper">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" class="search-input" placeholder="Search references...">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="reference-table">
+          <thead>
+            <tr>
+              <th class="col-title">Title</th>
+              <th class="col-authors">Authors</th>
+              <th class="col-year">Year</th>
+              <th class="col-tags">Tags</th>
+              <th class="col-files">Files</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="title-cell">A Study of Plasticity Loss in On-Policy DeepRL</td>
+              <td>Julian, A., Ash, J.</td>
+              <td>2024</td>
+              <td>
+                <div class="tag-group">
+                  <span class="tag tag-cyan">plasticity</span>
+                  <span class="tag tag-violet">deep-rl</span>
+                </div>
+              </td>
+              <td class="file-link">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </td>
+            </tr>
+            <tr class="selected">
+              <td class="title-cell">Robust On-Policy Sampling for Policy Evaluation</td>
+              <td>Zhang, H., et al.</td>
+              <td>2022</td>
+              <td>
+                <div class="tag-group">
+                  <span class="tag tag-emerald">policy-eval</span>
+                </div>
+              </td>
+              <td class="file-link">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </td>
+            </tr>
+            <tr>
+              <td class="title-cell">On-Policy Deep RL for Average-Reward Criterion</td>
+              <td>Zhang, S., Ross, K.</td>
+              <td>2021</td>
+              <td>
+                <div class="tag-group">
+                  <span class="tag tag-emerald">policy-eval</span>
+                  <span class="tag tag-violet">deep-rl</span>
+                </div>
+              </td>
+              <td class="file-link">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="info-panel" id="infoPanel">
+    <h3 id="infoTitle">Option A: Distinct Colors</h3>
+    <p id="infoDesc">Module accent switches with Editor/Bibliography/Discovery.</p>
+    <ul id="infoDetails">
+      <li><strong>Accent:</strong> Active module color</li>
+      <li><strong>Selection:</strong> Module tint</li>
+      <li><strong>Buttons:</strong> Module primary</li>
+    </ul>
+  </div>
+
+  <script>
+    const optionInfo = {
+      'A': {
+        title: 'Option A: Distinct Colors',
+        desc: 'Active module controls the accent (Editor/Bibliography/Discovery).',
+        details: [
+          '<strong>Accent:</strong> Active module color',
+          '<strong>Selection:</strong> Module tint',
+          '<strong>Buttons:</strong> Module primary',
+          '<strong>Pros:</strong> Strong section identity',
+          '<strong>Cons:</strong> Can feel jarring for long sessions'
+        ]
+      },
+      'B': {
+        title: 'Option B: Unified',
+        desc: 'Single accent throughout the workspace (uses Bibliography color of the combo).',
+        details: [
+          '<strong>Accent:</strong> Bibliography color',
+          '<strong>Selection:</strong> Bibliography tint',
+          '<strong>Buttons:</strong> Bibliography primary',
+          '<strong>Pros:</strong> Maximum consistency, "one tool" feel',
+          '<strong>Cons:</strong> Home page loses visual variety'
+        ]
+      },
+      'C': {
+        title: 'Option C: Notion Model',
+        desc: 'Home page keeps colorful cards (green for this section), but workspace uses unified blue. Best of both worlds.',
+        details: [
+          '<strong>Home Page:</strong> Colorful cards per section',
+          '<strong>Workspace:</strong> Unified blue accent',
+          '<strong>Pros:</strong> Marketing appeal + focus support',
+          '<strong>Cons:</strong> Home colors become "just marketing"'
+        ]
+      },
+      'D': {
+        title: 'Option D: Hybrid (Subtle Indicator)',
+        desc: 'Blue accent throughout, but a subtle green stripe/indicator shows which section you\'re in.',
+        details: [
+          '<strong>Accent:</strong> Blue (unified)',
+          '<strong>Indicator:</strong> Green stripe on sidebar header',
+          '<strong>Active icon:</strong> Green color',
+          '<strong>Pros:</strong> Orientation without disruption',
+          '<strong>Cons:</strong> Subtle, users might not notice'
+        ]
+      },
+      'E': {
+        title: 'Option E: User Customizable',
+        desc: 'Users choose their own accent color. This example shows purple as a user-selected preference.',
+        details: [
+          '<strong>Accent:</strong> User\'s choice (purple shown)',
+          '<strong>Selection:</strong> Matches user color',
+          '<strong>Pros:</strong> Personal preference respected',
+          '<strong>Cons:</strong> More complex, not solving brand question'
+        ]
+      },
+      'F': {
+        title: 'Option F: Tinted Backgrounds',
+        desc: 'Blue accent stays consistent, but backgrounds have a subtle green tint to indicate section.',
+        details: [
+          '<strong>Accent:</strong> Blue (unified)',
+          '<strong>Backgrounds:</strong> Subtle green tint',
+          '<strong>Atmosphere:</strong> Warmer, section-specific feel',
+          '<strong>Pros:</strong> Atmospheric without jarring',
+          '<strong>Cons:</strong> Can look muddy if not careful'
+        ]
+      }
+    };
+
+    function setOption(option) {
+      document.body.dataset.colorOption = option;
+
+      // Update button states
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.option === option);
+      });
+
+      // Update info panel
+      const info = optionInfo[option];
+      document.getElementById('infoTitle').textContent = info.title;
+      document.getElementById('infoDesc').textContent = info.desc;
+      document.getElementById('infoDetails').innerHTML = info.details.map(d => `<li>${d}</li>`).join('');
+    }
+
+    function setCombo(combo) {
+      document.body.dataset.combo = combo;
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        if (btn.dataset.combo) {
+          btn.classList.toggle('active', btn.dataset.combo === combo);
+        }
+      });
+      // Show mood toggle only for Combo D
+      const moodGroup = document.getElementById('moodGroup');
+      if (moodGroup) {
+        moodGroup.style.display = combo === 'D' ? 'flex' : 'none';
+      }
+      updateStatus();
+    }
+
+    function setMood(mood) {
+      document.body.dataset.mood = mood;
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        if (btn.dataset.mood) {
+          btn.classList.toggle('active', btn.dataset.mood === mood);
+        }
+      });
+      updateStatus();
+    }
+
+    function setModule(moduleKey) {
+      document.body.dataset.module = moduleKey;
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        if (btn.dataset.module) {
+          btn.classList.toggle('active', btn.dataset.module === moduleKey);
+        }
+      });
+      updateStatus();
+    }
+
+    function setTheme(theme) {
+      document.body.dataset.theme = theme;
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        if (btn.dataset.theme) {
+          btn.classList.toggle('active', btn.dataset.theme === theme);
+        }
+      });
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const comboName = document.body.dataset.combo || 'A';
+      const moduleName = document.body.dataset.module || 'biblio';
+      const themeName = document.body.dataset.theme || 'light';
+      const moodName = document.body.dataset.mood || 'muted';
+      const moduleLabel = moduleName === 'biblio' ? 'Bibliography' : moduleName === 'todo' ? 'Todo' : moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+      const comboLabel = comboName === 'A' ? 'Scholar' : comboName === 'B' ? 'Vercel' : comboName === 'C' ? 'Split' : 'Scholarly';
+      const moodLabel = moodName.charAt(0).toUpperCase() + moodName.slice(1);
+      let statusText = `Combo: ${comboName} (${comboLabel}) · Module: ${moduleLabel} · Theme: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
+      if (comboName === 'D') {
+        statusText += ` · Mood: ${moodLabel}`;
+      }
+      document.getElementById('paletteStatus').textContent = statusText;
+    }
+
+    function updatePanelOffset() {
+      const panel = document.querySelector('.control-panel');
+      if (!panel) return;
+      document.documentElement.style.setProperty('--panel-offset', `${panel.offsetHeight}px`);
+    }
+
+    updateStatus();
+    updatePanelOffset();
+    window.addEventListener('resize', updatePanelOffset);
+  </script>
+</body>
+</html>
