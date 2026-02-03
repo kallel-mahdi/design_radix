@@ -1,28 +1,28 @@
 /**
  * ManuMockup - Overleaf-style editor split view for landing page
  *
- * Story loop:
- * 1) typing (3s) - Single author writing LaTeX
- * 2) collab (3s) - Collaborator joins + remote cursor appears
- * 3) compile (2.5s) - Compile overlay, then PDF updates
- * 4) comment (3.5s) - Comment bubble anchored to a code line
+ * Story loop (9s total):
+ * 1) typing (2s) - User typing LaTeX prose with blinking cursor
+ * 2) collab (3s) - Sarah joins and types in Methods section
+ * 3) comment (2s) - Sarah leaves an inline comment
+ * 4) compile (2s) - PDF compiles with rotation animation
  *
  * Renders inside a 16:10 frame (see landing layouts).
  */
 
-import { useEffect, useMemo, useState } from "react";
-import { FileText, PlayCircle, MessageSquare } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { FileText, FileCode, Check } from "lucide-react";
 import { MockAppShell } from "./MockAppShell";
 
-type EditorStep = "typing" | "collab" | "compile" | "comment";
+type EditorStep = "typing" | "collab" | "comment" | "compile";
 
-const stepOrder: EditorStep[] = ["typing", "collab", "compile", "comment"];
+const stepOrder: EditorStep[] = ["typing", "collab", "comment", "compile"];
 
 const stepTimings: Record<EditorStep, number> = {
-  typing: 3000,
+  typing: 2000,
   collab: 3000,
-  compile: 2500,
-  comment: 3500,
+  comment: 2000,
+  compile: 2000,
 };
 
 type Collaborator = {
@@ -31,133 +31,192 @@ type Collaborator = {
   colorVar: string;
 };
 
-const collaborators: { you: Collaborator; alex: Collaborator } = {
-  you: { name: "Sarah Chen", initial: "S", colorVar: "--manu" },
-  alex: { name: "Alex Rodriguez", initial: "A", colorVar: "--discover" },
+const collaborators = {
+  you: { name: "You", initial: "Y", colorVar: "--manu" },
+  sarah: { name: "Sarah", initial: "S", colorVar: "--discover" },
 };
 
-type Line = { num: number; text: string };
-
-const baseLines: Line[] = [
-  { num: 1, text: "\\documentclass{article}" },
-  { num: 2, text: "\\usepackage{amsmath}" },
-  { num: 3, text: "\\usepackage{biblatex}" },
-  { num: 4, text: "\\addbibresource{references.bib}" },
-  { num: 5, text: "" },
-  { num: 6, text: "\\title{Machine Learning for Climate Prediction}" },
-  { num: 7, text: "\\author{Chen et al.}" },
-  { num: 8, text: "" },
-  { num: 9, text: "\\begin{document}" },
-  { num: 10, text: "\\maketitle" },
-  { num: 11, text: "" },
-  { num: 12, text: "\\section{Introduction}" },
-  { num: 13, text: "Climate prediction remains one of the most challenging" },
-  { num: 14, text: "problems in environmental science \\cite{ipcc2023}." },
-  { num: 15, text: "" },
-  { num: 16, text: "\\end{document}" },
+// LaTeX content for the editor
+const baseLatex = [
+  "\\documentclass{article}",
+  "\\begin{document}",
+  "",
+  "\\section{Introduction}",
 ];
+
+// User types across both typing and collab steps
+const typingText = "The transformer architecture has revolutionized";
+const sarahTypingText = "\\section{Methods}";
 
 export function ManuMockup() {
   const [step, setStep] = useState<EditorStep>("typing");
   const [compilePhase, setCompilePhase] = useState<0 | 1>(0);
-  const [commentPhase, setCommentPhase] = useState<0 | 1>(0);
+  const [typedChars, setTypedChars] = useState(0);
+  const [sarahTypedChars, setSarahTypedChars] = useState(0);
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sarahTypingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Step progression
   useEffect(() => {
     const timeout = setTimeout(() => {
       const nextIndex = (stepOrder.indexOf(step) + 1) % stepOrder.length;
       const next = stepOrder[nextIndex];
       setStep(next);
+
+      // Reset states on step change
+      if (next === "typing") {
+        setTypedChars(0);
+        setSarahTypedChars(0);
+      }
       if (next === "compile") setCompilePhase(0);
-      if (next === "comment") setCommentPhase(0);
     }, stepTimings[step]);
     return () => clearTimeout(timeout);
   }, [step]);
 
+  // Typing animation for user (continues through typing + collab steps)
+  useEffect(() => {
+    // Stop typing in comment/compile steps
+    if (step !== "typing" && step !== "collab") {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    // Reset when entering typing step (start of loop)
+    if (step === "typing") {
+      setTypedChars(0);
+    }
+
+    // Start typing
+    const interval = setInterval(() => {
+      setTypedChars((prev) => {
+        if (prev >= typingText.length) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 100);
+    typingIntervalRef.current = interval;
+
+    return () => {
+      clearInterval(interval);
+      typingIntervalRef.current = null;
+    };
+  }, [step]);
+
+  // Sarah typing animation (Step 2 - starts after 500ms delay)
+  useEffect(() => {
+    if (step !== "collab") {
+      if (sarahTypingIntervalRef.current) {
+        clearInterval(sarahTypingIntervalRef.current);
+        sarahTypingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    setSarahTypedChars(0);
+    const startDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setSarahTypedChars((prev) => {
+          if (prev >= sarahTypingText.length) {
+            if (sarahTypingIntervalRef.current) clearInterval(sarahTypingIntervalRef.current);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 80);
+      sarahTypingIntervalRef.current = interval;
+    }, 500);
+
+    return () => {
+      clearTimeout(startDelay);
+      if (sarahTypingIntervalRef.current) {
+        clearInterval(sarahTypingIntervalRef.current);
+        sarahTypingIntervalRef.current = null;
+      }
+    };
+  }, [step]);
+
+  // Compile phase transition
   useEffect(() => {
     if (step !== "compile") return;
-    const t1 = setTimeout(() => setCompilePhase(1), 1200);
+    const t1 = setTimeout(() => setCompilePhase(1), 1000);
     return () => clearTimeout(t1);
   }, [step]);
 
-  useEffect(() => {
-    if (step !== "comment") return;
-    const t1 = setTimeout(() => setCommentPhase(1), 700);
-    return () => clearTimeout(t1);
-  }, [step]);
-
-  const visibleLines = useMemo(() => {
-    if (step === "typing") return baseLines.slice(0, 14);
-    if (step === "collab") return baseLines.slice(6, 16);
-    if (step === "compile") return baseLines.slice(8, 16);
-    return baseLines.slice(10, 16);
-  }, [step]);
+  const showSarah = step === "collab" || step === "comment" || step === "compile";
+  const isUserTyping = step === "typing" || step === "collab";
+  const displayedTypingText = isUserTyping
+    ? typingText.slice(0, typedChars)
+    : typingText;
+  const displayedSarahText = step === "collab"
+    ? sarahTypingText.slice(0, sarahTypedChars)
+    : (step === "comment" || step === "compile" ? sarahTypingText : "");
 
   return (
     <MockAppShell module="manuscripts">
-      <TopBar
-        step={step}
-        compilePhase={compilePhase}
-      />
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <EditorPane step={step} commentPhase={commentPhase} lines={visibleLines} />
+        {/* Editor pane */}
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          {/* Editor tabs */}
+          <EditorTabs showSarah={showSarah} />
+
+          {/* Code area */}
+          <div
+            className="flex-1 relative overflow-hidden"
+            style={{ background: "var(--bg-primary)" }}
+          >
+            <EditorContent
+              step={step}
+              displayedTypingText={displayedTypingText}
+              displayedSarahText={displayedSarahText}
+              sarahTypedChars={sarahTypedChars}
+            />
+          </div>
+        </div>
+
         <SplitHandle />
+
+        {/* PDF pane */}
         <PdfPane step={step} compilePhase={compilePhase} />
       </div>
     </MockAppShell>
   );
 }
 
-function TopBar({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1 }) {
-  const showAlex = step === "collab" || step === "compile" || step === "comment";
-  const status =
-    step === "compile" && compilePhase === 0
-      ? { label: "Compiling…", Icon: PlayCircle, tone: "warning" as const }
-      : { label: "Saved", Icon: PlayCircle, tone: "success" as const };
-
+function EditorTabs({ showSarah }: { showSarah: boolean }) {
   return (
     <div
-      className="h-11 flex items-center justify-between px-3"
-      style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-default)" }}
+      className="h-11 flex items-center justify-between"
+      style={{ background: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-subtle)" }}
     >
-      {/* Active tab */}
-      <div className="flex items-center gap-2 min-w-0">
+      {/* Tab - flat style with accent underline */}
+      <div
+        className="h-full flex items-center gap-2 px-4 relative"
+        style={{ background: "var(--bg-primary)" }}
+      >
+        <FileCode className="size-3.5 shrink-0" style={{ color: "var(--manu)" }} />
+        <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+          Main.tex
+        </span>
+        {/* Active tab underline */}
         <div
-          className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium rounded-md min-w-0"
-          style={{
-            background: "var(--bg-tertiary)",
-            border: "1px solid var(--border-subtle)",
-            color: "var(--text-primary)",
-          }}
-        >
-          <FileText className="size-3.5 shrink-0" />
-          <span className="truncate">Main.tex</span>
-        </div>
+          className="absolute bottom-0 left-0 right-0 h-0.5"
+          style={{ background: "var(--manu)" }}
+        />
       </div>
 
-      {/* Right-side controls */}
-      <div className="flex items-center gap-2">
-        {/* Collaborators */}
-        <div className="flex items-center gap-1">
-          <AvatarChip collaborator={collaborators.you} />
-          {showAlex && (
-            <div className="animate-popup-in">
-              <AvatarChip collaborator={collaborators.alex} />
-            </div>
-          )}
-        </div>
-
-        {/* Status */}
-        <div
-          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-semibold"
-          style={{
-            background: status.tone === "warning" ? "var(--warning-tint)" : "var(--success-tint)",
-            color: status.tone === "warning" ? "var(--warning-text)" : "var(--success-text)",
-            border: "1px solid var(--border-subtle)",
-          }}
-        >
-          <status.Icon className="size-3" />
-          <span>{status.label}</span>
-        </div>
+      {/* Collaborators */}
+      <div className="flex items-center gap-1.5 px-3">
+        <AvatarChip collaborator={collaborators.you} />
+        {showSarah && (
+          <div className="animate-popup-in">
+            <AvatarChip collaborator={collaborators.sarah} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -165,18 +224,165 @@ function TopBar({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1 
 
 function AvatarChip({ collaborator }: { collaborator: Collaborator }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <div
-        className="size-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-        style={{
-          background: `var(${collaborator.colorVar})`,
-          color: "var(--text-on-accent)",
-        }}
-        aria-label={collaborator.name}
-        title={collaborator.name}
-      >
-        {collaborator.initial}
+    <div
+      className="size-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+      style={{
+        background: `var(${collaborator.colorVar})`,
+        color: "var(--text-on-accent)",
+      }}
+      aria-label={collaborator.name}
+      title={collaborator.name}
+    >
+      {collaborator.initial}
+    </div>
+  );
+}
+
+function EditorContent({
+  step,
+  displayedTypingText,
+  displayedSarahText,
+  sarahTypedChars,
+}: {
+  step: EditorStep;
+  displayedTypingText: string;
+  displayedSarahText: string;
+  sarahTypedChars: number;
+}) {
+  const showUserCursor = step === "typing" || step === "collab";
+  const showSarahCursor = step === "collab";
+  const showComment = step === "comment";
+  const showHighlight = step === "comment";
+
+  const lines = [
+    { num: 1, text: baseLatex[0] },
+    { num: 2, text: baseLatex[1] },
+    { num: 3, text: baseLatex[2] },
+    { num: 4, text: baseLatex[3] },
+    { num: 5, text: displayedTypingText, isTypingLine: true, showHighlight },
+    { num: 6, text: "" },
+    { num: 7, text: displayedSarahText, isSarahLine: true },
+  ];
+
+  return (
+    <div
+      className="h-full overflow-hidden px-3 py-3 font-mono relative"
+      style={{ fontSize: "11px", lineHeight: "18px" }}
+    >
+      {lines.map((line, idx) => (
+        <div key={line.num} className="flex relative">
+          {/* Line number */}
+          <span
+            className="w-7 pr-2 text-right select-none shrink-0 tabular-nums"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {line.num}
+          </span>
+
+          {/* Code content */}
+          <span className="min-w-0 relative">
+            {line.showHighlight ? (
+              <span
+                className="px-0.5 rounded"
+                style={{ background: "var(--manu-tint)" }}
+              >
+                {formatLatex(line.text)}
+              </span>
+            ) : (
+              formatLatex(line.text)
+            )}
+
+            {/* User cursor (on line 5 during typing) */}
+            {line.isTypingLine && showUserCursor && (
+              <span
+                className="inline-block w-0.5 h-3.5 ml-0.5 align-middle animate-cursor-blink"
+                style={{ background: "var(--manu)" }}
+              />
+            )}
+
+            {/* Sarah's cursor (on line 7 during collab) */}
+            {line.isSarahLine && showSarahCursor && sarahTypedChars > 0 && (
+              <span className="relative">
+                <span
+                  className="inline-block w-0.5 h-3.5 ml-0.5 align-middle"
+                  style={{ background: `var(${collaborators.sarah.colorVar})` }}
+                />
+                <span
+                  className="absolute -top-5 left-0 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap"
+                  style={{
+                    background: `var(${collaborators.sarah.colorVar})`,
+                    color: "var(--text-on-accent)",
+                  }}
+                >
+                  Sarah
+                </span>
+              </span>
+            )}
+
+            {/* Comment icon */}
+            {line.showHighlight && (
+              <span className="ml-2 text-[10px]" style={{ color: "var(--manu)" }}>
+                💬
+              </span>
+            )}
+          </span>
+        </div>
+      ))}
+
+      {/* Inline comment card (below line 5) */}
+      {showComment && (
+        <div
+          className="absolute animate-popup-in"
+          style={{
+            left: "34px",
+            top: "102px", // After line 5 (5 lines * 18px + padding)
+          }}
+        >
+          <InlineCommentCard />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InlineCommentCard() {
+  return (
+    <div
+      className="max-w-[220px] rounded-lg px-3 py-2"
+      style={{
+        background: "var(--bg-secondary)",
+        border: "1px solid var(--border-default)",
+        boxShadow: "var(--shadow-medium)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-1.5">
+        <div
+          className="size-4 rounded-full flex items-center justify-center text-[8px] font-bold"
+          style={{
+            background: `var(${collaborators.sarah.colorVar})`,
+            color: "var(--text-on-accent)",
+          }}
+        >
+          {collaborators.sarah.initial}
+        </div>
+        <span className="text-[10px] font-semibold" style={{ color: "var(--text-primary)" }}>
+          Sarah
+        </span>
       </div>
+      <p className="text-[10px] leading-snug mb-2" style={{ color: "var(--text-secondary)" }}>
+        Consider rephrasing this for clarity
+      </p>
+      <button
+        className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-medium"
+        style={{
+          background: "var(--bg-tertiary)",
+          color: "var(--text-secondary)",
+          border: "1px solid var(--border-subtle)",
+        }}
+      >
+        <Check className="size-2.5" />
+        Resolve
+      </button>
     </div>
   );
 }
@@ -205,242 +411,90 @@ function SplitHandle() {
   );
 }
 
-function EditorPane({
-  step,
-  commentPhase,
-  lines,
-}: {
-  step: EditorStep;
-  commentPhase: 0 | 1;
-  lines: Line[];
-}) {
-  const showRemoteCursor = step === "collab" || step === "compile" || step === "comment";
-  const showComment = step === "comment" && commentPhase === 1;
-
-  const lineHeightPx = 16;
-  const topPaddingPx = 12;
-  const targetLineIndex = Math.min(5, Math.max(0, lines.length - 3));
-
-  return (
-    <div className="flex-[1.1] min-w-0 flex flex-col overflow-hidden">
-      <div
-        className="h-9 flex items-center justify-between px-3"
-        style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-default)" }}
-      >
-        <div className="flex items-center gap-1.5">
-          <button
-            className="h-7 px-2.5 rounded-md text-[11px] font-semibold flex items-center gap-1.5"
-            style={{
-              background: "var(--manu)",
-              color: "var(--text-on-accent)",
-            }}
-          >
-            <PlayCircle className="size-4" />
-            Compile
-          </button>
-          <button
-            className="h-7 px-2.5 rounded-md text-[11px] font-semibold flex items-center gap-1.5"
-            style={{
-              background: "var(--bg-tertiary)",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <MessageSquare className="size-4" />
-            Comments
-          </button>
-        </div>
-        <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-          Auto-save
-        </span>
-      </div>
-
-      <div
-        className="flex-1 relative overflow-hidden"
-        style={{ background: "var(--bg-primary)" }}
-      >
-        {/* Code */}
-        <div
-          className="h-full overflow-hidden px-3 py-3 font-mono"
-          style={{ fontSize: "11px", lineHeight: `${lineHeightPx}px` }}
-        >
-          {lines.map((line, idx) => {
-            const isCommentAnchor = showComment && idx === targetLineIndex;
-            return (
-              <div key={`${line.num}-${idx}`} className="flex">
-                <span
-                  className="w-7 pr-2 text-right select-none shrink-0 tabular-nums"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {line.num}
-                </span>
-                <span
-                  className="min-w-0"
-                  style={{
-                    color: "var(--text-primary)",
-                    background: isCommentAnchor ? "var(--manu-tint)" : undefined,
-                    borderRadius: isCommentAnchor ? "4px" : undefined,
-                    padding: isCommentAnchor ? "0 2px" : undefined,
-                  }}
-                >
-                  {formatLatex(line.text)}
-                  {step === "typing" && idx === lines.length - 1 && (
-                    <span
-                      className="inline-block w-0.5 h-3 ml-0.5 align-middle animate-cursor-blink"
-                      style={{ background: "var(--manu)" }}
-                    />
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Remote cursor */}
-        {showRemoteCursor && (
-          <div
-            className="absolute animate-popup-in"
-            style={{
-              left: "160px",
-              top: `${topPaddingPx + targetLineIndex * lineHeightPx}px`,
-            }}
-          >
-            <div className="relative">
-              <div
-                className="w-0.5 h-4"
-                style={{ background: `var(${collaborators.alex.colorVar})` }}
-              />
-              <div
-                className="absolute -top-5 left-0 px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap"
-                style={{
-                  background: `var(${collaborators.alex.colorVar})`,
-                  color: "var(--text-on-accent)",
-                }}
-              >
-                Alex
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Comment bubble anchored to a line */}
-        {showComment && (
-          <div
-            className="absolute animate-popup-in"
-            style={{
-              left: "54px",
-              top: `${topPaddingPx + targetLineIndex * lineHeightPx - 4}px`,
-            }}
-          >
-            <div
-              className="relative max-w-[210px] rounded-md px-2.5 py-2"
-              style={{
-                background: "var(--bg-secondary)",
-                border: "1px solid var(--border-default)",
-                boxShadow: "var(--shadow-soft)",
-              }}
-            >
-              <div
-                className="absolute -left-1.5 top-3 size-3 rotate-45"
-                style={{
-                  background: "var(--bg-secondary)",
-                  borderLeft: "1px solid var(--border-default)",
-                  borderBottom: "1px solid var(--border-default)",
-                }}
-              />
-              <div className="flex items-center gap-2 mb-1">
-                <div
-                  className="size-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{
-                    background: `var(${collaborators.alex.colorVar})`,
-                    color: "var(--text-on-accent)",
-                  }}
-                >
-                  {collaborators.alex.initial}
-                </div>
-                <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Alex
-                </span>
-                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  on line {lines[targetLineIndex]?.num ?? 0}
-                </span>
-              </div>
-              <p className="text-[11px] leading-snug" style={{ color: "var(--text-secondary)" }}>
-                Could we cite the latest IPCC report here?
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1 }) {
-  const showOverlay = step === "compile" && compilePhase === 0;
-  const isCompiled = (step === "compile" && compilePhase === 1) || step === "comment";
-  const showAuthors = step === "collab" || step === "compile" || step === "comment";
+  const isCompiling = step === "compile" && compilePhase === 0;
+  const isCompiled = step === "compile" && compilePhase === 1;
 
   return (
-    <div className="flex-[0.9] min-w-0 flex flex-col overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+    <div className="flex-1 min-w-0 flex flex-col overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+      {/* PDF tabs - flat style with accent underline */}
       <div
-        className="h-9 flex items-center justify-between px-3"
-        style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-default)" }}
+        className="h-11 flex items-center"
+        style={{ background: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-subtle)" }}
       >
-        <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>
-          output.pdf
-        </span>
-        <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-          {isCompiled ? "Last compiled just now" : "Not compiled yet"}
-        </span>
+        <div
+          className="h-full flex items-center gap-2 px-4 relative"
+          style={{ background: "var(--bg-primary)" }}
+        >
+          <FileText className="size-3.5 shrink-0" style={{ color: "var(--error)" }} />
+          <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+            output.pdf
+          </span>
+          {/* Active tab underline */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-0.5"
+            style={{ background: "var(--manu)" }}
+          />
+        </div>
       </div>
 
+      {/* PDF preview */}
       <div className="flex-1 flex items-center justify-center p-3 relative overflow-hidden">
         <div
-          className="w-full h-full rounded-md overflow-hidden"
+          className={`w-full h-full rounded-md overflow-hidden ${isCompiling ? "animate-pdf-compile-rotate" : ""}`}
           style={{
             background: "var(--bg-secondary)",
             border: "1px solid var(--border-default)",
             boxShadow: "var(--shadow-soft)",
           }}
         >
+          {/* Paper title */}
           <div
             className="px-3 py-2 text-center"
             style={{ borderBottom: "1px solid var(--border-subtle)" }}
           >
-            <div className="text-[12px] font-bold" style={{ color: "var(--text-primary)" }}>
-              Machine Learning for Climate Prediction
+            <div className="text-[11px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+              My Research Paper
             </div>
-            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-              {showAuthors ? "Chen • Rodriguez" : "Chen"}
+            <div className="text-[9px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+              Author Name
             </div>
           </div>
-          <div className="p-3">
-            <div
-              className="h-1 w-10 rounded-full mb-2"
-              style={{ background: "var(--border-default)" }}
-            />
-            <div className="text-[11px] font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+
+          {/* Paper content - reflects what's being typed */}
+          <div className="p-3 text-[10px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
               1. Introduction
             </div>
-            <div className="text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              Climate prediction remains one of the most challenging problems in environmental science…
+            <div className="mb-3">
+              {isCompiled ? (
+                <span style={{ background: "var(--manu-tint)", padding: "0 2px", borderRadius: "2px" }}>
+                  The transformer architecture has revolutionized...
+                </span>
+              ) : (
+                <span style={{ color: "var(--text-muted)" }}>...</span>
+              )}
             </div>
-            {!isCompiled && (
-              <div className="mt-3 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                Compile to render PDF preview
-              </div>
+
+            {isCompiled && (
+              <>
+                <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                  2. Methods
+                </div>
+                <div style={{ color: "var(--text-muted)" }}>...</div>
+              </>
             )}
           </div>
         </div>
 
-        {showOverlay && (
+        {/* Compile overlay */}
+        {isCompiling && (
           <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: "var(--overlay)" }}
+            className="absolute inset-0 flex items-center justify-center animate-compile-overlay-in"
+            style={{ background: "rgba(0, 0, 0, 0.5)" }}
           >
             <div
-              className="flex items-center gap-2 px-3 py-2 rounded-md"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg"
               style={{
                 background: "var(--bg-secondary)",
                 border: "1px solid var(--border-default)",
@@ -448,14 +502,14 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
               }}
             >
               <div
-                className="size-4 rounded-full border-2 animate-spin"
+                className="size-4 rounded-full border-2 animate-compile-spinner"
                 style={{
                   borderColor: "var(--border-default)",
                   borderTopColor: "var(--manu)",
                 }}
               />
-              <span className="text-[12px] font-semibold" style={{ color: "var(--text-primary)" }}>
-                Compiling…
+              <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>
+                Compiling...
               </span>
             </div>
           </div>

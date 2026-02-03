@@ -530,3 +530,33 @@
 .animate-highlight-grow {
   animation: highlight-grow 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
+
+/* PDF compile rotation + overlay */
+@keyframes pdf-compile-rotate {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(2deg); }
+  70% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes compile-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 0.7; }
+}
+
+@keyframes compile-spinner {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-pdf-compile-rotate {
+  animation: pdf-compile-rotate 1s ease-in-out forwards;
+}
+
+.animate-compile-overlay-in {
+  animation: compile-overlay-in 0.3s ease-out forwards;
+}
+
+.animate-compile-spinner {
+  animation: compile-spinner 1s linear infinite;
+}
