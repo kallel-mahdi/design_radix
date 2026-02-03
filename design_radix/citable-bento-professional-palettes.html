@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citable Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           LIGHT MODE - Indigo Research Palette
+           ============================================ */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --bg-empty: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-default: rgba(226, 232, 240, 0.8);
+            --border-subtle: rgba(226, 232, 240, 0.5);
+
+            /* Feature colors */
+            --accent-biblio: #4f46e5;
+            --accent-manu: #059669;
+            --accent-app: #0284c7;
+
+            --biblio-tint: #eef2ff;
+            --biblio-light: #e0e7ff;
+            --manu-tint: #ecfdf5;
+            --manu-light: #d1fae5;
+            --app-tint: #f0f9ff;
+            --app-light: #e0f2fe;
+
+            --card-bg: rgba(255,255,255,0.9);
+            --warm-shadow: rgba(15, 23, 42, 0.08);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============================================
+           DARK MODE - Aurora Palette
+           ============================================ */
+        [data-theme="dark"] {
+            --bg-primary: #121218;
+            --bg-secondary: #1a1a22;
+            --bg-canvas: #23232d;
+            --bg-hover: #2c2c38;
+            --bg-empty: #1e1e28;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a8a8b8;
+            --text-muted: #6e6e7e;
+            --border-default: #2e2e3a;
+            --border-subtle: #232330;
+
+            --accent-biblio: #818cf8;
+            --accent-manu: #34d399;
+            --accent-app: #38bdf8;
+
+            --biblio-tint: rgba(99, 102, 241, 0.12);
+            --biblio-light: rgba(99, 102, 241, 0.18);
+            --manu-tint: rgba(52, 211, 153, 0.12);
+            --manu-light: rgba(52, 211, 153, 0.18);
+            --app-tint: rgba(56, 189, 248, 0.12);
+            --app-light: rgba(56, 189, 248, 0.18);
+
+            --card-bg: rgba(26, 26, 34, 0.95);
+            --warm-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Auto dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-primary: #121218;
+                --bg-secondary: #1a1a22;
+                --bg-canvas: #23232d;
+                --bg-hover: #2c2c38;
+                --bg-empty: #1e1e28;
+                --text-primary: #e8e8f0;
+                --text-secondary: #a8a8b8;
+                --text-muted: #6e6e7e;
+                --border-default: #2e2e3a;
+                --border-subtle: #232330;
+                --accent-biblio: #818cf8;
+                --accent-manu: #34d399;
+                --accent-app: #38bdf8;
+                --biblio-tint: rgba(99, 102, 241, 0.12);
+                --biblio-light: rgba(99, 102, 241, 0.18);
+                --manu-tint: rgba(52, 211, 153, 0.12);
+                --manu-light: rgba(52, 211, 153, 0.18);
+                --app-tint: rgba(56, 189, 248, 0.12);
+                --app-light: rgba(56, 189, 248, 0.18);
+                --card-bg: rgba(26, 26, 34, 0.95);
+                --warm-shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Noise texture */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-default);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        :root:not([data-theme="dark"]) .navbar {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--accent-biblio) 0%, var(--accent-app) 50%, var(--accent-manu) 100%);
+            border-radius: 8px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: relative;
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            transition: opacity 0.2s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg); }
+        .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg); }
+        [data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg); }
+        [data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg); }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-biblio) 0%, var(--accent-app) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           STATE TOGGLE
+           ============================================ */
+        .state-toggle {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 4px 20px var(--warm-shadow);
+            display: flex;
+            gap: 4px;
+        }
+
+        .state-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .state-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .state-btn.active {
+            background: var(--accent-app);
+            color: white;
+        }
+
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 40px 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Greeting */
+        .greeting-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .greeting-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+        }
+
+        .greeting-header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 15px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px -4px var(--warm-shadow);
+            transition: var(--transition);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-app);
+        }
+
+        .search-bar svg { color: var(--accent-app); flex-shrink: 0; }
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-shortcut {
+            background: var(--bg-canvas);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           BENTO GRID
+           ============================================ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-top: 36px;
+        }
+
+        .workspace-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 2px 12px -2px var(--warm-shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px -12px var(--warm-shadow);
+        }
+
+        /* Card Header */
+        .card-header {
+            background: linear-gradient(135deg, var(--biblio-tint) 0%, var(--biblio-light) 100%);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            min-height: 88px;
+        }
+
+        .card-header.manu {
+            background: linear-gradient(135deg, var(--manu-tint) 0%, var(--manu-light) 100%);
+        }
+
+        .card-header.app {
+            background: linear-gradient(135deg, var(--app-tint) 0%, var(--app-light) 100%);
+        }
+
+        .card-title-group { flex: 1; }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-title.biblio { color: var(--accent-biblio); }
+        .card-title.manu { color: var(--accent-manu); }
+        .card-title.app { color: var(--accent-app); }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px 0 0 0;
+        }
+
+        .card-illustration {
+            width: 72px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        /* SVG Styles */
+        .illustration-biblio .stroke { stroke: var(--accent-biblio); }
+        .illustration-biblio .fill { fill: var(--accent-biblio); }
+        .illustration-biblio .light { stroke: var(--accent-biblio); opacity: 0.3; }
+        .illustration-manu .stroke { stroke: var(--accent-manu); }
+        .illustration-manu .fill { fill: var(--accent-manu); }
+        .illustration-manu .light { stroke: var(--accent-manu); opacity: 0.3; }
+        .illustration-app .stroke { stroke: var(--accent-app); }
+        .illustration-app .fill { fill: var(--accent-app); }
+        .illustration-app .light { stroke: var(--accent-app); opacity: 0.3; }
+
+        .paper-fill { fill: white; }
+        [data-theme="dark"] .paper-fill { fill: rgba(255, 255, 255, 0.06); }
+        [data-theme="dark"] .illustration-biblio .stroke { stroke: #a5b4fc; }
+        [data-theme="dark"] .illustration-manu .stroke { stroke: #6ee7b7; }
+        [data-theme="dark"] .illustration-app .stroke { stroke: #7dd3fc; }
+        [data-theme="dark"] .illustration-biblio .light,
+        [data-theme="dark"] .illustration-manu .light,
+        [data-theme="dark"] .illustration-app .light { opacity: 0.4; }
+
+        /* ============================================
+           FULL STATE - Recent Items
+           ============================================ */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            padding: 14px 20px 6px;
+        }
+
+        .recent-list { padding: 0 12px 14px; }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .recent-item:hover { background: var(--bg-canvas); }
+
+        .item-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.biblio { background: var(--accent-biblio); }
+        .dot.green { background: var(--accent-manu); }
+        .time { font-size: 11px; color: var(--text-muted); }
+
+        /* ============================================
+           EMPTY STATE
+           ============================================ */
+        .empty-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 20px 24px;
+            text-align: center;
+        }
+
+        [data-state="empty"] .full-content { display: none; }
+        [data-state="empty"] .empty-content { display: flex; }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .empty-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .empty-task-content .empty-subtitle {
+            margin-bottom: 0;
+        }
+
+        .empty-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+        }
+
+        .empty-btn.biblio { background: var(--accent-biblio); }
+        .empty-btn.biblio:hover { filter: brightness(1.1); }
+        .empty-btn.manu { background: var(--accent-manu); }
+        .empty-btn.manu:hover { filter: brightness(1.1); }
+        .empty-btn.app { background: var(--accent-app); }
+        .empty-btn.app:hover { filter: brightness(1.1); }
+
+        /* ============================================
+           TASK CARD
+           ============================================ */
+        .task-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-section {
+            flex: 1;
+            padding: 16px 20px 20px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover { background: var(--bg-canvas); }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 5px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:hover .checkbox { border-color: var(--accent-app); }
+
+        .task-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .mention {
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .mention.biblio { background: var(--biblio-tint); color: var(--accent-biblio); }
+        .mention.manu { background: var(--manu-tint); color: var(--accent-manu); }
+
+        .task-item.completed .checkbox {
+            background: var(--accent-manu);
+            border-color: var(--accent-manu);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: var(--bg-canvas);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .task-input-wrapper:focus-within {
+            background: var(--bg-secondary);
+            border-color: var(--accent-app);
+        }
+
+        .plus-icon {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .task-input-wrapper input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .task-input-wrapper input::placeholder { color: var(--text-muted); }
+
+        /* Empty task state */
+        .empty-task-content {
+            display: none;
+            flex-direction: column;
+            padding: 16px 20px 20px;
+        }
+
+        .empty-task-content .empty-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        [data-state="empty"] .full-task-content { display: none; }
+        [data-state="empty"] .empty-task-content { display: flex; }
+    </style>
+</head>
+<body data-state="full">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <div class="logo-icon"></div>
+            <span>Citable</span>
+        </a>
+        <div class="nav-actions">
+            <button class="icon-btn theme-toggle" title="Toggle dark mode" onclick="toggleTheme()">
+                <svg class="icon-sun" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg class="icon-moon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" title="Notifications">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+            </button>
+            <div class="avatar">M</div>
+        </div>
+    </nav>
+
+    <!-- State Toggle -->
+    <div class="state-toggle">
+        <button class="state-btn active" data-state="full" onclick="switchState('full')">Full</button>
+        <button class="state-btn" data-state="empty" onclick="switchState('empty')">Empty</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="greeting-header">
+            <h1 id="greeting">Good afternoon, Mahdi</h1>
+            <p>Pick up where you left off</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" placeholder="Search your research, papers, and manuscripts...">
+            <span class="search-shortcut">&#x2318;K</span>
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="bento-grid">
+            <!-- Left Column -->
+            <div class="workspace-stack">
+                <!-- Bibliography Card -->
+                <div class="card">
+                    <div class="card-header biblio">
+                        <div class="card-title-group">
+                            <h3 class="card-title biblio">Bibliography</h3>
+                            <p class="card-subtitle">Organize and discover research papers</p>
+                        </div>
+                        <svg class="card-illustration illustration-biblio" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="8" y="8" width="38" height="52" rx="3" stroke-width="2"/>
+                            <rect class="stroke paper-fill" x="16" y="14" width="38" height="52" rx="3" stroke-width="2"/>
+                            <rect class="stroke paper-fill" x="24" y="20" width="38" height="52" rx="3" stroke-width="2"/>
+                            <path class="light" d="M32 34h22M32 42h18M32 50h14" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle class="fill" cx="76" cy="38" r="16" opacity="0.15"/>
+                            <path class="stroke" d="M70 38l4 4 8-8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <!-- Full State -->
+                    <div class="full-content">
+                        <span class="section-label">Recent Papers</span>
+                        <div class="recent-list">
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Attention Is All You Need</span></div>
+                                <span class="time">2h ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Transformer Architectures</span></div>
+                                <span class="time">Yesterday</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot biblio"></span><span>Visual RAG Methods for Documents</span></div>
+                                <span class="time">3d ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State -->
+                    <div class="empty-content">
+                        <svg class="empty-icon" viewBox="0 0 100 80" fill="none">
+                            <rect stroke="var(--accent-biblio)" stroke-opacity="0.4" fill="none" x="24" y="10" width="52" height="60" rx="4" stroke-width="2" stroke-dasharray="4 4"/>
+                            <path stroke="var(--accent-biblio)" stroke-opacity="0.3" d="M38 32h24M38 42h18M38 52h12" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <div class="empty-title">No papers yet</div>
+                        <div class="empty-subtitle">Import your first PDF to get started</div>
+                        <button class="empty-btn biblio">Import PDF</button>
+                    </div>
+                </div>
+
+                <!-- Manuscripts Card -->
+                <div class="card">
+                    <div class="card-header manu">
+                        <div class="card-title-group">
+                            <h3 class="card-title manu">Manuscripts</h3>
+                            <p class="card-subtitle">Write with AI assistance in LaTeX</p>
+                        </div>
+                        <svg class="card-illustration illustration-manu" viewBox="0 0 100 80" fill="none">
+                            <rect class="stroke paper-fill" x="18" y="6" width="52" height="68" rx="3" stroke-width="2"/>
+                            <path class="light" d="M28 22h24M28 32h32M28 42h26" stroke-width="3" stroke-linecap="round"/>
+                            <path class="light" d="M28 56h28M28 64h20" stroke-width="3" stroke-linecap="round"/>
+                            <rect class="fill" x="52" y="38" width="24" height="11" rx="5.5"/>
+                            <text x="56" y="47" fill="white" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
+                            <g transform="translate(70, 12) rotate(12)">
+                                <rect class="stroke paper-fill" x="0" y="0" width="6" height="40" rx="3" stroke-width="1.5"/>
+                                <path class="fill" d="M0 32 L3 42 L6 32" />
+                            </g>
+                        </svg>
+                    </div>
+                    <!-- Full State -->
+                    <div class="full-content">
+                        <span class="section-label">Active Projects</span>
+                        <div class="recent-list">
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot green"></span><span>NeurIPS_Draft_Final.tex</span></div>
+                                <span class="time">10m ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot green"></span><span>Thesis_Chapter_01</span></div>
+                                <span class="time">4h ago</span>
+                            </div>
+                            <div class="recent-item">
+                                <div class="item-name"><span class="dot green"></span><span>ICML_Submission_v2</span></div>
+                                <span class="time">2d ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State -->
+                    <div class="empty-content">
+                        <svg class="empty-icon" viewBox="0 0 100 80" fill="none">
+                            <rect stroke="var(--accent-manu)" stroke-opacity="0.4" fill="none" x="24" y="6" width="52" height="68" rx="4" stroke-width="2" stroke-dasharray="4 4"/>
+                            <path stroke="var(--accent-manu)" stroke-opacity="0.3" d="M36 24h28M36 36h20M36 48h24" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <div class="empty-title">No manuscripts yet</div>
+                        <div class="empty-subtitle">Create a LaTeX document to begin writing</div>
+                        <button class="empty-btn manu">New Document</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Task Card -->
+            <div class="card task-card">
+                <div class="card-header app">
+                    <div class="card-title-group">
+                        <h3 class="card-title app">Research Planner</h3>
+                        <p class="card-subtitle">Track your research tasks</p>
+                    </div>
+                    <svg class="card-illustration illustration-app" viewBox="0 0 100 80" fill="none">
+                        <rect class="stroke paper-fill" x="15" y="6" width="62" height="68" rx="6" stroke-width="2"/>
+                        <circle class="stroke paper-fill" cx="32" cy="24" r="7" stroke-width="1.5"/>
+                        <path class="stroke" d="M29 24l2 2 4-4" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path class="light" d="M46 22h24" stroke-width="3" stroke-linecap="round"/>
+                        <circle class="stroke paper-fill" cx="32" cy="44" r="7" stroke-width="1.5"/>
+                        <path class="light" d="M46 42h20" stroke-width="3" stroke-linecap="round"/>
+                        <circle class="stroke paper-fill" cx="32" cy="64" r="7" stroke-width="1.5"/>
+                        <path class="light" d="M46 62h22" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <!-- Full State -->
+                <div class="task-section full-task-content">
+                    <div class="task-list">
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Finish reading <span class="mention biblio">@Attention_is_all</span></span>
+                        </div>
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Rewrite intro in <span class="mention manu">@NeurIPS_Draft</span></span>
+                        </div>
+                        <div class="task-item">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Add citations to <span class="mention manu">@Thesis_01</span></span>
+                        </div>
+                        <div class="task-item completed">
+                            <div class="checkbox"></div>
+                            <span class="task-text">Export bib for <span class="mention manu">@ICML_Sub</span></span>
+                        </div>
+                    </div>
+                    <div class="task-input-wrapper">
+                        <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        <input type="text" placeholder="Add task... use @ to link">
+                    </div>
+                </div>
+                <!-- Empty State -->
+                <div class="empty-task-content">
+                    <div class="empty-message">
+                        <svg class="empty-icon" viewBox="0 0 100 80" fill="none">
+                            <rect stroke="var(--accent-app)" stroke-opacity="0.4" fill="none" x="20" y="10" width="60" height="60" rx="6" stroke-width="2" stroke-dasharray="4 4"/>
+                            <circle stroke="var(--accent-app)" stroke-opacity="0.3" fill="none" cx="38" cy="30" r="6" stroke-width="1.5"/>
+                            <path stroke="var(--accent-app)" stroke-opacity="0.3" d="M50 28h22" stroke-width="2" stroke-linecap="round"/>
+                            <circle stroke="var(--accent-app)" stroke-opacity="0.3" fill="none" cx="38" cy="50" r="6" stroke-width="1.5"/>
+                            <path stroke="var(--accent-app)" stroke-opacity="0.3" d="M50 48h18" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <div class="empty-title">No tasks yet</div>
+                        <div class="empty-subtitle">Add your first research task</div>
+                    </div>
+                    <div class="task-input-wrapper">
+                        <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        <input type="text" placeholder="Add task... use @ to link">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+        initTheme();
+
+        // State toggle (Full / Empty)
+        function switchState(state) {
+            document.body.setAttribute('data-state', state);
+            document.querySelectorAll('.state-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-state') === state);
+            });
+        }
+
+        // Greeting
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const el = document.getElementById('greeting');
+            let greeting = "Good evening";
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 17) greeting = "Good afternoon";
+            el.textContent = greeting + ", Mahdi";
+        }
+        updateGreeting();
+    </script>
+</body>
+</html>

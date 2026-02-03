@@ -1,23 +1,110 @@
 <!DOCTYPE html>
-<html lang="en" class="light-theme">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citable Home — Radix Colors</title>
+    <title>Citable Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Radix Design Tokens -->
-    <link rel="stylesheet" href="radix-tokens.css">
     <style>
         /* ============================================
-           HOME PAGE STYLES
-           Uses radix-tokens.css for all colors
+           CITABLE BALANCED PALETTE
+           From citable-palette (2).jsx - Balanced mood
+           WCAG AA Compliant (4.5:1 for normal text)
            ============================================ */
         :root {
+            /* Foundation Light - Warm cream backgrounds */
+            --bg-primary: #FAF8F5;
+            --bg-secondary: #F2EFEA;
+            --bg-canvas: #FFFFFF;
+            --bg-hover: #E8E4DD;
+
+            /* Text - Warm charcoal tones (WCAG AA compliant) */
+            --text-primary: #2C2825;      /* ~14.3:1 on bg-primary */
+            --text-secondary: #6B635B;    /* ~5.65:1 on bg-primary */
+            --text-muted: #736B63;        /* ~5.2:1 on bg-primary (was #9A9189 ~2.99:1 FAIL) */
+
+            /* Borders */
+            --border-default: #D9D4CB;
+            --border-subtle: #E8E4DD;
+
+            /* Module: Bibliography (Blue) */
+            --biblio: #3A6D90;            /* ~5.44:1 on bg-primary */
+            --biblio-strong: #2A5270;
+            --biblio-tint: #E3EDF4;
+            --biblio-light: #D0E0EC;
+
+            /* Module: Manuscripts (Teal/Green) - WCAG AA fixed */
+            --manu: #247A5E;              /* ~4.77:1 on bg-primary (was #2A8268 ~4.41:1 FAIL) */
+            --manu-strong: #1A624C;
+            --manu-tint: #E0F2EC;
+            --manu-light: #C8E8DD;
+
+            /* Module: Discover (Violet) */
+            --discover: #7E5098;          /* ~6.76:1 on bg-primary */
+            --discover-strong: #5E3878;
+            --discover-tint: #F0E6F5;
+            --discover-light: #E2D0EB;
+
+            /* Planner: Neutral (no accent color) */
+            --planner: #6B635B;           /* ~5.65:1 on bg-primary */
+            --planner-strong: #2C2825;
+            --planner-tint: #F2EFEA;
+            --planner-light: #E8E4DD;
+
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --warm-shadow: rgba(44, 40, 37, 0.08);
             --radius-lg: 20px;
             --radius-md: 12px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode - True Black OLED + Warm undertones */
+        /* WCAG AA Compliant (4.5:1 for normal text) */
+        [data-theme="dark"] {
+            /* Foundation Dark */
+            --bg-primary: #000000;
+            --bg-secondary: rgba(13, 13, 12, 0.9);
+            --bg-canvas: #171614;
+            --bg-hover: #1E1D1A;
+
+            /* Text - Warm off-white (WCAG AA compliant) */
+            --text-primary: #E8E4DF;      /* ~16.3:1 on bg-primary */
+            --text-secondary: #9A958D;    /* ~6.76:1 on bg-primary */
+            --text-muted: #857F77;        /* ~4.84:1 on bg-primary (was #5C5850 ~2.9:1 FAIL) */
+
+            /* Borders */
+            --border-default: #2D2B27;
+            --border-subtle: #1F1E1B;
+
+            /* Module: Bibliography (Blue) */
+            --biblio: #5A9FD4;
+            --biblio-strong: #7FBAE8;
+            --biblio-tint: rgba(90, 159, 212, 0.15);
+            --biblio-light: rgba(90, 159, 212, 0.25);
+
+            /* Module: Manuscripts (Teal/Green) */
+            --manu: #4DCBA8;
+            --manu-strong: #70E0C0;
+            --manu-tint: rgba(77, 203, 168, 0.15);
+            --manu-light: rgba(77, 203, 168, 0.25);
+
+            /* Module: Discover (Violet) */
+            --discover: #BC8BD0;
+            --discover-strong: #D4A8E5;
+            --discover-tint: rgba(188, 139, 208, 0.15);
+            --discover-light: rgba(188, 139, 208, 0.25);
+
+            /* Planner: Neutral */
+            --planner: #9A958D;
+            --planner-strong: #E8E4DF;
+            --planner-tint: rgba(154, 149, 141, 0.1);
+            --planner-light: rgba(154, 149, 141, 0.18);
+
+            /* Card & Shadow */
+            --card-bg: rgba(23, 22, 20, 0.95);
+            --warm-shadow: rgba(0, 0, 0, 0.5);
         }
 
         /* ============================================
@@ -53,8 +140,8 @@
             justify-content: space-between;
         }
 
-        :root:not(.dark-theme) .navbar {
-            background: color-mix(in srgb, var(--bg-canvas) 90%, transparent);
+        :root:not([data-theme="dark"]) .navbar {
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .logo {
@@ -107,8 +194,8 @@
         }
         .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg); }
         .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg); }
-        .dark-theme .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg); }
-        .dark-theme .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg); }
+        [data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg); }
+        [data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg); }
 
         .avatar {
             width: 32px;
@@ -118,7 +205,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-on-accent);
+            color: white;
             font-size: 13px;
             font-weight: 600;
             margin-left: 8px;
@@ -166,13 +253,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 2px 12px -4px var(--shadow-soft);
+            box-shadow: 0 2px 12px -4px var(--warm-shadow);
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .search-bar:focus-within {
             border-color: var(--manu);
-            box-shadow: 0 2px 20px -4px var(--shadow-soft);
+            box-shadow: 0 2px 20px -4px var(--warm-shadow);
         }
 
         .search-bar svg { color: var(--manu); flex-shrink: 0; }
@@ -247,7 +334,7 @@
 
         .recent-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px -8px var(--shadow-soft);
+            box-shadow: 0 8px 20px -8px var(--warm-shadow);
             border-color: var(--manu);
         }
 
@@ -315,12 +402,12 @@
             border: 1px solid var(--border-default);
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px -2px var(--shadow-soft);
+            box-shadow: 0 2px 8px -2px var(--warm-shadow);
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px -8px var(--shadow-soft);
+            box-shadow: 0 12px 32px -8px var(--warm-shadow);
         }
 
         /* Module Card - Navigation tile */
@@ -362,7 +449,7 @@
         .module-icon svg {
             width: 24px;
             height: 24px;
-            color: var(--text-on-accent);
+            color: white;
         }
 
         .module-info { flex: 1; min-width: 0; }
@@ -413,20 +500,21 @@
         .illustration-discover .fill { fill: var(--discover-strong); }
         .illustration-discover .light { stroke: var(--discover-strong); opacity: 0.35; }
 
-        .paper-fill { fill: var(--paper-fill); }
+        .paper-fill { fill: white; }
+        [data-theme="dark"] .paper-fill { fill: rgba(248, 250, 252, 0.06); } /* slate-50 @ 6% */
 
         /* Dark mode illustrations - use softer colors */
-        .dark-theme .illustration-biblio .stroke { stroke: var(--biblio); }
-        .dark-theme .illustration-biblio .fill { fill: var(--biblio); }
-        .dark-theme .illustration-biblio .light { stroke: var(--biblio); opacity: 0.35; }
+        [data-theme="dark"] .illustration-biblio .stroke { stroke: var(--biblio); }
+        [data-theme="dark"] .illustration-biblio .fill { fill: var(--biblio); }
+        [data-theme="dark"] .illustration-biblio .light { stroke: var(--biblio); opacity: 0.35; }
 
-        .dark-theme .illustration-manu .stroke { stroke: var(--manu); }
-        .dark-theme .illustration-manu .fill { fill: var(--manu); }
-        .dark-theme .illustration-manu .light { stroke: var(--manu); opacity: 0.35; }
+        [data-theme="dark"] .illustration-manu .stroke { stroke: var(--manu); }
+        [data-theme="dark"] .illustration-manu .fill { fill: var(--manu); }
+        [data-theme="dark"] .illustration-manu .light { stroke: var(--manu); opacity: 0.35; }
 
-        .dark-theme .illustration-discover .stroke { stroke: var(--discover); }
-        .dark-theme .illustration-discover .fill { fill: var(--discover); }
-        .dark-theme .illustration-discover .light { stroke: var(--discover); opacity: 0.35; }
+        [data-theme="dark"] .illustration-discover .stroke { stroke: var(--discover); }
+        [data-theme="dark"] .illustration-discover .fill { fill: var(--discover); }
+        [data-theme="dark"] .illustration-discover .light { stroke: var(--discover); opacity: 0.35; }
 
         /* ============================================
            PLANNER CARD - Full height
@@ -467,7 +555,8 @@
             display: none;
         }
 
-        .paper-fill { fill: var(--paper-fill); }
+        .paper-fill { fill: white; }
+        [data-theme="dark"] .paper-fill { fill: rgba(248, 250, 252, 0.06); }
 
         /* Task Section */
         .task-section {
@@ -578,7 +667,7 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-default);
             border-radius: 12px;
-            box-shadow: 0 8px 32px -8px var(--shadow-soft);
+            box-shadow: 0 8px 32px -8px var(--warm-shadow);
             z-index: 200;
             font-size: 12px;
         }
@@ -695,13 +784,13 @@
         }
 
         .wcag-badge.pass {
-            background: var(--success);
-            color: var(--text-on-accent);
+            background: #059669;
+            color: white;
         }
 
         .wcag-badge.fail {
-            background: var(--error);
-            color: var(--text-on-accent);
+            background: #dc2626;
+            color: white;
         }
 
         .wcag-toggle-btn {
@@ -717,7 +806,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             z-index: 199;
-            box-shadow: 0 2px 8px -2px var(--shadow-soft);
+            box-shadow: 0 2px 8px -2px var(--warm-shadow);
         }
 
         .wcag-toggle-btn:hover {
@@ -902,7 +991,7 @@
                             <path class="light" d="M26 28h28M26 38h24M26 48h20" stroke-width="2.5" stroke-linecap="round"/>
                             <!-- CITE button -->
                             <rect class="fill" x="26" y="56" width="22" height="10" rx="5"/>
-                            <text x="30" y="64" fill="var(--text-on-accent)" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
+                            <text x="30" y="64" fill="white" font-size="6" font-weight="bold" font-family="Inter, sans-serif">CITE</text>
                             <!-- Pen -->
                             <g transform="translate(68, 8) rotate(20)">
                                 <rect class="stroke paper-fill" x="0" y="0" width="6" height="36" rx="3" stroke-width="1.5"/>
@@ -1081,7 +1170,7 @@
         }
 
         function updateWcagPanel() {
-            const isDark = document.documentElement.classList.contains('dark-theme');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             document.getElementById('wcagThemeLabel').textContent = isDark ? 'Dark' : 'Light';
 
             // Define all color combinations to test
@@ -1097,13 +1186,13 @@
                 ]},
                 // Module accent colors
                 { section: 'Accent Colors', items: [
-                    { label: 'Biblio (text) on bg-primary', fg: '--biblio', bg: '--bg-primary' },
+                    { label: 'Biblio on bg-primary', fg: '--biblio', bg: '--bg-primary' },
                     { label: 'Biblio-strong on tint', fg: '--biblio-strong', bg: '--biblio-tint', tintBg: '--bg-primary' },
-                    { label: 'Manu (text) on bg-primary', fg: '--manu-text', bg: '--bg-primary' },
+                    { label: 'Manu on bg-primary', fg: '--manu', bg: '--bg-primary' },
                     { label: 'Manu-strong on tint', fg: '--manu-strong', bg: '--manu-tint', tintBg: '--bg-primary' },
                     { label: 'Planner on bg-primary', fg: '--planner', bg: '--bg-primary' },
                     { label: 'Planner-strong on tint', fg: '--planner-strong', bg: '--planner-tint', tintBg: '--bg-primary' },
-                    { label: 'Discover (text) on bg-primary', fg: '--discover', bg: '--bg-primary' },
+                    { label: 'Discover on bg-primary', fg: '--discover', bg: '--bg-primary' },
                     { label: 'Discover-strong on tint', fg: '--discover-strong', bg: '--discover-tint', tintBg: '--bg-primary' },
                 ]}
             ];
@@ -1150,7 +1239,7 @@
                             <div class="wcag-label">${test.label}</div>
                             <div class="wcag-colors">${fgHex} / ${bgHex}</div>
                         </div>
-                        <div class="wcag-ratio" style="color: ${passAA ? 'var(--success)' : 'var(--error)'};">${ratio.toFixed(2)}</div>
+                        <div class="wcag-ratio" style="color: ${passAA ? '#059669' : '#dc2626'};">${ratio.toFixed(2)}</div>
                         <div class="wcag-badges">
                             <span class="wcag-badge ${passAA ? 'pass' : 'fail'}">AA</span>
                             <span class="wcag-badge ${passAAA ? 'pass' : 'fail'}">AAA</span>
@@ -1187,31 +1276,24 @@
             updateWcagPanel();
         });
 
-        function setTheme(theme) {
-            const root = document.documentElement;
-            root.classList.toggle('dark-theme', theme === 'dark');
-            root.classList.toggle('light-theme', theme !== 'dark');
-            localStorage.setItem('theme', theme);
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
             // Update WCAG panel if visible
             if (!document.getElementById('wcagPanel').classList.contains('hidden')) {
                 setTimeout(updateWcagPanel, 50);
             }
         }
 
-        function toggleTheme() {
-            const root = document.documentElement;
-            const next = root.classList.contains('dark-theme') ? 'light' : 'dark';
-            setTheme(next);
-        }
-
         (function initTheme() {
             const saved = localStorage.getItem('theme');
             if (saved) {
-                setTheme(saved);
+                document.documentElement.setAttribute('data-theme', saved);
             } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                setTheme('dark');
-            } else {
-                setTheme('light');
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         })();
 

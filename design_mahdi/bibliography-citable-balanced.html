@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" class="light-theme">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bibliography Manager — Radix Colors</title>
+  <title>Bibliography Manager - Citable Balanced</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Radix Design Tokens -->
-  <link rel="stylesheet" href="radix-tokens.css">
   <style>
     /* ============================================
-       BIBLIOGRAPHY PAGE STYLES
-       Uses radix-tokens.css for all colors
-       Module: Bibliography (Blue accent)
+       CITABLE BALANCED PALETTE - LIGHT MODE (Default)
+       From citable-palette (2).jsx - Balanced mood
+       Bibliography module uses blue accent
+       WCAG AA Compliant (4.5:1 for normal text)
        ============================================ */
     :root {
       /* Base font size for rem calculations (1rem = 16px) */
@@ -46,10 +45,39 @@
       --icon-small: 1rem;           /* 16px */
       --icon-logo: 1.375rem;        /* 22px */
 
+      /* Foundation Light - Warm cream backgrounds */
+      --bg-primary: #FAF8F5;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F2EFEA;
+      --bg-hover: #E8E4DD;
+
+      /* Text - Warm charcoal tones (WCAG AA compliant) */
+      --text-primary: #2C2825;      /* ~14.3:1 on bg-primary */
+      --text-secondary: #6B635B;    /* ~5.65:1 on bg-primary */
+      --text-muted: #736B63;        /* ~5.2:1 on bg-primary */
+
+      /* Bibliography Module Accent (Blue) */
+      --accent-primary: #3A6D90;    /* ~5.44:1 on bg-primary */
+      --accent-secondary: #2A5270;
+      --accent-tint: #E3EDF4;
+      --accent-light: #D0E0EC;
+
+      /* Semantic Colors */
+      --accent-success: #2A8268;
+      --accent-warning: #B8860B;
+      --accent-error: #C85A5A;
+      --accent-violet: #7E5098;
+
+      /* Borders */
+      --border-default: #D9D4CB;
+      --border-subtle: #E8E4DD;
+
+      --selection: rgba(58, 109, 144, 0.15);
+      --shadow-soft: rgba(44, 40, 37, 0.08);
+
       /* Dynamic widths (Balanced) */
       --activity-bar-width: 3.5rem;  /* 56px */
       --sidebar-width: 16rem;        /* 256px */
-
     }
 
     /* ============================================
@@ -73,6 +101,40 @@
       /* Spacious spacing */
       --spacing-section: 1rem;         /* 16px */
       --spacing-content: 0.75rem;      /* 12px */
+    }
+
+    /* Dark Mode - True Black OLED + Warm undertones */
+    /* WCAG AA Compliant (4.5:1 for normal text) */
+    [data-theme="dark"] {
+      /* Foundation Dark */
+      --bg-primary: #000000;
+      --bg-secondary: #171614;
+      --bg-tertiary: rgba(13, 13, 12, 0.9);
+      --bg-hover: #1E1D1A;
+
+      /* Text - Warm off-white (WCAG AA compliant) */
+      --text-primary: #E8E4DF;      /* ~16.3:1 on bg-primary */
+      --text-secondary: #9A958D;    /* ~6.76:1 on bg-primary */
+      --text-muted: #857F77;        /* ~4.84:1 on bg-primary */
+
+      /* Bibliography Module Accent (Blue) */
+      --accent-primary: #5A9FD4;
+      --accent-secondary: #7FBAE8;
+      --accent-tint: rgba(90, 159, 212, 0.15);
+      --accent-light: rgba(90, 159, 212, 0.25);
+
+      /* Semantic Colors */
+      --accent-success: #4DCBA8;
+      --accent-warning: #D4A84B;
+      --accent-error: #E88A8A;
+      --accent-violet: #BC8BD0;
+
+      /* Borders */
+      --border-default: #2D2B27;
+      --border-subtle: #1F1E1B;
+
+      --selection: rgba(90, 159, 212, 0.18);
+      --shadow-soft: rgba(0, 0, 0, 0.5);
     }
 
     /* ============================================
@@ -100,13 +162,13 @@
       --radius-tag: 0.375rem;       /* 6px */
       --radius-icon: 0.625rem;      /* 10px */
       --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      --shadow-warm: var(--shadow-medium);
-      --shadow-lifted: 0 2px 8px var(--shadow-soft);
+      --shadow-warm: rgba(10, 15, 30, 0.25);
+      --shadow-lifted: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
-    .light-theme body[data-refinement="refined"] {
-      --shadow-warm: var(--shadow-soft);
-      --shadow-lifted: 0 2px 8px var(--shadow-soft);
+    body[data-refinement="refined"][data-theme="light"] {
+      --shadow-warm: rgba(15, 23, 42, 0.1);
+      --shadow-lifted: 0 2px 8px rgba(15, 23, 42, 0.08);
     }
 
     /* Modern - Closer to home page (softer, warmer) */
@@ -117,13 +179,13 @@
       --radius-tag: 0.625rem;       /* 10px */
       --radius-icon: 1rem;          /* 16px */
       --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --shadow-warm: var(--shadow-strong);
-      --shadow-lifted: 0 6px 20px var(--shadow-medium);
+      --shadow-warm: rgba(10, 15, 30, 0.4);
+      --shadow-lifted: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
 
-    .light-theme body[data-refinement="modern"] {
-      --shadow-warm: var(--shadow-medium);
-      --shadow-lifted: 0 4px 12px var(--shadow-soft);
+    body[data-refinement="modern"][data-theme="light"] {
+      --shadow-warm: rgba(15, 23, 42, 0.12);
+      --shadow-lifted: 0 4px 12px rgba(15, 23, 42, 0.1);
     }
 
     /* ============================================
@@ -298,7 +360,7 @@
 
     .toggle-btn.active {
       background: var(--bg-secondary);
-      color: var(--biblio);
+      color: var(--accent-primary);
       box-shadow: 0 1px 3px var(--shadow-soft);
     }
 
@@ -345,7 +407,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
       cursor: pointer;
       transition: background 0.15s ease;
     }
@@ -390,7 +452,7 @@
     .app-switcher.expanded {
       max-height: 100px;
       padding: var(--space-2) 0;
-      border-bottom-color: var(--border-default);
+      border-bottom-color: var(--border-subtle);
     }
 
     .app-option {
@@ -412,7 +474,7 @@
 
     .app-option.active {
       background: var(--selection);
-      color: var(--biblio);
+      color: var(--accent-primary);
     }
 
     .app-option svg {
@@ -450,7 +512,7 @@
 
     .activity-icon.active {
       background: var(--selection);
-      color: var(--biblio);
+      color: var(--accent-primary);
     }
 
     .activity-icon svg {
@@ -482,7 +544,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 var(--space-4);
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .sidebar-title {
@@ -568,13 +630,13 @@
     }
 
     .collection-item:hover {
-      background: var(--bg-hover-subtle);
+      background: var(--bg-hover);
       color: var(--text-primary);
     }
 
     .collection-item.active {
       background: var(--selection);
-      color: var(--biblio);
+      color: var(--accent-primary);
     }
 
     .collection-item.nested {
@@ -595,7 +657,7 @@
       padding-left: var(--space-6);
       min-height: 2rem;     /* 32px - comfortable */
       font-size: 0.875rem;  /* 14px */
-      color: var(--biblio);
+      color: var(--accent-primary);
       cursor: pointer;
     }
 
@@ -611,7 +673,7 @@
     .group-libraries {
       margin-top: var(--space-4);
       padding-top: var(--space-4);
-      border-top: 1px solid var(--border-default);
+      border-top: 1px solid var(--border-subtle);
     }
 
     .group-header {
@@ -720,8 +782,8 @@
     }
 
     .tab.active {
-      color: var(--biblio);
-      border-bottom-color: var(--biblio);
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
     }
 
     .tab.active .tab-close {
@@ -766,13 +828,13 @@
     }
 
     .btn-primary {
-      background: var(--biblio);
-      color: var(--text-on-accent);
+      background: var(--accent-primary);
+      color: white;
       box-shadow: var(--shadow-lifted);
     }
 
     .btn-primary:hover {
-      background: var(--biblio-strong);
+      background: var(--accent-secondary);
       transform: translateY(-1px);
     }
 
@@ -860,7 +922,7 @@
       padding: 0 var(--space-3);
       font-size: 0.875rem;   /* 14px - Zotero-like */
       color: var(--text-secondary);
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -873,12 +935,12 @@
     }
 
     .reference-table tbody tr:hover {
-      background: var(--bg-hover-subtle);
+      background: var(--bg-hover);
     }
 
     .reference-table tbody tr.selected {
       background: var(--selection);
-      box-shadow: inset 0 0 0 1px var(--biblio);
+      box-shadow: inset 0 0 0 1px var(--accent-primary);
     }
 
     .reference-table tbody tr.selected:hover {
@@ -907,25 +969,25 @@
       transition: var(--transition-smooth);
     }
 
-    /* Tag colors using Radix scales */
+    /* Tag colors using Citable Balanced palette */
     .tag-cyan {
-      background: var(--biblio-tint);
-      color: var(--biblio-strong);
+      background: var(--accent-tint);
+      color: var(--accent-secondary);
     }
 
     .tag-violet {
-      background: var(--tag-violet-bg);
-      color: var(--tag-violet-text);
+      background: rgba(126, 80, 152, 0.15);
+      color: #7E5098;
     }
 
     .tag-emerald {
-      background: var(--tag-emerald-bg);
-      color: var(--tag-emerald-text);
+      background: rgba(42, 130, 104, 0.15);
+      color: #2A8268;
     }
 
     .tag-amber {
-      background: var(--tag-amber-bg);
-      color: var(--tag-amber-text);
+      background: rgba(184, 134, 11, 0.15);
+      color: #B8860B;
     }
 
     /* File link */
@@ -935,7 +997,7 @@
     }
 
     .file-link:hover {
-      color: var(--biblio);
+      color: var(--accent-primary);
     }
 
     /* DOI link */
@@ -989,7 +1051,7 @@
       gap: var(--space-1) var(--space-3);
       margin-top: var(--space-3);
       padding-top: var(--space-3);
-      border-top: 1px solid var(--border-default);
+      border-top: 1px solid var(--border-subtle);
     }
 
     .info-grid dt {
@@ -1043,22 +1105,24 @@
     }
 
     /* ============================================
-       BORDER STYLE: Uniform 1px borders
+       BORDER STYLE: SOFT DEPTH
+       Subtle shadows + minimal 1px dividers
        ============================================ */
     .activity-bar {
-      border-right: 1px solid var(--border-default);
+      border-right: 1px solid var(--border-subtle);
     }
 
     .sidebar {
-      border-right: 1px solid var(--border-default);
+      border-right: none;
+      box-shadow: inset -8px 0 12px -8px var(--shadow-soft);
     }
 
     .sidebar-header {
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .tab-bar {
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .reference-table {
@@ -1066,15 +1130,15 @@
     }
 
     .reference-table th {
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .reference-table td {
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .group-libraries {
-      border-top: 1px solid var(--border-default);
+      border-top: 1px solid var(--border-subtle);
     }
 
     /* ============================================
@@ -1082,31 +1146,207 @@
        ============================================ */
 
     /* Option 1: Darker - Use bg-hover for table header */
-    .light-theme body[data-table-header="darker"] .reference-table th {
+    [data-theme="light"][data-table-header="darker"] .reference-table th {
       background: var(--bg-hover);
     }
 
     /* Option 2: Border - Add visible top border to table */
-    .light-theme body[data-table-header="border"] .reference-table {
+    [data-theme="light"][data-table-header="border"] .reference-table {
       border-top: 2px solid var(--border-default);
     }
 
     /* Option 3: Shadow - Subtle inset shadow on table */
-    .light-theme body[data-table-header="shadow"] .reference-table {
-      box-shadow: 0 -2px 8px var(--shadow-soft);
+    [data-theme="light"][data-table-header="shadow"] .reference-table {
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
     }
 
     /* Option 4: Tinted - Slightly blue-tinted header */
-    .light-theme body[data-table-header="tinted"] .reference-table th {
-      background: var(--biblio-tint);
+    [data-theme="light"][data-table-header="tinted"] .reference-table th {
+      background: #dde4f0;
     }
 
+    /* ============================================
+       OPTION A: Pill-Shaped Active Indicators
+       ============================================ */
+    [data-pill-icons="true"] .activity-icon.active {
+      border-radius: 100px;
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+    }
+
+    [data-pill-icons="true"] .activity-icon {
+      border-radius: 100px;
+    }
+
+    [data-pill-icons="true"] .activity-icon:hover:not(.active) {
+      background: var(--bg-hover);
+      border-radius: 100px;
+    }
+
+    [data-pill-icons="true"] .logo-icon {
+      border-radius: 100px;
+    }
+
+    [data-pill-icons="true"] .app-option {
+      border-radius: 100px;
+    }
+
+    [data-pill-icons="true"] .app-option.active {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    /* ============================================
+       OPTION B: Bar Edge Styles
+       ============================================ */
+
+    /* B1: Rounded - Activity bar with rounded right edge */
+    [data-bar-edge="rounded"] .activity-bar {
+      border-top-right-radius: 1rem;
+      border-bottom-right-radius: 1rem;
+      border-right: none;
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+      position: relative;
+      z-index: 2;
+    }
+
+    [data-bar-edge="rounded"] .sidebar {
+      margin-left: -1rem;
+      padding-left: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* B2: Scoop - Sidebar hugs activity bar curve with inverted corners */
+    [data-bar-edge="scoop"] .activity-bar {
+      border-top-right-radius: 1rem;
+      border-bottom-right-radius: 1rem;
+      border-right: none;
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Scoop corners on activity bar extending right into gap */
+    [data-bar-edge="scoop"] .activity-bar::before,
+    [data-bar-edge="scoop"] .activity-bar::after {
+      content: '';
+      position: absolute;
+      right: -1rem;
+      width: 1rem;
+      height: 1rem;
+      pointer-events: none;
+    }
+
+    /* Top scoop: quarter circle cutout at top-left, sidebar color fills rest */
+    [data-bar-edge="scoop"] .activity-bar::before {
+      top: 0;
+      background: radial-gradient(circle at 0% 0%, transparent 1rem, var(--bg-secondary) 1rem);
+    }
+
+    /* Bottom scoop: quarter circle cutout at bottom-left, sidebar color fills rest */
+    [data-bar-edge="scoop"] .activity-bar::after {
+      bottom: 0;
+      background: radial-gradient(circle at 0% 100%, transparent 1rem, var(--bg-secondary) 1rem);
+    }
+
+    /* Light mode adjustments for bar edge */
+    [data-theme="light"][data-bar-edge="rounded"] .activity-bar,
+    [data-theme="light"][data-bar-edge="scoop"] .activity-bar {
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ============================================
+       OPTION C: Sidebar Section Cards
+       ============================================ */
+    [data-sidebar-cards="true"] .collection-section {
+      background: var(--bg-tertiary);
+      border-radius: 0.75rem;
+      margin: 0.5rem;
+      padding: 0.5rem !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-sidebar-cards="true"] .section-header {
+      padding: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    [data-sidebar-cards="true"] .collection-item {
+      padding-left: var(--space-4);
+      border-radius: 0.5rem;
+    }
+
+    [data-sidebar-cards="true"] .collection-item.nested {
+      padding-left: calc(var(--space-4) + var(--space-3));
+    }
+
+    [data-sidebar-cards="true"] .add-collection {
+      padding-left: var(--space-4);
+    }
+
+    [data-sidebar-cards="true"] .group-libraries {
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    /* ============================================
+       OPTION D: Soft Borders (Shadow Separation)
+       ============================================ */
+    [data-soft-borders="true"] .activity-bar {
+      border-right: none;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-soft-borders="true"] .sidebar {
+      border-right: none;
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-soft-borders="true"] .sidebar-header {
+      border-bottom: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-soft-borders="true"] .logo-section {
+      border-bottom: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-soft-borders="true"] .tab-bar {
+      border-bottom: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-soft-borders="true"] .reference-table th {
+      border-bottom: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-soft-borders="true"] .reference-table td {
+      border-bottom: none;
+    }
+
+    [data-soft-borders="true"] .reference-table tbody tr:not(:last-child) td {
+      box-shadow: 0 1px 0 var(--border-subtle);
+    }
+
+    /* Light mode adjustments for soft borders */
+    [data-theme="light"][data-soft-borders="true"] .activity-bar {
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"][data-soft-borders="true"] .sidebar {
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.06);
+    }
   </style>
 </head>
-  <body data-module="bibliography" data-table-header="darker" data-refinement="refined">
+<body data-table-header="darker" data-refinement="refined" data-bar-edge="straight">
   <!-- Control Panel -->
   <div class="control-panel">
-    <h1>Bibliography Manager — Radix Colors</h1>
+    <h1>Bibliography Manager - Citable Balanced</h1>
 
     <div class="controls">
       <div class="control-group">
@@ -1117,6 +1357,38 @@
         </div>
       </div>
 
+      <div class="control-group">
+        <span class="control-label">A: Pill Icons</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="toggleOption('pill-icons', false)">Off</button>
+          <button class="toggle-btn" onclick="toggleOption('pill-icons', true)">On</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">B: Bar Edge</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setBarEdge('straight')">Straight</button>
+          <button class="toggle-btn" onclick="setBarEdge('rounded')">Rounded</button>
+          <button class="toggle-btn" onclick="setBarEdge('scoop')">Scoop</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">C: Sidebar Cards</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="toggleOption('sidebar-cards', false)">Off</button>
+          <button class="toggle-btn" onclick="toggleOption('sidebar-cards', true)">On</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">D: Soft Borders</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="toggleOption('soft-borders', false)">Off</button>
+          <button class="toggle-btn" onclick="toggleOption('soft-borders', true)">On</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1420,11 +1692,19 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-      <h3>Radix Colors</h3>
+    <h3>Citable Balanced</h3>
     <p>Toggle options A-D above to test different visual styles.</p>
     <dl class="info-grid">
       <dt>Theme:</dt>
       <dd id="infoTheme">Light</dd>
+      <dt>A: Pill Icons:</dt>
+      <dd id="infoPill">Off</dd>
+      <dt>B: Bar Edge:</dt>
+      <dd id="infoBarEdge">Straight</dd>
+      <dt>C: Sidebar Cards:</dt>
+      <dd id="infoCards">Off</dd>
+      <dt>D: Soft Borders:</dt>
+      <dd id="infoSoft">Off</dd>
     </dl>
   </div>
 
@@ -1432,13 +1712,92 @@
     let logoExpanded = false;
 
     function setTheme(theme) {
-      const root = document.documentElement;
-      root.classList.toggle('dark-theme', theme === 'dark');
-      root.classList.toggle('light-theme', theme !== 'dark');
+      document.body.dataset.theme = theme;
       document.querySelectorAll('.toggle-btn[data-theme]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
       });
       document.getElementById('infoTheme').textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+    }
+
+    function toggleOption(option, enabled) {
+      // Map option names to data attributes
+      const attrMap = {
+        'pill-icons': 'pillIcons',
+        'sidebar-cards': 'sidebarCards',
+        'soft-borders': 'softBorders'
+      };
+
+      // Map option names to info panel IDs
+      const infoMap = {
+        'pill-icons': 'infoPill',
+        'sidebar-cards': 'infoCards',
+        'soft-borders': 'infoSoft'
+      };
+
+      // Set the data attribute on body
+      document.body.dataset[attrMap[option]] = enabled ? 'true' : 'false';
+
+      // Update button states - find buttons in the same toggle-group
+      const buttons = event.target.parentElement.querySelectorAll('.toggle-btn');
+      buttons.forEach((btn, index) => {
+        // First button is Off (index 0), second is On (index 1)
+        btn.classList.toggle('active', (index === 0 && !enabled) || (index === 1 && enabled));
+      });
+
+      // Update info panel
+      const infoEl = document.getElementById(infoMap[option]);
+      if (infoEl) {
+        infoEl.textContent = enabled ? 'On' : 'Off';
+      }
+    }
+
+    function setBarEdge(edge) {
+      // Set the data attribute on body
+      document.body.dataset.barEdge = edge;
+
+      // Update button states - find buttons in the Bar Edge toggle group
+      const barEdgeGroup = document.querySelector('.control-label:nth-child(1)');
+      const buttons = event.target.parentElement.querySelectorAll('.toggle-btn');
+      buttons.forEach(btn => {
+        const btnEdge = btn.textContent.toLowerCase();
+        btn.classList.toggle('active', btnEdge === edge);
+      });
+
+      // Update info panel
+      const edgeNames = {
+        'straight': 'Straight',
+        'rounded': 'Rounded',
+        'scoop': 'Scoop'
+      };
+      const infoEl = document.getElementById('infoBarEdge');
+      if (infoEl) {
+        infoEl.textContent = edgeNames[edge] || edge;
+      }
+    }
+
+    function setTableHeader(header) {
+      document.body.dataset.tableHeader = header;
+      document.querySelectorAll('[data-header]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.header === header);
+      });
+    }
+
+    function setRefinement(refinement) {
+      document.body.dataset.refinement = refinement;
+      // Only toggle active class on buttons (not body)
+      document.querySelectorAll('.toggle-btn[data-refinement]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.refinement === refinement);
+      });
+      // Update info panel
+      const refinementNames = {
+        'default': 'Default (sharp edges, minimal shadows)',
+        'refined': 'Refined (8px radius, warmer shadows)',
+        'modern': 'Modern (12px radius, soft depth)'
+      };
+      const densityEl = document.getElementById('infoDensity');
+      if (densityEl) {
+        densityEl.textContent = refinementNames[refinement] || 'Spacious (56px bar, 28px icons)';
+      }
     }
 
     function toggleLogo() {

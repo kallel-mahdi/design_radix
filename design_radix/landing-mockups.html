@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citable Landing - Layout Comparison</title>
+
+  <!-- Fonts: Source Serif Pro for display, Inter for body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Radix Colors CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/sand.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/sand-alpha.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/mauve.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/mauve-alpha.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/blue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/blue-alpha.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade-alpha.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris-alpha.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/red.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/amber.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/green.css">
+
+  <style>
+    /* ============================================
+       SEMANTIC TOKENS - Aligned with frontend-v2
+       ============================================ */
+    :root {
+      /* Backgrounds */
+      --bg-primary: var(--sand-2);
+      --bg-secondary: var(--sand-1);
+      --bg-tertiary: var(--sand-3);
+      --bg-hover: var(--sand-4);
+      --bg-active: var(--sand-5);
+
+      /* Text */
+      --text-primary: var(--sand-12);
+      --text-secondary: var(--sand-11);
+      --text-muted: var(--sand-9);
+
+      /* Borders */
+      --border-subtle: var(--sand-6);
+      --border-default: var(--sand-7);
+      --border-strong: var(--sand-8);
+
+      /* Module: Bibliography (Blue) */
+      --biblio: var(--blue-9);
+      --biblio-hover: var(--blue-10);
+      --biblio-text: var(--blue-11);
+      --biblio-tint: var(--blue-3);
+      --biblio-light: var(--blue-4);
+      --biblio-border: var(--blue-6);
+
+      /* Module: Manuscripts (Jade) */
+      --manu: var(--jade-9);
+      --manu-hover: var(--jade-10);
+      --manu-text: var(--jade-11);
+      --manu-tint: var(--jade-3);
+      --manu-light: var(--jade-4);
+      --manu-border: var(--jade-6);
+
+      /* Module: Discover (Iris) */
+      --discover: var(--iris-9);
+      --discover-hover: var(--iris-10);
+      --discover-text: var(--iris-11);
+      --discover-tint: var(--iris-3);
+      --discover-light: var(--iris-4);
+      --discover-border: var(--iris-6);
+
+      /* Shadows - more dramatic */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+      --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+
+      /* Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.25rem;
+      --radius-3xl: 1.5rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Display font for headlines */
+    h1, h2, h3 {
+      font-family: 'Source Serif 4', Georgia, serif;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ============================================
+       LAYOUT TOGGLE (Fixed Top-Right)
+       ============================================ */
+    .layout-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .layout-toggle button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .layout-toggle button:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .layout-toggle button.active {
+      background: var(--biblio);
+      color: white;
+    }
+
+    .layout-section {
+      display: none;
+    }
+
+    .layout-section.active {
+      display: block;
+    }
+
+    .layout-label {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 100;
+      padding: 0.5rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+      backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 4rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.375rem;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .logo-icon {
+      width: 2rem;
+      height: 2rem;
+      background: linear-gradient(135deg, var(--biblio), var(--manu));
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.15s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--biblio);
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .header-cta {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    /* ============================================
+       BUTTONS - Enhanced with micro-interactions
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      background: var(--biblio);
+      color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--biblio-hover);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--biblio) 30%, transparent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-lg {
+      padding: 0.875rem 1.75rem;
+      font-size: 1rem;
+      border-radius: var(--radius-lg);
+    }
+
+    .btn-outline {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-primary);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    /* ============================================
+       HERO SECTION - Dramatic overhaul
+       ============================================ */
+    .hero {
+      padding-top: 9rem;
+      padding-bottom: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated mesh gradient background */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, var(--blue-a4) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 85% 30%, var(--iris-a3) 0%, transparent 45%),
+        radial-gradient(ellipse 50% 35% at 15% 40%, var(--jade-a3) 0%, transparent 45%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, var(--blue-a2) 0%, transparent 50%);
+      animation: meshFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes meshFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(10px, -10px) scale(1.02); }
+      66% { transform: translate(-10px, 5px) scale(0.98); }
+    }
+
+    /* Subtle grid pattern overlay */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--sand-a3) 1px, transparent 1px),
+        linear-gradient(90deg, var(--sand-a3) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+      mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black, transparent);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 1.5rem;
+    }
+
+    .hero-gradient {
+      background: linear-gradient(
+        135deg,
+        var(--biblio) 0%,
+        var(--manu) 50%,
+        var(--discover) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: gradientShift 8s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero-subhead {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .hero-subhead strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================
+       TRUST STRIP - Premium treatment
+       ============================================ */
+    .trust-strip {
+      margin-top: 5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .trust-strip p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+      font-weight: 500;
+    }
+
+    .trust-logos {
+      display: flex;
+      gap: 3.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .trust-logos span,
+    .marquee-content span {
+      color: var(--sand-10);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.125rem;
+      letter-spacing: -0.01em;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .trust-logos span:hover,
+    .marquee-content span:hover {
+      opacity: 1;
+    }
+
+    /* ============================================
+       SCREENSHOT SECTION
+       ============================================ */
+    .screenshot-section {
+      padding: 3rem 0 7rem;
+    }
+
+    .screenshot-container {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .screenshot-glow {
+      position: absolute;
+      inset: -3rem;
+      background:
+        radial-gradient(ellipse 50% 40% at 30% 50%, var(--blue-a4) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 70% 50%, var(--jade-a3) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, var(--iris-a3) 0%, transparent 50%);
+      border-radius: 3rem;
+      filter: blur(50px);
+      opacity: 0.6;
+    }
+
+    .screenshot-frame {
+      position: relative;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      box-shadow:
+        var(--shadow-2xl),
+        0 0 0 1px var(--sand-a3),
+        inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+
+    .screenshot-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Using Radix tokens for dots instead of hardcoded hex */
+    .screenshot-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+    }
+
+    .screenshot-dot:nth-child(1) { background: var(--red-9); }
+    .screenshot-dot:nth-child(2) { background: var(--amber-9); }
+    .screenshot-dot:nth-child(3) { background: var(--green-9); }
+
+    .screenshot-body {
+      aspect-ratio: 16/10;
+      background:
+        linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ============================================
+       SECTION HEADERS
+       ============================================ */
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 600;
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .section-header p {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      max-width: 550px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       BADGE - Refined
+       ============================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.3125rem 0.75rem;
+      border-radius: 9999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-biblio { background: var(--biblio-tint); color: var(--biblio-text); }
+    .badge-manu { background: var(--manu-tint); color: var(--manu-text); }
+    .badge-discover { background: var(--discover-tint); color: var(--discover-text); }
+
+    /* ============================================
+       LAYOUT A: BENTO GRID - Dramatically improved
+       ============================================ */
+    .bento-section {
+      padding: 6rem 0;
+      background: var(--bg-secondary);
+      position: relative;
+    }
+
+    /* Subtle section divider */
+    .bento-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 1200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-areas:
+        "biblio biblio manu"
+        "import discover discover"
+        "collab ai tags";
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "biblio"
+          "manu"
+          "discover"
+          "import"
+          "collab"
+          "ai"
+          "tags";
+      }
+    }
+
+    .bento-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 1.75rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Subtle inner glow on hover */
+    .bento-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .bento-card:hover {
+      border-color: var(--border-default);
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-4px);
+    }
+
+    .bento-card:hover::after {
+      opacity: 1;
+    }
+
+    /* Grid area assignments */
+    .bento-card-biblio { grid-area: biblio; }
+    .bento-card-manu { grid-area: manu; }
+    .bento-card-import { grid-area: import; }
+    .bento-card-discover { grid-area: discover; }
+    .bento-card-collab { grid-area: collab; }
+    .bento-card-ai { grid-area: ai; }
+    .bento-card-tags { grid-area: tags; }
+
+    /* Featured indicator */
+    .bento-featured-indicator {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.25rem 0.625rem;
+      background: var(--sand-a3);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .bento-icon {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+
+    .bento-card:hover .bento-icon {
+      transform: scale(1.05);
+    }
+
+    .bento-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 0.625rem;
+      letter-spacing: -0.01em;
+    }
+
+    .bento-card p {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      margin: 0 0 1.25rem;
+    }
+
+    .bento-preview {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      margin-top: auto;
+    }
+
+    /* Bibliography (wide) gets cinematic preview */
+    .bento-card-biblio .bento-preview {
+      aspect-ratio: 21/9;
+    }
+
+    /* Discover (wide) gets cinematic preview */
+    .bento-card-discover .bento-preview {
+      aspect-ratio: 21/9;
+    }
+
+    /* Module-specific hover effects */
+    .bento-card[data-module="bibliography"] .bento-icon {
+      background: var(--biblio-tint);
+      color: var(--biblio-text);
+    }
+    .bento-card[data-module="bibliography"]:hover {
+      border-color: var(--biblio-border);
+    }
+    .bento-card[data-module="bibliography"]::after {
+      background: radial-gradient(ellipse at 50% 0%, var(--blue-a2) 0%, transparent 70%);
+    }
+
+    .bento-card[data-module="manuscripts"] .bento-icon {
+      background: var(--manu-tint);
+      color: var(--manu-text);
+    }
+    .bento-card[data-module="manuscripts"]:hover {
+      border-color: var(--manu-border);
+    }
+    .bento-card[data-module="manuscripts"]::after {
+      background: radial-gradient(ellipse at 50% 0%, var(--jade-a2) 0%, transparent 70%);
+    }
+
+    .bento-card[data-module="discover"] .bento-icon {
+      background: var(--discover-tint);
+      color: var(--discover-text);
+    }
+    .bento-card[data-module="discover"]:hover {
+      border-color: var(--discover-border);
+    }
+    .bento-card[data-module="discover"]::after {
+      background: radial-gradient(ellipse at 50% 0%, var(--iris-a2) 0%, transparent 70%);
+    }
+
+    /* ============================================
+       LAYOUT B: ALTERNATING LEFT/RIGHT - Improved
+       ============================================ */
+    .alternating-section {
+      padding: 7rem 0;
+      position: relative;
+    }
+
+    .alternating-section:nth-child(odd) { background: var(--bg-secondary); }
+    .alternating-section:nth-child(even) { background: var(--bg-primary); }
+
+    .alternating-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .alternating-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    .alternating-grid.reversed { direction: rtl; }
+    .alternating-grid.reversed > * { direction: ltr; }
+
+    .alternating-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .alternating-text h3 {
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .alternating-text p {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .alternating-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+
+    .alternating-bullets li {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+    }
+
+    .bullet-icon {
+      width: 1.375rem;
+      height: 1.375rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .bullet-icon svg { width: 0.75rem; height: 0.75rem; }
+
+    .alternating-preview {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--border-subtle);
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      box-shadow: var(--shadow-xl);
+      transition: all 0.3s ease;
+    }
+
+    .alternating-preview:hover {
+      transform: scale(1.02) rotate(-0.5deg);
+      box-shadow: var(--shadow-2xl);
+    }
+
+    [data-module="bibliography"] .bullet-icon { background: var(--biblio); color: white; }
+    [data-module="manuscripts"] .bullet-icon { background: var(--manu); color: white; }
+    [data-module="discover"] .bullet-icon { background: var(--discover); color: white; }
+
+    /* ============================================
+       LAYOUT C: PROGRESSIVE TABS - Enhanced
+       ============================================ */
+    .progressive-section {
+      padding: 6rem 0;
+      background: var(--bg-secondary);
+    }
+
+    .tab-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 3rem;
+      padding: 0.375rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-lg);
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .tab-btn[data-tab="bibliography"].active {
+      background: var(--biblio-tint);
+      color: var(--biblio-text);
+    }
+    .tab-btn[data-tab="manuscripts"].active {
+      background: var(--manu-tint);
+      color: var(--manu-text);
+    }
+    .tab-btn[data-tab="discover"].active {
+      background: var(--discover-tint);
+      color: var(--discover-text);
+    }
+
+    .tab-content {
+      display: none;
+      animation: tabFadeIn 0.3s ease;
+    }
+    .tab-content.active { display: block; }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-panel {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 3.5rem;
+      align-items: center;
+      background: var(--bg-primary);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--border-subtle);
+      padding: 3rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (max-width: 768px) {
+      .tab-panel { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+    }
+
+    .tab-panel-text h3 {
+      font-size: 1.875rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .tab-panel-text p {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0 0 1.5rem;
+    }
+
+    .tab-panel-preview {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      aspect-ratio: 16/10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+    }
+
+    /* ============================================
+       TESTIMONIALS - Enhanced
+       ============================================ */
+    .testimonials-section {
+      padding: 7rem 0;
+      position: relative;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+
+    .testimonial-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 1.75rem;
+      transition: all 0.25s ease;
+    }
+
+    .testimonial-card:hover {
+      border-color: var(--border-default);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .testimonial-quote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin: 0 0 1.5rem;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+
+    .testimonial-avatar {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sand-5), var(--sand-7));
+    }
+
+    .testimonial-name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      margin: 0;
+    }
+
+    .testimonial-role {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      margin: 0;
+    }
+
+    /* ============================================
+       CTA SECTION - Impactful
+       ============================================ */
+    .cta-section {
+      padding: 6rem 0;
+      background: var(--bg-secondary);
+    }
+
+    .cta-card {
+      background: linear-gradient(135deg, var(--blue-a4), var(--jade-a3), var(--iris-a4));
+      border-radius: var(--radius-3xl);
+      padding: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-card-inner {
+      background: var(--bg-secondary);
+      border-radius: calc(var(--radius-3xl) - 1px);
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Decorative circles */
+    .cta-card-inner::before,
+    .cta-card-inner::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cta-card-inner::before {
+      width: 300px;
+      height: 300px;
+      background: var(--blue-a2);
+      top: -150px;
+      left: -100px;
+      filter: blur(60px);
+    }
+
+    .cta-card-inner::after {
+      width: 200px;
+      height: 200px;
+      background: var(--iris-a2);
+      bottom: -100px;
+      right: -50px;
+      filter: blur(50px);
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-card h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 600;
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-card p {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 2rem;
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       FOOTER - Polished
+       ============================================ */
+    .footer {
+      padding: 3.5rem 0;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .footer-links a {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-copy {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+      .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+    }
+
+    /* ============================================
+       SCROLL ANIMATIONS
+       ============================================ */
+    @media (prefers-reduced-motion: no-preference) {
+      .fade-in-up {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease forwards;
+      }
+
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .bento-card { animation-delay: calc(var(--i, 0) * 0.1s); }
+    }
+
+    /* ============================================
+       MAGIC UI: DOT PATTERN BACKGROUND
+       ============================================ */
+    .dot-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--sand-6) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.5;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 20%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ============================================
+       MAGIC UI: TYPING ANIMATION
+       ============================================ */
+    .typing-container {
+      display: inline-block;
+      position: relative;
+    }
+
+    .typing-text {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid var(--biblio);
+      animation:
+        typing 2s steps(12, end) forwards,
+        blink-caret 0.75s step-end infinite;
+      width: 0;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: var(--biblio); }
+    }
+
+    /* Word rotate alternative */
+    .word-rotate {
+      display: inline-block;
+      position: relative;
+      height: 1.2em;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .word-rotate-inner {
+      display: flex;
+      flex-direction: column;
+      animation: wordRotate 9s ease-in-out infinite;
+    }
+
+    .word-rotate-inner span {
+      height: 1.2em;
+      line-height: 1.2;
+    }
+
+    @keyframes wordRotate {
+      0%, 20% { transform: translateY(0); }
+      25%, 45% { transform: translateY(-1.2em); }
+      50%, 70% { transform: translateY(-2.4em); }
+      75%, 95% { transform: translateY(-3.6em); }
+      100% { transform: translateY(0); }
+    }
+
+    /* ============================================
+       MAGIC UI: BLUR FADE SCROLL REVEAL
+       ============================================ */
+    .blur-fade {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(20px);
+      transition:
+        opacity 0.6s ease,
+        filter 0.6s ease,
+        transform 0.6s ease;
+    }
+
+    .blur-fade.visible {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+
+    /* Staggered delays */
+    .blur-fade[data-delay="1"] { transition-delay: 0.1s; }
+    .blur-fade[data-delay="2"] { transition-delay: 0.2s; }
+    .blur-fade[data-delay="3"] { transition-delay: 0.3s; }
+    .blur-fade[data-delay="4"] { transition-delay: 0.4s; }
+    .blur-fade[data-delay="5"] { transition-delay: 0.5s; }
+
+    /* ============================================
+       MAGIC UI: MARQUEE (Trust Strip)
+       ============================================ */
+    .marquee-container {
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 40s linear infinite;
+    }
+
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    .marquee-content {
+      display: flex;
+      gap: 3.5rem;
+      padding: 0 1.75rem;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ============================================
+       MAGIC UI: BORDER BEAM
+       ============================================ */
+    .border-beam {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .border-beam::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 2px;
+      border-radius: inherit;
+      background: conic-gradient(
+        from var(--beam-angle, 0deg),
+        transparent 0%,
+        var(--biblio) 10%,
+        var(--manu) 20%,
+        transparent 30%,
+        transparent 100%
+      );
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      animation: border-beam-rotate 4s linear infinite;
+    }
+
+    @keyframes border-beam-rotate {
+      from { --beam-angle: 0deg; }
+      to { --beam-angle: 360deg; }
+    }
+
+    /* CSS custom property animation fallback */
+    @property --beam-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+
+    /* ============================================
+       MAGIC UI: NUMBER TICKER
+       ============================================ */
+    .number-ticker {
+      display: inline-block;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================
+       MAGIC UI: SHIMMER BUTTON
+       ============================================ */
+    .btn-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      50%, 100% { left: 100%; }
+    }
+
+    /* ============================================
+       MAGIC UI: GRID PATTERN (Alternative BG)
+       ============================================ */
+    .grid-pattern {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--sand-a4) 1px, transparent 1px),
+        linear-gradient(90deg, var(--sand-a4) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black, transparent);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- ============================================
+       LAYOUT TOGGLE
+       ============================================ -->
+  <div class="layout-toggle">
+    <button class="active" data-layout="bento">A: Bento</button>
+    <button data-layout="alternating">B: Alternating</button>
+    <button data-layout="progressive">C: Tabs</button>
+  </div>
+
+  <div class="layout-label" id="layoutLabel">Layout A: Bento Grid</div>
+
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span>Citable</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#docs">Docs</a>
+          <a href="#blog">Blog</a>
+        </nav>
+        <div class="header-cta">
+          <button class="btn btn-ghost">Sign in</button>
+          <button class="btn btn-primary">Start free</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================
+       HERO SECTION
+       ============================================ -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="dot-pattern"></div>
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="blur-fade" data-delay="1">Your research.<br><span class="hero-gradient word-rotate"><span class="word-rotate-inner"><span>One home.</span><span>Organized.</span><span>Connected.</span><span>Simplified.</span></span></span></h1>
+        <p class="hero-subhead blur-fade" data-delay="2">
+          <strong>Read, write, and discover</strong> — finally in one place. The unified platform for academics who are done juggling Zotero, Overleaf, and endless browser tabs.
+        </p>
+        <div class="hero-cta blur-fade" data-delay="3">
+          <button class="btn btn-primary btn-lg btn-shimmer">
+            Start for free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <button class="btn btn-outline btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 0.5rem;">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Watch demo
+          </button>
+        </div>
+        <div class="trust-strip blur-fade" data-delay="4">
+          <p>Trusted by researchers at</p>
+          <div class="marquee-container">
+            <div class="marquee-track">
+              <div class="marquee-content">
+                <span>Stanford</span>
+                <span>MIT</span>
+                <span>Oxford</span>
+                <span>Harvard</span>
+                <span>Caltech</span>
+                <span>ETH Zürich</span>
+                <span>Cambridge</span>
+                <span>Berkeley</span>
+              </div>
+              <div class="marquee-content" aria-hidden="true">
+                <span>Stanford</span>
+                <span>MIT</span>
+                <span>Oxford</span>
+                <span>Harvard</span>
+                <span>Caltech</span>
+                <span>ETH Zürich</span>
+                <span>Cambridge</span>
+                <span>Berkeley</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PRODUCT SCREENSHOT
+       ============================================ -->
+  <section class="screenshot-section">
+    <div class="container">
+      <div class="screenshot-container">
+        <div class="screenshot-glow"></div>
+        <div class="screenshot-frame">
+          <div class="screenshot-header">
+            <div class="screenshot-dot"></div>
+            <div class="screenshot-dot"></div>
+            <div class="screenshot-dot"></div>
+          </div>
+          <div class="screenshot-body">[Product Screenshot Placeholder]</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       LAYOUT A: BENTO GRID
+       ============================================ -->
+  <div class="layout-section active" id="layout-bento">
+    <section class="bento-section" id="features-bento">
+      <div class="container">
+        <div class="section-header blur-fade">
+          <h2>Everything you need.<br>Nothing you don't.</h2>
+          <p>Three modules, one seamless experience. Built for researchers who spend their days reading, writing, and discovering.</p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Bibliography: spans 2 cols -->
+          <div class="bento-card bento-card-biblio blur-fade" data-module="bibliography" data-delay="1">
+            <span class="bento-featured-indicator">Core Module</span>
+            <span class="badge badge-biblio">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Bibliography
+            </span>
+            <h3>Smart library that organizes itself</h3>
+            <p>Import papers from anywhere — Zotero, Mendeley, DOI, arXiv, or any URL. AI handles tagging, sorting, and organizing while you focus on what matters: understanding the literature.</p>
+            <div class="bento-preview">[Bibliography Interface Preview]</div>
+          </div>
+
+          <!-- Manuscripts: 1 col -->
+          <div class="bento-card bento-card-manu blur-fade" data-module="manuscripts" data-delay="2">
+            <span class="badge badge-manu">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Manuscripts
+            </span>
+            <h3>LaTeX editor built for you</h3>
+            <p>Live preview, real-time collaboration, seamless citation insertion.</p>
+            <div class="bento-preview">[Editor Preview]</div>
+          </div>
+
+          <!-- Import: 1 col -->
+          <div class="bento-card bento-card-import blur-fade" data-module="bibliography" data-delay="3">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <h3>One-click import</h3>
+            <p>Drag and drop PDFs or paste any URL. We handle the rest.</p>
+          </div>
+
+          <!-- Discover: spans 2 cols -->
+          <div class="bento-card bento-card-discover blur-fade" data-module="discover" data-delay="2">
+            <span class="badge badge-discover">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              Discover
+            </span>
+            <h3>Find hidden connections</h3>
+            <p>Visual citation graphs reveal how papers connect. AI-powered recommendations surface the research you'd otherwise miss.</p>
+            <div class="bento-preview">[Citation Graph Preview]</div>
+          </div>
+
+          <!-- Row 3: Three equal cards -->
+          <div class="bento-card bento-card-collab blur-fade" data-module="manuscripts" data-delay="3">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Real-time collaboration</h3>
+            <p>Work with your team, see changes as they happen.</p>
+          </div>
+
+          <div class="bento-card bento-card-ai blur-fade" data-module="discover" data-delay="4">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <h3>AI recommendations</h3>
+            <p>Surface relevant papers you might have missed.</p>
+          </div>
+
+          <div class="bento-card bento-card-tags blur-fade" data-module="bibliography" data-delay="5">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <h3>Smart tagging</h3>
+            <p>AI automatically categorizes and tags your papers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================
+       LAYOUT B: ALTERNATING LEFT/RIGHT
+       ============================================ -->
+  <div class="layout-section" id="layout-alternating">
+    <section class="alternating-section" data-module="bibliography">
+      <div class="container">
+        <div class="alternating-grid">
+          <div class="alternating-text">
+            <span class="badge badge-biblio">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Bibliography
+            </span>
+            <h3>Smart library that organizes itself</h3>
+            <p>Import papers from anywhere. AI handles the tagging, sorting, and organizing while you focus on what matters — actually reading the papers.</p>
+            <ul class="alternating-bullets">
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>AI-powered auto-tagging</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Smart collections that update themselves</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>One-click import from any source</li>
+            </ul>
+          </div>
+          <div class="alternating-preview">[Bibliography Screenshot]</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alternating-section" data-module="manuscripts">
+      <div class="container">
+        <div class="alternating-grid reversed">
+          <div class="alternating-text">
+            <span class="badge badge-manu">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Manuscripts
+            </span>
+            <h3>LaTeX editor built for researchers</h3>
+            <p>A powerful editor with live preview, real-time collaboration, and seamless citation insertion as you write. No more copy-pasting BibTeX entries.</p>
+            <ul class="alternating-bullets">
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Side-by-side live preview</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Insert citations from your library</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Auto-save & version history</li>
+            </ul>
+          </div>
+          <div class="alternating-preview">[Manuscripts Screenshot]</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alternating-section" data-module="discover">
+      <div class="container">
+        <div class="alternating-grid">
+          <div class="alternating-text">
+            <span class="badge badge-discover">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              Discover
+            </span>
+            <h3>Find hidden connections</h3>
+            <p>Explore citation networks, find related papers, and let AI surface the research you need to strengthen your work. Never miss a seminal paper again.</p>
+            <ul class="alternating-bullets">
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Visual citation graphs</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>AI-powered recommendations</li>
+              <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Track emerging research</li>
+            </ul>
+          </div>
+          <div class="alternating-preview">[Discover Screenshot]</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================
+       LAYOUT C: PROGRESSIVE TABS
+       ============================================ -->
+  <div class="layout-section" id="layout-progressive">
+    <section class="progressive-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>One platform.<br>Three superpowers.</h2>
+          <p>Everything you need to go from reading to publishing.</p>
+        </div>
+
+        <div class="tab-container">
+          <button class="tab-btn active" data-tab="bibliography">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            Bibliography
+          </button>
+          <button class="tab-btn" data-tab="manuscripts">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Manuscripts
+          </button>
+          <button class="tab-btn" data-tab="discover">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Discover
+          </button>
+        </div>
+
+        <div class="tab-content active" data-content="bibliography">
+          <div class="tab-panel">
+            <div class="tab-panel-text">
+              <h3>Smart library that organizes itself</h3>
+              <p>Import papers from anywhere. AI handles the tagging, sorting, and organizing while you focus on reading and understanding.</p>
+              <ul class="alternating-bullets" data-module="bibliography">
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>AI-powered auto-tagging</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Smart collections</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>One-click import</li>
+              </ul>
+            </div>
+            <div class="tab-panel-preview">[Bibliography Interface]</div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-content="manuscripts">
+          <div class="tab-panel">
+            <div class="tab-panel-text">
+              <h3>LaTeX editor built for researchers</h3>
+              <p>A powerful editor with live preview, real-time collaboration, and seamless citation insertion as you write.</p>
+              <ul class="alternating-bullets" data-module="manuscripts">
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Side-by-side live preview</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Rich formatting toolbar</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Auto-save & version history</li>
+              </ul>
+            </div>
+            <div class="tab-panel-preview">[Manuscripts Interface]</div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-content="discover">
+          <div class="tab-panel">
+            <div class="tab-panel-text">
+              <h3>Find hidden connections</h3>
+              <p>Explore citation networks, find related papers, and let AI surface the research you need to strengthen your work.</p>
+              <ul class="alternating-bullets" data-module="discover">
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Visual citation graphs</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>AI-powered recommendations</li>
+                <li><span class="bullet-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Track citation trends</li>
+              </ul>
+            </div>
+            <div class="tab-panel-preview">[Discover Interface]</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================
+       TESTIMONIALS
+       ============================================ -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header blur-fade">
+        <h2>Loved by researchers</h2>
+        <p>Join thousands of academics who've simplified their workflow</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card blur-fade" data-delay="1">
+          <p class="testimonial-quote">"Finally, a tool that understands how researchers actually work. The integration between my library and writing is seamless."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div>
+              <p class="testimonial-name">Dr. Sarah Chen</p>
+              <p class="testimonial-role">Postdoc, MIT</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card blur-fade" data-delay="2">
+          <p class="testimonial-quote">"The citation graph feature alone saved me weeks of literature review time. I discovered papers I never would have found otherwise."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div>
+              <p class="testimonial-name">Prof. James Miller</p>
+              <p class="testimonial-role">Faculty, Stanford</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card blur-fade" data-delay="3">
+          <p class="testimonial-quote">"Switched from Zotero + Overleaf and never looked back. Everything in one place, and it actually works on my 10-year-old laptop."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div>
+              <p class="testimonial-name">Maria Rodriguez</p>
+              <p class="testimonial-role">PhD Candidate, Oxford</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       CTA SECTION
+       ============================================ -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card border-beam blur-fade">
+        <div class="cta-card-inner">
+          <div class="cta-content">
+            <h2>Start writing better papers today</h2>
+            <p>Free forever for individuals. No credit card required. Import your existing library in seconds.</p>
+            <button class="btn btn-primary btn-lg btn-shimmer">
+              Get started free
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       FOOTER
+       ============================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <div class="logo-icon" style="width: 1.5rem; height: 1.5rem;"></div>
+          <span>Citable</span>
+        </div>
+        <nav class="footer-links">
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+          <a href="#">Docs</a>
+          <a href="#">Blog</a>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </nav>
+        <p class="footer-copy">© 2026 Citable. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================
+       JAVASCRIPT
+       ============================================ -->
+  <script>
+    // ============================================
+    // MAGIC UI: Blur Fade Scroll Reveal
+    // ============================================
+    const blurFadeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Optional: unobserve after revealing
+            // blurFadeObserver.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    );
+
+    // Observe all blur-fade elements
+    document.querySelectorAll('.blur-fade').forEach(el => {
+      blurFadeObserver.observe(el);
+    });
+
+    // Trigger hero elements immediately (above fold)
+    document.querySelectorAll('.hero .blur-fade').forEach(el => {
+      setTimeout(() => el.classList.add('visible'), 100);
+    });
+
+    // ============================================
+    // Layout toggle
+    // ============================================
+    const layoutButtons = document.querySelectorAll('.layout-toggle button');
+    const layoutSections = document.querySelectorAll('.layout-section');
+    const layoutLabel = document.getElementById('layoutLabel');
+
+    const layoutNames = {
+      'bento': 'Layout A: Bento Grid',
+      'alternating': 'Layout B: Alternating',
+      'progressive': 'Layout C: Tabs'
+    };
+
+    layoutButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const layout = btn.dataset.layout;
+        layoutButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        layoutSections.forEach(section => {
+          section.classList.remove('active');
+          if (section.id === `layout-${layout}`) {
+            section.classList.add('active');
+          }
+        });
+        layoutLabel.textContent = layoutNames[layout];
+      });
+    });
+
+    // ============================================
+    // Tab functionality for progressive layout
+    // ============================================
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.dataset.content === tab) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // ============================================
+    // MAGIC UI: Number Ticker (for stats)
+    // ============================================
+    function animateNumber(el, target, duration = 2000) {
+      const start = 0;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (target - start) * easeOut);
+        el.textContent = current.toLocaleString();
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          el.textContent = target.toLocaleString();
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Trigger number tickers when visible
+    document.querySelectorAll('.number-ticker').forEach(el => {
+      const target = parseInt(el.dataset.target, 10);
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateNumber(el, target);
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

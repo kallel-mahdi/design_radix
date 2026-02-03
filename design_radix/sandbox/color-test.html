@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="light-theme">
+<head>
+  <meta charset="UTF-8">
+  <title>Color Comparison Test</title>
+  <link rel="stylesheet" href="../radix-tokens.css">
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 2rem;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+    h1 { margin-bottom: 1rem; }
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .color-card {
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .color-swatch {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .color-info {
+      padding: 0.75rem;
+      background: var(--bg-secondary);
+      font-size: 11px;
+    }
+    .color-info code {
+      display: block;
+      margin-top: 4px;
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+    .theme-toggle {
+      margin-bottom: 1rem;
+    }
+    .theme-toggle button {
+      padding: 0.5rem 1rem;
+      margin-right: 0.5rem;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body data-module="bibliography">
+  <h1>Radix Color Token Comparison</h1>
+
+  <div class="theme-toggle">
+    <button onclick="setTheme('light')">Light</button>
+    <button onclick="setTheme('dark')">Dark</button>
+    <button onclick="extractColors()">Extract Colors</button>
+    <button onclick="copyColors()">Copy to Clipboard</button>
+  </div>
+
+  <div class="color-grid" id="colorGrid"></div>
+
+  <div id="output"></div>
+
+  <script>
+    const tokens = [
+      // Backgrounds
+      { name: '--bg-primary', cssVar: 'var(--bg-primary)' },
+      { name: '--bg-secondary', cssVar: 'var(--bg-secondary)' },
+      { name: '--bg-tertiary', cssVar: 'var(--bg-tertiary)' },
+      { name: '--bg-hover', cssVar: 'var(--bg-hover)' },
+      { name: '--bg-hover-subtle', cssVar: 'var(--bg-hover-subtle)' },
+      { name: '--bg-active', cssVar: 'var(--bg-active)' },
+      { name: '--bg-canvas', cssVar: 'var(--bg-canvas)' },
+
+      // Text
+      { name: '--text-primary', cssVar: 'var(--text-primary)' },
+      { name: '--text-secondary', cssVar: 'var(--text-secondary)' },
+      { name: '--text-muted', cssVar: 'var(--text-muted)' },
+      { name: '--text-on-accent', cssVar: 'var(--text-on-accent)' },
+
+      // Borders
+      { name: '--border-subtle', cssVar: 'var(--border-subtle)' },
+      { name: '--border-default', cssVar: 'var(--border-default)' },
+      { name: '--border-strong', cssVar: 'var(--border-strong)' },
+
+      // Bibliography module
+      { name: '--biblio', cssVar: 'var(--biblio)' },
+      { name: '--biblio-hover', cssVar: 'var(--biblio-hover)' },
+      { name: '--biblio-strong', cssVar: 'var(--biblio-strong)' },
+      { name: '--biblio-text', cssVar: 'var(--biblio-text)' },
+      { name: '--biblio-tint', cssVar: 'var(--biblio-tint)' },
+      { name: '--biblio-light', cssVar: 'var(--biblio-light)' },
+      { name: '--biblio-border', cssVar: 'var(--biblio-border)' },
+
+      // Selection
+      { name: '--selection', cssVar: 'var(--selection)' },
+
+      // Raw Radix colors for reference
+      { name: '--sand-1', cssVar: 'var(--sand-1)' },
+      { name: '--sand-2', cssVar: 'var(--sand-2)' },
+      { name: '--sand-3', cssVar: 'var(--sand-3)' },
+      { name: '--sand-4', cssVar: 'var(--sand-4)' },
+      { name: '--sand-5', cssVar: 'var(--sand-5)' },
+      { name: '--sand-6', cssVar: 'var(--sand-6)' },
+      { name: '--mauve-11', cssVar: 'var(--mauve-11)' },
+      { name: '--mauve-12', cssVar: 'var(--mauve-12)' },
+      { name: '--blue-9', cssVar: 'var(--blue-9)' },
+      { name: '--blue-10', cssVar: 'var(--blue-10)' },
+      { name: '--blue-11', cssVar: 'var(--blue-11)' },
+      { name: '--blue-12', cssVar: 'var(--blue-12)' },
+      { name: '--blue-a3', cssVar: 'var(--blue-a3)' },
+      { name: '--blue-a4', cssVar: 'var(--blue-a4)' },
+    ];
+
+    let colorData = {};
+
+    function setTheme(theme) {
+      document.documentElement.classList.toggle('dark-theme', theme === 'dark');
+      document.documentElement.classList.toggle('light-theme', theme === 'light');
+      renderColors();
+    }
+
+    function getComputedColor(cssVar) {
+      const temp = document.createElement('div');
+      temp.style.color = cssVar;
+      document.body.appendChild(temp);
+      const computed = getComputedStyle(temp).color;
+      document.body.removeChild(temp);
+      return computed;
+    }
+
+    function rgbToHex(rgb) {
+      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return rgb;
+      const r = parseInt(match[1]).toString(16).padStart(2, '0');
+      const g = parseInt(match[2]).toString(16).padStart(2, '0');
+      const b = parseInt(match[3]).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+    }
+
+    function renderColors() {
+      const grid = document.getElementById('colorGrid');
+      grid.innerHTML = '';
+
+      tokens.forEach(token => {
+        const computed = getComputedColor(token.cssVar);
+        const hex = rgbToHex(computed);
+
+        const card = document.createElement('div');
+        card.className = 'color-card';
+        card.innerHTML = `
+          <div class="color-swatch" style="background: ${token.cssVar}; color: ${isLight(computed) ? '#000' : '#fff'}">
+            ${token.name}
+          </div>
+          <div class="color-info">
+            <strong>${token.name}</strong>
+            <code>${computed}</code>
+            <code>${hex}</code>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function isLight(rgb) {
+      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return true;
+      const luminance = (0.299 * match[1] + 0.587 * match[2] + 0.114 * match[3]) / 255;
+      return luminance > 0.5;
+    }
+
+    function extractColors() {
+      const theme = document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light';
+      colorData[theme] = {};
+
+      tokens.forEach(token => {
+        const computed = getComputedColor(token.cssVar);
+        const hex = rgbToHex(computed);
+        colorData[theme][token.name] = { rgb: computed, hex };
+      });
+
+      document.getElementById('output').textContent = JSON.stringify(colorData, null, 2);
+    }
+
+    function copyColors() {
+      const output = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(output);
+      alert('Copied to clipboard!');
+    }
+
+    // Initial render
+    renderColors();
+  </script>
+</body>
+</html>
