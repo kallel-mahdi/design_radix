@@ -25,13 +25,19 @@
 @import "@radix-ui/colors/blue-alpha.css";
 @import "@radix-ui/colors/blue-dark-alpha.css";
 
-/* Sky scale - Better match for desaturated steel blue (~205° hue) */
-@import "@radix-ui/colors/sky.css";
-@import "@radix-ui/colors/sky-dark.css";
-@import "@radix-ui/colors/sky-alpha.css";
-@import "@radix-ui/colors/sky-dark-alpha.css";
+/* Jade scale - Manuscripts module (green with teal undertone) */
+@import "@radix-ui/colors/jade.css";
+@import "@radix-ui/colors/jade-dark.css";
+@import "@radix-ui/colors/jade-alpha.css";
+@import "@radix-ui/colors/jade-dark-alpha.css";
 
-/* Teal scale - Manuscripts module (hue ~163, closer to original design) */
+/* Iris scale - Discover module (violet) */
+@import "@radix-ui/colors/iris.css";
+@import "@radix-ui/colors/iris-dark.css";
+@import "@radix-ui/colors/iris-alpha.css";
+@import "@radix-ui/colors/iris-dark-alpha.css";
+
+/* Teal scale - Tags */
 @import "@radix-ui/colors/teal.css";
 @import "@radix-ui/colors/teal-dark.css";
 @import "@radix-ui/colors/teal-alpha.css";
@@ -49,7 +55,7 @@
 @import "@radix-ui/colors/cyan-alpha.css";
 @import "@radix-ui/colors/cyan-dark-alpha.css";
 
-/* Purple scale - Discover module */
+/* Purple scale - Tags */
 @import "@radix-ui/colors/purple.css";
 @import "@radix-ui/colors/purple-dark.css";
 @import "@radix-ui/colors/purple-alpha.css";
@@ -66,3 +72,15 @@
 @import "@radix-ui/colors/tomato-dark.css";
 @import "@radix-ui/colors/tomato-alpha.css";
 @import "@radix-ui/colors/tomato-dark-alpha.css";
+
+/* Orange scale - Highlight color */
+@import "@radix-ui/colors/orange.css";
+@import "@radix-ui/colors/orange-dark.css";
+@import "@radix-ui/colors/orange-alpha.css";
+@import "@radix-ui/colors/orange-dark-alpha.css";
+
+/* Pink scale - Highlight color */
+@import "@radix-ui/colors/pink.css";
+@import "@radix-ui/colors/pink-dark.css";
+@import "@radix-ui/colors/pink-alpha.css";
+@import "@radix-ui/colors/pink-dark-alpha.css";
