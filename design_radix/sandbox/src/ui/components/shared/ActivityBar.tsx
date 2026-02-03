@@ -14,32 +14,58 @@ import { Box, Settings, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Types
-export interface ActivityItem {
+export interface NavigationItem {
   id: string
   icon: LucideIcon
   label: string
+  selected?: boolean
+  onClick?: () => void
 }
 
+// Legacy type alias for backwards compatibility
+export type ActivityItem = NavigationItem
+
 export interface AppSwitcherConfig {
-  items: ActivityItem[]
+  items: NavigationItem[]
   activeId: string
   onSelect?: (id: string) => void
 }
 
+// New interface with per-item callbacks and logo click
 export interface ActivityBarProps {
-  items: ActivityItem[]
-  activeId: string
-  onSelect: (id: string) => void
+  items: NavigationItem[]
+  onLogoClick?: () => void
   appSwitcher?: AppSwitcherConfig
+  // Legacy props for backwards compatibility
+  activeId?: string
+  onSelect?: (id: string) => void
 }
 
 export function ActivityBar({
   items,
+  onLogoClick,
+  appSwitcher,
+  // Legacy props
   activeId,
   onSelect,
-  appSwitcher,
 }: ActivityBarProps) {
   const [logoExpanded, setLogoExpanded] = useState(false)
+
+  // Determine if an item is selected (supports both old and new patterns)
+  const isItemSelected = (item: NavigationItem) => {
+    if (item.selected !== undefined) return item.selected
+    if (activeId !== undefined) return item.id === activeId
+    return false
+  }
+
+  // Handle item click (supports both old and new patterns)
+  const handleItemClick = (item: NavigationItem) => {
+    if (item.onClick) {
+      item.onClick()
+    } else if (onSelect) {
+      onSelect(item.id)
+    }
+  }
 
   return (
     <TooltipProvider>
@@ -86,9 +112,12 @@ export function ActivityBar({
             </CollapsibleContent>
           </Collapsible>
         ) : (
-          // Simple logo (Bibliography mode)
+          // Simple logo (Bibliography mode) - clickable to navigate home
           <div className="flex h-11 w-full items-center justify-center border-b">
-            <button className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--text-secondary)]">
+            <button
+              className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--text-secondary)]"
+              onClick={onLogoClick}
+            >
               <Box className="size-[22px]" />
             </button>
           </div>
@@ -100,10 +129,10 @@ export function ActivityBar({
             <Tooltip key={item.id}>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => onSelect(item.id)}
+                  onClick={() => handleItemClick(item)}
                   className={cn(
                     "flex size-11 items-center justify-center rounded-lg transition-colors",
-                    activeId === item.id
+                    isItemSelected(item)
                       ? "bg-[color:var(--selection)] text-[color:var(--accent)]"
                       : "text-muted-foreground hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--text-secondary)]"
                   )}

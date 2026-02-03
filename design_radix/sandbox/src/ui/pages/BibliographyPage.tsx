@@ -16,7 +16,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Separator } from "@/components/ui/separator";
 import {
   Search,
   Plus,
@@ -36,7 +35,7 @@ import {
 } from "lucide-react";
 import { ReferenceDetailsPanel } from "../components/ReferenceDetailsPanel";
 import { BatchActionBar } from "../components/BatchActionBar";
-import { ActivityBar, type ActivityItem } from "../components/shared/ActivityBar";
+import { AppLayout, type NavigationItem } from "../components/shared/AppLayout";
 import { FileTabs, type FileTab } from "../components/shared/FileTabs";
 
 // ============================================
@@ -146,15 +145,6 @@ const references: Reference[] = [
     hasFile: true,
     doi: "10.48550/arXiv.2106",
   },
-];
-
-// Activity bar items for Bibliography module
-const biblioActivityItems: ActivityItem[] = [
-  { id: "library", icon: BookOpen, label: "Library" },
-  { id: "search", icon: Search, label: "Search" },
-  { id: "tags", icon: Tag, label: "Tags" },
-  { id: "duplicates", icon: Copy, label: "Duplicates" },
-  { id: "notifications", icon: Bell, label: "Notifications" },
 ];
 
 // File tabs for Bibliography module
@@ -327,12 +317,14 @@ function TagBadge({ tag }: { tag: ReferenceTag }) {
 function ReferenceTable({
   selectedReference,
   onSelectReference,
+  onDoubleClick,
   selectedRows,
   onToggleRow,
   onToggleAll,
 }: {
   selectedReference: Reference | null;
   onSelectReference: (ref: Reference | null) => void;
+  onDoubleClick?: (ref: Reference) => void;
   selectedRows: Record<string, boolean>;
   onToggleRow: (id: string, checked: boolean) => void;
   onToggleAll: (checked: boolean) => void;
@@ -383,6 +375,7 @@ function ReferenceTable({
                   data-state={isActive ? "selected" : undefined}
                   className="cursor-pointer hover:bg-[color:var(--bg-hover-subtle)] data-[state=selected]:bg-[color:var(--selection)]"
                   onClick={() => handleRowClick(ref)}
+                  onDoubleClick={() => onDoubleClick?.(ref)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox
@@ -414,11 +407,25 @@ function ReferenceTable({
 // ============================================
 // MAIN COMPONENT
 // ============================================
-export function BibliographyPage() {
+interface BibliographyPageProps {
+  onNavigateHome?: () => void;
+  onOpenPdf?: () => void;
+}
+
+export function BibliographyPage({ onNavigateHome, onOpenPdf }: BibliographyPageProps) {
   const [selectedReference, setSelectedReference] = useState<Reference | null>(null);
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [activeActivity, setActiveActivity] = useState("library");
   const [activeTab, setActiveTab] = useState("main");
+
+  // Build navigation items with per-item callbacks
+  const navItems: NavigationItem[] = [
+    { id: "library", icon: BookOpen, label: "Library", selected: activeActivity === "library", onClick: () => setActiveActivity("library") },
+    { id: "search", icon: Search, label: "Search", selected: activeActivity === "search", onClick: () => setActiveActivity("search") },
+    { id: "tags", icon: Tag, label: "Tags", selected: activeActivity === "tags", onClick: () => setActiveActivity("tags") },
+    { id: "duplicates", icon: Copy, label: "Duplicates", selected: activeActivity === "duplicates", onClick: () => setActiveActivity("duplicates") },
+    { id: "notifications", icon: Bell, label: "Notifications", selected: activeActivity === "notifications", onClick: () => setActiveActivity("notifications") },
+  ];
 
   const handleSelectReference = (ref: Reference | null) => {
     // Toggle: if clicking the same reference, deselect it
@@ -454,17 +461,12 @@ export function BibliographyPage() {
   const selectedCount = Object.values(selectedRows).filter(Boolean).length;
 
   return (
-    <div className="flex min-h-0 flex-1">
-      {/* Activity Bar - 56px (shared component) */}
-      <ActivityBar
-        items={biblioActivityItems}
-        activeId={activeActivity}
-        onSelect={setActiveActivity}
-      />
-
-      {/* Collection Sidebar - 224px */}
-      <CollectionSidebar />
-
+    <AppLayout
+      activityBarItems={navItems}
+      onLogoClick={onNavigateHome ?? (() => {})}
+      sidebar={{ content: <CollectionSidebar />, visible: true }}
+      dataModule="bibliography"
+    >
       {/* Main Content Area - uses CSS Grid to push table when panel opens */}
       <div className="flex-1 grid grid-cols-12 min-h-0">
         {/* Table Area - shrinks when panel is open */}
@@ -483,6 +485,7 @@ export function BibliographyPage() {
           <ReferenceTable
             selectedReference={selectedReference}
             onSelectReference={handleSelectReference}
+            onDoubleClick={onOpenPdf ? () => onOpenPdf() : undefined}
             selectedRows={selectedRows}
             onToggleRow={handleToggleRow}
             onToggleAll={handleToggleAll}
@@ -508,6 +511,6 @@ export function BibliographyPage() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }

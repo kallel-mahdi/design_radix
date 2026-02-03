@@ -285,7 +285,7 @@ function PlannerCard() {
 // MAIN COMPONENT
 // ============================================
 interface HomePageProps {
-  onNavigate?: (screen: "home" | "bibliography" | "editor") => void;
+  onNavigate?: (screen: "home" | "bibliography" | "editor" | "projects") => void;
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
@@ -321,7 +321,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             subtitle="8 active projects"
             module="manu"
             illustration={<ManuIllustration />}
-            onClick={() => onNavigate?.("editor")}
+            onClick={() => onNavigate?.("projects")}
           />
           <ModuleCard
             title="Discover"

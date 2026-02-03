@@ -13,26 +13,10 @@ import {
   Clock,
   Code,
 } from "lucide-react"
-import { ActivityBar, type ActivityItem } from "../components/shared/ActivityBar"
+import { AppLayout, type NavigationItem } from "../components/shared/AppLayout"
 import { FileSidebar } from "../components/editor/FileSidebar"
 import { EditorPane, type EditorTab } from "../components/editor/EditorPane"
 import { PdfPane } from "../components/editor/PdfPane"
-
-// Activity bar items for Editor/Manuscripts module
-const editorActivityItems: ActivityItem[] = [
-  { id: "files", icon: Folder, label: "Files" },
-  { id: "search", icon: Search, label: "Search" },
-  { id: "references", icon: BookOpen, label: "References" },
-  { id: "notifications", icon: Bell, label: "Notifications" },
-  { id: "collaborators", icon: Users, label: "Collaborators" },
-  { id: "history", icon: Clock, label: "History" },
-]
-
-// App switcher options
-const appSwitcherItems: ActivityItem[] = [
-  { id: "editor", icon: Code, label: "Editor" },
-  { id: "library", icon: BookOpen, label: "Library" },
-]
 
 // Mock editor tabs
 const initialTabs: EditorTab[] = [
@@ -40,11 +24,31 @@ const initialTabs: EditorTab[] = [
   { id: "tab-chapter1", name: "chapter1.tex", fileId: "chapter1", isDirty: false },
 ]
 
-export function EditorPage() {
+// App switcher options
+const appSwitcherItems: NavigationItem[] = [
+  { id: "editor", icon: Code, label: "Editor" },
+  { id: "library", icon: BookOpen, label: "Library" },
+]
+
+interface EditorPageProps {
+  onNavigateHome?: () => void
+}
+
+export function EditorPage({ onNavigateHome }: EditorPageProps) {
   const [activeActivity, setActiveActivity] = useState("files")
   const [selectedFileId, setSelectedFileId] = useState<string | null>("main")
   const [tabs, setTabs] = useState<EditorTab[]>(initialTabs)
   const [activeTabId, setActiveTabId] = useState("tab-main")
+
+  // Build navigation items with per-item callbacks
+  const navItems: NavigationItem[] = [
+    { id: "files", icon: Folder, label: "Files", selected: activeActivity === "files", onClick: () => setActiveActivity("files") },
+    { id: "search", icon: Search, label: "Search", selected: activeActivity === "search", onClick: () => setActiveActivity("search") },
+    { id: "references", icon: BookOpen, label: "References", selected: activeActivity === "references", onClick: () => setActiveActivity("references") },
+    { id: "notifications", icon: Bell, label: "Notifications", selected: activeActivity === "notifications", onClick: () => setActiveActivity("notifications") },
+    { id: "collaborators", icon: Users, label: "Collaborators", selected: activeActivity === "collaborators", onClick: () => setActiveActivity("collaborators") },
+    { id: "history", icon: Clock, label: "History", selected: activeActivity === "history", onClick: () => setActiveActivity("history") },
+  ]
 
   const handleTabClose = (tabId: string) => {
     setTabs((prev) => prev.filter((t) => t.id !== tabId))
@@ -65,49 +69,39 @@ export function EditorPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1" data-module="manuscripts">
-      {/* Activity Bar - 56px (shared component with app switcher) */}
-      <ActivityBar
-        items={editorActivityItems}
-        activeId={activeActivity}
-        onSelect={setActiveActivity}
-        appSwitcher={{
-          items: appSwitcherItems,
-          activeId: "editor",
-        }}
-      />
-
-      {/* File Sidebar - 256px */}
-      <FileSidebar
-        selectedFileId={selectedFileId}
-        onSelectFile={handleFileSelect}
-      />
-
+    <AppLayout
+      activityBarItems={navItems}
+      onLogoClick={onNavigateHome ?? (() => {})}
+      sidebar={{ content: <FileSidebar selectedFileId={selectedFileId} onSelectFile={handleFileSelect} />, visible: true }}
+      dataModule="manuscripts"
+      appSwitcher={{
+        items: appSwitcherItems,
+        activeId: "editor",
+      }}
+    >
       {/* Main Content Area with Resizable Panes */}
-      <main className="flex flex-1 flex-col overflow-hidden">
-        <ResizablePanelGroup orientation="horizontal" className="flex-1">
-          {/* Editor Pane */}
-          <ResizablePanel defaultSize={50} minSize={25}>
-            <EditorPane
-              tabs={tabs}
-              activeTabId={activeTabId}
-              onTabChange={setActiveTabId}
-              onTabClose={handleTabClose}
-            />
-          </ResizablePanel>
-
-          {/* Resize Handle */}
-          <ResizableHandle
-            withHandle
-            className="bg-[color:var(--bg-tertiary)] transition-colors hover:bg-[color:var(--accent)]"
+      <ResizablePanelGroup orientation="horizontal" className="flex-1">
+        {/* Editor Pane */}
+        <ResizablePanel defaultSize={50} minSize={25}>
+          <EditorPane
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onTabChange={setActiveTabId}
+            onTabClose={handleTabClose}
           />
+        </ResizablePanel>
 
-          {/* PDF Pane */}
-          <ResizablePanel defaultSize={50} minSize={25}>
-            <PdfPane errorCount={0} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </main>
-    </div>
+        {/* Resize Handle */}
+        <ResizableHandle
+          withHandle
+          className="bg-[color:var(--bg-tertiary)] transition-colors hover:bg-[color:var(--accent)]"
+        />
+
+        {/* PDF Pane */}
+        <ResizablePanel defaultSize={50} minSize={25}>
+          <PdfPane errorCount={0} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </AppLayout>
   )
 }
