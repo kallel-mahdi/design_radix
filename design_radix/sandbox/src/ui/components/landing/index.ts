@@ -1,0 +1,10 @@
+export { Header } from "./Header";
+export { HeroSection } from "./HeroSection";
+export { TrustStrip } from "./TrustStrip";
+export { BentoFeatures } from "./BentoFeatures";
+export { AlternatingFeatures } from "./AlternatingFeatures";
+export { TabbedFeatures } from "./TabbedFeatures";
+export { StatsSection } from "./StatsSection";
+export { Testimonials } from "./Testimonials";
+export { CTASection } from "./CTASection";
+export { Footer } from "./Footer";
