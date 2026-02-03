@@ -9,6 +9,10 @@ interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   direction?: "up" | "down"
   delay?: number
   decimalPlaces?: number
+  /** Spring stiffness - higher values = faster animation. Default: 100 */
+  stiffness?: number
+  /** Spring damping - higher values = less bounce. Default: 60 */
+  damping?: number
 }
 
 export function NumberTicker({
@@ -18,13 +22,15 @@ export function NumberTicker({
   delay = 0,
   className,
   decimalPlaces = 0,
+  stiffness = 150,
+  damping = 40,
   ...props
 }: NumberTickerProps) {
   const ref = useRef<HTMLSpanElement>(null)
   const motionValue = useMotionValue(direction === "down" ? value : startValue)
   const springValue = useSpring(motionValue, {
-    damping: 60,
-    stiffness: 100,
+    damping,
+    stiffness,
   })
   const isInView = useInView(ref, { once: true, margin: "0px" })
 

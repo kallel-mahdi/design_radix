@@ -31,8 +31,8 @@ export function HeroSection() {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Headline */}
-          <BlurFade delay={0.1} inView>
+          {/* Headline - delay={0} for immediate visibility */}
+          <BlurFade delay={0} inView>
             <div className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
               <span className="text-[var(--text-primary)]">Your research.</span>
               <br />
@@ -45,7 +45,7 @@ export function HeroSection() {
           </BlurFade>
 
           {/* Subheadline */}
-          <BlurFade delay={0.2} inView>
+          <BlurFade delay={0.1} inView>
             <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 leading-relaxed">
               <strong className="text-[var(--text-primary)] font-medium">
                 Read, write, and discover
@@ -56,7 +56,7 @@ export function HeroSection() {
           </BlurFade>
 
           {/* CTA Buttons */}
-          <BlurFade delay={0.3} inView>
+          <BlurFade delay={0.15} inView>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <ShimmerButton
                 shimmerColor="rgba(255,255,255,0.3)"
@@ -64,7 +64,7 @@ export function HeroSection() {
                 borderRadius="10px"
                 className="gap-2 font-medium text-white"
               >
-                Start for free
+                Start free
                 <ArrowRight className="size-4" />
               </ShimmerButton>
               <Button size="lg" variant="outline" className="gap-2">

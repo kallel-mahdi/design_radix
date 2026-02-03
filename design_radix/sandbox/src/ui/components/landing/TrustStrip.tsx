@@ -2,21 +2,27 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";
 
 const universities = [
-  "Stanford",
-  "MIT",
-  "Oxford",
-  "Harvard",
-  "Caltech",
-  "ETH Zürich",
-  "Cambridge",
-  "Berkeley",
+  { name: "Stanford", short: "SU" },
+  { name: "MIT", short: "MIT" },
+  { name: "Oxford", short: "OX" },
+  { name: "Harvard", short: "H" },
+  { name: "Caltech", short: "CT" },
+  { name: "ETH Zürich", short: "ETH" },
+  { name: "Cambridge", short: "CAM" },
+  { name: "Berkeley", short: "UCB" },
 ];
 
-function UniversityLogo({ name }: { name: string }) {
+function UniversityBadge({ name, short }: { name: string; short: string }) {
   return (
-    <span className="font-serif font-semibold text-lg text-[var(--text-muted)] opacity-70 hover:opacity-100 transition-opacity whitespace-nowrap px-4">
-      {name}
-    </span>
+    <div className="flex items-center gap-2.5 px-4 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] opacity-70 hover:opacity-100 transition-all hover:shadow-sm whitespace-nowrap group">
+      {/* Shield/crest icon placeholder */}
+      <div className="flex items-center justify-center size-8 rounded bg-gradient-to-br from-[var(--sand-5)] to-[var(--sand-7)] text-[var(--text-muted)] text-xs font-bold tracking-tight">
+        {short}
+      </div>
+      <span className="font-serif font-semibold text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+        {name}
+      </span>
+    </div>
   );
 }
 
@@ -29,7 +35,7 @@ export function TrustStrip() {
         </p>
         <Marquee
           pauseOnHover
-          className="[--duration:45s] [--gap:2rem]"
+          className="[--duration:50s] [--gap:1rem]"
           style={{
             maskImage:
               "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
@@ -38,7 +44,7 @@ export function TrustStrip() {
           }}
         >
           {universities.map((uni) => (
-            <UniversityLogo key={uni} name={uni} />
+            <UniversityBadge key={uni.name} name={uni.name} short={uni.short} />
           ))}
         </Marquee>
       </div>

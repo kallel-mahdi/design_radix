@@ -45,7 +45,7 @@ export function CTASection() {
                   borderRadius="10px"
                   className="gap-2 font-medium text-white"
                 >
-                  Get started free
+                  Start free
                   <ArrowRight className="size-4" />
                 </ShimmerButton>
               </div>

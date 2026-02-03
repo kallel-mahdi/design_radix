@@ -1,5 +1,5 @@
 import { BlurFade } from "@/components/ui/blur-fade";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarCircles } from "@/components/ui/avatar-circles";
 
 interface TestimonialProps {
@@ -7,18 +7,27 @@ interface TestimonialProps {
   name: string;
   role: string;
   initials: string;
+  avatarUrl: string;
   delay?: number;
 }
 
-function TestimonialCard({ quote, name, role, initials, delay = 0 }: TestimonialProps) {
+function TestimonialCard({ quote, name, role, initials, avatarUrl, delay = 0 }: TestimonialProps) {
   return (
     <BlurFade delay={delay} inView>
-      <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] p-6 transition-all hover:border-[var(--border-default)] hover:shadow-lg hover:-translate-y-0.5">
+      <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-subtle)] p-6 transition-all hover:border-[var(--border-default)] hover:shadow-lg hover:-translate-y-0.5">
+        {/* Quote */}
         <p className="font-serif text-base leading-relaxed text-[var(--text-primary)] mb-6 italic">
           "{quote}"
         </p>
+        {/* Attribution */}
         <div className="flex items-center gap-3">
-          <Avatar className="size-11">
+          <Avatar className="size-11 ring-2 ring-[var(--border-subtle)]">
+            <AvatarImage
+              src={avatarUrl}
+              alt={name}
+              loading="lazy"
+              className="object-cover"
+            />
             <AvatarFallback className="bg-gradient-to-br from-[var(--sand-5)] to-[var(--sand-7)] text-[var(--text-secondary)] text-sm font-medium">
               {initials}
             </AvatarFallback>
@@ -40,6 +49,8 @@ const testimonials = [
     name: "Dr. Sarah Chen",
     role: "Postdoc, MIT",
     initials: "SC",
+    // Professional Asian woman with glasses - research/academic context
+    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces",
   },
   {
     quote:
@@ -47,6 +58,8 @@ const testimonials = [
     name: "Prof. James Miller",
     role: "Faculty, Stanford",
     initials: "JM",
+    // Professional man with beard - academic/professor look
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces",
   },
   {
     quote:
@@ -54,15 +67,18 @@ const testimonials = [
     name: "Maria Rodriguez",
     role: "PhD Candidate, Oxford",
     initials: "MR",
+    // Young professional woman - graduate student look
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
   },
 ];
 
+// Avatar URLs for the avatar circles component
 const avatarUrls = [
-  { imageUrl: "https://api.dicebear.com/7.x/notionists/svg?seed=Sarah", profileUrl: "#" },
-  { imageUrl: "https://api.dicebear.com/7.x/notionists/svg?seed=James", profileUrl: "#" },
-  { imageUrl: "https://api.dicebear.com/7.x/notionists/svg?seed=Maria", profileUrl: "#" },
-  { imageUrl: "https://api.dicebear.com/7.x/notionists/svg?seed=David", profileUrl: "#" },
-  { imageUrl: "https://api.dicebear.com/7.x/notionists/svg?seed=Emma", profileUrl: "#" },
+  { imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop&crop=faces", profileUrl: "#" },
+  { imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=faces", profileUrl: "#" },
+  { imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&h=60&fit=crop&crop=faces", profileUrl: "#" },
+  { imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=60&h=60&fit=crop&crop=faces", profileUrl: "#" },
+  { imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=faces", profileUrl: "#" },
 ];
 
 export function Testimonials() {
@@ -84,7 +100,7 @@ export function Testimonials() {
           </div>
         </BlurFade>
 
-        {/* Testimonials Grid */}
+        {/* Testimonials Grid - increased gap from gap-4 to gap-6 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
             <TestimonialCard
@@ -93,6 +109,7 @@ export function Testimonials() {
               name={t.name}
               role={t.role}
               initials={t.initials}
+              avatarUrl={t.avatarUrl}
               delay={0.1 * (i + 1)}
             />
           ))}
