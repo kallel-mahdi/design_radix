@@ -4,7 +4,7 @@
 
    Foundation: Sand scale (neutral warmth)
    Text: Mauve scale (subtle sophistication)
-   Dark mode: sand-1 = #111110 (near-black, OLED-friendly)
+   Dark mode: sand-1 is near-black (OLED-friendly)
 
    Theme: add `.dark-theme` to <html> for dark mode.
    Docs: https://www.radix-ui.com/colors
@@ -27,11 +27,43 @@
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/blue-alpha.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/blue-dark-alpha.css");
 
+/* Jade scale - Manuscripts module (green with teal undertone) */
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade-dark.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade-alpha.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/jade-dark-alpha.css");
+
+/* Iris scale - Discover module (violet) */
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris-dark.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris-alpha.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/iris-dark-alpha.css");
+
+/* Gray scale - Planner module (pure neutral) */
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/gray.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/gray-dark.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/gray-alpha.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/gray-dark-alpha.css");
+
+/* Teal scale - Tags */
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/teal.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/teal-dark.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/teal-alpha.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/teal-dark-alpha.css");
+
+/* Green scale - Success states */
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/green.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/green-dark.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/green-alpha.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/green-dark-alpha.css");
 
+/* Cyan scale - Tags */
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/cyan.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/cyan-dark.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/cyan-alpha.css");
+@import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/cyan-dark-alpha.css");
+
+/* Purple scale - Tags */
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/purple.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/purple-dark.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/purple-alpha.css");
@@ -47,126 +79,4 @@
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/tomato-alpha.css");
 @import url("https://cdn.jsdelivr.net/npm/@radix-ui/colors@3.0.0/tomato-dark-alpha.css");
 
-/* ============================================
-   SEMANTIC ALIASES (Design Tokens)
-   Maps Radix steps to app-specific tokens
-   ============================================ */
-:root {
-  /* Backgrounds - Sand scale (neutral warmth, matches original "Scholarly Warmth") */
-  --bg-primary: var(--sand-2);
-  --bg-secondary: var(--sand-1);
-  --bg-tertiary: var(--sand-3);
-  --bg-canvas: var(--sand-1);
-  --bg-hover: var(--sand-4);
-  --bg-active: var(--sand-5);
-
-  /* Text */
-  --text-primary: var(--mauve-12);
-  --text-secondary: var(--mauve-11);
-  --text-muted: var(--mauve-11);
-
-  /* Borders - Sand scale */
-  --border-subtle: var(--sand-5);
-  --border-default: var(--sand-6);
-  --border-strong: var(--sand-7);
-
-  /* Module: Bibliography (Muted Blue) */
-  --biblio: color-mix(in srgb, var(--blue-12) 76%, var(--bg-primary));
-  --biblio-hover: color-mix(in srgb, var(--blue-12) 84%, var(--bg-primary));
-  --biblio-strong: color-mix(in srgb, var(--blue-12) 92%, var(--bg-primary));
-  --biblio-text: var(--blue-12);
-  --biblio-tint: color-mix(in srgb, var(--blue-3) 70%, var(--bg-primary));
-  --biblio-light: color-mix(in srgb, var(--blue-4) 70%, var(--bg-primary));
-  --biblio-border: color-mix(in srgb, var(--blue-6) 55%, var(--border-default));
-
-  /* Module: Manuscripts (Muted Teal/Green) */
-  --manu: var(--green-11);
-  --manu-hover: var(--green-12);
-  --manu-strong: var(--green-12);
-  --manu-text: var(--green-12);
-  --manu-tint: var(--green-3);
-  --manu-light: var(--green-4);
-  --manu-border: var(--green-7);
-
-  /* Module: Discover (Muted Violet) */
-  --discover: var(--purple-11);
-  --discover-hover: var(--purple-12);
-  --discover-strong: var(--purple-12);
-  --discover-text: var(--purple-12);
-  --discover-tint: var(--purple-3);
-  --discover-light: var(--purple-4);
-  --discover-border: var(--purple-7);
-
-  /* Planner: Neutral */
-  --planner: var(--mauve-11);
-  --planner-strong: var(--mauve-12);
-  --planner-tint: var(--sand-3);
-  --planner-light: var(--sand-4);
-
-  /* Semantic: Success */
-  --success: var(--green-11);
-  --success-tint: var(--green-a3);
-
-  /* Semantic: Warning (Amber) */
-  --warning: var(--amber-9);
-  --warning-tint: var(--amber-a3);
-
-  /* Semantic: Error (Tomato) */
-  --error: var(--tomato-9);
-  --error-tint: var(--tomato-a3);
-
-  /* Shadows (as colors) */
-  --shadow-soft: color-mix(in srgb, var(--mauve-12) 10%, transparent);
-  --shadow-medium: color-mix(in srgb, var(--mauve-12) 16%, transparent);
-  --shadow-strong: color-mix(in srgb, var(--mauve-12) 26%, transparent);
-
-  /* Card surface */
-  --card-bg: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
-}
-
-/* ============================================
-   MODULE-SPECIFIC ACCENT ALIASES
-   Use these when a page needs a specific accent
-   ============================================ */
-
-/* Bibliography page accent (Blue) */
-[data-module="bibliography"] {
-  --accent: var(--biblio);
-  --accent-hover: var(--biblio-hover);
-  --accent-strong: var(--biblio-strong);
-  --accent-text: var(--biblio-text);
-  --accent-tint: var(--biblio-tint);
-  --accent-light: var(--biblio-light);
-  --accent-border: var(--biblio-border);
-  --accent-a3: var(--blue-a3);
-  --accent-a4: var(--blue-a4);
-  --selection: var(--blue-a4);
-}
-
-/* Manuscripts/Editor page accent (Teal) */
-[data-module="manuscripts"] {
-  --accent: var(--manu);
-  --accent-hover: var(--manu-hover);
-  --accent-strong: var(--manu-strong);
-  --accent-text: var(--manu-text);
-  --accent-tint: var(--manu-tint);
-  --accent-light: var(--manu-light);
-  --accent-border: var(--manu-border);
-  --accent-a3: var(--green-a3);
-  --accent-a4: var(--green-a4);
-  --selection: var(--green-a4);
-}
-
-/* Discover page accent (Violet) */
-[data-module="discover"] {
-  --accent: var(--discover);
-  --accent-hover: var(--discover-hover);
-  --accent-strong: var(--discover-strong);
-  --accent-text: var(--discover-text);
-  --accent-tint: var(--discover-tint);
-  --accent-light: var(--discover-light);
-  --accent-border: var(--discover-border);
-  --accent-a3: var(--purple-a3);
-  --accent-a4: var(--purple-a4);
-  --selection: var(--purple-a4);
-}
+@import url("./sandbox/src/styles/shared-tokens.css");

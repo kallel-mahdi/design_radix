@@ -291,3 +291,242 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ===========================================
+   BIBLIOGRAPHY MOCKUP ANIMATIONS
+   =========================================== */
+@keyframes pdf-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) rotate(-5deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(5px) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes fade-in-row {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tag-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-pdf-drop {
+  opacity: 0;
+  animation: pdf-drop 0.6s ease-out forwards;
+}
+
+.animate-fade-in-row {
+  opacity: 0;
+  animation: fade-in-row 0.4s ease-out forwards;
+}
+
+.animate-tag-appear {
+  opacity: 0;
+  animation: tag-appear 0.3s ease-out forwards;
+}
+
+/* Text highlight animation */
+@keyframes text-highlight {
+  0% { background-size: 0% 100%; }
+  100% { background-size: 100% 100%; }
+}
+
+/* Typing cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Popup fade in */
+@keyframes popup-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Note card slide in */
+@keyframes note-slide-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-text-highlight {
+  background: linear-gradient(to right, var(--biblio-tint) 50%, transparent 50%);
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  animation: text-highlight 0.5s ease-out forwards;
+}
+
+/* Yellow highlight animation */
+@keyframes text-highlight-yellow {
+  0% { background-color: transparent; }
+  100% { background-color: var(--amber-4); }
+}
+
+.animate-text-highlight-yellow {
+  animation: text-highlight-yellow 0.6s ease-out forwards;
+}
+
+.animate-cursor-blink {
+  animation: cursor-blink 0.8s infinite;
+}
+
+.animate-popup-in {
+  opacity: 0;
+  animation: popup-in 0.3s ease-out forwards;
+}
+
+.animate-note-slide-in {
+  opacity: 0;
+  animation: note-slide-in 0.4s ease-out forwards;
+}
+
+/* Color picker scale-in */
+@keyframes picker-appear {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-picker-appear {
+  opacity: 0;
+  animation: picker-appear 0.3s ease-out forwards;
+  animation-delay: 0.2s;
+}
+
+/* Margin note slide-in from right */
+@keyframes margin-note-in {
+  from { opacity: 0; transform: translate(12px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+/* Cursor movement + highlight swipe (Bibliography mockups) */
+@keyframes cursor-swoop {
+  0% { transform: translate(0, 0) scale(0.96); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(150px, 0) scale(1); opacity: 1; }
+}
+
+@keyframes highlight-swipe {
+  0% { transform: translate(0, 0); width: 22px; opacity: 0.7; }
+  100% { transform: translate(180px, 0); width: 32px; opacity: 0; }
+}
+
+.animate-cursor-swoop {
+  animation: cursor-swoop 0.7s ease-out forwards;
+}
+
+.animate-highlight-swipe {
+  animation: highlight-swipe 0.55s ease-out forwards;
+}
+
+.animate-margin-note-in {
+  opacity: 0;
+  animation: margin-note-in 0.4s ease-out forwards;
+}
+
+/* ===========================================
+   MANUSCRIPTS MOCKUP ANIMATIONS
+   =========================================== */
+
+/* Remote cursor slide-in from bottom */
+@keyframes cursor-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cursor-slide-in {
+  opacity: 0;
+  animation: cursor-slide-in 0.4s ease-out forwards;
+}
+
+/* Comment bubble pop-in */
+@keyframes comment-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-comment-pop-in {
+  opacity: 0;
+  animation: comment-pop-in 0.3s ease-out forwards;
+}
+
+/* Avatar slide-in from left */
+@keyframes avatar-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-avatar-slide-in {
+  opacity: 0;
+  animation: avatar-slide-in 0.3s ease-out forwards;
+}
+
+/* Tab slide-in from right */
+@keyframes tab-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-tab-slide-in {
+  opacity: 0;
+  animation: tab-slide-in 0.35s ease-out forwards;
+}
+
+/* Highlight grow (expands left to right like text selection) */
+@keyframes highlight-grow {
+  0% {
+    right: 100%;
+  }
+  100% {
+    right: -2px;
+  }
+}
+
+.animate-highlight-grow {
+  animation: highlight-grow 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
