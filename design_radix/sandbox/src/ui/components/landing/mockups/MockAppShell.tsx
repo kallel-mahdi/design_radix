@@ -23,13 +23,13 @@ interface MockAppShellProps {
 const moduleConfig = {
   bibliography: {
     icon: BookOpen,
-    accentVar: "--biblio",
-    tintVar: "--biblio-tint",
+    accentVar: "--manu",
+    tintVar: "--manu-tint",
   },
   manuscripts: {
     icon: FileEdit,
-    accentVar: "--manu",
-    tintVar: "--manu-tint",
+    accentVar: "--biblio",
+    tintVar: "--biblio-tint",
   },
   discover: {
     icon: Compass,

@@ -82,24 +82,16 @@ export function MockPdfViewer({
               return (
                 <p key={idx} className="mb-1.5">
                   {isHighlightTarget ? (
-                    <span className="relative inline">
-                      {/* Growing highlight overlay */}
-                      {showHighlight && (
-                        <span
-                          className={highlightPhase === 1 ? "animate-highlight-grow" : ""}
-                          style={{
-                            position: "absolute",
-                            left: "-2px",
-                            top: "-1px",
-                            bottom: "-1px",
-                            right: highlightPhase >= 2 ? "-2px" : "100%",
-                            background: "var(--amber-4)",
-                            borderRadius: "2px",
-                            pointerEvents: "none",
-                          }}
-                        />
-                      )}
-                      <span className="relative">{line}</span>
+                    <span
+                      className={showHighlight ? "animate-text-highlight-yellow" : ""}
+                      style={{
+                        borderRadius: "2px",
+                        padding: "1px 2px",
+                        margin: "-1px -2px",
+                        background: highlightPhase >= 2 ? "var(--amber-4)" : undefined,
+                      }}
+                    >
+                      {line}
                     </span>
                   ) : (
                     line
@@ -130,7 +122,7 @@ export function MockPdfViewer({
                     {showTypingCursor && (
                       <span
                         className="inline-block w-px h-2.5 ml-0.5 animate-cursor-blink"
-                        style={{ background: "var(--biblio)" }}
+                        style={{ background: "var(--manu)" }}
                       />
                     )}
                   </p>
@@ -138,7 +130,7 @@ export function MockPdfViewer({
                 <button
                   className="size-5 rounded flex items-center justify-center shrink-0"
                   style={{
-                    background: "var(--biblio)",
+                    background: "var(--manu)",
                     color: "var(--text-on-accent)",
                   }}
                 >

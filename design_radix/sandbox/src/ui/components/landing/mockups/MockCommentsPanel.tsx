@@ -63,15 +63,15 @@ export function MockCommentsPanel({ comments, visible }: MockCommentsPanelProps)
             key={comment.id}
             className="p-2 rounded text-[9px] leading-relaxed mb-2 animate-note-slide-in"
             style={{
-              background: "var(--biblio-tint)",
-              border: "1px solid var(--biblio-light)",
+              background: "var(--manu-tint)",
+              border: "1px solid var(--manu-light)",
               borderLeft: `3px solid ${colorVars[comment.color || "yellow"]}`,
               animationDelay: `${idx * 0.1}s`,
             }}
           >
             <p
               className="font-medium mb-1 line-clamp-1"
-              style={{ color: "var(--biblio-text)" }}
+              style={{ color: "var(--manu-text)" }}
             >
               {comment.noteText}
             </p>

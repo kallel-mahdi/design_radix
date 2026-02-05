@@ -2,14 +2,14 @@
  * BiblioMockup - 6-step animated bibliography showcase for landing page
  *
  * Steps:
- * 1. upload (2.5s) - PDFs dropping, NO chrome
- * 2. tagging (3s) - Table with cascading tags
- * 3. click (1.5s) - Row selection + new tab appearing
- * 4. reader (2s) - Clean PDF view with two tabs
- * 5. highlight (2s) - Yellow highlight sweep animation
- * 6. comment (3s) - Inline comment input → side panel appears
+ * 1. upload (2s) - PDFs dropping, NO chrome
+ * 2. tagging (1.5s) - Table with cascading tags
+ * 3. click (0.8s) - Row selection + new tab appearing
+ * 4. reader (1s) - Clean PDF view with two tabs
+ * 5. highlight (1.3s) - Yellow highlight sweep animation
+ * 6. comment (2.8s) - Inline comment input → side panel appears
  *
- * Total loop: 14 seconds
+ * Total loop: 9.4 seconds
  */
 
 import { useState, useEffect } from "react";
@@ -23,12 +23,12 @@ import { MockCommentsPanel, type MockComment } from "./MockCommentsPanel";
 type BiblioStep = "upload" | "tagging" | "click" | "reader" | "highlight" | "comment";
 
 const stepTimings: Record<BiblioStep, number> = {
-  upload: 2500,
-  tagging: 3000,
-  click: 1500,
-  reader: 2000,
-  highlight: 2000,
-  comment: 3000,
+  upload: 2000,
+  tagging: 1500,
+  click: 800,
+  reader: 1000,
+  highlight: 1300,
+  comment: 2800,
 };
 
 const stepOrder: BiblioStep[] = ["upload", "tagging", "click", "reader", "highlight", "comment"];
@@ -80,7 +80,7 @@ export function BiblioMockup() {
     if (step !== "tagging") return;
     setTagCount(0);
     const timers = papers.map((_, idx) =>
-      setTimeout(() => setTagCount(c => Math.max(c, idx + 1)), 400 + idx * 500)
+      setTimeout(() => setTagCount(c => Math.max(c, idx + 1)), 200 + idx * 280)
     );
     return () => timers.forEach(t => clearTimeout(t));
   }, [step]);
@@ -89,7 +89,7 @@ export function BiblioMockup() {
   useEffect(() => {
     if (step !== "click") return;
     setSelectedRow(0);
-    const t = setTimeout(() => setShowNewTab(true), 600);
+    const t = setTimeout(() => setShowNewTab(true), 350);
     return () => clearTimeout(t);
   }, [step]);
 
@@ -104,8 +104,8 @@ export function BiblioMockup() {
   useEffect(() => {
     if (step !== "highlight") return;
     setHighlightPhase(0);
-    const t1 = setTimeout(() => setHighlightPhase(1), 200);
-    const t2 = setTimeout(() => setHighlightPhase(2), 1100);
+    const t1 = setTimeout(() => setHighlightPhase(1), 150);
+    const t2 = setTimeout(() => setHighlightPhase(2), 850);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [step]);
 
@@ -125,12 +125,12 @@ export function BiblioMockup() {
       } else {
         clearInterval(typeInterval);
       }
-    }, 40);
+    }, 30);
 
     const t1 = setTimeout(() => {
       setShowCommentInput(false);
       setShowCommentsPanel(true);
-    }, 2200);
+    }, 1600);
 
     return () => { clearInterval(typeInterval); clearTimeout(t1); };
   }, [step]);
@@ -140,7 +140,7 @@ export function BiblioMockup() {
     const uploadTabs: MockTab[] = [{ id: "bib", name: "reference.bib", icon: FileText }];
     return (
       <MockAppShell module="bibliography">
-        <MockFileTabs tabs={uploadTabs} activeId="bib" />
+        <MockFileTabs tabs={uploadTabs} activeId="bib" accentVar="--manu" />
         <div className="flex-1 overflow-hidden p-3" style={{ background: "var(--bg-primary)" }}>
           <UploadAnimation />
         </div>
@@ -166,7 +166,7 @@ export function BiblioMockup() {
   if (step === "tagging" || step === "click") {
     return (
       <MockAppShell module="bibliography">
-        <MockFileTabs tabs={tabs} activeId={activeTabId} />
+        <MockFileTabs tabs={tabs} activeId={activeTabId} accentVar="--manu" />
         <div className="flex-1 overflow-hidden p-3" style={{ background: "var(--bg-primary)" }}>
           <MockReferenceTable
             papers={papers}
@@ -185,7 +185,7 @@ export function BiblioMockup() {
 
   return (
     <MockAppShell module="bibliography">
-      <MockFileTabs tabs={tabs} activeId="pdf" />
+      <MockFileTabs tabs={tabs} activeId="pdf" accentVar="--manu" />
       <div className="flex-1 flex overflow-hidden relative">
         <MockPdfViewer
           title="ATTENTION IS ALL YOU NEED"
@@ -229,8 +229,8 @@ function UploadAnimation() {
             <div
               className="w-11 h-14 rounded shadow-md flex flex-col items-center justify-center gap-1"
               style={{
-                background: `linear-gradient(135deg, color-mix(in srgb, var(--biblio) 85%, var(--bg-primary)), var(--biblio))`,
-                border: "1px solid var(--biblio-border)",
+                background: `linear-gradient(135deg, color-mix(in srgb, var(--manu) 85%, var(--bg-primary)), var(--manu))`,
+                border: "1px solid var(--manu-border)",
               }}
             >
               <FileText className="size-4" style={{ color: "var(--text-on-accent)" }} />

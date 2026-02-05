@@ -32,7 +32,7 @@ type Collaborator = {
 };
 
 const collaborators = {
-  you: { name: "You", initial: "Y", colorVar: "--manu" },
+  you: { name: "You", initial: "Y", colorVar: "--biblio" },
   sarah: { name: "Sarah", initial: "S", colorVar: "--discover" },
 };
 
@@ -198,14 +198,14 @@ function EditorTabs({ showSarah }: { showSarah: boolean }) {
         className="h-full flex items-center gap-2 px-4 relative"
         style={{ background: "var(--bg-primary)" }}
       >
-        <FileCode className="size-3.5 shrink-0" style={{ color: "var(--manu)" }} />
-        <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+        <FileCode className="size-3.5 shrink-0" style={{ color: "var(--biblio)" }} />
+        <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
           Main.tex
         </span>
         {/* Active tab underline */}
         <div
           className="absolute bottom-0 left-0 right-0 h-0.5"
-          style={{ background: "var(--manu)" }}
+          style={{ background: "var(--biblio)" }}
         />
       </div>
 
@@ -284,7 +284,7 @@ function EditorContent({
             {line.showHighlight ? (
               <span
                 className="px-0.5 rounded"
-                style={{ background: "var(--manu-tint)" }}
+                style={{ background: "var(--biblio-tint)" }}
               >
                 {formatLatex(line.text)}
               </span>
@@ -296,7 +296,7 @@ function EditorContent({
             {line.isTypingLine && showUserCursor && (
               <span
                 className="inline-block w-0.5 h-3.5 ml-0.5 align-middle animate-cursor-blink"
-                style={{ background: "var(--manu)" }}
+                style={{ background: "var(--biblio)" }}
               />
             )}
 
@@ -321,7 +321,7 @@ function EditorContent({
 
             {/* Comment icon */}
             {line.showHighlight && (
-              <span className="ml-2 text-[10px]" style={{ color: "var(--manu)" }}>
+              <span className="ml-2 text-[10px]" style={{ color: "var(--biblio)" }}>
                 💬
               </span>
             )}
@@ -427,13 +427,13 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
           style={{ background: "var(--bg-primary)" }}
         >
           <FileText className="size-3.5 shrink-0" style={{ color: "var(--error)" }} />
-          <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+          <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
             output.pdf
           </span>
           {/* Active tab underline */}
           <div
             className="absolute bottom-0 left-0 right-0 h-0.5"
-            style={{ background: "var(--manu)" }}
+            style={{ background: "var(--biblio)" }}
           />
         </div>
       </div>
@@ -468,7 +468,7 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
             </div>
             <div className="mb-3">
               {isCompiled ? (
-                <span style={{ background: "var(--manu-tint)", padding: "0 2px", borderRadius: "2px" }}>
+                <span style={{ background: "var(--biblio-tint)", padding: "0 2px", borderRadius: "2px" }}>
                   The transformer architecture has revolutionized...
                 </span>
               ) : (
@@ -505,7 +505,7 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
                 className="size-4 rounded-full border-2 animate-compile-spinner"
                 style={{
                   borderColor: "var(--border-default)",
-                  borderTopColor: "var(--manu)",
+                  borderTopColor: "var(--biblio)",
                 }}
               />
               <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -523,7 +523,7 @@ function formatLatex(text: string) {
   if (!text) return null;
   const parts = text.split(/(\\[a-zA-Z]+|\{|\})/g);
   return parts.map((part, idx) => {
-    if (part.startsWith("\\")) return <span key={idx} style={{ color: "var(--manu-text)" }}>{part}</span>;
+    if (part.startsWith("\\")) return <span key={idx} style={{ color: "var(--biblio-text)" }}>{part}</span>;
     if (part === "{" || part === "}") return <span key={idx} style={{ color: "var(--text-muted)" }}>{part}</span>;
     return <span key={idx}>{part}</span>;
   });

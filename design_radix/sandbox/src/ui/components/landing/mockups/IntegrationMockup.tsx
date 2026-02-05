@@ -479,13 +479,13 @@ function EditorTabs() {
         className="h-full flex items-center gap-2 px-4 relative"
         style={{ background: "var(--bg-primary)" }}
       >
-        <FileCode className="size-3.5 shrink-0" style={{ color: "var(--manu)" }} />
-        <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+        <FileCode className="size-3.5 shrink-0" style={{ color: "var(--biblio)" }} />
+        <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
           Main.tex
         </span>
         <div
           className="absolute bottom-0 left-0 right-0 h-0.5"
-          style={{ background: "var(--manu)" }}
+          style={{ background: "var(--biblio)" }}
         />
       </div>
 
@@ -493,7 +493,7 @@ function EditorTabs() {
       <div className="flex items-center gap-1.5 px-3">
         <div
           className="size-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-          style={{ background: "var(--manu)", color: "var(--text-on-accent)" }}
+          style={{ background: "var(--biblio)", color: "var(--text-on-accent)" }}
         >
           Y
         </div>
@@ -559,7 +559,7 @@ function EditorContent({
               {line.isCiteLine && showCursor && (
                 <span
                   className="inline-block w-0.5 h-3.5 ml-0.5 align-middle animate-cursor-blink"
-                  style={{ background: "var(--manu)" }}
+                  style={{ background: "var(--biblio)" }}
                 />
               )}
             </span>
@@ -612,7 +612,7 @@ function formatLatex(text: string) {
   return parts.map((part, idx) => {
     if (part.startsWith("\\"))
       return (
-        <span key={idx} style={{ color: "var(--manu-text)" }}>
+        <span key={idx} style={{ color: "var(--biblio-text)" }}>
           {part}
         </span>
       );
@@ -689,12 +689,12 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
           style={{ background: "var(--bg-primary)" }}
         >
           <FileText className="size-3.5 shrink-0" style={{ color: "var(--error)" }} />
-          <span className="text-[12px] font-medium" style={{ color: "var(--manu)" }}>
+          <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
             output.pdf
           </span>
           <div
             className="absolute bottom-0 left-0 right-0 h-0.5"
-            style={{ background: "var(--manu)" }}
+            style={{ background: "var(--biblio)" }}
           />
         </div>
       </div>
@@ -785,7 +785,7 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
                 className="size-4 rounded-full border-2 animate-compile-spinner"
                 style={{
                   borderColor: "var(--border-default)",
-                  borderTopColor: "var(--manu)",
+                  borderTopColor: "var(--biblio)",
                 }}
               />
               <span

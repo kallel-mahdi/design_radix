@@ -90,9 +90,9 @@ export function MockReferenceTable({
                       className="size-3.5 rounded-sm flex items-center justify-center"
                       style={{
                         border: isSelected
-                          ? "1px solid var(--biblio)"
+                          ? "1px solid var(--manu)"
                           : "1px solid var(--border-default)",
-                        background: isSelected ? "var(--biblio)" : "transparent",
+                        background: isSelected ? "var(--manu)" : "transparent",
                       }}
                     >
                       {isSelected && (
