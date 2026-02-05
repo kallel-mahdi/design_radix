@@ -3,8 +3,6 @@ import {
   HeroSection,
   TrustStrip,
   AlternatingFeatures,
-  StatsSection,
-  Testimonials,
   CTASection,
   Footer,
 } from "../components/landing";
@@ -58,9 +56,6 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
 
           <AlternatingFeatures />
-
-          <StatsSection />
-          <Testimonials />
         </div>
 
         <CTASection />

@@ -14,10 +14,10 @@ export function HeroSection() {
           {/* Headline - delay={0} for immediate visibility */}
           <BlurFade delay={0} inView>
             <div className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-              <span className="text-[var(--text-primary)]">Your research.</span>
+              <span className="text-[var(--text-primary)]">Your research</span>
               <br />
               <WordRotate
-                words={["One home.", "Organized.", "Connected.", "Simplified."]}
+                words={["One home", "Organized", "Connected", "Simplified"]}
                 duration={2500}
                 className="bg-gradient-to-r from-[var(--biblio)] via-[var(--manu)] to-[var(--discover)] bg-clip-text text-transparent"
               />
@@ -30,7 +30,7 @@ export function HeroSection() {
               <strong className="text-[var(--text-primary)] font-semibold">Read.</strong>{" "}
               <strong className="text-[var(--text-primary)] font-semibold">Write.</strong>{" "}
               <strong className="text-[var(--text-primary)] font-semibold">Cite.</strong>{" "}
-              <span className="text-[var(--text-secondary)]">All here.</span>
+              <span className="text-[var(--text-secondary)] font-normal">All here</span>
             </p>
           </BlurFade>
 

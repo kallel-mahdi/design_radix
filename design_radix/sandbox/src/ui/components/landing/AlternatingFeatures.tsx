@@ -11,7 +11,7 @@ import { BiblioMockup } from "./mockups/BiblioMockup";
 import { ManuMockup } from "./mockups/ManuMockup";
 import { IntegrationMockup } from "./mockups/IntegrationMockup";
 
-function useInView(threshold = 0.3) {
+function useScrollAssist(threshold = 0.4) {
   const ref = useRef<HTMLElement>(null);
   const [isInView, setIsInView] = useState(false);
 
@@ -23,6 +23,8 @@ function useInView(threshold = 0.3) {
         if (entry.isIntersecting) {
           setIsInView(true);
           observer.disconnect();
+          // Smooth-scroll the section to center viewport
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       },
       { threshold }
@@ -109,7 +111,7 @@ const moduleStyles = {
 
 function FeatureSection({ feature, index }: { feature: FeatureSection; index: number }) {
   const styles = moduleStyles[feature.module];
-  const { ref, isInView } = useInView(0.3);
+  const { ref, isInView } = useScrollAssist(0.4);
 
   return (
     <section ref={ref} className="relative min-h-screen flex items-center py-16 lg:py-0">
