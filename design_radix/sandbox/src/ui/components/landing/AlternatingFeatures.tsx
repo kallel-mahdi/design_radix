@@ -85,16 +85,10 @@ const moduleStyles = {
 
 function FeatureSection({ feature, index }: { feature: FeatureSection; index: number }) {
   const styles = moduleStyles[feature.module];
-  const isOdd = index % 2 === 1;
 
   return (
-    <section
-      className={cn(
-        "min-h-screen flex items-center py-16 lg:py-0",
-        isOdd ? "bg-[var(--bg-primary)]" : "bg-[var(--bg-secondary)]"
-      )}
-    >
-      <div className="container mx-auto px-6 lg:px-12">
+    <section className="relative min-h-screen flex items-center py-16 lg:py-0">
+      <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div
           className={cn(
             "grid lg:grid-cols-[0.72fr_1.28fr] gap-10 lg:gap-16 items-center",
@@ -183,7 +177,9 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
 
 export function AlternatingFeatures() {
   return (
-    <div>
+    <div className="relative">
+      {/* Gradient handled by parent LandingPage - no local gradient */}
+
       {features.map((feature, index) => (
         <FeatureSection key={feature.module} feature={feature} index={index} />
       ))}

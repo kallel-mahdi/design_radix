@@ -66,7 +66,11 @@ const gradientDynamics: Record<GradientDynamic, { label: string; description: st
 };
 
 type HeroPosition = "high" | "mid" | "tight";
-type HeroColors = "single" | "aurora" | "zones" | "conic";
+type HeroColors =
+  | "single-blue" | "single-teal" | "single-violet"  // Group A: Single
+  | "aurora" | "soft-orbs" | "horizontal" | "vertical"  // Group B: Soft Blends
+  | "zones" | "corners" | "conic"  // Group C: Geometric
+  | "oklch" | "prismatic";  // Group D: Advanced
 
 const heroPositions: Record<HeroPosition, { label: string; position: string; size: string }> = {
   high: { label: "High (8%)", position: "50% 8%", size: "80% 35%" },
@@ -74,23 +78,26 @@ const heroPositions: Record<HeroPosition, { label: string; position: string; siz
   tight: { label: "Tight (10%)", position: "50% 10%", size: "60% 25%" },
 };
 
-const heroColorStyles: Record<HeroColors, { label: string; description: string }> = {
-  single: {
-    label: "Single (Blue)",
-    description: "Classic biblio blue glow",
-  },
-  aurora: {
-    label: "Aurora Mesh",
-    description: "Soft blend of all 3 colors",
-  },
-  zones: {
-    label: "Distinct Zones",
-    description: "Each color in its own area",
-  },
-  conic: {
-    label: "Conic Sweep",
-    description: "Colors rotate around center",
-  },
+const heroColorStyles: Record<HeroColors, { label: string; group: string; description: string }> = {
+  // Group A: Single
+  "single-blue": { label: "Blue", group: "Single", description: "Classic biblio blue" },
+  "single-teal": { label: "Teal", group: "Single", description: "Manu teal" },
+  "single-violet": { label: "Violet", group: "Single", description: "Discover violet" },
+
+  // Group B: Soft Blends
+  aurora: { label: "Aurora", group: "Blend", description: "Soft mesh of all colors" },
+  "soft-orbs": { label: "Soft Orbs", group: "Blend", description: "Large fuzzy circles" },
+  horizontal: { label: "Horizontal", group: "Blend", description: "Left→right flow" },
+  vertical: { label: "Vertical", group: "Blend", description: "Top→bottom fade" },
+
+  // Group C: Geometric
+  zones: { label: "Zones", group: "Geometric", description: "Each in its area" },
+  corners: { label: "Corners", group: "Geometric", description: "Colors from corners" },
+  conic: { label: "Conic", group: "Geometric", description: "Rotating sweep" },
+
+  // Group D: Advanced
+  oklch: { label: "OKLCH", group: "Advanced", description: "Vibrant modern blend" },
+  prismatic: { label: "Prismatic", group: "Advanced", description: "Full spectrum" },
 };
 
 // Build hero CSS based on position and color style
@@ -98,30 +105,73 @@ const buildHeroCss = (position: HeroPosition, colors: HeroColors): string => {
   const { position: pos, size } = heroPositions[position];
 
   switch (colors) {
-    case "single":
+    // Group A: Single colors
+    case "single-blue":
       return `radial-gradient(ellipse ${size} at ${pos}, var(--blue-a4) 0%, transparent 60%)`;
+    case "single-teal":
+      return `radial-gradient(ellipse ${size} at ${pos}, var(--jade-a4) 0%, transparent 60%)`;
+    case "single-violet":
+      return `radial-gradient(ellipse ${size} at ${pos}, var(--iris-a4) 0%, transparent 60%)`;
 
+    // Group B: Soft Blends
     case "aurora":
-      // Overlapping radials from different positions, all meeting in center
       return `
         radial-gradient(ellipse ${size} at ${pos}, var(--blue-a4) 0%, transparent 70%),
         radial-gradient(ellipse 70% 40% at 30% 5%, var(--jade-a3) 0%, transparent 60%),
         radial-gradient(ellipse 70% 40% at 70% 5%, var(--iris-a3) 0%, transparent 60%)
       `.replace(/\s+/g, ' ').trim();
 
+    case "soft-orbs":
+      return `
+        radial-gradient(circle 400px at 35% 15%, var(--blue-a3) 0%, transparent 70%),
+        radial-gradient(circle 350px at 50% 8%, var(--jade-a3) 0%, transparent 70%),
+        radial-gradient(circle 400px at 65% 15%, var(--iris-a3) 0%, transparent 70%)
+      `.replace(/\s+/g, ' ').trim();
+
+    case "horizontal":
+      return `
+        linear-gradient(90deg, var(--blue-a4) 0%, var(--jade-a4) 50%, var(--iris-a4) 100%),
+        radial-gradient(ellipse 100% 50% at 50% 10%, rgba(255,255,255,0.3) 0%, transparent 50%)
+      `.replace(/\s+/g, ' ').trim();
+
+    case "vertical":
+      return `
+        linear-gradient(180deg, var(--blue-a4) 0%, var(--jade-a3) 50%, var(--iris-a3) 100%),
+        radial-gradient(ellipse 80% 30% at 50% 0%, rgba(255,255,255,0.2) 0%, transparent 40%)
+      `.replace(/\s+/g, ' ').trim();
+
+    // Group C: Geometric
     case "zones":
-      // Each color has its own zone (left, center, right)
       return `
         radial-gradient(ellipse 50% 35% at 25% 10%, var(--blue-a4) 0%, transparent 55%),
         radial-gradient(ellipse 50% 35% at 50% 8%, var(--jade-a4) 0%, transparent 55%),
         radial-gradient(ellipse 50% 35% at 75% 10%, var(--iris-a4) 0%, transparent 55%)
       `.replace(/\s+/g, ' ').trim();
 
+    case "corners":
+      return `
+        radial-gradient(ellipse 60% 50% at 0% 0%, var(--blue-a4) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 100% 0%, var(--iris-a4) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 40% at 50% 20%, var(--jade-a3) 0%, transparent 50%)
+      `.replace(/\s+/g, ' ').trim();
+
     case "conic":
-      // Conic gradient sweeping through all colors
       return `
         radial-gradient(ellipse ${size} at ${pos}, transparent 30%, var(--sand-2) 70%),
         conic-gradient(from 180deg at 50% 10%, var(--blue-a4), var(--jade-a4), var(--iris-a4), var(--blue-a4))
+      `.replace(/\s+/g, ' ').trim();
+
+    // Group D: Advanced
+    case "oklch":
+      return `
+        linear-gradient(in oklch 90deg, var(--blue-9) 0%, var(--jade-9) 50%, var(--iris-9) 100%),
+        radial-gradient(ellipse 100% 50% at 50% 10%, transparent 30%, var(--sand-2) 80%)
+      `.replace(/\s+/g, ' ').trim();
+
+    case "prismatic":
+      return `
+        conic-gradient(from 220deg at 50% 10%, var(--blue-a4), var(--jade-a4), var(--iris-a4), var(--blue-a4)),
+        radial-gradient(ellipse 80% 35% at 50% 10%, transparent 20%, var(--sand-2) 60%)
       `.replace(/\s+/g, ' ').trim();
   }
 };
@@ -129,7 +179,7 @@ const buildHeroCss = (position: HeroPosition, colors: HeroColors): string => {
 export function LandingPage({ onNavigate }: LandingPageProps) {
   const [gradientDynamic, setGradientDynamic] = useState<GradientDynamic>("spotlight");
   const [heroPosition, setHeroPosition] = useState<HeroPosition>("mid");
-  const [heroColors, setHeroColors] = useState<HeroColors>("aurora");
+  const [heroColors, setHeroColors] = useState<HeroColors>("single-blue");
   const [opacity, setOpacity] = useState(50);
 
   // Build spotlight CSS with selected hero position and color style
@@ -190,22 +240,82 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               </div>
             </div>
 
-            {/* Hero Colors */}
+            {/* Hero Colors - grouped */}
             <div className="border-t border-[var(--border-subtle)] pt-2 mb-3">
               <div className="text-[var(--text-secondary)] text-xs mb-1">Hero Colors</div>
-              <div className="flex flex-col gap-1">
-                {(Object.keys(heroColorStyles) as HeroColors[]).map((colorStyle) => (
+
+              {/* Single */}
+              <div className="text-[var(--text-muted)] text-[10px] mb-0.5">Single</div>
+              <div className="flex gap-1 mb-2">
+                {(["single-blue", "single-teal", "single-violet"] as HeroColors[]).map((c) => (
                   <button
-                    key={colorStyle}
-                    onClick={() => setHeroColors(colorStyle)}
-                    className={`text-left px-2 py-1 rounded text-xs transition-colors ${
-                      heroColors === colorStyle
+                    key={c}
+                    onClick={() => setHeroColors(c)}
+                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
+                      heroColors === c
                         ? "bg-[var(--discover)] text-white"
                         : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
                     }`}
+                    title={heroColorStyles[c].description}
                   >
-                    <span className="font-medium">{heroColorStyles[colorStyle].label}</span>
-                    <span className="text-[10px] ml-1 opacity-70">{heroColorStyles[colorStyle].description}</span>
+                    {heroColorStyles[c].label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Blends */}
+              <div className="text-[var(--text-muted)] text-[10px] mb-0.5">Blend</div>
+              <div className="flex gap-1 mb-2">
+                {(["aurora", "soft-orbs", "horizontal", "vertical"] as HeroColors[]).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setHeroColors(c)}
+                    className={`flex-1 px-1.5 py-1 rounded text-xs transition-colors ${
+                      heroColors === c
+                        ? "bg-[var(--discover)] text-white"
+                        : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                    }`}
+                    title={heroColorStyles[c].description}
+                  >
+                    {heroColorStyles[c].label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Geometric */}
+              <div className="text-[var(--text-muted)] text-[10px] mb-0.5">Geometric</div>
+              <div className="flex gap-1 mb-2">
+                {(["zones", "corners", "conic"] as HeroColors[]).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setHeroColors(c)}
+                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
+                      heroColors === c
+                        ? "bg-[var(--discover)] text-white"
+                        : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                    }`}
+                    title={heroColorStyles[c].description}
+                  >
+                    {heroColorStyles[c].label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Advanced */}
+              <div className="text-[var(--text-muted)] text-[10px] mb-0.5">Advanced</div>
+              <div className="flex gap-1">
+                {(["oklch", "prismatic"] as HeroColors[]).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setHeroColors(c)}
+                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
+                      heroColors === c
+                        ? "bg-[var(--discover)] text-white"
+                        : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                    }`}
+                    title={heroColorStyles[c].description}
+                  >
+                    {heroColorStyles[c].label}
                   </button>
                 ))}
               </div>

@@ -33,8 +33,18 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="py-16 border-y border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6">
+    <section className="relative py-20">
+      {/* Soft gradient dividers - subtle section indication */}
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent 20%, var(--border-subtle) 50%, transparent 80%)" }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent 20%, var(--border-subtle) 50%, transparent 80%)" }}
+      />
+
+      <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {stats.map((stat, i) => (
             <StatItem
