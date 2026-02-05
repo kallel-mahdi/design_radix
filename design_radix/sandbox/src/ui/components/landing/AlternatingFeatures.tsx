@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import {
   BookOpen,
   FileEdit,
@@ -9,6 +10,29 @@ import { cn } from "@/lib/utils";
 import { BiblioMockup } from "./mockups/BiblioMockup";
 import { ManuMockup } from "./mockups/ManuMockup";
 import { IntegrationMockup } from "./mockups/IntegrationMockup";
+
+function useInView(threshold = 0.3) {
+  const ref = useRef<HTMLElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isInView };
+}
 
 interface FeatureSection {
   module: "bibliography" | "manuscripts" | "discover";
@@ -85,9 +109,10 @@ const moduleStyles = {
 
 function FeatureSection({ feature, index }: { feature: FeatureSection; index: number }) {
   const styles = moduleStyles[feature.module];
+  const { ref, isInView } = useInView(0.3);
 
   return (
-    <section className="relative min-h-screen flex items-center py-16 lg:py-0">
+    <section ref={ref} className="relative py-24 lg:py-32">
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div
           className={cn(
@@ -156,15 +181,15 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
             >
               {feature.module === "bibliography" ? (
                 <div className="aspect-[16/10]">
-                  <BiblioMockup />
+                  <BiblioMockup isInView={isInView} />
                 </div>
               ) : feature.module === "manuscripts" ? (
                 <div className="aspect-[16/10]">
-                  <ManuMockup />
+                  <ManuMockup isInView={isInView} />
                 </div>
               ) : (
                 <div className="aspect-[16/10]">
-                  <IntegrationMockup />
+                  <IntegrationMockup isInView={isInView} />
                 </div>
               )}
             </div>

@@ -2,14 +2,18 @@
  * IntegrationMockup - Bibliography + Editor integration showcase for landing page
  *
  * Steps:
- * 1. editor (2s) - No sidebar, typing "The transformer architecture \cite{"
+ * 1. editor (1.5s) - No sidebar, typing "\cite{"
  * 2. sidebarOpen (1.5s) - Icon pulses → sidebar slides in → folder pops in with 🔗
- * 3. typingKey (2s) - Continue typing "vas" inside \cite{}
- * 4. autocomplete (2s) - Single-item dropdown: "vaswani2017attention"
- * 5. selection (1.5s) - Item selected → dropdown closes → full citation inserted
+ * 3. typingKey (1.2s) - Continue typing "vas" inside \cite{}
+ * 4. autocomplete (1.2s) - Single-item dropdown: "vaswani2017attention"
+ * 5. selection (0.4s) - Item selected → dropdown closes → full citation inserted
  * 6. compile (2s) - Spinner → PDF shows "[1]" → first dot turns green
  *
- * Total loop: 11 seconds
+ * Total loop: 7.8 seconds
+ *
+ * Static initial state: "sidebarOpen" with sidebar, folder, and papers visible.
+ * Animation begins only when `isInView` is true.
+ * Respects prefers-reduced-motion (shows static state only).
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -33,34 +37,42 @@ const stepOrder: IntegrationStep[] = [
 ];
 
 const stepTimings: Record<IntegrationStep, number> = {
-  editor: 1500,      // typing \cite{
-  sidebarOpen: 1500, // sidebar + folder + papers
-  typingKey: 1200,   // typing "vas"
-  autocomplete: 1200,// dropdown visible
-  selection: 400,    // instant selection
-  compile: 2000,     // compile animation
+  editor: 1500,
+  sidebarOpen: 1500,
+  typingKey: 1200,
+  autocomplete: 1200,
+  selection: 400,
+  compile: 2000,
 };
 
-// Text sequences
-const proseText = "The transformer architecture has revolutionized NLP"; // static
-const citeText = "\\cite{"; // typed in step 1
-const keyText = "vas"; // typed in step 3
+const proseText = "The transformer architecture has revolutionized NLP";
+const citeText = "\\cite{";
+const keyText = "vas";
 const fullCitationKey = "vaswani2017attention";
 
-// Papers for the sidebar
 const sidebarPapers = [
   { id: "p1", title: "Attention Is All You Need", key: "vaswani2017attention" },
   { id: "p2", title: "BERT: Pre-training...", key: "devlin2019bert" },
   { id: "p3", title: "Language Models are...", key: "brown2020gpt3" },
 ];
 
-export function IntegrationMockup() {
-  const [step, setStep] = useState<IntegrationStep>("editor");
-  const [typedInitialChars, setTypedInitialChars] = useState(0);
+interface IntegrationMockupProps {
+  isInView?: boolean;
+}
+
+export function IntegrationMockup({ isInView = true }: IntegrationMockupProps) {
+  const reducedMotion = useRef(
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ).current;
+  const shouldAnimate = isInView && !reducedMotion;
+
+  // Rich initial state: "sidebarOpen" with sidebar, folder, and papers visible
+  const [step, setStep] = useState<IntegrationStep>("sidebarOpen");
+  const [typedInitialChars, setTypedInitialChars] = useState(citeText.length);
   const [typedKeyChars, setTypedKeyChars] = useState(0);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [folderVisible, setFolderVisible] = useState(false);
-  const [papersVisible, setPapersVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [folderVisible, setFolderVisible] = useState(true);
+  const [papersVisible, setPapersVisible] = useState(true);
   const [iconPulsing, setIconPulsing] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [citationInserted, setCitationInserted] = useState(false);
@@ -70,14 +82,24 @@ export function IntegrationMockup() {
   const initialTypingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const keyTypingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Step progression
+  const animating = useRef(false);
+
+  // Step progression — paused until shouldAnimate
   useEffect(() => {
+    if (!shouldAnimate) return;
+
+    // First activation: advance from static "sidebarOpen" to "typingKey"
+    if (!animating.current) {
+      animating.current = true;
+      const t = setTimeout(() => setStep("typingKey"), 600);
+      return () => clearTimeout(t);
+    }
+
     const timeout = setTimeout(() => {
       const nextIndex = (stepOrder.indexOf(step) + 1) % stepOrder.length;
       const next = stepOrder[nextIndex];
       setStep(next);
 
-      // Reset states on loop restart
       if (next === "editor") {
         setTypedInitialChars(0);
         setTypedKeyChars(0);
@@ -92,9 +114,9 @@ export function IntegrationMockup() {
       }
     }, stepTimings[step]);
     return () => clearTimeout(timeout);
-  }, [step]);
+  }, [step, shouldAnimate]);
 
-  // Step 1: Editor - typing \cite{ only (prose is static)
+  // Step 1: Editor - typing \cite{
   useEffect(() => {
     if (step !== "editor") {
       if (initialTypingRef.current) {
@@ -103,6 +125,8 @@ export function IntegrationMockup() {
       }
       return;
     }
+
+    if (!animating.current) return;
 
     setTypedInitialChars(0);
     const interval = setInterval(() => {
@@ -122,28 +146,22 @@ export function IntegrationMockup() {
     };
   }, [step]);
 
-  // Step 2: sidebarOpen - icon pulse → sidebar slides in → folder pops in → papers appear
+  // Step 2: sidebarOpen - icon pulse → sidebar slides in → folder → papers
   useEffect(() => {
     if (step !== "sidebarOpen") {
       setIconPulsing(false);
       return;
     }
 
-    // Start pulse immediately
+    if (!animating.current) return;
+
     setIconPulsing(true);
-    // After pulse, slide in sidebar
     const t1 = setTimeout(() => {
       setIconPulsing(false);
       setSidebarVisible(true);
     }, 400);
-    // After sidebar slides in, pop in folder
-    const t2 = setTimeout(() => {
-      setFolderVisible(true);
-    }, 750);
-    // After folder pops in, show papers with dots
-    const t3 = setTimeout(() => {
-      setPapersVisible(true);
-    }, 1050);
+    const t2 = setTimeout(() => setFolderVisible(true), 750);
+    const t3 = setTimeout(() => setPapersVisible(true), 1050);
 
     return () => {
       clearTimeout(t1);
@@ -152,7 +170,7 @@ export function IntegrationMockup() {
     };
   }, [step]);
 
-  // Step 3: typingKey - continue typing "vas" inside \cite{}
+  // Step 3: typingKey - typing "vas"
   useEffect(() => {
     if (step !== "typingKey") {
       if (keyTypingRef.current) {
@@ -161,6 +179,8 @@ export function IntegrationMockup() {
       }
       return;
     }
+
+    if (!animating.current) return;
 
     setTypedKeyChars(0);
     const startDelay = setTimeout(() => {
@@ -185,23 +205,23 @@ export function IntegrationMockup() {
     };
   }, [step]);
 
-  // Step 4: autocomplete - show dropdown
+  // Step 4: autocomplete
   useEffect(() => {
-    if (step !== "autocomplete") return;
+    if (!animating.current || step !== "autocomplete") return;
     const t = setTimeout(() => setShowAutocomplete(true), 300);
     return () => clearTimeout(t);
   }, [step]);
 
-  // Step 5: selection - insert full citation immediately
+  // Step 5: selection
   useEffect(() => {
-    if (step !== "selection") return;
+    if (!animating.current || step !== "selection") return;
     setShowAutocomplete(false);
     setCitationInserted(true);
   }, [step]);
 
-  // Step 6: compile - spinner, then PDF updates, dot turns green
+  // Step 6: compile
   useEffect(() => {
-    if (step !== "compile") return;
+    if (!animating.current || step !== "compile") return;
     setCompilePhase(0);
     const t1 = setTimeout(() => setCompilePhase(1), 800);
     const t2 = setTimeout(() => {
@@ -229,10 +249,11 @@ export function IntegrationMockup() {
           ? fullCitationKey
           : "";
 
-  const showCursor =
+  const showCursor = animating.current && (
     step === "editor" ||
     step === "typingKey" ||
-    (step === "sidebarOpen" && !sidebarVisible);
+    (step === "sidebarOpen" && !sidebarVisible)
+  );
 
   return (
     <IntegrationAppShell
@@ -294,10 +315,8 @@ function IntegrationAppShell({
         boxShadow: "var(--shadow-medium)",
       }}
     >
-      {/* Activity Bar */}
       <IntegrationActivityBar iconPulsing={iconPulsing} sidebarVisible={sidebarVisible} />
 
-      {/* Sidebar (animated) */}
       {sidebarVisible && (
         <MockBiblioSidebar
           folderVisible={folderVisible}
@@ -306,7 +325,6 @@ function IntegrationAppShell({
         />
       )}
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {children}
       </div>
@@ -315,7 +333,7 @@ function IntegrationAppShell({
 }
 
 // ============================================
-// Activity Bar with pulse support
+// Activity Bar
 // ============================================
 
 function IntegrationActivityBar({
@@ -333,7 +351,6 @@ function IntegrationActivityBar({
         borderRight: "1px solid var(--border-default)",
       }}
     >
-      {/* Logo */}
       <div
         className="h-11 flex items-center justify-center"
         style={{ borderBottom: "1px solid var(--border-default)" }}
@@ -346,9 +363,7 @@ function IntegrationActivityBar({
         </div>
       </div>
 
-      {/* Nav icons */}
       <div className="flex-1 flex flex-col items-center gap-0.5 py-2">
-        {/* File browser icon - active until sidebar opens */}
         <div
           className="size-8 rounded flex items-center justify-center"
           style={{
@@ -359,7 +374,6 @@ function IntegrationActivityBar({
           <FolderClosed className="size-4" />
         </div>
 
-        {/* Bibliography icon - pulses then becomes active */}
         <div
           className={`size-8 rounded flex items-center justify-center ${
             iconPulsing ? "animate-icon-pulse" : ""
@@ -397,7 +411,6 @@ function MockBiblioSidebar({
         borderRight: "1px solid var(--border-default)",
       }}
     >
-      {/* Header */}
       <div
         className="h-11 flex items-center gap-2 px-3"
         style={{ borderBottom: "1px solid var(--border-subtle)" }}
@@ -408,7 +421,6 @@ function MockBiblioSidebar({
         </span>
       </div>
 
-      {/* Folder with linked indicator - pops in after sidebar */}
       <div className="p-2">
         {folderVisible && (
           <div
@@ -427,7 +439,6 @@ function MockBiblioSidebar({
         )}
       </div>
 
-      {/* PDF list with citation status dots - appears after folder */}
       <div className="flex-1 flex flex-col gap-0.5 px-2 py-1">
         {papersVisible &&
           sidebarPapers.map((paper, idx) => (
@@ -443,7 +454,6 @@ function MockBiblioSidebar({
               >
                 {paper.title}
               </span>
-              {/* Citation status dot */}
               <span
                 className={`size-1.5 rounded-full shrink-0 ${
                   citedPaperIndex === idx ? "animate-dot-to-green" : ""
@@ -489,7 +499,6 @@ function EditorTabs() {
         />
       </div>
 
-      {/* Collaborator avatar */}
       <div className="flex items-center gap-1.5 px-3">
         <div
           className="size-5 rounded-full flex items-center justify-center text-[10px] font-bold"
@@ -522,7 +531,6 @@ function EditorContent({
     "\\section{Introduction}",
   ];
 
-  // Build the cite line content
   const citeLineContent = citationInserted
     ? `${citeText}${displayedKeyText}}`
     : `${displayedCiteText}${displayedKeyText}`;
@@ -555,7 +563,6 @@ function EditorContent({
             </span>
             <span className="min-w-0 relative">
               {formatLatex(line.text)}
-              {/* Cursor on cite line (line 6) */}
               {line.isCiteLine && showCursor && (
                 <span
                   className="inline-block w-0.5 h-3.5 ml-0.5 align-middle animate-cursor-blink"
@@ -567,7 +574,6 @@ function EditorContent({
         ))}
       </div>
 
-      {/* Autocomplete dropdown - positioned below line 6, left-aligned to code */}
       {showAutocomplete && (
         <div
           className="absolute animate-autocomplete-in"
@@ -627,7 +633,7 @@ function formatLatex(text: string) {
 }
 
 // ============================================
-// Split Handle (copied from ManuMockup)
+// Split Handle
 // ============================================
 
 function SplitHandle() {
@@ -676,7 +682,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
       className="flex-1 min-w-0 flex flex-col overflow-hidden"
       style={{ background: "var(--bg-tertiary)" }}
     >
-      {/* PDF tabs */}
       <div
         className="h-11 flex items-center"
         style={{
@@ -699,7 +704,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
         </div>
       </div>
 
-      {/* PDF preview */}
       <div className="flex-1 flex items-center justify-center p-3 relative overflow-hidden">
         <div
           className={`w-full h-full rounded-md overflow-hidden ${
@@ -711,7 +715,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
             boxShadow: "var(--shadow-soft)",
           }}
         >
-          {/* Paper title */}
           <div
             className="px-3 py-2 text-center"
             style={{ borderBottom: "1px solid var(--border-subtle)" }}
@@ -727,7 +730,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
             </div>
           </div>
 
-          {/* Paper content */}
           <div
             className="p-3 text-[10px] leading-relaxed"
             style={{ color: "var(--text-secondary)" }}
@@ -752,7 +754,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
               )}
             </div>
 
-            {/* References section */}
             {isCompiled && (
               <div className="mt-4 pt-2" style={{ borderTop: "1px solid var(--border-subtle)" }}>
                 <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
@@ -767,7 +768,6 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
           </div>
         </div>
 
-        {/* Compile overlay */}
         {isCompiling && (
           <div
             className="absolute inset-0 flex items-center justify-center animate-compile-overlay-in"

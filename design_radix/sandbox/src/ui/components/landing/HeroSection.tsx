@@ -1,4 +1,4 @@
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center pt-24 pb-12">
+    <section className="relative flex items-center justify-center pt-32 pb-20">
       {/* Gradient handled by parent LandingPage - no local gradient */}
 
       <div className="container mx-auto px-6 relative z-10">
@@ -17,7 +17,7 @@ export function HeroSection() {
               <span className="text-[var(--text-primary)]">Your research.</span>
               <br />
               <WordRotate
-                words={["One home.", "Organized.", "Connected.", "Simplified."]}
+                words={["Cited.", "Written.", "Discovered.", "Published."]}
                 duration={2500}
                 className="bg-gradient-to-r from-[var(--biblio)] via-[var(--manu)] to-[var(--discover)] bg-clip-text text-transparent"
               />
@@ -47,8 +47,7 @@ export function HeroSection() {
                 <ArrowRight className="size-4" />
               </ShimmerButton>
               <Button size="lg" variant="outline" className="gap-2">
-                <Play className="size-4" />
-                Watch demo
+                Join Discord
               </Button>
             </div>
           </BlurFade>

@@ -10,9 +10,13 @@
  * 6. comment (2.8s) - Inline comment input → side panel appears
  *
  * Total loop: 9.4 seconds
+ *
+ * Static initial state: "tagging" with all tags visible (rich content).
+ * Animation begins only when `isInView` is true.
+ * Respects prefers-reduced-motion (shows static state only).
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
 import { MockAppShell } from "./MockAppShell";
 import { MockFileTabs, type MockTab } from "./MockFileTabs";
@@ -44,9 +48,19 @@ const abstractText = `The dominant sequence transduction models are based on com
 We propose a new simple network architecture, the Transformer, based solely on attention mechanisms.
 Experiments on two machine translation tasks show these models achieve superior quality while being more parallelizable.`;
 
-export function BiblioMockup() {
-  const [step, setStep] = useState<BiblioStep>("upload");
-  const [tagCount, setTagCount] = useState(0);
+interface BiblioMockupProps {
+  isInView?: boolean;
+}
+
+export function BiblioMockup({ isInView = true }: BiblioMockupProps) {
+  const reducedMotion = useRef(
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ).current;
+  const shouldAnimate = isInView && !reducedMotion;
+
+  // Rich initial state: "tagging" with all tags visible
+  const [step, setStep] = useState<BiblioStep>("tagging");
+  const [tagCount, setTagCount] = useState(papers.length);
   const [selectedRow, setSelectedRow] = useState<number | undefined>(undefined);
   const [showNewTab, setShowNewTab] = useState(false);
   const [highlightPhase, setHighlightPhase] = useState(0);
@@ -54,14 +68,24 @@ export function BiblioMockup() {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showCommentsPanel, setShowCommentsPanel] = useState(false);
 
-  // Step progression
+  const animating = useRef(false);
+
+  // Step progression — paused until shouldAnimate
   useEffect(() => {
+    if (!shouldAnimate) return;
+
+    // First activation: skip the static tagging step, advance to click
+    if (!animating.current) {
+      animating.current = true;
+      const t = setTimeout(() => setStep("click"), 600);
+      return () => clearTimeout(t);
+    }
+
     const timeout = setTimeout(() => {
       const nextIndex = (stepOrder.indexOf(step) + 1) % stepOrder.length;
       const nextStep = stepOrder[nextIndex];
       setStep(nextStep);
 
-      // Reset state for new cycle
       if (nextStep === "upload") {
         setTagCount(0);
         setSelectedRow(undefined);
@@ -73,11 +97,13 @@ export function BiblioMockup() {
       }
     }, stepTimings[step]);
     return () => clearTimeout(timeout);
-  }, [step]);
+  }, [step, shouldAnimate]);
 
   // Tagging: cascade tags one by one
   useEffect(() => {
-    if (step !== "tagging") return;
+    if (!animating.current || step !== "tagging") return;
+    // Skip cascade if all tags already visible (initial static state)
+    if (tagCount >= papers.length) return;
     setTagCount(0);
     const timers = papers.map((_, idx) =>
       setTimeout(() => setTagCount(c => Math.max(c, idx + 1)), 200 + idx * 280)
@@ -87,7 +113,7 @@ export function BiblioMockup() {
 
   // Click: select row, then show new tab
   useEffect(() => {
-    if (step !== "click") return;
+    if (!animating.current || step !== "click") return;
     setSelectedRow(0);
     const t = setTimeout(() => setShowNewTab(true), 350);
     return () => clearTimeout(t);
@@ -95,14 +121,12 @@ export function BiblioMockup() {
 
   // Reader: keep tab visible
   useEffect(() => {
-    if (step === "reader") {
-      setShowNewTab(true);
-    }
+    if (step === "reader") setShowNewTab(true);
   }, [step]);
 
   // Highlight: sweep animation
   useEffect(() => {
-    if (step !== "highlight") return;
+    if (!animating.current || step !== "highlight") return;
     setHighlightPhase(0);
     const t1 = setTimeout(() => setHighlightPhase(1), 150);
     const t2 = setTimeout(() => setHighlightPhase(2), 850);
@@ -111,7 +135,7 @@ export function BiblioMockup() {
 
   // Comment: typing animation → panel slide-in
   useEffect(() => {
-    if (step !== "comment") return;
+    if (!animating.current || step !== "comment") return;
     setShowCommentInput(true);
     setCommentText("");
     setShowCommentsPanel(false);
@@ -213,12 +237,10 @@ function UploadAnimation() {
         background: "var(--bg-secondary)",
       }}
     >
-      {/* Drop zone label */}
       <span className="text-[11px] absolute bottom-6" style={{ color: "var(--text-muted)" }}>
         Drop PDFs to import
       </span>
 
-      {/* Dropping PDFs */}
       <div className="flex gap-5">
         {[0, 1, 2].map(i => (
           <div

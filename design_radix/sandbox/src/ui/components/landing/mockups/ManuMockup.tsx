@@ -7,7 +7,9 @@
  * 3) comment (2s) - Sarah leaves an inline comment
  * 4) compile (2s) - PDF compiles with rotation animation
  *
- * Renders inside a 16:10 frame (see landing layouts).
+ * Static initial state: "typing" with full text visible (rich content).
+ * Animation begins only when `isInView` is true.
+ * Respects prefers-reduced-motion (shows static state only).
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -36,7 +38,6 @@ const collaborators = {
   sarah: { name: "Sarah", initial: "S", colorVar: "--discover" },
 };
 
-// LaTeX content for the editor
 const baseLatex = [
   "\\documentclass{article}",
   "\\begin{document}",
@@ -44,26 +45,45 @@ const baseLatex = [
   "\\section{Introduction}",
 ];
 
-// User types across both typing and collab steps
 const typingText = "The transformer architecture has revolutionized";
 const sarahTypingText = "\\section{Methods}";
 
-export function ManuMockup() {
+interface ManuMockupProps {
+  isInView?: boolean;
+}
+
+export function ManuMockup({ isInView = true }: ManuMockupProps) {
+  const reducedMotion = useRef(
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ).current;
+  const shouldAnimate = isInView && !reducedMotion;
+
+  // Rich initial state: "typing" with full text visible
   const [step, setStep] = useState<EditorStep>("typing");
   const [compilePhase, setCompilePhase] = useState<0 | 1>(0);
-  const [typedChars, setTypedChars] = useState(0);
+  const [typedChars, setTypedChars] = useState(typingText.length);
   const [sarahTypedChars, setSarahTypedChars] = useState(0);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sarahTypingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Step progression
+  const animating = useRef(false);
+
+  // Step progression — paused until shouldAnimate
   useEffect(() => {
+    if (!shouldAnimate) return;
+
+    // First activation: advance from static "typing" to "collab"
+    if (!animating.current) {
+      animating.current = true;
+      const t = setTimeout(() => setStep("collab"), 600);
+      return () => clearTimeout(t);
+    }
+
     const timeout = setTimeout(() => {
       const nextIndex = (stepOrder.indexOf(step) + 1) % stepOrder.length;
       const next = stepOrder[nextIndex];
       setStep(next);
 
-      // Reset states on step change
       if (next === "typing") {
         setTypedChars(0);
         setSarahTypedChars(0);
@@ -71,11 +91,10 @@ export function ManuMockup() {
       if (next === "compile") setCompilePhase(0);
     }, stepTimings[step]);
     return () => clearTimeout(timeout);
-  }, [step]);
+  }, [step, shouldAnimate]);
 
-  // Typing animation for user (continues through typing + collab steps)
+  // Typing animation for user
   useEffect(() => {
-    // Stop typing in comment/compile steps
     if (step !== "typing" && step !== "collab") {
       if (typingIntervalRef.current) {
         clearInterval(typingIntervalRef.current);
@@ -84,12 +103,10 @@ export function ManuMockup() {
       return;
     }
 
-    // Reset when entering typing step (start of loop)
-    if (step === "typing") {
-      setTypedChars(0);
-    }
+    if (!animating.current) return;
 
-    // Start typing
+    if (step === "typing") setTypedChars(0);
+
     const interval = setInterval(() => {
       setTypedChars((prev) => {
         if (prev >= typingText.length) {
@@ -107,7 +124,7 @@ export function ManuMockup() {
     };
   }, [step]);
 
-  // Sarah typing animation (Step 2 - starts after 500ms delay)
+  // Sarah typing animation (collab step)
   useEffect(() => {
     if (step !== "collab") {
       if (sarahTypingIntervalRef.current) {
@@ -116,6 +133,8 @@ export function ManuMockup() {
       }
       return;
     }
+
+    if (!animating.current) return;
 
     setSarahTypedChars(0);
     const startDelay = setTimeout(() => {
@@ -142,13 +161,13 @@ export function ManuMockup() {
 
   // Compile phase transition
   useEffect(() => {
-    if (step !== "compile") return;
+    if (!animating.current || step !== "compile") return;
     const t1 = setTimeout(() => setCompilePhase(1), 1000);
     return () => clearTimeout(t1);
   }, [step]);
 
   const showSarah = step === "collab" || step === "comment" || step === "compile";
-  const isUserTyping = step === "typing" || step === "collab";
+  const isUserTyping = animating.current && (step === "typing" || step === "collab");
   const displayedTypingText = isUserTyping
     ? typingText.slice(0, typedChars)
     : typingText;
@@ -161,10 +180,8 @@ export function ManuMockup() {
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Editor pane */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-          {/* Editor tabs */}
           <EditorTabs showSarah={showSarah} />
 
-          {/* Code area */}
           <div
             className="flex-1 relative overflow-hidden"
             style={{ background: "var(--bg-primary)" }}
@@ -174,6 +191,7 @@ export function ManuMockup() {
               displayedTypingText={displayedTypingText}
               displayedSarahText={displayedSarahText}
               sarahTypedChars={sarahTypedChars}
+              isAnimating={animating.current}
             />
           </div>
         </div>
@@ -193,7 +211,6 @@ function EditorTabs({ showSarah }: { showSarah: boolean }) {
       className="h-11 flex items-center justify-between"
       style={{ background: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-subtle)" }}
     >
-      {/* Tab - flat style with accent underline */}
       <div
         className="h-full flex items-center gap-2 px-4 relative"
         style={{ background: "var(--bg-primary)" }}
@@ -202,14 +219,12 @@ function EditorTabs({ showSarah }: { showSarah: boolean }) {
         <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
           Main.tex
         </span>
-        {/* Active tab underline */}
         <div
           className="absolute bottom-0 left-0 right-0 h-0.5"
           style={{ background: "var(--biblio)" }}
         />
       </div>
 
-      {/* Collaborators */}
       <div className="flex items-center gap-1.5 px-3">
         <AvatarChip collaborator={collaborators.you} />
         {showSarah && (
@@ -243,13 +258,15 @@ function EditorContent({
   displayedTypingText,
   displayedSarahText,
   sarahTypedChars,
+  isAnimating,
 }: {
   step: EditorStep;
   displayedTypingText: string;
   displayedSarahText: string;
   sarahTypedChars: number;
+  isAnimating: boolean;
 }) {
-  const showUserCursor = step === "typing" || step === "collab";
+  const showUserCursor = isAnimating && (step === "typing" || step === "collab");
   const showSarahCursor = step === "collab";
   const showComment = step === "comment";
   const showHighlight = step === "comment";
@@ -269,9 +286,8 @@ function EditorContent({
       className="h-full overflow-hidden px-3 py-3 font-mono relative"
       style={{ fontSize: "11px", lineHeight: "18px" }}
     >
-      {lines.map((line, idx) => (
+      {lines.map((line) => (
         <div key={line.num} className="flex relative">
-          {/* Line number */}
           <span
             className="w-7 pr-2 text-right select-none shrink-0 tabular-nums"
             style={{ color: "var(--text-muted)" }}
@@ -279,7 +295,6 @@ function EditorContent({
             {line.num}
           </span>
 
-          {/* Code content */}
           <span className="min-w-0 relative">
             {line.showHighlight ? (
               <span
@@ -292,7 +307,6 @@ function EditorContent({
               formatLatex(line.text)
             )}
 
-            {/* User cursor (on line 5 during typing) */}
             {line.isTypingLine && showUserCursor && (
               <span
                 className="inline-block w-0.5 h-3.5 ml-0.5 align-middle animate-cursor-blink"
@@ -300,7 +314,6 @@ function EditorContent({
               />
             )}
 
-            {/* Sarah's cursor (on line 7 during collab) */}
             {line.isSarahLine && showSarahCursor && sarahTypedChars > 0 && (
               <span className="relative">
                 <span
@@ -319,7 +332,6 @@ function EditorContent({
               </span>
             )}
 
-            {/* Comment icon */}
             {line.showHighlight && (
               <span className="ml-2 text-[10px]" style={{ color: "var(--biblio)" }}>
                 💬
@@ -329,13 +341,12 @@ function EditorContent({
         </div>
       ))}
 
-      {/* Inline comment card (below line 5) */}
       {showComment && (
         <div
           className="absolute animate-popup-in"
           style={{
             left: "34px",
-            top: "102px", // After line 5 (5 lines * 18px + padding)
+            top: "102px",
           }}
         >
           <InlineCommentCard />
@@ -417,7 +428,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
 
   return (
     <div className="flex-1 min-w-0 flex flex-col overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
-      {/* PDF tabs - flat style with accent underline */}
       <div
         className="h-11 flex items-center"
         style={{ background: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-subtle)" }}
@@ -430,7 +440,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
           <span className="text-[12px] font-medium" style={{ color: "var(--biblio)" }}>
             output.pdf
           </span>
-          {/* Active tab underline */}
           <div
             className="absolute bottom-0 left-0 right-0 h-0.5"
             style={{ background: "var(--biblio)" }}
@@ -438,7 +447,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
         </div>
       </div>
 
-      {/* PDF preview */}
       <div className="flex-1 flex items-center justify-center p-3 relative overflow-hidden">
         <div
           className={`w-full h-full rounded-md overflow-hidden ${isCompiling ? "animate-pdf-compile-rotate" : ""}`}
@@ -448,7 +456,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
             boxShadow: "var(--shadow-soft)",
           }}
         >
-          {/* Paper title */}
           <div
             className="px-3 py-2 text-center"
             style={{ borderBottom: "1px solid var(--border-subtle)" }}
@@ -461,7 +468,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
             </div>
           </div>
 
-          {/* Paper content - reflects what's being typed */}
           <div className="p-3 text-[10px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
               1. Introduction
@@ -487,7 +493,6 @@ function PdfPane({ step, compilePhase }: { step: EditorStep; compilePhase: 0 | 1
           </div>
         </div>
 
-        {/* Compile overlay */}
         {isCompiling && (
           <div
             className="absolute inset-0 flex items-center justify-center animate-compile-overlay-in"
