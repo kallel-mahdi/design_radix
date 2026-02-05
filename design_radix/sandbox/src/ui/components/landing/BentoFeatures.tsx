@@ -57,13 +57,13 @@ function DiscoverMockupBackground() {
 // Simple gradient backgrounds for supporting cards
 function BiblioBackground() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-[var(--biblio-tint)] to-transparent opacity-50" />
+    <div className="absolute inset-0 bg-gradient-to-br from-[var(--manu-tint)] to-transparent opacity-50" />
   );
 }
 
 function ManuBackground() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-[var(--manu-tint)] to-transparent opacity-50" />
+    <div className="absolute inset-0 bg-gradient-to-br from-[var(--biblio-tint)] to-transparent opacity-50" />
   );
 }
 
@@ -84,7 +84,7 @@ const features = [
     cta: "Explore Bibliography",
     background: <BiblioMockupBackground />,
     className:
-      "md:col-span-2 md:row-span-2 [&_svg]:text-[var(--biblio-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
+      "md:col-span-2 md:row-span-2 [&_svg]:text-[var(--manu-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
   },
   {
     Icon: FileEdit,
@@ -95,7 +95,7 @@ const features = [
     cta: "Try Editor",
     background: <ManuMockupBackground />,
     className:
-      "md:col-span-1 md:row-span-2 [&_svg]:text-[var(--manu-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
+      "md:col-span-1 md:row-span-2 [&_svg]:text-[var(--biblio-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
   },
   // Row 3: Three supporting cards
   {
@@ -106,7 +106,7 @@ const features = [
     cta: "Learn more",
     background: <BiblioBackground />,
     className:
-      "md:col-span-1 [&_svg]:text-[var(--biblio-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
+      "md:col-span-1 [&_svg]:text-[var(--manu-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
   },
   {
     Icon: Search,
@@ -127,7 +127,7 @@ const features = [
     cta: "Learn more",
     background: <ManuBackground />,
     className:
-      "md:col-span-1 [&_svg]:text-[var(--manu-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
+      "md:col-span-1 [&_svg]:text-[var(--biblio-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
   },
   {
     Icon: Sparkles,
@@ -147,7 +147,7 @@ const features = [
     cta: "Learn more",
     background: <BiblioBackground />,
     className:
-      "md:col-span-1 [&_svg]:text-[var(--biblio-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
+      "md:col-span-1 [&_svg]:text-[var(--manu-text)] [&_h3]:text-[var(--text-primary)] [&_p]:text-[var(--text-secondary)]",
   },
 ];
 

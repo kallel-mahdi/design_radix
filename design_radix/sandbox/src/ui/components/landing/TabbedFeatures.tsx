@@ -74,12 +74,12 @@ const tabFeatures: TabFeature[] = [
 
 const moduleStyles = {
   bibliography: {
-    trigger: "data-[state=active]:bg-[var(--biblio-tint)] data-[state=active]:text-[var(--biblio-text)]",
-    bullet: "bg-[var(--biblio)] text-white",
-  },
-  manuscripts: {
     trigger: "data-[state=active]:bg-[var(--manu-tint)] data-[state=active]:text-[var(--manu-text)]",
     bullet: "bg-[var(--manu)] text-white",
+  },
+  manuscripts: {
+    trigger: "data-[state=active]:bg-[var(--biblio-tint)] data-[state=active]:text-[var(--biblio-text)]",
+    bullet: "bg-[var(--biblio)] text-white",
   },
   discover: {
     trigger: "data-[state=active]:bg-[var(--discover-tint)] data-[state=active]:text-[var(--discover-text)]",

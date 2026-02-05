@@ -19,8 +19,8 @@ const GRADIENT_CSS = `
   radial-gradient(circle 400px at 35% 15%, var(--blue-a3) 0%, transparent 70%),
   radial-gradient(circle 350px at 50% 8%, var(--jade-a3) 0%, transparent 70%),
   radial-gradient(circle 400px at 65% 15%, var(--iris-a3) 0%, transparent 70%),
-  radial-gradient(ellipse 60% 30% at 85% 28%, var(--blue-a4) 0%, transparent 55%),
-  radial-gradient(ellipse 60% 30% at 15% 50%, var(--jade-a4) 0%, transparent 55%),
+  radial-gradient(ellipse 60% 30% at 85% 28%, var(--jade-a4) 0%, transparent 55%),
+  radial-gradient(ellipse 60% 30% at 15% 50%, var(--blue-a4) 0%, transparent 55%),
   radial-gradient(ellipse 60% 30% at 85% 72%, var(--iris-a4) 0%, transparent 55%),
   linear-gradient(180deg, var(--sand-1) 0%, transparent 5%, transparent 95%, var(--sand-1) 100%)
 `.replace(/\s+/g, ' ').trim();

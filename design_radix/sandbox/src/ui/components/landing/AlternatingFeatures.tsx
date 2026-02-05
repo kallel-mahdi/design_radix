@@ -91,14 +91,14 @@ const features: FeatureSection[] = [
 
 const moduleStyles = {
   bibliography: {
-    badge: "bg-[var(--biblio-tint)] text-[var(--biblio-text)]",
-    bullet: "bg-[var(--biblio)] text-white",
-    border: "hover:border-[var(--biblio-border)]",
-  },
-  manuscripts: {
     badge: "bg-[var(--manu-tint)] text-[var(--manu-text)]",
     bullet: "bg-[var(--manu)] text-white",
     border: "hover:border-[var(--manu-border)]",
+  },
+  manuscripts: {
+    badge: "bg-[var(--biblio-tint)] text-[var(--biblio-text)]",
+    bullet: "bg-[var(--biblio)] text-white",
+    border: "hover:border-[var(--biblio-border)]",
   },
   discover: {
     badge: "bg-[var(--discover-tint)] text-[var(--discover-text)]",
