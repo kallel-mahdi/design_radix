@@ -1,27 +1,41 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";
 
+// Per-logo scale factors to normalize visual weight.
+// Wide wordmarks get full width; bold/compact logos get scaled down.
 const universities = [
-  { name: "Stanford", short: "SU" },
-  { name: "MIT", short: "MIT" },
-  { name: "Oxford", short: "OX" },
-  { name: "Harvard", short: "H" },
-  { name: "Caltech", short: "CT" },
-  { name: "ETH Zürich", short: "ETH" },
-  { name: "Cambridge", short: "CAM" },
-  { name: "Berkeley", short: "UCB" },
+  { name: "École Polytechnique", logo: "/logos/ecole-polytechnique.svg", scale: 0.85 },
+  { name: "École Normale Supérieure", logo: "/logos/ens-paris.svg", scale: 0.7 },
+  { name: "EURECOM", logo: "/logos/eurecom.svg", scale: 0.9 },
+  { name: "Télécom Paris", logo: "/logos/telecom-paris.svg", scale: 0.75 },
+  { name: "Politecnico di Milano", logo: "/logos/polimi.svg", scale: 0.9 },
+  { name: "University of Würzburg", logo: "/logos/uni-wurzburg.svg", scale: 0.9 },
+  { name: "TU Darmstadt", logo: "/logos/tu-darmstadt.svg", scale: 0.85 },
+  { name: "KTH", logo: "/logos/kth.svg", scale: 0.55 },
+  { name: "Université de Montréal", logo: "/logos/udem.svg", scale: 0.9 },
+  { name: "Université du Québec", logo: "/logos/uq.svg", scale: 0.85 },
 ];
 
-function UniversityBadge({ name, short }: { name: string; short: string }) {
+function UniversityLogo({
+  name,
+  logo,
+  scale,
+}: {
+  name: string;
+  logo: string;
+  scale: number;
+}) {
   return (
-    <div className="flex items-center gap-2.5 px-4 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] opacity-70 hover:opacity-100 transition-all hover:shadow-sm whitespace-nowrap group">
-      {/* Shield/crest icon placeholder */}
-      <div className="flex items-center justify-center size-8 rounded bg-gradient-to-br from-[var(--sand-5)] to-[var(--sand-7)] text-[var(--text-muted)] text-xs font-bold tracking-tight">
-        {short}
-      </div>
-      <span className="font-serif font-semibold text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-        {name}
-      </span>
+    <div className="flex items-center justify-center w-[150px] h-[44px] px-2">
+      <img
+        src={logo}
+        alt={name}
+        className="max-w-full max-h-full object-contain opacity-50 hover:opacity-80 transition-opacity duration-300"
+        style={{
+          filter: "grayscale(100%) brightness(0.4)",
+          transform: `scale(${scale})`,
+        }}
+      />
     </div>
   );
 }
@@ -35,7 +49,7 @@ export function TrustStrip() {
         </p>
         <Marquee
           pauseOnHover
-          className="[--duration:50s] [--gap:1rem]"
+          className="[--duration:50s] [--gap:1.5rem]"
           style={{
             maskImage:
               "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
@@ -44,7 +58,12 @@ export function TrustStrip() {
           }}
         >
           {universities.map((uni) => (
-            <UniversityBadge key={uni.name} name={uni.name} short={uni.short} />
+            <UniversityLogo
+              key={uni.name}
+              name={uni.name}
+              logo={uni.logo}
+              scale={uni.scale}
+            />
           ))}
         </Marquee>
       </div>
