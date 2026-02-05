@@ -112,7 +112,7 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
   const { ref, isInView } = useInView(0.3);
 
   return (
-    <section ref={ref} className="relative py-24 lg:py-32">
+    <section ref={ref} className="relative min-h-screen flex items-center py-16 lg:py-0">
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div
           className={cn(

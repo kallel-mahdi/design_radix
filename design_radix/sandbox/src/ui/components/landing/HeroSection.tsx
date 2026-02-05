@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative flex items-center justify-center pt-32 pb-20">
+    <section className="relative min-h-[80vh] flex items-center justify-center pt-24 pb-12">
       {/* Gradient handled by parent LandingPage - no local gradient */}
 
       <div className="container mx-auto px-6 relative z-10">
@@ -17,7 +17,7 @@ export function HeroSection() {
               <span className="text-[var(--text-primary)]">Your research.</span>
               <br />
               <WordRotate
-                words={["Cited.", "Written.", "Discovered.", "Published."]}
+                words={["One home.", "Organized.", "Connected.", "Simplified."]}
                 duration={2500}
                 className="bg-gradient-to-r from-[var(--biblio)] via-[var(--manu)] to-[var(--discover)] bg-clip-text text-transparent"
               />
