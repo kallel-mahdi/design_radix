@@ -16,7 +16,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
       <Header />
 
       <main>
-        <div className="relative overflow-hidden bg-[var(--sand-2)]">
+        <div className="relative overflow-hidden bg-white">
           <HeroSection />
 
           <AlternatingFeatures />
