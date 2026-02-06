@@ -250,10 +250,9 @@ body {
    ============================================ */
 .hero-section-wrapper {
   position: relative;
-  overflow: hidden;
 }
 
-/* Radial Grid Background */
+/* Radial Grid Background — fades out at bottom for seamless transition */
 .hero-grid-bg {
   position: absolute;
   inset: 0;
@@ -263,15 +262,16 @@ body {
   background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
   background-size: 16px 16px;
   pointer-events: none;
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
-/* Organic Blob Container — fills hero section */
+/* Organic Blob Container — overflows into features for seamless flow */
 .hero-blobs {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
 }
 
 .blob {
