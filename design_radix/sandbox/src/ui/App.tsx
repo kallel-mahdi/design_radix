@@ -23,16 +23,7 @@ export function App() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark" || saved === "light") {
-      setTheme(saved);
-      applyTheme(saved);
-      return;
-    }
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    const next = prefersDark ? "dark" : "light";
-    setTheme(next);
-    applyTheme(next);
+    applyTheme("light");
   }, []);
 
   const moduleAttr = useMemo(() => {
