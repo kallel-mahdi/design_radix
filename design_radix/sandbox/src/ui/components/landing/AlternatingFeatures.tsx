@@ -51,7 +51,7 @@ const features: FeatureSection[] = [
     module: "bibliography",
     badge: "Bibliography",
     Icon: BookOpen,
-    title: "Your entire library, searchable and annotated",
+    title: "Build your library",
     bullets: [
       "Import PDFs with auto-extracted metadata",
       "Organize into nested collections and tags",
@@ -63,7 +63,7 @@ const features: FeatureSection[] = [
     module: "manuscripts",
     badge: "Manuscripts",
     Icon: FileEdit,
-    title: "LaTeX editor built for researchers",
+    title: "Create with ease",
     bullets: [
       "LaTeX editor with live compilation",
       "Version history with side-by-side diffs",
@@ -75,7 +75,7 @@ const features: FeatureSection[] = [
     module: "discover",
     badge: "Integration",
     Icon: Link2,
-    title: "Bibliography meets manuscript",
+    title: "Connect every source",
     bullets: [
       "Cite papers directly from your bibliography",
       "Track which papers are cited in your manuscript",
@@ -145,7 +145,7 @@ function FeatureSection({ feature }: { feature: FeatureSection }) {
               </span>
 
               {/* Title */}
-              <h3 className="font-serif text-3xl lg:text-4xl xl:text-5xl font-semibold tracking-tight leading-tight">
+              <h3 className="text-3xl lg:text-4xl xl:text-5xl font-semibold tracking-tight leading-tight">
                 {feature.title}
               </h3>
 

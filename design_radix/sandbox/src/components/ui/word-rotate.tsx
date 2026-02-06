@@ -3,7 +3,7 @@ import { AnimatePresence, motion, MotionProps } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
-interface WordRotateProps {
+interface WordRotateProps extends React.HTMLAttributes<HTMLDivElement> {
   words: string[]
   duration?: number
   motionProps?: MotionProps
@@ -20,6 +20,7 @@ export function WordRotate({
     transition: { duration: 0.25, ease: "easeOut" },
   },
   className,
+  ...props
 }: WordRotateProps) {
   const [index, setIndex] = useState(0)
 
@@ -33,7 +34,7 @@ export function WordRotate({
   }, [words, duration])
 
   return (
-    <div className="overflow-hidden py-2">
+    <div className="overflow-hidden py-2" {...props}>
       <AnimatePresence mode="wait">
         <motion.h1
           key={words[index]}

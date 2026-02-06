@@ -674,3 +674,34 @@
   opacity: 0;
   animation: paper-fade-in 0.25s ease-out forwards;
 }
+
+/* ===========================================
+   HERO GRADIENT ORBS (animated blobs)
+   =========================================== */
+@keyframes hero-drift {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(30px, -50px) scale(1.1); }
+  66%  { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-hero-drift {
+  animation: hero-drift 7s ease-in-out infinite;
+}
+
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* Hero gradient text — via at 35% gives purple more room,
+   purple boosted with iris chroma via color-mix in oklch */
+.hero-gradient-text {
+  background-image: linear-gradient(
+    to right,
+    var(--green-11),
+    var(--cyan-9) 35%,
+    color-mix(in oklch, var(--purple-9) 60%, var(--iris-9))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

@@ -9,7 +9,7 @@ const SURVEY_URL =
 
 export function CTASection() {
   return (
-    <section className="py-20 bg-[var(--bg-primary)]">
+    <section className="relative z-10 py-20">
       <div className="container mx-auto px-6">
         <BlurFade inView>
           <div className="relative rounded-3xl overflow-hidden border border-[var(--border-subtle)]">
@@ -34,7 +34,7 @@ export function CTASection() {
 
               {/* Content */}
               <div className="relative z-10 flex flex-col items-center text-center">
-                <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
                   Help us build the perfect research tool
                 </h2>
                 <p className="text-[var(--text-secondary)] text-lg max-w-md mb-8">

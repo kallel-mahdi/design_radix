@@ -16,7 +16,7 @@ function TestimonialCard({ quote, name, role, initials, avatarUrl, delay = 0 }: 
     <BlurFade delay={delay} inView>
       <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-subtle)] p-6 transition-all hover:border-[var(--border-default)] hover:shadow-lg hover:-translate-y-0.5">
         {/* Quote */}
-        <p className="font-serif text-base leading-relaxed text-[var(--text-primary)] mb-6 italic">
+        <p className="text-base leading-relaxed text-[var(--text-primary)] mb-6 italic">
           "{quote}"
         </p>
         {/* Attribution */}
@@ -93,7 +93,7 @@ export function Testimonials() {
             <div className="flex justify-center mb-4">
               <AvatarCircles numPeople={2847} avatarUrls={avatarUrls} />
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
               Loved by researchers
             </h2>
             <p className="text-[var(--text-secondary)] text-lg">

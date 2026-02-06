@@ -1,47 +1,92 @@
+import { useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { WordRotate } from "@/components/ui/word-rotate";
-import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { Button } from "@/components/ui/button";
 import { TrustStrip } from "./TrustStrip";
+import { cn } from "@/lib/utils";
+
+const GRADIENTS = {
+  brand: {
+    label: "Brand (Strict)",
+    value: "linear-gradient(to right, var(--manu), var(--biblio), var(--discover))",
+  },
+  vibrant: {
+    label: "Vibrant",
+    value: "linear-gradient(to right, #34d399, #60a5fa, #a78bfa)",
+  },
+  cool: {
+    label: "Cool (Blue-Jade)",
+    value: "linear-gradient(to right, var(--biblio), var(--manu))",
+  },
+  deep: {
+    label: "Deep (Violet-Blue)",
+    value: "linear-gradient(to right, var(--discover-strong), var(--biblio-strong))",
+  },
+  soft: {
+    label: "Soft (Pastel)",
+    value: "linear-gradient(to right, var(--manu-tint), var(--biblio-tint), var(--discover-tint))",
+  },
+};
 
 export function HeroSection() {
-  return (
-    <section className="relative min-h-[calc(100vh-4rem)] flex flex-col pt-24 pb-8">
-      {/* Gradient handled by parent LandingPage - no local gradient */}
+  const [activeGradient, setActiveGradient] = useState<keyof typeof GRADIENTS>("brand");
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Headline - delay={0} for immediate visibility */}
+  return (
+    <section className="hero-section-wrapper relative min-h-[calc(100vh-4rem)] flex flex-col pt-24 pb-8">
+      {/* Background Elements */}
+      <div className="hero-grid-bg"></div>
+      <div className="hero-blobs">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+        <div className="blob blob-3"></div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center relative z-10">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-5xl mx-auto">
+            {/* Headline — Inter Bold */}
             <BlurFade delay={0} inView>
-              <div className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-                <span className="text-[var(--text-primary)]">Your research</span>
-                <br />
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] mb-8 text-[#111827]">
+                Your research <br />
                 <WordRotate
-                  words={["One home", "Organized", "Connected", "Simplified"]}
+                  words={["Connected", "Organized", "Simplified", "One home"]}
                   duration={2500}
-                  className="bg-gradient-to-r from-[var(--biblio)] via-[var(--manu)] to-[var(--discover)] bg-clip-text text-transparent"
+                  className="hero-gradient-text pb-2"
+                  motionProps={{
+                    initial: { opacity: 0, y: -50 },
+                    animate: { opacity: 1, y: 0 },
+                    exit: { opacity: 0, y: 50 },
+                    transition: { duration: 0.25, ease: "easeOut" },
+                    style: {
+                      backgroundImage: GRADIENTS[activeGradient].value,
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      color: "transparent",
+                      WebkitTextFillColor: "transparent",
+                    },
+                  }}
                 />
-              </div>
+              </h1>
             </BlurFade>
 
-            {/* Subheadline - punchy 5-word tagline */}
+            {/* Subheadline */}
             <BlurFade delay={0.1} inView>
-              <p className="text-xl sm:text-2xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 tracking-wide">
-                <strong className="text-[var(--text-primary)] font-semibold">Read.</strong>{" "}
-                <strong className="text-[var(--text-primary)] font-semibold">Write.</strong>{" "}
-                <strong className="text-[var(--text-primary)] font-semibold">Cite.</strong>{" "}
-                <span className="text-[var(--text-secondary)] font-normal">All here</span>
+              <p className="text-xl sm:text-2xl text-[#6b7280] font-light mb-10 max-w-lg mx-auto leading-relaxed">
+                Read. Write. Cite.{" "}
+                <span className="text-[#9ca3af]">All here.</span>
               </p>
             </BlurFade>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - Black/White Pills */}
             <BlurFade delay={0.15} inView>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <InteractiveHoverButton>
+              <div className="flex items-center justify-center gap-4">
+                <Button className="rounded-full px-8 h-12 text-lg bg-[#111827] text-white font-medium hover:bg-[#1f2937] hover:shadow-lg transition-all hover:-translate-y-0.5 border-0">
                   Start free
-                </InteractiveHoverButton>
-                <Button size="lg" variant="outline" className="gap-2">
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full px-8 h-12 text-lg border border-gray-200 bg-white/50 backdrop-blur-sm text-[#4b5563] font-medium hover:bg-white hover:shadow-md hover:text-[#111827] transition-all"
+                >
                   Join Discord
                 </Button>
               </div>
@@ -51,8 +96,31 @@ export function HeroSection() {
       </div>
 
       {/* Trust strip at bottom of hero viewport */}
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-6 relative z-10 mt-12">
         <TrustStrip />
+      </div>
+
+      {/* Gradient Toggle Control */}
+      <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-4 p-4 bg-white/80 backdrop-blur-md rounded-xl border border-gray-200 shadow-xl max-w-[240px]">
+        <div className="flex flex-col gap-2">
+          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Gradient</span>
+          <div className="flex flex-wrap gap-1.5">
+            {(Object.keys(GRADIENTS) as Array<keyof typeof GRADIENTS>).map((key) => (
+              <button
+                key={key}
+                onClick={() => setActiveGradient(key)}
+                className={cn(
+                  "px-2.5 py-1.5 text-xs rounded-md transition-all font-medium border",
+                  activeGradient === key
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                )}
+              >
+                {GRADIENTS[key].label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

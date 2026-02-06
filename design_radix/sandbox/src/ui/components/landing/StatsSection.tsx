@@ -12,7 +12,7 @@ function StatItem({ value, suffix = "", label, delay = 0 }: StatItemProps) {
   return (
     <BlurFade delay={delay} inView>
       <div className="text-center">
-        <div className="font-serif text-4xl sm:text-5xl font-bold text-[var(--text-primary)] mb-2">
+        <div className="text-4xl sm:text-5xl font-bold text-[var(--text-primary)] mb-2">
           <NumberTicker value={value} />
           {suffix}
         </div>

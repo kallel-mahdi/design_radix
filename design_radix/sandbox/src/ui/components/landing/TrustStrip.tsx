@@ -28,7 +28,7 @@ function UniversityLogo({ name, logo }: { name: string; logo: string }) {
 export function TrustStrip() {
   return (
     <BlurFade delay={0.4} inView>
-      <div className="border-t border-[var(--border-subtle)] pt-10 pb-6">
+      <div className="pt-10 pb-6">
         <p className="text-center text-xs uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium mb-6">
           Trusted by researchers at
         </p>

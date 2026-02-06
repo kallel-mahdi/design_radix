@@ -94,7 +94,7 @@ function TabPanel({ feature }: { feature: TabFeature }) {
     <div className="grid md:grid-cols-[1fr_1.5fr] gap-8 lg:gap-14 items-center bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-subtle)] p-8 lg:p-12 shadow-lg">
       {/* Text Content */}
       <div className="flex flex-col gap-4">
-        <h3 className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight">
+        <h3 className="text-2xl lg:text-3xl font-semibold tracking-tight">
           {feature.title}
         </h3>
         <p className="text-[var(--text-secondary)] leading-relaxed">
@@ -137,7 +137,7 @@ export function TabbedFeatures() {
         {/* Section Header */}
         <BlurFade inView>
           <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
               One platform.
               <br />
               Three superpowers.

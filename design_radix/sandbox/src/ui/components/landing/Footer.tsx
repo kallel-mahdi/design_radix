@@ -13,7 +13,7 @@ export function Footer() {
                 background: "linear-gradient(135deg, var(--biblio), var(--manu))",
               }}
             />
-            <span className="font-serif font-semibold text-[var(--text-primary)]">
+            <span className="font-bold text-[var(--text-primary)]">
               Citable
             </span>
           </div>
