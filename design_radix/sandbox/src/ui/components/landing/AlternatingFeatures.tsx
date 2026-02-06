@@ -41,7 +41,7 @@ interface FeatureSection {
   badge: string;
   Icon: React.ElementType;
   title: string;
-  description: string;
+
   bullets: string[];
   reversed?: boolean;
 }
@@ -51,13 +51,11 @@ const features: FeatureSection[] = [
     module: "bibliography",
     badge: "Bibliography",
     Icon: BookOpen,
-    title: "Smart library that organizes itself",
-    description:
-      "Import papers from anywhere. AI handles the tagging, sorting, and organizing while you focus on what matters — actually reading the papers.",
+    title: "Your entire library, searchable and annotated",
     bullets: [
-      "AI-powered auto-tagging",
-      "Smart collections that update themselves",
-      "One-click import from any source",
+      "Import PDFs with auto-extracted metadata",
+      "Organize into nested collections and tags",
+      "Read and annotate PDFs inline",
     ],
     reversed: false,
   },
@@ -66,12 +64,10 @@ const features: FeatureSection[] = [
     badge: "Manuscripts",
     Icon: FileEdit,
     title: "LaTeX editor built for researchers",
-    description:
-      "A powerful editor with live preview, real-time collaboration, and seamless citation insertion as you write. No more copy-pasting BibTeX entries.",
     bullets: [
-      "Side-by-side live preview",
-      "Insert citations from your library",
-      "Auto-save & version history",
+      "LaTeX editor with live compilation",
+      "Version history with side-by-side diffs",
+      "Real-time collaborative editing",
     ],
     reversed: true,
   },
@@ -80,12 +76,10 @@ const features: FeatureSection[] = [
     badge: "Integration",
     Icon: Link2,
     title: "Bibliography meets manuscript",
-    description:
-      "Your references are one click away. Link a folder, type \\cite{}, and watch autocomplete pull from your library.",
     bullets: [
-      "One-click folder linking",
-      "Smart citation autocomplete",
-      "Live citation status tracking",
+      "Cite papers directly from your bibliography",
+      "Track which papers are cited in your manuscript",
+      "Open referenced PDFs without leaving the editor",
     ],
     reversed: false,
   },
@@ -111,7 +105,7 @@ const moduleStyles = {
 
 function FeatureSection({ feature, index }: { feature: FeatureSection; index: number }) {
   const styles = moduleStyles[feature.module];
-  const { ref, isInView } = useScrollAssist(0.4);
+  const { ref, isInView } = useScrollAssist(0.6);
 
   return (
     <section ref={ref} className="relative min-h-screen flex items-center py-16 lg:py-0">
@@ -144,11 +138,6 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
               <h3 className="font-serif text-3xl lg:text-4xl xl:text-5xl font-semibold tracking-tight leading-tight">
                 {feature.title}
               </h3>
-
-              {/* Description */}
-              <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
-                {feature.description}
-              </p>
 
               {/* Bullet Points */}
               <ul className="flex flex-col gap-3 mt-2">

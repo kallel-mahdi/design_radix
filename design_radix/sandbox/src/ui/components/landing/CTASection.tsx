@@ -1,9 +1,12 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageSquarePlus } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { cn } from "@/lib/utils";
+
+const SURVEY_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScgLAQGyrGBjs7YHPnUu2D-AxNacgDFFm1hBe64HbUhZixkaw/viewform";
 
 export function CTASection() {
   return (
@@ -33,21 +36,28 @@ export function CTASection() {
               {/* Content */}
               <div className="relative z-10 flex flex-col items-center text-center">
                 <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
-                  Start writing better papers today
+                  Help us build the perfect research tool
                 </h2>
                 <p className="text-[var(--text-secondary)] text-lg max-w-md mb-8">
-                  Free forever for individuals. No credit card required. Import your
-                  existing library in seconds.
+                  We're shaping Citable around real researcher needs.
+                  Help us build better tools for you.
                 </p>
-                <ShimmerButton
-                  shimmerColor="rgba(255,255,255,0.3)"
-                  background="var(--biblio)"
-                  borderRadius="10px"
-                  className="gap-2 font-medium text-white"
+                <a
+                  href={SURVEY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Start free
-                  <ArrowRight className="size-4" />
-                </ShimmerButton>
+                  <ShimmerButton
+                    shimmerColor="rgba(255,255,255,0.3)"
+                    background="var(--biblio)"
+                    borderRadius="10px"
+                    className="gap-2 font-medium text-white"
+                  >
+                    <MessageSquarePlus className="size-4" />
+                    Take our survey
+                    <ArrowRight className="size-4" />
+                  </ShimmerButton>
+                </a>
               </div>
             </div>
           </div>

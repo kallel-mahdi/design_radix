@@ -1,40 +1,26 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";
 
-// Per-logo scale factors to normalize visual weight.
-// Wide wordmarks get full width; bold/compact logos get scaled down.
 const universities = [
-  { name: "École Polytechnique", logo: "/logos/ecole-polytechnique.svg", scale: 0.85 },
-  { name: "École Normale Supérieure", logo: "/logos/ens-paris.svg", scale: 0.7 },
-  { name: "EURECOM", logo: "/logos/eurecom.svg", scale: 0.9 },
-  { name: "Télécom Paris", logo: "/logos/telecom-paris.svg", scale: 0.75 },
-  { name: "Politecnico di Milano", logo: "/logos/polimi.svg", scale: 0.9 },
-  { name: "University of Würzburg", logo: "/logos/uni-wurzburg.svg", scale: 0.9 },
-  { name: "TU Darmstadt", logo: "/logos/tu-darmstadt.svg", scale: 0.85 },
-  { name: "KTH", logo: "/logos/kth.svg", scale: 0.55 },
-  { name: "Université de Montréal", logo: "/logos/udem.svg", scale: 0.9 },
-  { name: "Université du Québec", logo: "/logos/uq.svg", scale: 0.85 },
+  { name: "École Polytechnique", logo: "/logos/ecole-polytechnique.png" },
+  { name: "École Normale Supérieure", logo: "/logos/ens-paris.png" },
+  { name: "EURECOM", logo: "/logos/eurecom.svg" },
+  { name: "Télécom Paris", logo: "/logos/telecom-paris.svg" },
+  { name: "Politecnico di Milano", logo: "/logos/polimi.svg" },
+  { name: "University of Würzburg", logo: "/logos/uni-wurzburg.svg" },
+  { name: "TU Darmstadt", logo: "/logos/tu-darmstadt.svg" },
+  { name: "KTH", logo: "/logos/kth.svg" },
+  { name: "Université de Montréal", logo: "/logos/udem.svg" },
+  { name: "Université du Québec", logo: "/logos/uq.svg" },
 ];
 
-function UniversityLogo({
-  name,
-  logo,
-  scale,
-}: {
-  name: string;
-  logo: string;
-  scale: number;
-}) {
+function UniversityLogo({ name, logo }: { name: string; logo: string }) {
   return (
     <div className="flex items-center justify-center w-[150px] h-[44px] px-2">
       <img
         src={logo}
         alt={name}
-        className="max-w-full max-h-full object-contain opacity-50 hover:opacity-80 transition-opacity duration-300"
-        style={{
-          filter: "grayscale(100%) brightness(0.4)",
-          transform: `scale(${scale})`,
-        }}
+        className="max-w-full max-h-full object-contain grayscale opacity-50 hover:opacity-80 transition-opacity duration-300"
       />
     </div>
   );
@@ -62,7 +48,6 @@ export function TrustStrip() {
               key={uni.name}
               name={uni.name}
               logo={uni.logo}
-              scale={uni.scale}
             />
           ))}
         </Marquee>

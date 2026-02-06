@@ -1,66 +1,23 @@
 import { Button } from "@/components/ui/button";
+import logoWithText from "@/assets/logo-with-text.png";
 
 interface HeaderProps {
   onSignIn?: () => void;
-  onStartFree?: () => void;
 }
 
-export function Header({ onSignIn, onStartFree }: HeaderProps) {
-  const navLinks = ["Features", "Pricing", "Docs", "Blog"];
-
+export function Header({ onSignIn }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--bg-primary)]/85 border-b border-[var(--border-subtle)]">
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-md relative overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, var(--biblio), var(--manu))",
-              }}
-            >
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%)",
-                }}
-              />
-            </div>
-            <span className="font-serif font-semibold text-xl tracking-tight text-[var(--text-primary)]">
-              Citable
-            </span>
-          </div>
+    <nav className="sticky top-0 z-50 bg-[var(--bg-secondary)]/80 backdrop-blur-md border-b border-[var(--border-default)]">
+      <div className="max-w-[1280px] mx-auto h-16 px-[var(--spacing-page-x)] flex items-center justify-between">
+        <img src={logoWithText} alt="Citable" className="w-[10rem] h-[2.75rem]" />
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors relative group"
-              >
-                {link}
-                <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[var(--biblio)] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-center" />
-              </a>
-            ))}
-          </nav>
-
-          {/* CTA */}
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={onSignIn}>
-              Sign in
-            </Button>
-            <Button
-              onClick={onStartFree}
-              className="bg-[var(--biblio)] hover:bg-[var(--biblio-hover)]"
-            >
-              Start free
-            </Button>
-          </div>
-        </div>
+        <Button
+          onClick={onSignIn}
+          className="bg-[var(--biblio)] hover:bg-[var(--biblio-hover)] text-white"
+        >
+          Sign in
+        </Button>
       </div>
-    </header>
+    </nav>
   );
 }

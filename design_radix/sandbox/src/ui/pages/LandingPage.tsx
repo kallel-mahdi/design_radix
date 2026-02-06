@@ -24,13 +24,9 @@ const GRADIENT_CSS = `
 `.replace(/\s+/g, ' ').trim();
 
 export function LandingPage({ onNavigate }: LandingPageProps) {
-  const handleStartFree = () => {
-    onNavigate?.("home");
-  };
-
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
-      <Header onStartFree={handleStartFree} />
+      <Header />
 
       <main>
         <div
