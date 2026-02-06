@@ -297,7 +297,7 @@ body {
 /* Blue (Bibliography) — left of center */
 .blob-1 {
   top: 8%;
-  left: 15%;
+  left: 22%;
   width: 35vw;
   height: 45%;
   background-color: var(--blue-5);
@@ -307,7 +307,7 @@ body {
 /* Green/Jade (Manuscripts) — right of center */
 .blob-2 {
   top: -8%;
-  right: 15%;
+  right: 22%;
   width: 35vw;
   height: 45%;
   background-color: var(--jade-5);
@@ -319,8 +319,8 @@ body {
 .blob-3 {
   bottom: 5%;
   left: 50%;
-  margin-left: -22.5vw;
-  width: 45vw;
+  margin-left: -17.5vw;
+  width: 35vw;
   height: 40%;
   background-color: var(--iris-6);
   border-radius: 40% 60% 50% 70% / 55% 45% 60% 40%;
