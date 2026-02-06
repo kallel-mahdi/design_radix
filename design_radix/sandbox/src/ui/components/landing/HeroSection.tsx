@@ -1,36 +1,11 @@
-import { useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { Button } from "@/components/ui/button";
 import { TrustStrip } from "./TrustStrip";
-import { cn } from "@/lib/utils";
 
-const GRADIENTS = {
-  brand: {
-    label: "Brand (Strict)",
-    value: "linear-gradient(to right, var(--manu), var(--biblio), var(--discover))",
-  },
-  vibrant: {
-    label: "Vibrant",
-    value: "linear-gradient(to right, #34d399, #60a5fa, #a78bfa)",
-  },
-  cool: {
-    label: "Cool (Blue-Jade)",
-    value: "linear-gradient(to right, var(--biblio), var(--manu))",
-  },
-  deep: {
-    label: "Deep (Violet-Blue)",
-    value: "linear-gradient(to right, var(--discover-strong), var(--biblio-strong))",
-  },
-  soft: {
-    label: "Soft (Pastel)",
-    value: "linear-gradient(to right, var(--manu-tint), var(--biblio-tint), var(--discover-tint))",
-  },
-};
+const HERO_GRADIENT = "linear-gradient(to right, #34d399, #60a5fa, #a78bfa)";
 
 export function HeroSection() {
-  const [activeGradient, setActiveGradient] = useState<keyof typeof GRADIENTS>("brand");
-
   return (
     <section className="hero-section-wrapper relative min-h-[calc(100vh-4rem)] flex flex-col pt-24 pb-8">
       {/* Background Elements */}
@@ -58,7 +33,7 @@ export function HeroSection() {
                     exit: { opacity: 0, y: 50 },
                     transition: { duration: 0.25, ease: "easeOut" },
                     style: {
-                      backgroundImage: GRADIENTS[activeGradient].value,
+                      backgroundImage: HERO_GRADIENT,
                       backgroundClip: "text",
                       WebkitBackgroundClip: "text",
                       color: "transparent",
@@ -98,29 +73,6 @@ export function HeroSection() {
       {/* Trust strip at bottom of hero viewport */}
       <div className="container mx-auto px-6 relative z-10 mt-12">
         <TrustStrip />
-      </div>
-
-      {/* Gradient Toggle Control */}
-      <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-4 p-4 bg-white/80 backdrop-blur-md rounded-xl border border-gray-200 shadow-xl max-w-[240px]">
-        <div className="flex flex-col gap-2">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Gradient</span>
-          <div className="flex flex-wrap gap-1.5">
-            {(Object.keys(GRADIENTS) as Array<keyof typeof GRADIENTS>).map((key) => (
-              <button
-                key={key}
-                onClick={() => setActiveGradient(key)}
-                className={cn(
-                  "px-2.5 py-1.5 text-xs rounded-md transition-all font-medium border",
-                  activeGradient === key
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                )}
-              >
-                {GRADIENTS[key].label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
