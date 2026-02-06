@@ -2,28 +2,14 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { Button } from "@/components/ui/button";
 import { TrustStrip } from "./TrustStrip";
-import { cn } from "@/lib/utils";
-
 const HERO_GRADIENT = "linear-gradient(to right, #34d399, #60a5fa, #a78bfa)";
 
-export type BlobTransition = "mask-fade" | "blob-overflow";
-
-interface HeroSectionProps {
-  blobTransition?: BlobTransition;
-}
-
-export function HeroSection({ blobTransition = "mask-fade" }: HeroSectionProps) {
+export function HeroSection() {
   return (
     <section className="hero-section-wrapper relative min-h-screen flex flex-col pt-24 pb-8">
       {/* Background Elements */}
       <div className="hero-grid-bg"></div>
-      <div
-        className={cn(
-          "hero-blobs",
-          blobTransition === "mask-fade" && "hero-blobs-mask",
-          blobTransition === "blob-overflow" && "hero-blobs-overflow"
-        )}
-      >
+      <div className="hero-blobs hero-blobs-mask">
         <div className="blob blob-1"></div>
         <div className="blob blob-2"></div>
         <div className="blob blob-3"></div>
@@ -71,12 +57,14 @@ export function HeroSection({ blobTransition = "mask-fade" }: HeroSectionProps) 
                 <Button className="rounded-full px-8 h-12 text-lg bg-[#111827] text-white font-medium hover:bg-[#1f2937] hover:shadow-lg transition-all hover:-translate-y-0.5 border-0">
                   Start free
                 </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-full px-8 h-12 text-lg border border-gray-200 bg-white/50 backdrop-blur-sm text-[#4b5563] font-medium hover:bg-white hover:shadow-md hover:text-[#111827] transition-all"
-                >
-                  Join Discord
-                </Button>
+                <a href="https://discord.gg/VJuszsSn" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="outline"
+                    className="rounded-full px-8 h-12 text-lg border border-gray-200 bg-white/50 backdrop-blur-sm text-[#4b5563] font-medium hover:bg-white hover:shadow-md hover:text-[#111827] transition-all"
+                  >
+                    Join Discord
+                  </Button>
+                </a>
               </div>
             </BlurFade>
           </div>
