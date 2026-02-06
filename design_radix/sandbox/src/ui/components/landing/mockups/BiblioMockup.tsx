@@ -17,7 +17,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { FileText } from "lucide-react";
+import { FileText, ChevronRight } from "lucide-react";
 import { MockAppShell } from "./MockAppShell";
 import { MockFileTabs, type MockTab } from "./MockFileTabs";
 import { MockReferenceTable, type MockPaper } from "./MockReferenceTable";
@@ -208,7 +208,7 @@ export function BiblioMockup({ isInView = true }: BiblioMockupProps) {
     : [];
 
   return (
-    <MockAppShell module="bibliography">
+    <MockAppShell module="bibliography" sidebar={<MockOutlinePanel />}>
       <MockFileTabs tabs={tabs} activeId="pdf" accentVar="--manu" />
       <div className="flex-1 flex overflow-hidden relative">
         <MockPdfViewer
@@ -222,9 +222,76 @@ export function BiblioMockup({ isInView = true }: BiblioMockupProps) {
           commentText={commentText}
           showTypingCursor={showCommentInput && commentText.length < 39}
         />
-        <MockCommentsPanel comments={comments} visible={showCommentsPanel} />
+        {showCommentsPanel && <MockCommentsPanel comments={comments} visible={showCommentsPanel} />}
       </div>
     </MockAppShell>
+  );
+}
+
+const outlineItems = [
+  { title: "Abstract", page: 1 },
+  { title: "Introduction", page: 1, children: [
+    { title: "Background", page: 2 },
+    { title: "Related Work", page: 3 },
+  ]},
+  { title: "Model Architecture", page: 3, children: [
+    { title: "Attention", page: 4 },
+  ]},
+  { title: "Results", page: 6 },
+  { title: "Conclusion", page: 8 },
+];
+
+function MockOutlinePanel() {
+  return (
+    <div
+      className="w-[140px] shrink-0 flex flex-col overflow-hidden"
+      style={{
+        background: "var(--bg-secondary)",
+        borderRight: "1px solid var(--border-default)",
+      }}
+    >
+      <div
+        className="h-11 flex items-center px-3 shrink-0"
+        style={{ borderBottom: "1px solid var(--border-default)" }}
+      >
+        <span
+          className="text-[9px] font-medium uppercase tracking-wide"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Outline
+        </span>
+      </div>
+
+      <div className="flex-1 flex flex-col gap-px p-1.5 overflow-hidden">
+        {outlineItems.map((item) => (
+          <div key={item.title}>
+            <div className="flex items-center gap-1 px-1.5 py-1 rounded">
+              {item.children ? (
+                <ChevronRight className="size-2.5 shrink-0 rotate-90" style={{ color: "var(--text-muted)" }} />
+              ) : (
+                <span className="w-2.5 shrink-0" />
+              )}
+              <span className="text-[9px] flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
+                {item.title}
+              </span>
+              <span className="text-[8px] shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                {item.page}
+              </span>
+            </div>
+            {item.children?.map((child) => (
+              <div key={child.title} className="flex items-center gap-1 px-1.5 py-1 rounded ml-3">
+                <span className="text-[9px] flex-1 truncate" style={{ color: "var(--text-muted)" }}>
+                  {child.title}
+                </span>
+                <span className="text-[8px] shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                  {child.page}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

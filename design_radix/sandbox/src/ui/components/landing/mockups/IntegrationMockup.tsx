@@ -704,16 +704,12 @@ function PdfPane({ compilePhase }: { compilePhase: 0 | 1 | 2 }) {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-3 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden">
         <div
-          className={`w-full h-full rounded-md overflow-hidden ${
+          className={`w-full h-full overflow-hidden ${
             isCompiling ? "animate-pdf-compile-rotate" : ""
           }`}
-          style={{
-            background: "var(--bg-secondary)",
-            border: "1px solid var(--border-default)",
-            boxShadow: "var(--shadow-soft)",
-          }}
+          style={{ background: "var(--bg-secondary)" }}
         >
           <div
             className="px-3 py-2 text-center"

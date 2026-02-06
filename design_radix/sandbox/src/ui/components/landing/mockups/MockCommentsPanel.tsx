@@ -27,11 +27,10 @@ const colorVars: Record<string, string> = {
 export function MockCommentsPanel({ comments, visible }: MockCommentsPanelProps) {
   return (
     <div
-      className="absolute right-0 top-0 h-full w-[200px] flex flex-col transition-transform duration-300"
+      className="w-[160px] shrink-0 flex flex-col overflow-hidden"
       style={{
         borderLeft: "1px solid var(--border-default)",
         background: "var(--bg-secondary)",
-        transform: visible ? "translateX(0)" : "translateX(100%)",
       }}
     >
       {/* Header */}
@@ -63,15 +62,15 @@ export function MockCommentsPanel({ comments, visible }: MockCommentsPanelProps)
             key={comment.id}
             className="p-2 rounded text-[9px] leading-relaxed mb-2 animate-note-slide-in"
             style={{
-              background: "var(--manu-tint)",
-              border: "1px solid var(--manu-light)",
+              background: "var(--bg-tertiary)",
+              border: "1px solid var(--border-default)",
               borderLeft: `3px solid ${colorVars[comment.color || "yellow"]}`,
               animationDelay: `${idx * 0.1}s`,
             }}
           >
             <p
               className="font-medium mb-1 line-clamp-1"
-              style={{ color: "var(--manu-text)" }}
+              style={{ color: "var(--text-primary)" }}
             >
               {comment.noteText}
             </p>
