@@ -13,7 +13,7 @@ export function Header({ onSignIn }: HeaderProps) {
 
         <Button
           onClick={onSignIn}
-          className="bg-[var(--biblio)] hover:bg-[var(--biblio-hover)] text-white"
+          className="bg-[var(--sand-12)] hover:bg-[var(--sand-11)] text-[var(--sand-1)]"
         >
           Sign in
         </Button>

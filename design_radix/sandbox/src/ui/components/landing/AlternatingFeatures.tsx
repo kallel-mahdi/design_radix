@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BookOpen,
   FileEdit,
@@ -85,6 +85,15 @@ const features: FeatureSection[] = [
   },
 ];
 
+// Mockup glow: blurred circle behind each mockup
+const GLOW = { opacity: 0.25, size: 85, blur: 110 };
+
+const moduleColors = {
+  bibliography: "--jade-9",
+  manuscripts: "--blue-9",
+  discover: "--iris-9",
+};
+
 const moduleStyles = {
   bibliography: {
     badge: "bg-[var(--manu-tint)] text-[var(--manu-text)]",
@@ -103,8 +112,9 @@ const moduleStyles = {
   },
 };
 
-function FeatureSection({ feature, index }: { feature: FeatureSection; index: number }) {
+function FeatureSection({ feature }: { feature: FeatureSection }) {
   const styles = moduleStyles[feature.module];
+  const color = moduleColors[feature.module];
   const { ref, isInView } = useScrollAssist(0.6);
 
   return (
@@ -158,31 +168,47 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
             </div>
           </BlurFade>
 
-          {/* Mockup - Bibliography uses standalone component, others use Safari */}
+          {/* Mockup with per-module glow */}
           <BlurFade
             delay={0.2}
             inView
             className={cn(feature.reversed && "lg:order-1")}
           >
-            <div
-              className={cn(
-                "transition-all duration-300",
-                "hover:shadow-2xl hover:scale-[1.01]"
-              )}
-            >
-              {feature.module === "bibliography" ? (
-                <div className="aspect-[16/10]">
-                  <BiblioMockup isInView={isInView} />
-                </div>
-              ) : feature.module === "manuscripts" ? (
-                <div className="aspect-[16/10]">
-                  <ManuMockup isInView={isInView} />
-                </div>
-              ) : (
-                <div className="aspect-[16/10]">
-                  <IntegrationMockup isInView={isInView} />
-                </div>
-              )}
+            <div className="relative">
+              {/* Blurred circle glow behind mockup */}
+              <div
+                className="absolute pointer-events-none rounded-full"
+                style={{
+                  width: `${GLOW.size}%`,
+                  aspectRatio: "1",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  background: `var(${color})`,
+                  filter: `blur(${GLOW.blur}px)`,
+                  opacity: GLOW.opacity,
+                }}
+              />
+              <div
+                className={cn(
+                  "relative transition-all duration-300",
+                  "hover:shadow-2xl hover:scale-[1.01]"
+                )}
+              >
+                {feature.module === "bibliography" ? (
+                  <div className="aspect-[16/10]">
+                    <BiblioMockup isInView={isInView} />
+                  </div>
+                ) : feature.module === "manuscripts" ? (
+                  <div className="aspect-[16/10]">
+                    <ManuMockup isInView={isInView} />
+                  </div>
+                ) : (
+                  <div className="aspect-[16/10]">
+                    <IntegrationMockup isInView={isInView} />
+                  </div>
+                )}
+              </div>
             </div>
           </BlurFade>
         </div>
@@ -194,10 +220,8 @@ function FeatureSection({ feature, index }: { feature: FeatureSection; index: nu
 export function AlternatingFeatures() {
   return (
     <div className="relative">
-      {/* Gradient handled by parent LandingPage - no local gradient */}
-
-      {features.map((feature, index) => (
-        <FeatureSection key={feature.module} feature={feature} index={index} />
+      {features.map((feature) => (
+        <FeatureSection key={feature.module} feature={feature} />
       ))}
     </div>
   );

@@ -2,7 +2,6 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";
 
 const universities = [
-  { name: "École Polytechnique", logo: "/logos/ecole-polytechnique.png" },
   { name: "École Normale Supérieure", logo: "/logos/ens-paris.png" },
   { name: "EURECOM", logo: "/logos/eurecom.svg" },
   { name: "Télécom Paris", logo: "/logos/telecom-paris.svg" },

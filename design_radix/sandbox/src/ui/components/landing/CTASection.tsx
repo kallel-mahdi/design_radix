@@ -1,8 +1,7 @@
-import { ArrowRight, MessageSquarePlus } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { DotPattern } from "@/components/ui/dot-pattern";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { cn } from "@/lib/utils";
 
 const SURVEY_URL =
@@ -47,16 +46,9 @@ export function CTASection() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <ShimmerButton
-                    shimmerColor="rgba(255,255,255,0.3)"
-                    background="var(--biblio)"
-                    borderRadius="10px"
-                    className="gap-2 font-medium text-white"
-                  >
-                    <MessageSquarePlus className="size-4" />
+                  <InteractiveHoverButton>
                     Take our survey
-                    <ArrowRight className="size-4" />
-                  </ShimmerButton>
+                  </InteractiveHoverButton>
                 </a>
               </div>
             </div>

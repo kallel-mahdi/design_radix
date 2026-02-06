@@ -1,7 +1,6 @@
 import {
   Header,
   HeroSection,
-  TrustStrip,
   AlternatingFeatures,
   CTASection,
   Footer,
@@ -12,14 +11,11 @@ interface LandingPageProps {
   onNavigate?: (screen: string) => void;
 }
 
-// Locked-in gradient: Soft Orbs hero + Content Spotlight sections @ 70% opacity
-const GRADIENT_CSS = `
-  radial-gradient(circle 400px at 35% 15%, var(--blue-a3) 0%, transparent 70%),
-  radial-gradient(circle 350px at 50% 8%, var(--jade-a3) 0%, transparent 70%),
-  radial-gradient(circle 400px at 65% 15%, var(--iris-a3) 0%, transparent 70%),
-  radial-gradient(ellipse 60% 30% at 85% 28%, var(--jade-a4) 0%, transparent 55%),
-  radial-gradient(ellipse 60% 30% at 15% 50%, var(--blue-a4) 0%, transparent 55%),
-  radial-gradient(ellipse 60% 30% at 85% 72%, var(--iris-a4) 0%, transparent 55%),
+// Hero-only gradient: 3 distinct color orbs behind headline
+const HERO_GRADIENT = `
+  radial-gradient(circle 500px at 30% 20%, color-mix(in srgb, var(--jade-9) 20%, transparent) 0%, transparent 60%),
+  radial-gradient(circle 500px at 50% 15%, color-mix(in srgb, var(--blue-9) 20%, transparent) 0%, transparent 60%),
+  radial-gradient(circle 500px at 70% 20%, color-mix(in srgb, var(--iris-9) 20%, transparent) 0%, transparent 60%),
   linear-gradient(180deg, var(--sand-1) 0%, transparent 5%, transparent 95%, var(--sand-1) 100%)
 `.replace(/\s+/g, ' ').trim();
 
@@ -36,7 +32,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
           {/* Unified gradient layer */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: GRADIENT_CSS, opacity: 0.7 }}
+            style={{ background: HERO_GRADIENT, opacity: 0.8 }}
           />
 
           <DotPattern
@@ -47,9 +43,6 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
           />
 
           <HeroSection />
-          <div className="container mx-auto px-6 relative z-10">
-            <TrustStrip />
-          </div>
 
           <AlternatingFeatures />
         </div>
